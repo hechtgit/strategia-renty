@@ -946,6 +946,7 @@ async function submitToBoldem({first,last,email,scenarioUrl,summary}){
   };
   const withScenario={
     ...basePayload,
+    scenar_url:scenarioUrl,
     custom_columns:{['cc_'+BOLDEM_SCENARIO_COLUMN_ID]:scenarioUrl},
     scenario_url:scenarioUrl,
     scenario_summary:summary
