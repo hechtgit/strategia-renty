@@ -322,7 +322,7 @@ body.vystup .grid{grid-template-columns:1fr}
     <canvas id="chart" height="260"></canvas>
     <div class="tip" id="tip"></div>
   </div>
-  <p class="chart-cap" id="chart-cap">Zelené pásmo: 800 možných vývojov majetku podľa skutočnej histórie <b>MSCI World</b> (EUR, 1970–2025) — od najhorších po najlepších 10 % scenárov.</p>
+  <p class="chart-cap" id="chart-cap">Zelené pásmo ukazuje 800 modelových výpočtov vývoja majetku. Simulácia používa Monte Carlo prístup s historickým bootstrapom: náhodne skladá priebehy z reálnych ročných výnosov <b>MSCI World</b> v EUR (1970–2025). Zobrazené rozpätie je medzi 10. a 90. percentilom výsledkov, bez najextrémnejších okrajových scenárov. Nejde o predpoveď budúcnosti, ale o ilustráciu citlivosti renty na poradie dobrých a zlých rokov.</p>
 
   <div id="r-notes"></div>
 
@@ -878,7 +878,7 @@ function syncUI(){
   }
   $('stress-controls').hidden=!stressOn;
   $('odklad-hint').textContent = num($('in-odklad'))===0 ? '= renta začína ihneď, bez odkladu' : '';
-  $('chart-cap').innerHTML = 'Zelené pásmo: 800 možných vývojov majetku podľa skutočnej histórie <b>MSCI World</b> (EUR, 1970–2025) — od najhorších po najlepších 10 % scenárov.'
+  $('chart-cap').innerHTML = 'Zelené pásmo ukazuje 800 modelových výpočtov vývoja majetku. Simulácia používa Monte Carlo prístup s historickým bootstrapom: náhodne skladá priebehy z reálnych ročných výnosov <b>MSCI World</b> v EUR (1970–2025). Zobrazené rozpätie je medzi 10. a 90. percentilom výsledkov, bez najextrémnejších okrajových scenárov. Nejde o predpoveď budúcnosti, ale o ilustráciu citlivosti renty na poradie dobrých a zlých rokov.'
     + (stressOn ? ' Prerušovaná čiara je váš zadaný stres-test.' : '');
 
   $('btn-save').style.display = PUBLIC ? 'none' : '';
