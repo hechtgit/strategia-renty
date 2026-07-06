@@ -1,0 +1,969 @@
+<meta charset="utf-8">
+<title>Stratégia renty</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Asap:wght@400;600;700&family=Lora:ital,wght@0,400;1,400&family=PT+Serif:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* presná paleta hechtberger.com (computed styles zo Squarespace) */
+  --bg:#1a1a1a; --surface:#151716; --inset:#1e201f; --ink:#ffffff; --muted:#a29c93;
+  --gold:#ae8753; --gold-strong:#c49a63; --btn-gold:#9a6929; --line:#35342f;
+  --red:#d92036; --green:#5fa97c; --green-light:#a9cdb4; --amber:#e0a24d;
+  --radius:10px; --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 34px rgba(0,0,0,.35);
+  --serif:"pt-serif-pro-extended","PT Serif",Georgia,serif;
+  --sans:"Asap","Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55}
+.wrap{max-width:1180px;margin:0 auto;padding:34px 20px 60px}
+
+/* ---------- header (full-width nad oboma stĺpcami) ---------- */
+header{border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:26px}
+h1{font-family:var(--serif);font-weight:600;color:var(--gold);font-size:clamp(30px,4.5vw,44px);margin:0 0 8px;letter-spacing:.01em;text-wrap:balance}
+.claim{color:var(--muted);margin:0;font-size:17px;font-family:"Lora",var(--serif);font-style:italic;max-width:70ch}
+
+/* ---------- layout ---------- */
+.grid{display:grid;grid-template-columns:430px 1fr;gap:24px;align-items:start}
+@media(max-width:960px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px;border:1px solid var(--line)}
+
+/* ---------- form ---------- */
+.q{margin:0 0 22px}
+.q:last-child{margin-bottom:0}
+.q-label{font-weight:600;font-size:14px;margin:0 0 10px;display:block;letter-spacing:.04em;text-transform:uppercase;color:var(--gold)}
+.pills{display:flex;flex-wrap:wrap;gap:8px}
+.pills .pill{flex:1 1 auto;text-align:center}
+.pill{border:1px solid var(--line);background:var(--inset);border-radius:999px;padding:10px 16px;font:inherit;font-size:15px;cursor:pointer;color:var(--ink);transition:all .15s}
+.pill.active{background:var(--gold);border-color:var(--gold);color:#1d1d1d;font-weight:600}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field.wide{grid-column:1/-1}
+.field label{font-size:13.5px;color:var(--muted)}
+.inputbox{display:flex;align-items:center;border:1px solid var(--line);border-radius:10px;background:var(--inset);overflow:hidden}
+.inputbox:focus-within{border-color:var(--gold)}
+.inputbox input{border:0;outline:0;padding:11px 12px;width:100%;font:inherit;font-size:16px;font-variant-numeric:tabular-nums;background:transparent;color:var(--ink)}
+.inputbox .unit{padding:0 12px 0 4px;color:var(--muted);font-size:14px;white-space:nowrap}
+.switchrow{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;user-select:none;background:var(--inset)}
+.switchrow input[type=checkbox]{accent-color:var(--gold);width:18px;height:18px;margin:0;flex:none}
+.switchrow .t{font-size:15px}
+.switchrow .mini{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:7px;background:var(--surface);margin:0 4px;overflow:hidden}
+.switchrow .mini input{border:0;outline:0;width:48px;padding:3px 2px 3px 8px;font:inherit;font-size:15px;background:transparent;color:var(--ink);font-variant-numeric:tabular-nums}
+.switchrow .mini span{padding-right:7px;color:var(--muted);font-size:13.5px}
+details.adv{border:1px solid var(--line);border-radius:12px;padding:0;overflow:hidden;background:var(--inset)}
+details.adv summary{cursor:pointer;padding:13px 15px;font-weight:600;font-size:14px;color:var(--gold);list-style:none;display:flex;justify-content:space-between;align-items:center;letter-spacing:.04em;text-transform:uppercase}
+details.adv summary::after{content:"+";font-size:18px;color:var(--muted)}
+details.adv[open] summary::after{content:"–"}
+details.adv .inner{padding:4px 15px 16px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.chips{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.chip{border:1px solid var(--line);background:var(--inset);border-radius:10px;padding:11px 16px;font-size:15px;cursor:pointer;font:inherit;color:var(--ink);text-align:left;width:100%}
+.chip.active{border-color:var(--gold);color:var(--gold-strong);font-weight:600;background:#2e2a22}
+.chip small{display:block;font-size:13px;color:var(--muted);font-weight:400;margin-top:2px}
+.hint{font-size:13.5px;color:var(--muted);margin-top:8px}
+@media(max-width:640px){
+  .pills{flex-direction:column}
+  .pills .pill{width:100%}
+}
+
+/* ---------- result ---------- */
+.r-eyebrow{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:0 0 14px}
+.sentence{font-family:var(--serif);font-size:clamp(19px,2.3vw,23px);line-height:1.55;margin:0 0 8px;text-wrap:balance}
+.sentence b{color:var(--gold-strong);font-weight:600;white-space:nowrap}
+.sentence.second{font-size:clamp(17px,2vw,20px);color:#ddd8ce;margin-bottom:22px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:20px}
+.stat{background:var(--inset);border:1px solid var(--line);border-radius:10px;padding:13px 15px}
+.stat .k{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.stat .v{font-size:21px;font-weight:600;font-variant-numeric:tabular-nums;margin-top:3px;color:var(--ink)}
+.stat.hero{background:var(--btn-gold)}
+.stat.hero .k{color:#f0e2cc}
+.stat.hero .v{color:#fff;font-weight:700}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.cmp-card{background:var(--inset);border:1px solid var(--line);border-radius:12px;padding:14px}
+.cmp-card.current{border-color:var(--gold)}
+.cmp-card h4{margin:0 0 4px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);font-weight:600}
+.cmp-card .sub{font-size:11.5px;color:var(--muted);margin-bottom:10px}
+.cmp-card table{width:100%;border-collapse:collapse;font-size:13px}
+.cmp-card td{padding:4px 0;border-bottom:1px solid #2e2e2e}
+.cmp-card td:last-child{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.cmp-card tr:last-child td{border-bottom:0}
+.stress-panel{border:1px solid var(--line);border-radius:10px;background:var(--inset);padding:12px 14px;margin-bottom:8px}
+.stress-toggle{border:0;background:transparent;padding:0}
+.stress-controls{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;margin-top:12px}
+.stress-controls .field{min-width:120px}
+.stress-controls .inputbox:focus-within{border-color:var(--amber)}
+.presets{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+.preset-box{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:5px 11px;font-size:12.5px;font-variant-numeric:tabular-nums;line-height:1.35}
+.preset-box b{color:var(--amber);font-weight:600;display:block}
+.preset-box small{color:var(--muted);font-size:11.5px;display:block}
+.stat .statsub{font-size:11.5px;color:var(--muted);margin-top:4px;line-height:1.35}
+.stat.hero .statsub{color:#f0e2cc}
+.chip.stress{border-color:#6b4b26;color:var(--amber)}
+.chip.stress.active{background:#33291d;border-color:var(--amber);color:var(--amber);font-weight:600}
+canvas{width:100%;height:260px;display:block}
+.chartbox{border:1px solid var(--line);border-radius:10px;padding:12px 8px 4px;position:relative;margin-bottom:6px;background:var(--inset)}
+.chart-cap{font-size:12.5px;color:var(--muted);margin:0 2px 16px}
+.tip{position:absolute;pointer-events:none;background:var(--gold);color:#1d1d1d;font-size:12px;font-weight:600;padding:5px 9px;border-radius:7px;transform:translate(-50%,-120%);white-space:nowrap;display:none;font-variant-numeric:tabular-nums}
+.note{display:flex;gap:11px;align-items:flex-start;padding:13px 15px;border-radius:10px;font-size:15px;margin-bottom:8px;background:var(--inset);border:1px solid var(--line)}
+.note b{color:var(--gold-strong)}
+.note.legacy{border-color:#3c5a48;background:#233129}
+.note.legacy b{color:var(--green-light)}
+.note.stress{border-color:#6b4b26;background:#2c241a}
+.note.stress b{color:var(--amber)}
+.note.warn{background:var(--red);color:#fff;font-weight:600;border-color:var(--red)}
+.note .ic{font-family:var(--serif);font-style:italic;font-weight:700;font-size:16px;line-height:1.3;color:var(--gold)}
+.note.legacy .ic{color:var(--green-light)}
+.note.stress .ic{color:var(--amber);font-style:normal}
+.note.warn .ic{color:#fff}
+.pdf-gate{background:var(--inset);border:1px solid var(--line);border-radius:10px;padding:18px;margin-top:18px}
+.gate-h{font-family:var(--serif);font-weight:600;color:var(--gold-strong);font-size:19px;margin:0 0 10px}
+.gate-note{font-size:14px;color:var(--muted);margin:12px 0 0;line-height:1.5}
+.gate-label{font-size:14.5px;color:var(--muted);display:block;margin:0 0 14px;line-height:1.55}
+.gate-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.gate-fields .inputbox:last-child{grid-column:1/-1}
+.gate-consent-line{font-size:12.5px;color:var(--muted);margin:12px 0 0;line-height:1.5}
+.gate-sec{font-size:14.5px;color:var(--muted);margin:18px 0 12px;line-height:1.55;border-top:1px solid var(--line);padding-top:16px}
+.gate-actions{display:flex;gap:10px;flex-wrap:wrap}
+.actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.btn{border:0;border-radius:0;padding:14px 26px;font-family:var(--serif);font-size:14px;font-weight:700;letter-spacing:1.8px;cursor:pointer;text-decoration:none;display:inline-block}
+.btn.primary{background:var(--btn-gold);color:#fff}
+.btn.primary:hover{background:#ae8753}
+.btn.ghost{background:transparent;border:1px solid var(--gold);color:var(--gold)}
+.btn.ghost:hover{border-color:var(--gold-strong);color:var(--gold-strong)}
+.assump{font-size:12.5px;color:var(--muted);margin-top:16px;line-height:1.6}
+.assump-full{display:none}
+/* ---------- režim súkromného výstupu (?vystup) ---------- */
+.vystup-head{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);border:1px solid var(--line);background:var(--inset);border-radius:10px;padding:10px 14px;margin-bottom:16px}
+body.vystup .panel.form,body.vystup .stress-panel,body.vystup .actions,body.vystup .pdf-gate{display:none}
+body.vystup .grid{grid-template-columns:1fr}
+.disclaimer{margin:26px auto 0;max-width:1180px;font-size:12px;color:#8b877e;line-height:1.6;border-top:1px solid var(--line);padding:14px 4px 0}
+.disclaimer b{color:#a29c93}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+
+/* ---------- print (svetlý dokument) ---------- */
+.print-head{display:none}
+@media print{
+  body{background:#fff;color:#1d1d1d}
+  .wrap{padding:0;max-width:none}
+  .grid{grid-template-columns:1fr}
+  .panel.form,.chips,.actions,.claim,.rule,header,.chartbox,.stress-panel,.chart-cap,.pdf-gate,.vystup-head,.vystup-foot{display:none}
+  .panel.result{box-shadow:none;border:0;padding:0;background:#fff}
+  .sentence{color:#1d1d1d}
+  .sentence.second{color:#333}
+  .sentence.third{color:#555}
+  .sentence b{color:#8a6d3f}
+  .r-eyebrow{color:#666}
+  .stat{background:#f6f4f0;border-color:#e3ddd2}
+  .stat .k{color:#777165}.stat .v{color:#1d1d1d}
+  .stat.hero{background:#ae8753}
+  .cmp-card{background:#f6f4f0;border-color:#e3ddd2;color:#1d1d1d}
+  .cmp-card h4{color:#8a6d3f}.cmp-card .sub{color:#777}
+  .cmp-card td{border-color:#e3ddd2}
+  .note{background:#f6f4f0;border-color:#e3ddd2;color:#1d1d1d}
+  .note b{color:#8a6d3f}
+  .note.legacy{background:#eef4ef;border-color:#cfdfd3}
+  .note.legacy b{color:#3f7a56}
+  .note.stress{background:#faf3e7;border-color:#e8d5b5}
+  .note.stress b{color:#9a6d2e}
+  .note .ic{color:#8a6d3f}
+  .assump{color:#777}
+  .assump-full{display:block;font-size:10.5px;color:#777;line-height:1.6;margin-top:8px}
+  .disclaimer{color:#777;border-color:#ddd;margin-top:22px}
+  .disclaimer b{color:#555}
+  .print-head{display:block;margin-bottom:26px}
+  .print-head .dt{font-size:11px;color:#777}
+  .print-head h2{font-family:var(--serif);font-weight:400;color:#1d1d1d;font-size:30px;margin:8px 0 2px}
+  .print-head .sub{color:#8a6d3f;font-size:13px;font-style:italic;font-family:var(--serif)}
+  .print-head .cta{margin-top:10px;font-size:12px;color:#333}
+}
+</style>
+
+<div class="wrap">
+<header>
+  <h1>Stratégia renty</h1>
+  <p class="claim">Nie len výška renty. Dôležité je, aký kapitál ju má niesť, ako dlho a pri akom riziku.</p>
+</header>
+
+<div class="grid">
+
+<!-- ================= FORM ================= -->
+<section class="panel form" aria-label="Zadanie">
+
+  <div class="q">
+    <span class="q-label">Vaša situácia</span>
+    <div class="pills" role="radiogroup" id="pills-mode">
+      <button type="button" class="pill active" data-mode="accum" id="mc-accum">Majetok budujem</button>
+      <button type="button" class="pill" data-mode="rentier" id="mc-rentier">Majetok už mám</button>
+    </div>
+    <p class="hint" id="mode-hint"></p>
+  </div>
+
+  <div class="q" id="q-vek">
+    <div class="fields">
+      <div class="field"><label for="in-vek">Váš vek</label>
+        <div class="inputbox"><input id="in-vek" inputmode="decimal" value="50"><span class="unit">rokov</span></div></div>
+      <div class="field"><label for="in-odklad" id="lbl-odklad">Výplata renty sa má začať o</label>
+        <div class="inputbox"><input id="in-odklad" inputmode="decimal" value="15"><span class="unit">rokov</span></div></div>
+    </div>
+    <p class="hint" id="odklad-hint" style="margin-top:6px"></p>
+  </div>
+
+  <div class="q" id="q-majetok" hidden>
+    <span class="q-label">Váš majetok</span>
+    <div class="fields">
+      <div class="field wide"><label for="in-c0">Hodnota majetku určeného na rentu</label>
+        <div class="inputbox"><input id="in-c0" inputmode="decimal" value="600 000"><span class="unit">€</span></div></div>
+    </div>
+    <div class="pills" style="margin-top:12px" id="pills-goal">
+      <button type="button" class="pill active" data-goal="rent">Akú rentu mi umožní</button>
+      <button type="button" class="pill" data-goal="duration">Ako dlho vydrží pri mojej rente</button>
+    </div>
+  </div>
+
+  <div class="q" id="q-renta">
+    <span class="q-label" id="lbl-renta">Požadovaná renta</span>
+    <div class="fields">
+      <div class="field wide"><label for="in-renta">Výška mesačnej renty <span id="lbl-renta-today">(v dnešných cenách)</span></label>
+        <div class="inputbox"><input id="in-renta" inputmode="decimal" value="3 000"><span class="unit">€</span></div></div>
+    </div>
+  </div>
+
+  <div class="q" id="q-typ">
+    <span class="q-label">Ako dlho sa má renta vyplácať</span>
+    <div class="pills" role="radiogroup" id="pills-typ">
+      <button type="button" class="pill active" data-typ="docasna">Dočasná renta</button>
+      <button type="button" class="pill" data-typ="nekonecna">Nekonečná renta</button>
+    </div>
+    <div class="fields" id="f-doba" style="margin-top:10px">
+      <div class="field"><label for="in-doba">Doba vyplácania</label>
+        <div class="inputbox"><input id="in-doba" inputmode="decimal" value="25"><span class="unit">rokov</span></div></div>
+    </div>
+  </div>
+
+  <div class="q">
+    <label class="switchrow"><input type="checkbox" id="in-rast">
+      <span class="t"><b>Zohľadniť infláciu</b> vo výške <span class="mini"><input id="in-infl" inputmode="decimal" value="3"><span>% ročne</span></span> — renta si udrží dnešnú kúpnu silu</span></label>
+  </div>
+
+  <div class="q" id="q-funding">
+    <span class="q-label">Ako budete investovať</span>
+    <div class="pills" role="radiogroup" id="pills-fund">
+      <button type="button" class="pill" data-fund="regular">Pravidelne</button>
+      <button type="button" class="pill active" data-fund="lump">Jednorazovo</button>
+      <button type="button" class="pill" data-fund="both">Kombinácia</button>
+    </div>
+    <div class="fields" style="margin-top:10px">
+      <div class="field" id="f-p0"><label for="in-p0">Jednorazový vklad</label>
+        <div class="inputbox"><input id="in-p0" inputmode="decimal" value="100 000"><span class="unit">€</span></div></div>
+    </div>
+    <p class="hint" id="fund-hint"></p>
+  </div>
+
+  <div class="q" id="q-servis">
+    <label class="switchrow"><input type="checkbox" id="in-servis">
+      <span class="t"><b>Servisný prepočet</b> — prepočet pre existujúceho klienta. Vstupný poplatok sa neúčtuje z už zainvestovaného majetku<span id="servis-detail">; nové pravidelné investície ho platia štandardne</span>.</span></label>
+  </div>
+
+  <div class="q" id="q-adv">
+    <details class="adv">
+      <summary>Predpoklady a poplatky</summary>
+      <div class="inner">
+        <div class="field"><label for="in-rinv">Zhodnotenie počas budovania</label>
+          <div class="inputbox"><input id="in-rinv" inputmode="decimal" value="7,7"><span class="unit">% p.a.</span></div></div>
+        <div class="field"><label for="in-rrent">Zhodnotenie počas renty</label>
+          <div class="inputbox"><input id="in-rrent" inputmode="decimal" value="7,7"><span class="unit">% p.a.</span></div></div>
+        <div class="field"><label for="in-fee-in">Vstupný poplatok</label>
+          <div class="inputbox"><input id="in-fee-in" inputmode="decimal" value="1,5"><span class="unit">%</span></div></div>
+        <div class="field"><label for="in-fee-m">Poplatok za manažovanie</label>
+          <div class="inputbox"><input id="in-fee-m" inputmode="decimal" value="0,8"><span class="unit">% p.a.</span></div></div>
+        <div class="field"><label for="in-zost">Zostatok na konci renty</label>
+          <div class="inputbox"><input id="in-zost" inputmode="decimal" value="0"><span class="unit">€</span></div></div>
+      </div>
+    </details>
+    <span class="q-label" style="margin-top:18px">Investičný profil</span>
+    <div class="chips" id="chips-scenar" aria-label="Investičný profil">
+      <button type="button" class="chip" data-sc="kons">Konzervatívny<small>4,4 % p.a. (~30 % akcií)</small></button>
+      <button type="button" class="chip" data-sc="vyv">Vyvážený<small>6,1 % p.a. (~60 % akcií)</small></button>
+      <button type="button" class="chip active" data-sc="dyn">Dynamický<small>7,7 % p.a. (~90 % akcií)</small></button>
+    </div>
+  </div>
+
+</section>
+
+<!-- ================= RESULT ================= -->
+<section class="panel result" aria-label="Výsledok" aria-live="polite">
+  <div class="print-head">
+    <div class="dt" id="print-date"></div>
+    <h2>Stratégia renty</h2>
+    <div class="sub">Nie len výška renty — kapitál, čas a riziko za ňou · hechtberger.com</div>
+    <div class="cta">Konzultácia k vašej stratégii: <b>hechtberger.com/rezervacia</b></div>
+  </div>
+
+  <div class="vystup-head" id="vystup-head" hidden>Súkromný výstup · orientačný výpočet pripravený na základe vášho zadania</div>
+  <p class="r-eyebrow" id="r-typ"></p>
+  <p class="sentence" id="r-s1"></p>
+  <p class="sentence second" id="r-s2"></p>
+
+  <div class="compare" id="r-compare" hidden></div>
+
+  <div class="stats" id="r-stats"></div>
+
+  <div class="stress-panel" id="stress-tools">
+    <label class="switchrow stress-toggle"><input type="checkbox" id="in-stress">
+      <span class="t"><b>Stres-test</b> — čo ak príde prepad trhu</span></label>
+    <div class="stress-controls" id="stress-controls" hidden>
+      <div class="field"><label>Prepad trhu o</label>
+        <div class="inputbox"><input id="in-drop" inputmode="decimal" value="37"><span class="unit">%</span></div></div>
+      <div class="field"><label>Príde o</label>
+        <div class="inputbox"><input id="in-crisisyr" inputmode="decimal" value="1"><span class="unit">rokov od dnes</span></div></div>
+      <div class="presets" id="crisis-presets"><span>Pre predstavu — roky, keď svetové akcie (MSCI World, EUR) skončili najhlbšie v mínuse:</span></div>
+    </div>
+  </div>
+  <div class="chartbox">
+    <canvas id="chart" height="260"></canvas>
+    <div class="tip" id="tip"></div>
+  </div>
+  <p class="chart-cap" id="chart-cap">Zelené pásmo: 800 možných vývojov majetku podľa skutočnej histórie <b>MSCI World</b> (EUR, 1970–2025) — od najhorších po najlepších 10 % scenárov.</p>
+
+  <div id="r-notes"></div>
+
+  <div class="pdf-gate" id="pdf-gate" hidden>
+    <div id="gate-intro">
+      <button type="button" class="btn primary" id="gate-open">Pripraviť súkromný výstup</button>
+      <p class="gate-note">Výstup zhrnie váš scenár, hlavné čísla a predpoklady orientačného výpočtu.</p>
+    </div>
+    <div class="gate-form" id="gate-form" hidden>
+      <h3 class="gate-h">Kam vám máme poslať odkaz?</h3>
+      <p class="gate-label" id="gate-form-text">Zadajte meno, priezvisko a email. Výstup si budete môcť otvoriť hneď po odoslaní.</p>
+      <div class="gate-fields">
+        <div class="inputbox"><input type="text" id="gate-first" placeholder="Meno" autocomplete="given-name"></div>
+        <div class="inputbox"><input type="text" id="gate-last" placeholder="Priezvisko" autocomplete="family-name"></div>
+        <div class="inputbox"><input type="email" id="gate-email" placeholder="Email" autocomplete="email"></div>
+      </div>
+      <button type="button" class="btn primary" id="gate-submit">Pokračovať k výstupu</button>
+      <p class="gate-consent-line">Vaše údaje použijeme na odoslanie výstupu a nadväzujúcu komunikáciu k téme finančného plánovania.</p>
+    </div>
+    <div class="gate-done" id="gate-done" hidden>
+      <h3 class="gate-h">Váš výstup je pripravený</h3>
+      <p class="gate-label" id="gate-done-text">Nižšie nájdete súkromný výstup k scenáru, ktorý ste si práve prepočítali.</p>
+      <div class="gate-actions">
+        <a class="btn primary" id="gate-view" href="#" target="_blank" rel="noopener">Otvoriť súkromný výstup</a>
+      </div>
+      <p class="gate-sec">Ak chcete čísla zasadiť do širšieho kontextu majetku, likvidity a dlhodobého plánu, môžeme scenár prejsť spolu.</p>
+      <div class="gate-actions">
+        <a class="btn ghost" href="https://hechtberger.com/rezervacia" target="_blank" rel="noopener">Prejsť scenár na konzultácii</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button type="button" class="btn primary" id="btn-pdf" onclick="window.print()">Stiahnuť prehľad v PDF</button>
+    <button type="button" class="btn ghost" id="btn-save">Uložiť ako scenár A</button>
+  </div>
+
+  <p class="assump" id="r-assump"></p>
+  <p class="assump-full" id="r-assump-full"></p>
+
+  <div class="vystup-foot" id="vystup-foot" hidden>
+    <p class="gate-sec">Ak chcete čísla zasadiť do širšieho kontextu majetku, likvidity a dlhodobého plánu, môžeme scenár prejsť spolu.</p>
+    <div class="gate-actions"><a class="btn ghost" href="https://hechtberger.com/rezervacia" target="_blank" rel="noopener">Prejsť scenár na konzultácii</a></div>
+  </div>
+</section>
+
+</div>
+
+<footer class="disclaimer">
+  Táto kalkulačka slúži výhradne na ilustračné a vzdelávacie účely. <b>Nejde o investičné poradenstvo, investičné odporúčanie ani o ponuku či návrh na uzavretie zmluvy.</b> Ide o modelový výpočet — zhodnotenie nie je garantované, hodnota investície môže v čase kolísať a nie je zaručená návratnosť investovanej sumy. Výnosy dosiahnuté v minulosti nie sú zárukou budúcich výnosov.
+</footer>
+</div>
+
+<script>
+/* ---------------- helpers ---------------- */
+const $ = id => document.getElementById(id);
+const fmtEur = n => new Intl.NumberFormat('sk-SK',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(n);
+const num = el => { const v = parseFloat(String(el.value).replace(/\s/g,'').replace(',','.')); return isFinite(v)?v:0; };
+const pct = v => String(Math.round(v*10)/10).replace('.',',');
+
+let mode='accum', typ='docasna', fund='lump', goal='rent';
+let stressOn=false, savedScenario=null;
+
+/* ---- Profil web (verejný) vs. poradca (plná verzia) ----
+   Rozhoduje doména, nie parameter — na hechtberger.com sa poradenské funkcie (poplatky,
+   servisný prepočet, porovnanie scenárov) fyzicky skryjú, návštevník ich nevie odhaliť
+   úpravou URL. `?verejna` / `?poradca` v adrese slúžia len na manuálne testovanie oboch
+   profilov na inej doméne (napr. lokálny súbor, Air, claude.ai artifact náhľad). */
+const PUBLIC_HOST=/(^|\.)hechtberger\.com$|^hechtgit\.github\.io$/i.test(location.hostname);
+const qs=location.search+location.hash;
+const PUBLIC = /poradca/i.test(qs) ? false : (PUBLIC_HOST || /verejna/i.test(qs));
+/* súkromný výstup: scenár zakódovaný v URL (?vystup&...) — čisté zobrazenie bez formulára */
+const OUTPUT_MODE=/[?&#]vystup/.test(qs);
+
+/* deterministický seedovaný generátor — stabilné výsledky pri každom prepočte */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+/* ---- Skutočné ročné výnosy indexu MSCI World v EUR (net total return), 1970–2025 ----
+   Zdroj: MSCI, dáta cez curvo.eu. Aktualizovať raz ročne (viď outputs/msci-world-eur-annual.json). */
+const MSCI_EUR=[-0.0309,0.0571,0.1986,-0.2958,-0.3128,0.4209,0.0308,-0.0913,0.0183,0.0691,0.3893,0.1362,0.2457,0.4145,0.1974,0.1580,0.1863,-0.0413,0.3172,0.1835,-0.2929,0.2456,-0.0037,0.3428,-0.0219,0.1477,0.1649,0.2936,0.1760,0.4620,-0.0626,-0.1218,-0.3267,0.1052,0.0637,0.2641,0.0755,-0.0245,-0.3729,0.2558,0.2050,-0.0245,0.1359,0.2119,0.1920,0.1055,0.1104,0.0758,-0.0438,0.3012,0.0611,0.3198,-0.1308,0.1949,0.2622,0.0707];
+const MSCI_YEARS=[1970,2025];
+const MSCI_GEO=Math.pow(MSCI_EUR.reduce((a,r)=>a*(1+r),1),1/MSCI_EUR.length)-1; // CAGR ~8,3 %
+const MSCI_MEAN=MSCI_EUR.reduce((a,b)=>a+b,0)/MSCI_EUR.length;
+const MSCI_SD=Math.sqrt(MSCI_EUR.reduce((a,r)=>a+(r-MSCI_MEAN)**2,0)/MSCI_EUR.length)*100; // ~19 %
+/* ---- Investičné scenáre = podiel akciovej zložky v portfóliu ----
+   Akciová zložka losuje skutočné roky MSCI World; stabilná zložka (dlhopisy/hotovosť/reality)
+   rastie rovnomerne. WWR = priemerná alokácia svetových milionárov (Capgemini WWR 2026, Fig. 4). */
+const SCENARIOS={
+  kons:{name:'Konzervatívny', eq:0.30, stable:2.75},
+  vyv: {name:'Vyvážený',      eq:0.60, stable:2.75},
+  dyn: {name:'Dynamický',     eq:0.90, stable:2.75}
+};
+let scen=SCENARIOS.dyn;
+const scenReturn=s=>s.eq*MSCI_GEO*100+(1-s.eq)*s.stable;
+
+/* portfóliové ročné faktory: akcie = história MSCI, zvyšok stabilný; re-centrované tak,
+   aby geometrický priemer = poradcom zvolený očakávaný výnos (disperzia a krízy zostávajú). */
+function histFactors(muGrossPct){
+  const stable=1+scen.stable/100;
+  const pf=MSCI_EUR.map(r=>scen.eq*(1+r)+(1-scen.eq)*stable);
+  const geo=Math.pow(pf.reduce((a,f)=>a*f,1),1/pf.length);
+  const f=(1+muGrossPct/100)/geo;
+  return pf.map(x=>Math.max(0.02,x*f));
+}
+
+/* ---- Referenčné najhoršie kalendárne roky indexu MSCI World v EUR (net total return) ----
+   Čísla pochádzajú z rovnakého datasetu 1970–2025 ako pásmo; slúžia ako reálna kotva magnitúdy. */
+const CRISIS_REF=[
+  {year:2008, drop:37, desc:'Finančná kríza'},
+  {year:2002, drop:33, desc:'Dno dot-com bubliny'},
+  {year:1974, drop:31, desc:'Ropná kríza'}
+];
+
+/* ---------------- finančný model (Swiss Life metodika) ----------------
+   Jednorazový vklad: ROČNÉ úročenie čistého p.a. výnosu. Pravidelná investícia
+   a renta: mesačný výpočet, sadzba (výnos − manažment)/12. Vklady × (1 − vstupný
+   poplatok). Renta: účet sa zhodnotí, potom vyplatí; rastie o infláciu/12 mesačne.
+   Vo výplatnej fáze sa účtuje iba poplatok za manažovanie. */
+function accumPath(P0net, Mnet, months, r, feeM){
+  const rNet=(r-feeM)/100;
+  const fL=Math.pow(1+rNet,1/12);   // jednorazová zložka: ročné úročenie (po mesiacoch ekvivalentne)
+  const iM=rNet/12;                  // pravidelná zložka: mesačné úročenie
+  let balL=P0net, balM=0; const path=[balL];
+  for(let t=0;t<months;t++){ balL*=fL; balM=balM*(1+iM)+Mnet; path.push(balL+balM); }
+  return path;
+}
+function payoutPath(C, R0, months, rr, feeM, g){
+  const i=(rr-feeM)/1200, gm=g/1200;
+  let bal=C, R=R0; const path=[bal]; let paid=0;
+  for(let t=0;t<months;t++){ bal=bal*(1+i)-R; paid+=R; R*=(1+gm); path.push(bal); }
+  return {path, end:bal, paid};
+}
+function capitalForRent(R0, months, rr, feeM, g, endBal){
+  /* horná hranica sa dynamicky zdvojnásobuje, kým nepokryje zadanie; nereálne zadanie → null */
+  let hi=1e6;
+  while(payoutPath(hi,R0,months,rr,feeM,g).end < endBal){ hi*=2; if(hi>1e15) return null; }
+  let lo=0;
+  for(let k=0;k<60;k++){ const mid=(lo+hi)/2;
+    if(payoutPath(mid,R0,months,rr,feeM,g).end < endBal) lo=mid; else hi=mid; }
+  return (lo+hi)/2;
+}
+function rentFromCapital(C, months, rr, feeM, g, endBal){
+  let lo=0, hi=C;
+  for(let k=0;k<60;k++){ const mid=(lo+hi)/2;
+    if(payoutPath(C,mid,months,rr,feeM,g).end > endBal) lo=mid; else hi=mid; }
+  return (lo+hi)/2;
+}
+function monthsUntilDepleted(C, R0, rr, feeM, g){
+  const i=(rr-feeM)/1200, gm=g/1200;
+  if(R0 <= C*(i-gm)) return Infinity;
+  let bal=C, R=R0, t=0, paid=0; const path=[bal];
+  while(bal>0 && t<1200){ bal=bal*(1+i)-R; paid+=Math.min(R,Math.max(0,bal+R)); R*=(1+gm); t++; path.push(Math.max(0,bal)); }
+  return {t, path, paid};
+}
+
+/* ---------------- výpočet plánu (deterministicky, ako finAnalytics) ---------------- */
+function compute(){
+  const N=Math.max(0,num($('in-odklad'))), Nm=Math.round(N*12);
+  const rast=$('in-rast').checked, infl=rast?num($('in-infl')):0, g=infl;
+  const rinv=num($('in-rinv')), rrent=num($('in-rrent'));
+  const feeIn=num($('in-fee-in')), feeM=num($('in-fee-m'));
+  const zost=num($('in-zost')), vek=num($('in-vek'));
+  const T=Math.max(1,num($('in-doba'))), Tm=Math.round(T*12);
+  const servis=$('in-servis').checked;
+  const i_r=(rrent-feeM)/1200, gm=g/1200, e=1-feeIn/100, eP0=servis?1:e;
+
+  const o={N,Nm,g,rast,infl,rinv,rrent,feeIn,feeM,zost,vek,T,Tm,warn:null,goal,mode,servis,e};
+
+  const nek = typ==='nekonecna' && !(mode==='rentier'&&goal==='duration');
+  o.nek=nek;
+  if(nek && i_r<=gm){
+    o.warn = g>0
+      ? 'Inflačný rast renty je rovnaký alebo vyšší ako čisté zhodnotenie rentového účtu — nekonečná renta pri týchto predpokladoch nie je udržateľná. Zvýšte zhodnotenie alebo vypnite rast renty.'
+      : 'Čisté zhodnotenie rentového účtu (po odpočítaní poplatku za manažovanie) je nulové alebo záporné — nekonečná renta potrebuje kladný čistý výnos.';
+    return o;
+  }
+
+  if(mode==='accum'){
+    o.Rtoday = num($('in-renta'));
+    o.R = rast ? o.Rtoday*Math.pow(1+infl/100,N) : o.Rtoday;
+    o.capNet = nek ? o.R/(i_r-gm) : capitalForRent(o.R,Tm,rrent,feeM,g,zost);
+    if(o.capNet===null){
+      o.warn='Zadanie vedie k nereálne vysokému potrebnému kapitálu — skontrolujte výšku renty, dobu vyplácania a predpoklady zhodnotenia.';
+      return o;
+    }
+    o.capGross = o.capNet;  // pri prechode do výplaty sa vstupný poplatok neúčtuje — platí sa len z nových vkladov
+    const rNetA=(rinv-feeM)/100;       // jednorazový vklad: ročné úročenie čistého výnosu
+    const iA=(rinv-feeM)/1200;         // pravidelná investícia: mesačné úročenie
+    if(Nm===0){ o.P0=o.capNet/eP0; o.M=0; }
+    else if(fund==='lump'){ o.P0=o.capNet/Math.pow(1+rNetA,N)/eP0; o.M=0; }
+    else{
+      const P0=fund==='both'?num($('in-p0')):0;
+      const fromP0=P0*eP0*Math.pow(1+rNetA,N);
+      const annu = iA===0 ? Nm : (Math.pow(1+iA,Nm)-1)/iA;  // nulový čistý výnos → bez úročenia
+      o.M=Math.max(0,(o.capNet-fromP0)/(annu*e)); o.P0=P0;
+      o.p0Covers=fromP0>=o.capNet;
+    }
+    o.acc=accumPath(o.P0*eP0,o.M*e,Nm,rinv,feeM);
+    o.payM = nek?360:Tm;
+    o.pay=payoutPath(o.capNet,o.R,o.payM,rrent,feeM,g);
+    o.vlozene=o.P0+o.M*Nm;
+    o.startMC=o.P0*eP0; o.MnetMC=o.M*e; o.transferF=1;
+  } else {
+    o.C0=num($('in-c0'));
+    o.acc=accumPath(o.C0,0,Nm,rinv,feeM);
+    o.capGross=o.acc[o.acc.length-1];
+    o.capNet=o.capGross;   // výplatná fáza: iba manažérsky poplatok, žiadny vstupný
+    o.startMC=o.C0; o.MnetMC=0; o.transferF=1;
+    if(goal==='rent'){
+      o.R = nek ? o.capNet*(i_r-gm) : rentFromCapital(o.capNet,Tm,rrent,feeM,g,zost);
+      o.payM = nek?360:Tm;
+      o.pay=payoutPath(o.capNet,o.R,o.payM,rrent,feeM,g);
+    } else {
+      o.Rtoday=num($('in-renta'));
+      o.R = rast ? o.Rtoday*Math.pow(1+infl/100,N) : o.Rtoday;
+      const res=monthsUntilDepleted(o.capNet,o.R,rrent,feeM,g);
+      if(res===Infinity){ o.forever=true; o.payM=360; o.pay=payoutPath(o.capNet,o.R,360,rrent,feeM,g); }
+      else { o.months=res.t; o.payM=Math.min(1200,Math.max(360,res.t+120)); o.pay={path:res.path,paid:res.paid};
+             while(o.pay.path.length<o.payM+1)o.pay.path.push(0); }
+    }
+    o.vlozene=o.C0;
+  }
+  o.vyplatene=o.pay&&o.pay.paid!=null?o.pay.paid:null;
+  return o;
+}
+
+/* ---------------- Monte Carlo — pásmo výsledkov a vek istoty ---------------- */
+function simulateMC(o, runs=800){
+  const facA=histFactors(o.rinv), facP=histFactors(o.rrent), nF=facA.length;
+  const meanA=facA.reduce((a,b)=>a+b,0)/nF;
+  o.volA=Math.sqrt(facA.reduce((a,f)=>a+(f-meanA)**2,0)/nF)*100; o.volP=o.volA;
+  const feeMo=o.feeM/1200, gm=o.g/1200, total=o.Nm+o.payM;
+  const nYearsA=Math.ceil(o.Nm/12), nYearsP=Math.ceil(o.payM/12);
+  const byMonth=Array.from({length:total+1},()=>new Float64Array(runs));
+  const depletion=new Float64Array(runs);
+  for(let r=0;r<runs;r++){
+    const rng=mulberry32(1234+r*7919);
+    let bal=o.startMC; byMonth[0][r]=bal;
+    /* akumulácia — každý rok = náhodne vylosovaný skutočný rok MSCI World */
+    let mi=0;
+    for(let y=0;y<nYearsA;y++){
+      const mf=Math.pow(facA[Math.floor(rng()*nF)],1/12)*(1-feeMo);
+      for(let k=0;k<12 && mi<o.Nm;k++,mi++){ bal=bal*mf+o.MnetMC; byMonth[mi+1][r]=bal; }
+    }
+    bal*=o.transferF;
+    /* výplata */
+    let R=o.R, dep=Infinity, pm=0;
+    for(let y=0;y<nYearsP;y++){
+      const mf=Math.pow(facP[Math.floor(rng()*nF)],1/12)*(1-feeMo);
+      for(let k=0;k<12 && pm<o.payM;k++,pm++){
+        if(dep===Infinity){ bal=bal*mf-R; if(bal<=0){ dep=o.Nm+pm+1; bal=0; } else R*=(1+gm); }
+        byMonth[o.Nm+pm+1][r]=Math.max(0,bal);
+      }
+    }
+    depletion[r]=dep;
+  }
+  const p=(arr,q)=>{const s=Array.from(arr).sort((a,b)=>a-b);return s[Math.min(s.length-1,Math.floor(q*s.length))]};
+  const p10=[],p50=[],p90=[];
+  for(let t=0;t<=total;t++){ p10.push(p(byMonth[t],0.10)); p50.push(p(byMonth[t],0.50)); p90.push(p(byMonth[t],0.90)); }
+  const depSorted=Array.from(depletion).sort((a,b)=>a-b);
+  const dep10=depSorted[Math.floor(0.10*runs)];               // 90 % scenárov vydrží aspoň dovtedy
+  const survShare=depSorted.filter(d=>d===Infinity).length/runs;
+  return {p10,p50,p90,dep10,survShare,total};
+}
+
+/* ---------------- stres-test: jeden parametrický prepad trhu ----------------
+   Poradca zadá pokles v % a rok (od dnes). Prepad zasiahne celé portfólio počas
+   daného roka; kríza môže padnúť do akumulačnej aj výplatnej fázy. Po prepade sa
+   vývoj vracia k zvolenému očakávanému zhodnoteniu (bez automatického V-odrazu). */
+function stressSim(o, dropPct, yrsFromNow){
+  const iP=(o.rrent-o.feeM)/1200, gm=o.g/1200;
+  const rNetA=(o.rinv-o.feeM)/100, fL=Math.pow(1+rNetA,1/12), iM=rNetA/12;
+  const shock0=Math.max(0,Math.round(yrsFromNow*12));
+  const sm=Math.pow(1-dropPct/100,1/12)-1;               // mesačný faktor rozložený na 12 mesiacov
+  const inShock=t=> t>=shock0 && t<shock0+12;
+  const phase = shock0 < o.Nm ? 'accum' : 'payout';
+  // akumulačná fáza — rovnaký dvojzložkový model ako accumPath (vklad ročne, pravidelná mesačne)
+  const accPath=[]; let balL=o.startMC, balM=0; accPath.push(balL);
+  for(let t=0;t<o.Nm;t++){
+    if(inShock(t)){ balL*=(1+sm); balM=balM*(1+sm)+o.MnetMC; }
+    else { balL*=fL; balM=balM*(1+iM)+o.MnetMC; }
+    accPath.push(balL+balM);
+  }
+  const capStressed=balL+balM;
+  // výplatná fáza (voliteľná úprava renty po kríze)
+  const runPay=(startCap,rentFactor,adjMonth)=>{
+    let b=startCap, R=o.R, dep=null; const path=[];
+    for(let t=0;t<o.payM;t++){ const gt=o.Nm+t, rate=inShock(gt)?sm:iP;
+      const Reff=(adjMonth!=null && t>=adjMonth)?R*rentFactor:R;
+      if(dep===null){ b=b*(1+rate)-Reff; if(b<=0){dep=t+1;b=0;} else R*=(1+gm); }
+      path.push(Math.max(0,b)); }
+    return {path,end:b,dep};
+  };
+  const base=runPay(capStressed,1,null);
+  const st={phase, dropPct, yr:Math.round(yrsFromNow), capStressed,
+            capBase:o.acc[o.acc.length-1],
+            path:accPath.concat(base.path),
+            dep: base.dep!=null ? o.Nm+base.dep : null};
+  const dur = mode==='rentier' && goal==='duration';
+  if(phase==='accum' && !dur){
+    // koľko renty stresnutý kapitál ešte umožní
+    st.rentStressed = o.nek ? Math.max(0,capStressed*(iP-gm))
+                            : rentFromCapital(capStressed,o.payM,o.rrent,o.feeM,o.g,o.zost);
+  }
+  if(phase==='payout'){
+    const adjPay=Math.max(0,shock0-o.Nm);
+    if(o.nek){
+      // simuluj výplatu až po koniec krízového okna, potom dopočítaj udržateľnú rentu
+      const endShock=Math.min(o.payM,(shock0-o.Nm)+12);
+      let b=capStressed, R=o.R;
+      for(let t=0;t<endShock;t++){ const gt=o.Nm+t, rate=inShock(gt)?sm:iP; b=Math.max(0,b*(1+rate)-R); R*=(1+gm); }
+      const sust=Math.max(0,b*(iP-gm));
+      st.cutPct=Math.max(0,1-sust/R)*100; st.newRent=sust;
+    } else if(base.dep!=null && base.dep<o.payM){
+      const fails=f=>{const r=runPay(capStressed,f,adjPay);return r.dep!=null||r.end<o.zost};
+      let lo=0,hi=1;
+      for(let k=0;k<40;k++){ const mid=(lo+hi)/2; if(fails(mid)) hi=mid; else lo=mid; }
+      st.cutPct=(1-lo)*100; st.newRent=o.R*lo;
+    }
+  }
+  return st;
+}
+
+/* ---------------- render ---------------- */
+let lastStats=null, lastTyp='';
+function render(){
+  const o=compute();
+  const typLbl =
+    o.warn ? 'Upravte zadanie' :
+    (mode==='rentier'&&goal==='duration') ? 'Výdrž majetku pri požadovanej rente' :
+    o.nek ? (o.rast?'Rastúca nekonečná renta':'Fixná nekonečná renta')
+          : (o.rast?'Rastúca dočasná renta':'Fixná dočasná renta');
+  $('r-typ').textContent=typLbl;
+
+  const notes=$('r-notes'); notes.innerHTML='';
+  if(o.warn){
+    $('r-s1').textContent='Pri týchto predpokladoch výpočet nevychádza.'; $('r-s2').textContent='';
+    $('r-stats').innerHTML=''; $('r-assump').textContent=''; $('r-assump-full').textContent='';
+    notes.innerHTML=`<div class="note warn"><span class="ic">!</span><span>${o.warn}</span></div>`;
+    drawChart(null); renderCompare(); return;
+  }
+
+  const mc=simulateMC(o);
+  const stress=stressOn?stressSim(o,Math.max(0,Math.min(90,num($('in-drop')))),Math.max(0,num($('in-crisisyr')))):null;
+
+  const vekStart=Math.round(o.vek+o.N);
+  const rastTxt=o.rast?`, každý rok vyššiu o ${pct(o.infl)} %`:'';
+  const dobaTxt=o.nek?'— a majetok sa pritom nemusí nikdy minúť':`počas ${o.T} rokov`;
+
+  let s1='', s2='';
+  if(mode==='accum'){
+    const cielTxt = o.rast
+      ? `rentu <b>${fmtEur(o.Rtoday)} mesačne</b> v dnešných cenách (pri začiatku výplaty ${fmtEur(o.R)})`
+      : `rentu <b>${fmtEur(o.Rtoday)} mesačne</b>`;
+    s1=`Na ${cielTxt} od vašich <b>${vekStart} rokov</b> ${dobaTxt} je potrebný majetok približne <b>${fmtEur(o.capGross)}</b>.`;
+    if(o.N===0) s2=`Tento kapitál máte pripravený — výplata môže začať okamžite.`;
+    else if(o.M===0||fund==='lump') s2=`Máte potenciál ho vytvoriť jednorazovou investíciou <b>${fmtEur(o.P0)}</b> na obdobie ${o.N} rokov.`;
+    else if(o.P0>0) s2=`Máte potenciál ho vytvoriť vkladom <b>${fmtEur(o.P0)}</b> a pravidelnou investíciou <b>${fmtEur(o.M)} mesačne</b> počas ${o.N} rokov.`;
+    else s2=`Máte potenciál ho vytvoriť pravidelnou investíciou <b>${fmtEur(o.M)} mesačne</b> počas ${o.N} rokov.`;
+  } else if(goal==='rent'){
+    const odkladTxt=o.N>0?` má o ${o.N} rokov — od vašich <b>${vekStart} rokov</b> —`:` má od vašich <b>${vekStart} rokov</b>`;
+    s1=`Majetok <b>${fmtEur(o.C0)}</b>${odkladTxt} potenciál zabezpečiť rentu na úrovni <b>${fmtEur(o.R)} mesačne</b>${rastTxt} ${dobaTxt}.`;
+    s2=o.nek?`Renta sa vypláca iba z výnosov, podstata majetku zostáva nedotknutá.`:'';
+  } else {
+    if(o.forever){
+      s1=`Renta <b>${fmtEur(o.R)} mesačne</b>${rastTxt} je pri týchto predpokladoch plne krytá výnosmi majetku <b>${fmtEur(o.C0)}</b>.`;
+      s2=`Majetok sa pri nej nemusí nikdy minúť.`;
+    } else {
+      const yrs=Math.floor(o.months/12), endAge=Math.round(o.vek+o.N+o.months/12);
+      s1=`Majetok <b>${fmtEur(o.C0)}</b> má pri rente <b>${fmtEur(o.Rtoday)} mesačne</b>${o.rast?(o.N>0?' (v dnešných cenách, indexovanej infláciou)':' (rastúcej s infláciou)'):''} potenciál vydržať približne <b>${yrs} rokov</b>.`;
+      s2=`Výplata by trvala do vašich <b>${endAge} rokov</b>.`;
+    }
+  }
+  $('r-s1').innerHTML=s1; $('r-s2').innerHTML=s2;
+
+  /* vek istoty z Monte Carlo — jedna hodnota, vysvetlená v podtitulku karty (bez duplicitnej vety) */
+  const vekIstoty = mc.dep10===Infinity
+    ? ((o.nek||o.forever) ? 'bez obmedzenia' : Math.round(o.vek+o.N+o.payM/12)+' rokov')
+    : Math.round(o.vek+mc.dep10/12)+' rokov';
+
+  /* staty */
+  const stats=[];
+  const endBal = o.nek||o.forever ? o.pay.path[o.pay.path.length-1] : (mode==='rentier'&&goal==='duration' ? 0 : o.zost);
+  const zisk = (o.vyplatene||0) + endBal - o.vlozene;
+  if(mode==='rentier'&&goal==='duration'){
+    if(o.forever) stats.push({k:'Výdrž majetku',v:'neobmedzená',hero:true});
+    else stats.push({k:'Výdrž majetku',v:Math.floor(o.months/12)+' r '+(o.months%12)+' m',hero:true});
+    stats.push({k:'Vaša mesačná renta',v:fmtEur(o.R)});
+    stats.push({k:'Hodnota vášho majetku',v:fmtEur(o.C0)});
+    if(!o.forever) stats.push({k:'Renta vyplácaná do veku',v:Math.round(o.vek+o.N+o.months/12)+' rokov'});
+  } else {
+    stats.push({k:'Očakávaná mesačná renta',v:fmtEur(o.R),hero:true});
+    stats.push({k:mode==='rentier'?'Hodnota vášho majetku':'Potrebný majetok na začiatku renty',v:fmtEur(o.capGross)});
+    if(mode==='accum'&&o.P0>0) stats.push({k:'Jednorazový vklad dnes',v:fmtEur(o.P0)});
+    if(mode==='accum'&&o.M>0) stats.push({k:'Mesačná investícia',v:fmtEur(o.M)});
+    if(mode==='accum'&&fund!=='lump') stats.push({k:o.N>0?`Spolu vložíte za ${o.N} rokov`:'Spolu vložíte',v:fmtEur(o.vlozene)});
+  }
+  if(isFinite(zisk)&&(o.vyplatene||endBal)) stats.push({k:o.nek||o.forever?'Očakávaný zisk za 30 rokov':'Očakávaný zisk z investície',v:fmtEur(zisk),sub:'vyplatená renta + zostatok − vaše vklady'});
+  stats.push({k:'Renta by mala vydržať do',v:vekIstoty,sub:'aj keby trhy sklamali — platí v 9 z 10 scenárov'});
+  $('r-stats').innerHTML=stats.map(s=>`<div class="stat${s.hero?' hero':''}"><div class="k">${s.k}</div><div class="v">${s.v}</div>${s.sub?`<div class="statsub">${s.sub}</div>`:''}</div>`).join('');
+  lastStats=stats; lastTyp=typLbl;
+
+  /* poznámky */
+  const arr=[];
+  if(stress){
+    const rok = n=> n===1?'rok':(n>=2&&n<=4?'roky':'rokov');
+    const kdy = stress.yr===0 ? 'hneď v prvom roku' : `o ${stress.yr} ${rok(stress.yr)} od dnes`;
+    if(stress.phase==='accum'){
+      const intro=`<b>Stres-test:</b> prepad trhu o <b>${stress.dropPct} %</b> ${kdy} — počas budovania majetku.`;
+      const rentTxt = stress.rentStressed!=null ? ` Ak by ste plán neupravili, dosiahnuteľná renta by klesla na približne <b>${fmtEur(stress.rentStressed)}</b> (namiesto ${fmtEur(o.R)}) — počas sporenia však máte čas to dorovnať vyššou investíciou alebo dlhším horizontom.` : '';
+      arr.push(`<div class="note stress"><span class="ic">⚡</span><span>${intro} Kríza počas sporenia je zvládnuteľná: majetok pri štarte renty by vyšiel ~<b>${fmtEur(stress.capStressed)}</b> namiesto ${fmtEur(stress.capBase)}.${rentTxt} Prepad počas budovania bolí oveľa menej než na začiatku výplaty — a pravidelná investícia medzitým nakupuje lacnejšie.</span></div>`);
+    } else {
+      const intro=`<b>Stres-test:</b> prepad trhu o <b>${stress.dropPct} %</b> ${kdy} — počas výplaty renty.`;
+      if(o.nek){
+        arr.push(`<div class="note stress"><span class="ic">⚡</span><span>${intro} Nekonečná renta by sa musela dočasne znížiť o približne <b>${Math.round(stress.cutPct)} %</b> (na ~${fmtEur(stress.newRent)}), aby podstata majetku zostala zachovaná. S návratom trhov sa renta opäť zvyšuje.</span></div>`);
+      } else if(mode==='rentier'&&goal==='duration'){
+        if(stress.dep!==null){
+          const yrsS=Math.floor((stress.dep-o.Nm)/12), ageS=Math.round(o.vek+o.N+(stress.dep-o.Nm)/12);
+          const baseTxt=o.forever?'namiesto neobmedzenej výdrže':`namiesto ${Math.floor((o.months||0)/12)} rokov`;
+          arr.push(`<div class="note stress"><span class="ic">⚡</span><span>${intro} Majetok by vydržal približne <b>${yrsS} rokov</b> ${baseTxt} — do veku <b>${ageS} rokov</b>.</span></div>`);
+        } else {
+          arr.push(`<div class="note stress"><span class="ic">⚡</span><span>${intro} Majetok by krízu ustál — renta zostáva krytá počas celého sledovaného obdobia.</span></div>`);
+        }
+      } else if(stress.dep===null){
+        arr.push(`<div class="note stress"><span class="ic">⚡</span><span>${intro} Plán by krízu prežil — renta zostáva krytá počas celého obdobia.</span></div>`);
+      } else {
+        const ageDep=Math.round(o.vek+o.N+(stress.dep-o.Nm)/12);
+        arr.push(`<div class="note stress"><span class="ic">⚡</span><span>${intro} Majetok by sa minul vo veku <b>${ageDep} rokov</b>. Riešením je zníženie renty od krízy o približne <b>${Math.round(stress.cutPct)} %</b> (na ~${fmtEur(stress.newRent)}) — plán sa tým vráti do rovnováhy. Presne toto je hodnota pravidiel dohodnutých vopred.</span></div>`);
+      }
+    }
+  }
+  if(o.rast&&o.N>0&&mode==='accum') arr.push(`<div class="note"><span class="ic">€</span><span>Renta je zadaná v dnešných cenách. Inflácia ${pct(o.infl)} % sa zohľadňuje už počas budovania majetku — pri začiatku výplaty o ${o.N} rokov bude renta <b>${fmtEur(o.R)}</b> a ďalej rastie každý rok.</span></div>`);
+  if(o.rast&&mode==='rentier'&&goal==='rent'&&o.N>0) arr.push(`<div class="note"><span class="ic">€</span><span>Renta ${fmtEur(o.R)} o ${o.N} rokov zodpovedá dnešnej kúpnej sile <b>${fmtEur(o.R/Math.pow(1+o.infl/100,o.N))}</b>.</span></div>`);
+  if(o.nek) arr.push(`<div class="note legacy"><span class="ic">∞</span><span>Renta sa vypláca iba z výnosov — kapitál <b>${fmtEur(o.capNet)}</b> zostáva zachovaný pre vás a ďalšiu generáciu.</span></div>`);
+  else if(o.zost>0&&!(mode==='rentier'&&goal==='duration')) arr.push(`<div class="note legacy"><span class="ic">♦</span><span>Na konci vyplácania zostáva na účte <b>${fmtEur(o.zost)}</b> — rezerva alebo dedičstvo.</span></div>`);
+  if(mode==='accum'&&fund==='both'&&o.p0Covers) arr.push(`<div class="note legacy"><span class="ic">✓</span><span>Jednorazový vklad na cieľ postačuje — pravidelná investícia už nie je potrebná.</span></div>`);
+  if(o.servis) arr.push(`<div class="note"><span class="ic">✓</span><span><b>Servisný prepočet</b> — existujúci majetok vstupuje do výpočtu bez vstupného poplatku, klient ho uhradil pri pôvodnej investícii.</span></div>`);
+  notes.innerHTML=arr.join('');
+
+  $('r-assump').innerHTML=`Scenár ${scen.name} · zhodnotenie ${pct(o.rinv)} % p.a., v rente ${pct(o.rrent)} % p.a. · poplatky ${pct(o.feeIn)} % vstupný, ${pct(o.feeM)} % p.a. manažovanie${o.rast?` · inflácia ${pct(o.infl)} % ročne`:''}${o.servis?' · servisný prepočet':''}.`;
+
+  $('r-assump-full').innerHTML=`${o.vyplatene?`Renta spolu vyplatená za sledované obdobie: ${fmtEur(o.vyplatene)}. `:''}Pásmo v grafe: 800 simulácií metódou historického bootstrapu na skutočných ročných výnosoch indexu MSCI World v EUR 1970–2025 (56 rokov, CAGR ${pct(MSCI_GEO*100)} %, ročná volatilita ${pct(MSCI_SD)} %; zdroj MSCI/curvo.eu). Scenár ${scen.name}: ${Math.round(scen.eq*100)} % akciová zložka + ${Math.round((1-scen.eq)*100)} % stabilná zložka ${pct(scen.stable)} % p.a.; re-centrované na zvolené zhodnotenie, volatilita portfólia ~${pct(o.volA)} % p.a. Mesačný výpočet, renta vyplácaná mesačne.`;
+
+  drawChart({o,mc,stress});
+  renderCompare();
+}
+
+/* ---------------- porovnanie scenárov ---------------- */
+function renderCompare(){
+  const box=$('r-compare');
+  if(!savedScenario){ box.hidden=true; box.innerHTML=''; $('btn-save').textContent='Uložiť ako scenár A'; return; }
+  $('btn-save').textContent='Odstrániť scenár A';
+  const card=(title,typ,stats,cur)=>`<div class="cmp-card${cur?' current':''}"><h4>${title}</h4><div class="sub">${typ}</div><table>${
+    stats.map(s=>`<tr><td>${s.k}</td><td>${s.v}</td></tr>`).join('')}</table></div>`;
+  box.innerHTML=card('Scenár A',savedScenario.typ,savedScenario.stats,false)
+              + card('Aktuálny návrh',lastTyp,lastStats||[],true);
+  box.hidden=false;
+}
+$('btn-save').addEventListener('click',()=>{
+  savedScenario = savedScenario ? null : {typ:lastTyp, stats:(lastStats||[]).map(s=>({k:s.k,v:s.v}))};
+  renderCompare();
+});
+
+/* ---------------- graf ---------------- */
+let chartData=null;
+function drawChart(d){
+  const c=$('chart'), dpr=window.devicePixelRatio||1;
+  const W=c.clientWidth, H=260;
+  c.width=W*dpr; c.height=H*dpr;
+  const x=c.getContext('2d'); x.scale(dpr,dpr); x.clearRect(0,0,W,H);
+  if(!d){chartData=null;return}
+  const {o,mc,stress}=d;
+  const med=mc.p50, n=med.length;
+  const max=Math.max(...mc.p90)*1.05;
+  const L=56,Rr=10,T=12,B=26, pw=W-L-Rr, ph=H-T-B;
+  const X=t=>L+pw*t/(n-1), Y=v=>T+ph*(1-Math.max(0,v)/max);
+  x.strokeStyle='#353535'; x.fillStyle='#8f8a80'; x.font='11px Helvetica,Arial'; x.textAlign='right';
+  for(let k=0;k<=4;k++){ const v=max*k/4, y=Y(v);
+    x.beginPath(); x.moveTo(L,y); x.lineTo(W-Rr,y); x.stroke();
+    x.fillText(v>=1e6?(v/1e6).toFixed(1).replace('.',',')+' M':Math.round(v/1000)+' t', L-6, y+4); }
+  x.textAlign='center';
+  const yrs=Math.round((n-1)/12), step=yrs>40?10:yrs>16?5:yrs>8?2:1;
+  for(let yy=0;yy<=yrs;yy+=step){ const t=yy*12; if(t>n-1)break;
+    x.fillText(o.vek>0?String(Math.round(o.vek+yy)):'+'+yy, X(t), H-8); }
+  x.fillText(o.vek>0?'vek':'roky', W-Rr-12, H-8);
+
+  /* pásmo 10–90 % */
+  x.beginPath(); x.moveTo(X(0),Y(mc.p90[0]));
+  for(let t=1;t<n;t++)x.lineTo(X(t),Y(mc.p90[t]));
+  for(let t=n-1;t>=0;t--)x.lineTo(X(t),Y(mc.p10[t]));
+  x.closePath(); x.fillStyle='rgba(95,169,124,.16)'; x.fill();
+
+  /* stredná dráha: rast sýta zelená, výplata svetlá */
+  const splitT=o.Nm;
+  const seg=(from,to,col)=>{ x.beginPath();
+    for(let t=from;t<=to;t++){ const px=X(t),py=Y(med[t]); t===from?x.moveTo(px,py):x.lineTo(px,py); }
+    x.strokeStyle=col; x.lineWidth=2.4; x.stroke(); };
+  if(splitT>0) seg(0,splitT,'#5fa97c');
+  seg(Math.max(0,splitT),n-1,'#a9cdb4');
+
+  /* stres-test — prerušovaná jantárová cez celý časový rad (akumulácia + výplata) */
+  if(stress){
+    x.setLineDash([6,5]); x.beginPath();
+    for(let t=0;t<stress.path.length&&t<n;t++){ const px=X(t),py=Y(stress.path[t]); t===0?x.moveTo(px,py):x.lineTo(px,py); }
+    x.strokeStyle='#e0a24d'; x.lineWidth=2; x.stroke(); x.setLineDash([]);
+    // zvislý marker roku krízy
+    const cm=Math.max(0,Math.round(num($('in-crisisyr'))*12));
+    if(cm<n){ x.setLineDash([2,3]); x.strokeStyle='rgba(224,162,77,.5)'; x.beginPath(); x.moveTo(X(cm),T); x.lineTo(X(cm),T+ph); x.stroke(); x.setLineDash([]); }
+  }
+
+  if(splitT>0&&splitT<n-1){ x.beginPath(); x.arc(X(splitT),Y(med[splitT]),4.5,0,7); x.fillStyle='#ae8753'; x.fill();
+    x.fillStyle='#ae8753'; x.font='600 11px Helvetica,Arial'; x.textAlign='left';
+    x.fillText('začiatok výplaty', Math.min(X(splitT)+8,W-105), Y(med[splitT])-10); }
+  chartData={med,p10:mc.p10,p90:mc.p90,X,Y,n,vek:o.vek,L,pw};
+}
+$('chart').addEventListener('mousemove',ev=>{
+  if(!chartData)return;
+  const r=$('chart').getBoundingClientRect(), mx=ev.clientX-r.left;
+  const t=Math.max(0,Math.min(chartData.n-1,Math.round((mx-chartData.L)/chartData.pw*(chartData.n-1))));
+  const tip=$('tip'), yy=Math.floor(t/12);
+  tip.style.display='block';
+  tip.style.left=(chartData.X(t))+'px'; tip.style.top=(chartData.Y(chartData.med[t])+10)+'px';
+  tip.textContent=(chartData.vek>0?`vek ${Math.round(chartData.vek+yy)}`:`rok +${yy}`)+' · '+fmtEur(chartData.med[t])+' (rozpätie '+fmtEur(chartData.p10[t])+' – '+fmtEur(chartData.p90[t])+')';
+});
+$('chart').addEventListener('mouseleave',()=>{$('tip').style.display='none'});
+
+/* ---------------- interakcie ---------------- */
+function syncUI(){
+  document.querySelectorAll('#pills-mode .pill').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
+  const rentier=mode==='rentier';
+  $('mode-hint').textContent = rentier
+    ? 'Zaujíma ma, akú rentu mi majetok umožní a ako dlho pri nej vydrží.'
+    : 'Chcem v budúcnosti poberať rentu — vypočítame, koľko treba investovať dnes.';
+  $('q-majetok').hidden=!rentier;
+  $('q-funding').style.display=rentier?'none':'';
+  $('lbl-odklad').textContent=rentier?'Výplata sa začne o':'Výplata renty sa má začať o';
+  $('q-renta').style.display=(!rentier||goal==='duration')?'':'none';
+  $('lbl-renta').textContent=rentier?'Vaša požadovaná renta':'Požadovaná renta';
+  $('q-typ').style.display=(rentier&&goal==='duration')?'none':'';
+  $('q-servis').style.display=PUBLIC?'none':((!rentier&&fund!=='regular')?'':'none');
+  $('servis-detail').style.display=(mode==='accum'&&fund==='both')?'':'none';
+  $('in-doba').closest('.field').style.display=typ==='docasna'?'':'none';
+  $('lbl-renta-today').style.display=$('in-rast').checked?'':'none';
+  document.querySelectorAll('#pills-goal .pill').forEach(p=>p.classList.toggle('active',p.dataset.goal===goal));
+  document.querySelectorAll('#pills-typ .pill').forEach(p=>p.classList.toggle('active',p.dataset.typ===typ));
+  document.querySelectorAll('#pills-fund .pill').forEach(p=>p.classList.toggle('active',p.dataset.fund===fund));
+  if(!rentier){
+    // pole vkladu má zmysel len pri kombinácii — pri čisto jednorazovej/pravidelnej sa suma dopočítava
+    $('f-p0').style.display=(fund==='both')?'':'none';
+    $('fund-hint').textContent=fund==='lump'?'Vypočítame potrebný jednorazový vklad.'
+      :fund==='both'?'Zadajte jednorazový vklad — dopočítame potrebnú mesačnú investíciu.'
+      :'Vypočítame potrebnú mesačnú investíciu.';
+  }
+  $('stress-controls').hidden=!stressOn;
+  $('odklad-hint').textContent = num($('in-odklad'))===0 ? '= renta začína ihneď, bez odkladu' : '';
+  $('chart-cap').innerHTML = 'Zelené pásmo: 800 možných vývojov majetku podľa skutočnej histórie <b>MSCI World</b> (EUR, 1970–2025) — od najhorších po najlepších 10 % scenárov.'
+    + (stressOn ? ' Prerušovaná čiara je váš zadaný stres-test.' : '');
+
+  $('btn-save').style.display = PUBLIC ? 'none' : '';
+  updateGate();
+}
+
+/* ---- Email-gate (verejný web): „Pripraviť súkromný výstup" ----
+   Výstup dostane návštevník okamžite (odkaz so scenárom v URL); email slúži ako záloha
+   a vstup do Boldem zoznamu. Kým BOLDEM_FORM_URL nie je nastavené, kontakt sa neukladá
+   a texty nesľubujú email — po napojení Boldemu prepnúť EMAIL_DELIVERY_READY na true. */
+const BOLDEM_FORM_URL='';           // TODO: endpoint Boldem formulára (viď plán email workflow)
+const EMAIL_DELIVERY_READY=false;   // po napojení Boldemu → true (aktivuje texty o emaile)
+function updateGate(){
+  $('pdf-gate').hidden = !PUBLIC || OUTPUT_MODE;
+  $('btn-pdf').style.display = PUBLIC ? 'none' : '';
+  if(EMAIL_DELIVERY_READY){
+    $('gate-form-text').textContent='Zadajte meno, priezvisko a email. Výstup si budete môcť otvoriť hneď po odoslaní a odkaz vám pošleme aj emailom.';
+    $('gate-done-text').textContent='Nižšie nájdete súkromný výstup k scenáru, ktorý ste si práve prepočítali. Rovnaký odkaz sme vám poslali aj emailom.';
+  }
+}
+function markBad(inputId, cond){ $(inputId).closest('.inputbox').style.borderColor = cond ? 'var(--red)' : ''; return cond; }
+function scenarioURL(){
+  const scKey=Object.keys(SCENARIOS).find(k=>SCENARIOS[k]===scen)||'dyn';
+  const p=new URLSearchParams({m:mode,t:typ,f:fund,g:goal,sc:scKey,
+    vek:$('in-vek').value,odk:$('in-odklad').value,renta:$('in-renta').value,doba:$('in-doba').value,
+    c0:$('in-c0').value,p0:$('in-p0').value,rast:$('in-rast').checked?'1':'0',infl:$('in-infl').value,
+    rinv:$('in-rinv').value,rrent:$('in-rrent').value});
+  return location.origin+location.pathname+'?vystup&'+p.toString();
+}
+function submitGate(){
+  const first=$('gate-first').value.trim(), last=$('gate-last').value.trim(), email=$('gate-email').value.trim();
+  let err=false;
+  err = markBad('gate-first', !first) || err;
+  err = markBad('gate-last', !last) || err;
+  err = markBad('gate-email', !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) || err;
+  if(err) return;
+  const url=scenarioURL();
+  $('gate-view').href=url;
+  if(BOLDEM_FORM_URL){
+    try{ fetch(BOLDEM_FORM_URL,{method:'POST',mode:'no-cors',
+      headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body:new URLSearchParams({first,last,email,scenar:url,zdroj:'kalkulacka-renty'})}); }catch(e){}
+  }
+  $('gate-intro').hidden=true; $('gate-form').hidden=true; $('gate-done').hidden=false;
+}
+$('gate-open').addEventListener('click',()=>{ $('gate-intro').hidden=true; $('gate-form').hidden=false; $('gate-first').focus(); });
+$('gate-submit').addEventListener('click',submitGate);
+['gate-first','gate-last','gate-email'].forEach(id=>$(id).addEventListener('input',()=>markBad(id,false)));
+if(PUBLIC){ document.querySelector('#q-adv details.adv').style.display='none'; }
+document.querySelectorAll('#pills-mode .pill').forEach(b=>b.addEventListener('click',()=>{mode=b.dataset.mode;syncUI();render()}));
+document.querySelectorAll('#pills-typ .pill').forEach(b=>b.addEventListener('click',()=>{typ=b.dataset.typ;syncUI();render()}));
+document.querySelectorAll('#pills-goal .pill').forEach(b=>b.addEventListener('click',()=>{goal=b.dataset.goal;syncUI();render()}));
+document.querySelectorAll('#pills-fund .pill').forEach(b=>b.addEventListener('click',()=>{fund=b.dataset.fund;syncUI();render()}));
+document.querySelectorAll('#chips-scenar .chip').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('#chips-scenar .chip').forEach(p=>p.classList.toggle('active',p===b));
+  scen=SCENARIOS[b.dataset.sc];
+  const r=Math.round(scenReturn(scen)*10)/10;
+  $('in-rinv').value=pct(r); $('in-rrent').value=pct(r);
+  render();
+}));
+$('in-stress').addEventListener('change',()=>{stressOn=$('in-stress').checked;syncUI();render()});
+CRISIS_REF.forEach(p=>{ const b=document.createElement('span'); b.className='preset-box';
+  b.innerHTML=`<b>${p.year}: −${p.drop} %</b><small>${p.desc}</small>`; $('crisis-presets').appendChild(b); });
+let deb=null;
+document.querySelectorAll('input').forEach(el=>el.addEventListener('input',()=>{
+  syncUI(); clearTimeout(deb); deb=setTimeout(render,120);
+}));
+$('print-date').textContent='Prehľad pripravený '+new Date().toLocaleDateString('sk-SK');
+
+/* ---- aplikácia scenára z URL v režime súkromného výstupu ---- */
+if(OUTPUT_MODE){
+  document.body.classList.add('vystup');
+  const p=new URLSearchParams(location.search);
+  const setV=(id,k)=>{ if(p.get(k)) $(id).value=p.get(k); };
+  if(p.get('m')) mode=p.get('m');
+  if(p.get('t')) typ=p.get('t');
+  if(p.get('f')) fund=p.get('f');
+  if(p.get('g')) goal=p.get('g');
+  if(SCENARIOS[p.get('sc')]) scen=SCENARIOS[p.get('sc')];
+  setV('in-vek','vek'); setV('in-odklad','odk'); setV('in-renta','renta'); setV('in-doba','doba');
+  setV('in-c0','c0'); setV('in-p0','p0'); setV('in-infl','infl'); setV('in-rinv','rinv'); setV('in-rrent','rrent');
+  $('in-rast').checked = p.get('rast')==='1';
+  $('vystup-head').hidden=false;
+  $('vystup-foot').hidden=false;
+}
+
+syncUI(); render();
+</script>
