@@ -350,7 +350,7 @@ body.vystup .grid{grid-template-columns:1fr}
       </div>
       <p class="gate-sec">Ak chcete čísla zasadiť do širšieho kontextu majetku, likvidity a dlhodobého plánu, môžeme scenár prejsť spolu.</p>
       <div class="gate-actions">
-        <a class="btn ghost" href="https://hechtberger.com/rezervacia" target="_blank" rel="noopener">Prejsť scenár na konzultácii</a>
+        <a class="btn primary" href="https://hechtberger.com/rezervacia" target="_blank" rel="noopener">Prejsť scenár na konzultácii</a>
       </div>
     </div>
   </div>
@@ -365,7 +365,7 @@ body.vystup .grid{grid-template-columns:1fr}
 
   <div class="vystup-foot" id="vystup-foot" hidden>
     <p class="gate-sec">Ak chcete čísla zasadiť do širšieho kontextu majetku, likvidity a dlhodobého plánu, môžeme scenár prejsť spolu.</p>
-    <div class="gate-actions"><a class="btn ghost" href="https://hechtberger.com/rezervacia" target="_blank" rel="noopener">Prejsť scenár na konzultácii</a></div>
+    <div class="gate-actions"><a class="btn primary" href="https://hechtberger.com/rezervacia" target="_blank" rel="noopener">Prejsť scenár na konzultácii</a></div>
   </div>
 </section>
 
@@ -966,4 +966,6 @@ if(OUTPUT_MODE){
 }
 
 syncUI(); render();
+/* súkromný výstup: okrem zobrazenia sa ponúkne aj automatické stiahnutie (tlačový dialóg / Uložiť ako PDF) */
+if(OUTPUT_MODE){ setTimeout(()=>window.print(), 700); }
 </script>
