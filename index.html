@@ -1,5 +1,5 @@
 <meta charset="utf-8">
-<title>Stratégia renty</title>
+<title>Stratégia privátnej renty</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Asap:wght@400;600;700&family=Lora:ital,wght@0,400;1,400&family=PT+Serif:wght@400;700&display=swap" rel="stylesheet">
@@ -125,6 +125,7 @@ canvas{width:100%;height:260px;display:block}
 .gate-actions{display:flex;gap:10px;flex-wrap:wrap}
 .actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
 .btn{border:0;border-radius:0;padding:14px 26px;font-family:var(--serif);font-size:14px;font-weight:700;letter-spacing:1.8px;cursor:pointer;text-decoration:none;display:inline-block}
+.gate-actions .btn,.pdf-gate .btn{max-width:100%;white-space:normal;line-height:1.35;text-align:center}
 .btn[disabled]{opacity:.65;cursor:wait}
 .btn.primary{background:var(--btn-gold);color:#fff}
 .btn.primary:hover{background:#ae8753}
@@ -181,8 +182,8 @@ body.vystup .grid{grid-template-columns:1fr}
 
 <div class="wrap">
 <header>
-  <h1>Stratégia renty</h1>
-  <p class="claim">Nie len výška renty. Dôležité je, aký kapitál ju má niesť, ako dlho a pri akom riziku.</p>
+  <h1>Stratégia privátnej renty</h1>
+  <p class="claim">Nielen výška renty. Rozhoduje, aký kapitál ju má financovať, ako dlho má vydržať a s akou rezervou.</p>
 </header>
 
 <div class="grid">
@@ -295,12 +296,12 @@ body.vystup .grid{grid-template-columns:1fr}
 <section class="panel result" aria-label="Výsledok" aria-live="polite">
   <div class="print-head">
     <div class="dt" id="print-date"></div>
-    <h2>Stratégia renty</h2>
-    <div class="sub">Nie len výška renty — kapitál, čas a riziko za ňou · hechtberger.com</div>
+    <h2>Stratégia privátnej renty</h2>
+    <div class="sub">Kapitál, pravidelný príjem a výdrž majetku · hechtberger.com</div>
     <div class="cta">Konzultácia k vašej stratégii: <b>hechtberger.com/rezervacia</b></div>
   </div>
 
-  <div class="vystup-head" id="vystup-head" hidden>Súkromný výstup · orientačný výpočet pripravený na základe vášho zadania</div>
+  <div class="vystup-head" id="vystup-head" hidden>Výstup Stratégia privátnej renty · orientačný výpočet pripravený na základe vášho zadania</div>
   <p class="r-eyebrow" id="r-typ"></p>
   <p class="sentence" id="r-s1"></p>
   <p class="sentence second" id="r-s2"></p>
@@ -324,14 +325,14 @@ body.vystup .grid{grid-template-columns:1fr}
     <canvas id="chart" height="260"></canvas>
     <div class="tip" id="tip"></div>
   </div>
-  <p class="chart-cap" id="chart-cap">Zelené pásmo ukazuje 800 modelových výpočtov vývoja majetku. Simulácia používa Monte Carlo prístup s historickým bootstrapom: náhodne skladá priebehy z reálnych ročných výnosov <b>MSCI World</b> v EUR (1970–2025). Zobrazené rozpätie je medzi 10. a 90. percentilom výsledkov, bez najextrémnejších okrajových scenárov. Nejde o predpoveď budúcnosti, ale o ilustráciu citlivosti renty na poradie dobrých a zlých rokov.</p>
+  <p class="chart-cap" id="chart-cap">Zelené pásmo ukazuje 800 modelových výpočtov vývoja majetku. Simulácia používa Monte Carlo prístup s historickým bootstrapom: náhodne skladá priebehy z reálnych ročných výnosov <b>MSCI World</b> v EUR (1970–2025). Zobrazené rozpätie je medzi 10. a 90. percentilom výsledkov, bez najextrémnejších okrajových scenárov. Nejde o predpoveď budúcnosti, ale o ilustráciu citlivosti privátnej renty na poradie dobrých a zlých rokov.</p>
 
   <div id="r-notes"></div>
 
   <div class="pdf-gate" id="pdf-gate" hidden>
     <div id="gate-intro">
-      <button type="button" class="btn primary" id="gate-open">Pripraviť súkromný výstup</button>
-      <p class="gate-note">Výstup zhrnie váš scenár, hlavné čísla a predpoklady orientačného výpočtu.</p>
+      <button type="button" class="btn primary" id="gate-open">Stiahnuť výstup Stratégia privátnej renty</button>
+      <p class="gate-note">Výstup zhrnie váš scenár privátnej renty, hlavné čísla a predpoklady orientačného výpočtu.</p>
     </div>
     <div class="gate-form" id="gate-form" hidden>
       <h3 class="gate-h">Kam vám máme poslať odkaz?</h3>
@@ -346,10 +347,10 @@ body.vystup .grid{grid-template-columns:1fr}
       <p class="gate-consent-line">Vaše údaje použijeme na odoslanie výstupu a nadväzujúcu komunikáciu k téme Wealth managementu.</p>
     </div>
     <div class="gate-done" id="gate-done" hidden>
-      <h3 class="gate-h">Váš výstup je pripravený</h3>
-      <p class="gate-label" id="gate-done-text">Nižšie nájdete súkromný výstup k scenáru, ktorý ste si práve prepočítali.</p>
+      <h3 class="gate-h">Výstup Stratégia privátnej renty je pripravený</h3>
+      <p class="gate-label" id="gate-done-text">Nižšie nájdete výstup k scenáru privátnej renty, ktorý ste si práve prepočítali.</p>
       <div class="gate-actions">
-        <a class="btn primary" id="gate-view" href="#" target="_blank" rel="noopener">Stiahnuť súkromný výstup</a>
+        <a class="btn primary" id="gate-view" href="#" target="_blank" rel="noopener">Stiahnuť výstup Stratégia privátnej renty</a>
       </div>
       <p class="gate-sec">Ak chcete čísla zasadiť do širšieho kontextu majetku, likvidity a dlhodobého plánu, môžeme scenár prejsť spolu.</p>
       <div class="gate-actions">
@@ -375,7 +376,7 @@ body.vystup .grid{grid-template-columns:1fr}
 </div>
 
 <footer class="disclaimer">
-  Táto kalkulačka slúži výhradne na ilustračné a vzdelávacie účely. <b>Nejde o investičné poradenstvo, investičné odporúčanie ani o ponuku či návrh na uzavretie zmluvy.</b> Ide o modelový výpočet — zhodnotenie nie je garantované, hodnota investície môže v čase kolísať a nie je zaručená návratnosť investovanej sumy. Výnosy dosiahnuté v minulosti nie sú zárukou budúcich výnosov.
+  Tento modelový výpočet slúži výhradne na ilustračné a vzdelávacie účely. <b>Nejde o investičné poradenstvo, investičné odporúčanie ani o ponuku či návrh na uzavretie zmluvy.</b> Zhodnotenie nie je garantované, hodnota investície môže v čase kolísať a nie je zaručená návratnosť investovanej sumy. Výnosy dosiahnuté v minulosti nie sú zárukou budúcich výnosov.
 </footer>
 </div>
 
@@ -881,14 +882,14 @@ function syncUI(){
   }
   $('stress-controls').hidden=!stressOn;
   $('odklad-hint').textContent = num($('in-odklad'))===0 ? '= renta začína ihneď, bez odkladu' : '';
-  $('chart-cap').innerHTML = 'Zelené pásmo ukazuje 800 modelových výpočtov vývoja majetku. Simulácia používa Monte Carlo prístup s historickým bootstrapom: náhodne skladá priebehy z reálnych ročných výnosov <b>MSCI World</b> v EUR (1970–2025). Zobrazené rozpätie je medzi 10. a 90. percentilom výsledkov, bez najextrémnejších okrajových scenárov. Nejde o predpoveď budúcnosti, ale o ilustráciu citlivosti renty na poradie dobrých a zlých rokov.'
+  $('chart-cap').innerHTML = 'Zelené pásmo ukazuje 800 modelových výpočtov vývoja majetku. Simulácia používa Monte Carlo prístup s historickým bootstrapom: náhodne skladá priebehy z reálnych ročných výnosov <b>MSCI World</b> v EUR (1970–2025). Zobrazené rozpätie je medzi 10. a 90. percentilom výsledkov, bez najextrémnejších okrajových scenárov. Nejde o predpoveď budúcnosti, ale o ilustráciu citlivosti privátnej renty na poradie dobrých a zlých rokov.'
     + (stressOn ? ' Prerušovaná čiara je váš zadaný stres-test.' : '');
 
   $('btn-save').style.display = PUBLIC ? 'none' : '';
   updateGate();
 }
 
-/* ---- Email-gate (verejný web): „Pripraviť súkromný výstup" ----
+/* ---- Email-gate (verejný web): výstup k scenáru privátnej renty ----
    Výstup dostane návštevník okamžite po úspešnom zápise kontaktu do Boldemu. */
 const BOLDEM_FORMS_CONFIG_URL='https://front.boldem.cz/api/forms/get?uc=208268&wg=7c7d41e8-0a15-4317-9bb7-abebbc852fab&sc=0';
 const BOLDEM_FORM_GUID='dd1af774-e0b8-4e6b-b309-ef3ce906a2ac';
@@ -900,7 +901,7 @@ function updateGate(){
   $('btn-pdf').style.display = PUBLIC ? 'none' : '';
   if(EMAIL_DELIVERY_READY){
     $('gate-form-text').textContent='Zadajte meno, priezvisko a email. Výstup si budete môcť otvoriť hneď po odoslaní a odkaz vám pošleme aj emailom.';
-    $('gate-done-text').textContent='Nižšie nájdete súkromný výstup k scenáru, ktorý ste si práve prepočítali. Rovnaký odkaz sme vám poslali aj emailom.';
+    $('gate-done-text').textContent='Nižšie nájdete výstup k scenáru privátnej renty, ktorý ste si práve prepočítali. Rovnaký odkaz sme vám poslali aj emailom.';
   }
 }
 function markBad(inputId, cond){ $(inputId).closest('.inputbox').style.borderColor = cond ? 'var(--red)' : ''; return cond; }
@@ -914,9 +915,9 @@ function scenarioURL(){
 }
 function scenarioSummary(){
   const o=compute();
-  if(o.warn) return 'Scenár renty z kalkulačky Stratégia renty.';
+  if(o.warn) return 'Scenár privátnej renty z orientačného výpočtu.';
   const statTxt=(lastStats||[]).slice(0,3).map(s=>`${s.k}: ${s.v}`).join(' | ');
-  const typ=lastTyp||$('r-typ').textContent||'Scenár renty';
+  const typ=lastTyp||$('r-typ').textContent||'Scenár privátnej renty';
   const modeTxt=mode==='accum'?'budovanie majetku':'rentier';
   return `${typ} (${modeTxt}, ${scen.name}). ${statTxt}`.slice(0,500);
 }
