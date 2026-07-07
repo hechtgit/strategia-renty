@@ -1027,8 +1027,15 @@ function notifyEmbedHeight(){
     const footer=document.querySelector('.disclaimer');
     const last=footer || wrap || document.body;
     const rect=last.getBoundingClientRect();
+    const h1=document.querySelector('h1');
     const h=Math.ceil(rect.top + rect.height + window.scrollY);
-    window.parent.postMessage({type:'ph-renta-height', height:h}, '*');
+    const h1Rect=h1?h1.getBoundingClientRect():null;
+    window.parent.postMessage({
+      type:'ph-renta-height',
+      height:h,
+      scrollY:Math.round(window.scrollY),
+      h1Top:h1Rect?Math.round(h1Rect.top):null
+    }, '*');
   });
 }
 if(window.parent!==window){
