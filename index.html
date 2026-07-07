@@ -5,24 +5,24 @@
 <link href="https://fonts.googleapis.com/css2?family=Asap:wght@400;600;700&family=Lora:ital,wght@0,400;1,400&family=PT+Serif:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  /* presná paleta hechtberger.com (computed styles zo Squarespace) */
-  --bg:#282828; --surface:#1c1e1d; --inset:#242625; --ink:#ffffff; --muted:#b7afa5;
-  --gold:#bd935d; --gold-strong:#d0a66d; --btn-gold:#a87431; --line:#44413b;
+  /* presná paleta hechtberger.com — computed styles zo živého webu 2026-07-07 */
+  --bg:#1a1a1a; --surface:#242424; --inset:#2b2b2b; --ink:#ffffff; --muted:#b7afa5;
+  --gold:#ae8753; --gold-strong:#c49a63; --btn-gold:#9a6929; --line:#332f28;
   --red:#d92036; --green:#5fa97c; --green-light:#a9cdb4; --amber:#e0a24d;
-  --radius:10px; --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 34px rgba(0,0,0,.35);
+  --radius:0; --shadow:none;
   --serif:"pt-serif-pro-extended","PT Serif",Georgia,serif;
   --sans:"Asap","Helvetica Neue",Helvetica,Arial,sans-serif;
 }
 *{box-sizing:border-box}
 html{background:var(--bg)}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:18px;line-height:1.55;overflow-x:hidden}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:20px;line-height:1.5;letter-spacing:.2px;overflow-x:hidden}
 html.embedded,body.embedded{overflow:hidden}
 .wrap{width:100%;max-width:none;margin:0 auto;padding:38px clamp(24px,3.8vw,64px) 72px}
 
 /* ---------- header (full-width nad oboma stĺpcami) ---------- */
 header{border-bottom:1px solid var(--line);padding-bottom:24px;margin-bottom:30px}
-h1{font-family:var(--serif);font-weight:600;color:var(--gold);font-size:clamp(40px,4.2vw,62px);line-height:1.05;margin:0 0 12px;letter-spacing:.01em;text-wrap:balance}
-.claim{color:var(--muted);margin:0;font-size:clamp(18px,1.55vw,22px);font-family:"Lora",var(--serif);font-style:italic;max-width:none}
+h1{font-family:var(--serif);font-weight:600;color:var(--gold);font-size:clamp(38px,3.6vw,52px);line-height:1.1;margin:0 0 12px;letter-spacing:normal;text-wrap:balance}
+.claim{color:var(--muted);margin:0;font-size:clamp(18px,1.55vw,22px);font-family:"Lora",var(--serif);font-style:normal;max-width:none}
 
 /* ---------- layout ---------- */
 .grid{display:grid;grid-template-columns:minmax(430px,34%) minmax(0,1fr);gap:30px;align-items:start}
@@ -36,30 +36,30 @@ h1{font-family:var(--serif);font-weight:600;color:var(--gold);font-size:clamp(40
 .q-label{font-weight:700;font-size:15px;margin:0 0 12px;display:block;letter-spacing:.045em;text-transform:uppercase;color:var(--gold);white-space:nowrap}
 .pills{display:flex;flex-wrap:nowrap;gap:10px}
 .pills .pill{flex:1 1 0;text-align:center}
-.pill{border:1px solid var(--line);background:var(--inset);border-radius:999px;padding:13px 18px;font:inherit;font-size:17px;cursor:pointer;color:var(--ink);transition:all .15s;white-space:nowrap}
-.pill.active{background:var(--gold);border-color:var(--gold);color:#1d1d1d;font-weight:600}
+.pill{border:1px solid var(--line);background:var(--inset);border-radius:0;padding:13px 18px;font:inherit;font-size:17px;cursor:pointer;color:var(--ink);transition:all .15s;white-space:nowrap}
+.pill.active{background:var(--gold);border-color:var(--gold);color:#1a1a1a;font-weight:600}
 #pills-goal .pill{white-space:normal;line-height:1.25}
 .fields{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .field{display:flex;flex-direction:column;gap:5px}
 .field.wide{grid-column:1/-1}
 .field label{font-size:15.5px;color:var(--muted)}
-.inputbox{display:flex;align-items:center;border:1px solid var(--line);border-radius:10px;background:var(--inset);overflow:hidden}
+.inputbox{display:flex;align-items:center;border:1px solid var(--line);border-radius:0;background:var(--inset);overflow:hidden}
 .inputbox:focus-within{border-color:var(--gold)}
 .inputbox input{border:0;outline:0;padding:14px 14px;width:100%;font:inherit;font-size:18px;font-variant-numeric:tabular-nums;background:transparent;color:var(--ink)}
 .inputbox .unit{padding:0 14px 0 4px;color:var(--muted);font-size:15.5px;white-space:nowrap}
-.switchrow{display:flex;align-items:center;gap:12px;padding:15px 16px;border:1px solid var(--line);border-radius:10px;cursor:pointer;user-select:none;background:var(--inset)}
+.switchrow{display:flex;align-items:center;gap:12px;padding:15px 16px;border:1px solid var(--line);border-radius:0;cursor:pointer;user-select:none;background:var(--inset)}
 .switchrow input[type=checkbox]{accent-color:var(--gold);width:20px;height:20px;margin:0;flex:none}
 .switchrow .t{font-size:16.5px;line-height:1.45}
-.switchrow .mini{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:7px;background:var(--surface);margin:0 4px;overflow:hidden}
+.switchrow .mini{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:0;background:var(--surface);margin:0 4px;overflow:hidden}
 .switchrow .mini input{border:0;outline:0;width:54px;padding:4px 2px 4px 9px;font:inherit;font-size:16px;background:transparent;color:var(--ink);font-variant-numeric:tabular-nums}
 .switchrow .mini span{padding-right:8px;color:var(--muted);font-size:14.5px;white-space:nowrap}
-details.adv{border:1px solid var(--line);border-radius:12px;padding:0;overflow:hidden;background:var(--inset)}
+details.adv{border:1px solid var(--line);border-radius:0;padding:0;overflow:hidden;background:var(--inset)}
 details.adv summary{cursor:pointer;padding:15px 17px;font-weight:700;font-size:15px;color:var(--gold);list-style:none;display:flex;justify-content:space-between;align-items:center;letter-spacing:.04em;text-transform:uppercase}
 details.adv summary::after{content:"+";font-size:18px;color:var(--muted)}
 details.adv[open] summary::after{content:"–"}
 details.adv .inner{padding:6px 17px 18px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .chips{display:flex;flex-direction:column;gap:10px;margin-top:12px}
-.chip{border:1px solid var(--line);background:var(--inset);border-radius:10px;padding:14px 18px;font-size:17px;cursor:pointer;font:inherit;color:var(--ink);text-align:left;width:100%}
+.chip{border:1px solid var(--line);background:var(--inset);border-radius:0;padding:14px 18px;font-size:17px;cursor:pointer;font:inherit;color:var(--ink);text-align:left;width:100%}
 .chip.active{border-color:var(--gold);color:var(--gold-strong);font-weight:600;background:#2e2a22}
 .chip small{display:block;font-size:14.5px;color:var(--muted);font-weight:400;margin-top:3px}
 .hint{font-size:15px;color:var(--muted);margin-top:10px}
@@ -76,14 +76,14 @@ details.adv .inner{padding:6px 17px 18px;display:grid;grid-template-columns:1fr 
 .sentence.second{font-size:clamp(20px,1.65vw,27px);color:#ddd8ce;margin-bottom:26px}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(176px,1fr));gap:12px;margin-bottom:24px}
 @media(min-width:1280px){.stats{grid-template-columns:repeat(4,minmax(0,1fr))}.stats .stat:nth-child(5):last-child{grid-column:span 2}}
-.stat{background:var(--inset);border:1px solid var(--line);border-radius:10px;padding:16px 17px}
+.stat{background:var(--inset);border:1px solid var(--line);border-radius:0;padding:16px 17px}
 .stat .k{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;line-height:1.35}
 .stat .v{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:5px;color:var(--ink);white-space:nowrap}
-.stat.hero{background:var(--btn-gold)}
-.stat.hero .k{color:#f0e2cc}
-.stat.hero .v{color:#fff;font-weight:700}
+.stat.hero{background:#ae8753}
+.stat.hero .k{color:#5c4720}
+.stat.hero .v{color:#1a1a1a;font-weight:700}
 .compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
-.cmp-card{background:var(--inset);border:1px solid var(--line);border-radius:12px;padding:17px}
+.cmp-card{background:var(--inset);border:1px solid var(--line);border-radius:0;padding:17px}
 .cmp-card.current{border-color:var(--gold)}
 .cmp-card h4{margin:0 0 4px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);font-weight:700;white-space:nowrap}
 .cmp-card .sub{font-size:13px;color:var(--muted);margin-bottom:12px}
@@ -91,35 +91,35 @@ details.adv .inner{padding:6px 17px 18px;display:grid;grid-template-columns:1fr 
 .cmp-card td{padding:4px 0;border-bottom:1px solid #2e2e2e}
 .cmp-card td:last-child{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
 .cmp-card tr:last-child td{border-bottom:0}
-.stress-panel{border:1px solid var(--line);border-radius:10px;background:var(--inset);padding:15px 16px;margin-bottom:12px}
+.stress-panel{border:1px solid var(--line);border-radius:0;background:var(--inset);padding:15px 16px;margin-bottom:12px}
 .stress-toggle{border:0;background:transparent;padding:0}
 .stress-controls{display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;margin-top:14px}
 .stress-controls .field{min-width:120px}
 .stress-controls .inputbox:focus-within{border-color:var(--amber)}
 .presets{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:14px;color:var(--muted)}
-.preset-box{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:6px 12px;font-size:13.5px;font-variant-numeric:tabular-nums;line-height:1.35}
+.preset-box{border:1px solid var(--line);background:var(--surface);border-radius:0;padding:6px 12px;font-size:13.5px;font-variant-numeric:tabular-nums;line-height:1.35}
 .preset-box b{color:var(--amber);font-weight:600;display:block}
 .preset-box small{color:var(--muted);font-size:12.5px;display:block}
 .stat .statsub{font-size:13px;color:var(--muted);margin-top:5px;line-height:1.35}
-.stat.hero .statsub{color:#f0e2cc}
+.stat.hero .statsub{color:#5c4720}
 .chip.stress{border-color:#6b4b26;color:var(--amber)}
 .chip.stress.active{background:#33291d;border-color:var(--amber);color:var(--amber);font-weight:600}
 canvas{width:100%;height:320px;display:block}
-.chartbox{border:1px solid var(--line);border-radius:10px;padding:14px 10px 6px;position:relative;margin-bottom:8px;background:var(--inset)}
+.chartbox{border:1px solid var(--line);border-radius:0;padding:14px 10px 6px;position:relative;margin-bottom:8px;background:var(--inset)}
 .chart-cap{font-size:14px;color:var(--muted);margin:0 2px 20px}
-.tip{position:absolute;pointer-events:none;background:var(--gold);color:#1d1d1d;font-size:12px;font-weight:600;padding:5px 9px;border-radius:7px;transform:translate(-50%,-120%);white-space:nowrap;display:none;font-variant-numeric:tabular-nums}
-.note{display:flex;gap:12px;align-items:flex-start;padding:16px 17px;border-radius:10px;font-size:16.5px;margin-bottom:10px;background:var(--inset);border:1px solid var(--line)}
+.tip{position:absolute;pointer-events:none;background:var(--gold);color:#1a1a1a;font-size:12px;font-weight:600;padding:5px 9px;border-radius:0;transform:translate(-50%,-120%);white-space:nowrap;display:none;font-variant-numeric:tabular-nums}
+.note{display:flex;gap:12px;align-items:flex-start;padding:16px 17px;border-radius:0;font-size:16.5px;margin-bottom:10px;background:var(--inset);border:1px solid var(--line)}
 .note b{color:var(--gold-strong)}
 .note.legacy{border-color:#3c5a48;background:#233129}
 .note.legacy b{color:var(--green-light)}
 .note.stress{border-color:#6b4b26;background:#2c241a}
 .note.stress b{color:var(--amber)}
 .note.warn{background:var(--red);color:#fff;font-weight:600;border-color:var(--red)}
-.note .ic{font-family:var(--serif);font-style:italic;font-weight:700;font-size:16px;line-height:1.3;color:var(--gold)}
+.note .ic{font-family:var(--serif);font-style:normal;font-weight:700;font-size:16px;line-height:1.3;color:var(--gold)}
 .note.legacy .ic{color:var(--green-light)}
 .note.stress .ic{color:var(--amber);font-style:normal}
 .note.warn .ic{color:#fff}
-.pdf-gate{background:var(--inset);border:1px solid var(--line);border-radius:10px;padding:22px;margin-top:22px}
+.pdf-gate{background:var(--inset);border:1px solid var(--line);border-radius:0;padding:22px;margin-top:22px}
 .gate-h{font-family:var(--serif);font-weight:600;color:var(--gold-strong);font-size:23px;margin:0 0 12px}
 .gate-note{font-size:15.5px;color:var(--muted);margin:14px 0 0;line-height:1.5}
 .gate-label{font-size:16px;color:var(--muted);display:block;margin:0 0 16px;line-height:1.55}
@@ -130,7 +130,7 @@ canvas{width:100%;height:320px;display:block}
 .gate-sec{font-size:16px;color:var(--muted);margin:20px 0 14px;line-height:1.55;border-top:1px solid var(--line);padding-top:18px}
 .gate-actions{display:flex;gap:10px;flex-wrap:wrap}
 .actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
-.btn{border:0;border-radius:0;padding:16px 30px;font-family:var(--serif);font-size:16px;font-weight:700;letter-spacing:1.4px;cursor:pointer;text-decoration:none;display:inline-block;white-space:nowrap}
+.btn{border:0;border-radius:0;padding:20px 42px;font-family:var(--serif);font-size:18px;font-weight:700;letter-spacing:1.8px;cursor:pointer;text-decoration:none;display:inline-block;white-space:nowrap}
 .gate-actions .btn,.pdf-gate .btn{max-width:100%;line-height:1.35;text-align:center}
 .btn[disabled]{opacity:.65;cursor:wait}
 .btn.primary{background:var(--btn-gold);color:#fff}
@@ -140,13 +140,18 @@ canvas{width:100%;height:320px;display:block}
 .assump{font-size:14px;color:var(--muted);margin-top:18px;line-height:1.6}
 .assump-full{display:none}
 /* ---------- režim súkromného výstupu (?vystup) ---------- */
-.vystup-head{font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);border:1px solid var(--line);background:var(--inset);border-radius:10px;padding:12px 15px;margin-bottom:18px}
+.vystup-head{font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);border:1px solid var(--line);background:var(--inset);border-radius:0;padding:12px 15px;margin-bottom:18px}
 body.vystup .panel.form,body.vystup .stress-panel,body.vystup .actions,body.vystup .pdf-gate{display:none}
 body.vystup .grid{grid-template-columns:1fr}
 .disclaimer{margin:30px auto 0;max-width:none;font-size:13px;color:#9d968c;line-height:1.6;border-top:1px solid var(--line);padding:16px 4px 0}
 .disclaimer b{color:#a29c93}
 :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
+
+/* ---------- zvýraznenie boxov (variant D: svetlejšia výplň + jemná zlatá linka) ---------- */
+.panel{background:#232323}
+.panel,.stat,.chip,.inputbox,.switchrow,.switchrow .mini,.cmp-card,.stress-panel,
+.note,.chartbox,.pdf-gate,details.adv,.preset-box,.pill,.vystup-head{border-color:rgba(174,135,83,.32)}
 
 /* ---------- print (svetlý dokument) ---------- */
 .print-head{display:none}
@@ -312,8 +317,6 @@ body.vystup .grid{grid-template-columns:1fr}
   <p class="sentence" id="r-s1"></p>
   <p class="sentence second" id="r-s2"></p>
 
-  <div class="compare" id="r-compare" hidden></div>
-
   <div class="stats" id="r-stats"></div>
 
   <div class="stress-panel" id="stress-tools">
@@ -367,7 +370,6 @@ body.vystup .grid{grid-template-columns:1fr}
 
   <div class="actions">
     <button type="button" class="btn primary" id="btn-pdf" onclick="window.print()">Stiahnuť prehľad v PDF</button>
-    <button type="button" class="btn ghost" id="btn-save">Uložiť ako scenár A</button>
   </div>
 
   <p class="assump" id="r-assump"></p>
@@ -394,7 +396,7 @@ const num = el => { const v = parseFloat(String(el.value).replace(/\s/g,'').repl
 const pct = v => String(Math.round(v*10)/10).replace('.',',');
 
 let mode='accum', typ='docasna', fund='lump', goal='rent';
-let stressOn=false, savedScenario=null;
+let stressOn=false;
 
 /* ---- Profil web (verejný) vs. poradca (plná verzia) ----
    Rozhoduje doména, nie parameter — na hechtberger.com sa poradenské funkcie (poplatky,
@@ -672,7 +674,7 @@ function render(){
     $('r-s1').textContent='Pri týchto predpokladoch výpočet nevychádza.'; $('r-s2').textContent='';
     $('r-stats').innerHTML=''; $('r-assump').textContent=''; $('r-assump-full').textContent='';
     notes.innerHTML=`<div class="note warn"><span class="ic">!</span><span>${o.warn}</span></div>`;
-    drawChart(null); renderCompare(); return;
+    drawChart(null); return;
   }
 
   const mc=simulateMC(o);
@@ -777,24 +779,7 @@ function render(){
   $('r-assump-full').innerHTML=`${o.vyplatene?`Renta spolu vyplatená za sledované obdobie: ${fmtEur(o.vyplatene)}. `:''}Pásmo v grafe: 800 simulácií metódou historického bootstrapu na skutočných ročných výnosoch indexu MSCI World v EUR 1970–2025 (56 rokov, CAGR ${pct(MSCI_GEO*100)} %, ročná volatilita ${pct(MSCI_SD)} %; zdroj MSCI/curvo.eu). Scenár ${scen.name}: ${Math.round(scen.eq*100)} % akciová zložka + ${Math.round((1-scen.eq)*100)} % stabilná zložka ${pct(scen.stable)} % p.a.; re-centrované na zvolené zhodnotenie, volatilita portfólia ~${pct(o.volA)} % p.a. Mesačný výpočet, renta vyplácaná mesačne.`;
 
   drawChart({o,mc,stress});
-  renderCompare();
 }
-
-/* ---------------- porovnanie scenárov ---------------- */
-function renderCompare(){
-  const box=$('r-compare');
-  if(!savedScenario){ box.hidden=true; box.innerHTML=''; $('btn-save').textContent='Uložiť ako scenár A'; return; }
-  $('btn-save').textContent='Odstrániť scenár A';
-  const card=(title,typ,stats,cur)=>`<div class="cmp-card${cur?' current':''}"><h4>${title}</h4><div class="sub">${typ}</div><table>${
-    stats.map(s=>`<tr><td>${s.k}</td><td>${s.v}</td></tr>`).join('')}</table></div>`;
-  box.innerHTML=card('Scenár A',savedScenario.typ,savedScenario.stats,false)
-              + card('Aktuálny návrh',lastTyp,lastStats||[],true);
-  box.hidden=false;
-}
-$('btn-save').addEventListener('click',()=>{
-  savedScenario = savedScenario ? null : {typ:lastTyp, stats:(lastStats||[]).map(s=>({k:s.k,v:s.v}))};
-  renderCompare();
-});
 
 /* ---------------- graf ---------------- */
 let chartData=null;
@@ -891,7 +876,6 @@ function syncUI(){
   $('chart-cap').innerHTML = 'Zelené pásmo ukazuje 800 modelových výpočtov vývoja majetku. Simulácia používa Monte Carlo prístup s historickým bootstrapom: náhodne skladá priebehy z reálnych ročných výnosov <b>MSCI World</b> v EUR (1970–2025). Zobrazené rozpätie je medzi 10. a 90. percentilom výsledkov, bez najextrémnejších okrajových scenárov. Nejde o predpoveď budúcnosti, ale o ilustráciu citlivosti privátnej renty na poradie dobrých a zlých rokov.'
     + (stressOn ? ' Prerušovaná čiara je váš zadaný stres-test.' : '');
 
-  $('btn-save').style.display = PUBLIC ? 'none' : '';
   updateGate();
 }
 
