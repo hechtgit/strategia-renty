@@ -1014,9 +1014,15 @@ document.querySelectorAll('input').forEach(el=>el.addEventListener('input',()=>{
 }));
 $('print-date').textContent='Prehľad pripravený '+new Date().toLocaleDateString('sk-SK');
 
+function lockEmbeddedScroll(){
+  if(window.parent===window) return;
+  try{ history.scrollRestoration='manual'; }catch(err){}
+  if(window.scrollX!==0 || window.scrollY!==0) window.scrollTo(0,0);
+}
 function notifyEmbedHeight(){
   if(window.parent===window) return;
   requestAnimationFrame(()=>{
+    lockEmbeddedScroll();
     const wrap=document.querySelector('.wrap');
     const footer=document.querySelector('.disclaimer');
     const last=footer || wrap || document.body;
@@ -1028,10 +1034,13 @@ function notifyEmbedHeight(){
 if(window.parent!==window){
   document.documentElement.classList.add('embedded');
   document.body.classList.add('embedded');
-  window.scrollTo(0,0);
+  lockEmbeddedScroll();
+  window.addEventListener('pageshow', lockEmbeddedScroll);
+  window.addEventListener('scroll', lockEmbeddedScroll, {passive:true});
   window.addEventListener('load', notifyEmbedHeight);
   window.addEventListener('resize', ()=>{ window.scrollTo(0,0); notifyEmbedHeight(); });
   if('ResizeObserver' in window) new ResizeObserver(notifyEmbedHeight).observe(document.body);
+  [0,100,500,1500,3000].forEach(ms=>setTimeout(()=>{ lockEmbeddedScroll(); notifyEmbedHeight(); },ms));
   setInterval(notifyEmbedHeight, 1500);
 }
 
