@@ -16,6 +16,7 @@
 *{box-sizing:border-box}
 html{background:var(--bg)}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:18px;line-height:1.55;overflow-x:hidden}
+html.embedded,body.embedded{overflow:hidden}
 .wrap{width:100%;max-width:none;margin:0 auto;padding:38px clamp(24px,3.8vw,64px) 72px}
 
 /* ---------- header (full-width nad oboma stĺpcami) ---------- */
@@ -1025,8 +1026,11 @@ function notifyEmbedHeight(){
   });
 }
 if(window.parent!==window){
+  document.documentElement.classList.add('embedded');
+  document.body.classList.add('embedded');
+  window.scrollTo(0,0);
   window.addEventListener('load', notifyEmbedHeight);
-  window.addEventListener('resize', notifyEmbedHeight);
+  window.addEventListener('resize', ()=>{ window.scrollTo(0,0); notifyEmbedHeight(); });
   if('ResizeObserver' in window) new ResizeObserver(notifyEmbedHeight).observe(document.body);
   setInterval(notifyEmbedHeight, 1500);
 }
