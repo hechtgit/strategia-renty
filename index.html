@@ -1016,12 +1016,11 @@ $('print-date').textContent='Prehľad pripravený '+new Date().toLocaleDateStrin
 function notifyEmbedHeight(){
   if(window.parent===window) return;
   requestAnimationFrame(()=>{
-    const h=Math.ceil(Math.max(
-      document.body.scrollHeight,
-      document.documentElement.scrollHeight,
-      document.body.offsetHeight,
-      document.documentElement.offsetHeight
-    ));
+    const wrap=document.querySelector('.wrap');
+    const footer=document.querySelector('.disclaimer');
+    const last=footer || wrap || document.body;
+    const rect=last.getBoundingClientRect();
+    const h=Math.ceil(rect.top + rect.height + window.scrollY);
     window.parent.postMessage({type:'ph-renta-height', height:h}, '*');
   });
 }
