@@ -17,7 +17,7 @@
 *{box-sizing:border-box}
 html{background:var(--bg)}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:20px;line-height:1.5;letter-spacing:.2px;overflow-x:hidden}
-html.embedded,body.embedded{overflow:hidden}
+html.embedded,body.embedded{overflow:hidden;background:transparent}
 .wrap{width:100%;max-width:none;margin:0 auto;padding:var(--frame-gap)}
 
 /* ---------- layout ---------- */
@@ -139,7 +139,7 @@ canvas{width:100%;height:320px;display:block}
 .vystup-head{font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);border:1px solid var(--line);background:var(--inset);border-radius:0;padding:12px 15px;margin-bottom:18px}
 body.vystup .panel.form,body.vystup .stress-panel,body.vystup .actions,body.vystup .pdf-gate{display:none}
 body.vystup .grid{grid-template-columns:1fr}
-.disclaimer{margin:30px auto 0;max-width:none;font-size:13px;color:#9d968c;line-height:1.6;border-top:1px solid var(--line);padding:16px 4px 0}
+.disclaimer{margin:30px auto 0;max-width:none;font-size:13px;color:#9d968c;line-height:1.6;border-bottom:1px solid var(--line);padding:0 4px 16px}
 .disclaimer b{color:#a29c93}
 :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
