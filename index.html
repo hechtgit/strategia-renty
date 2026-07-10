@@ -470,6 +470,7 @@ function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a
 const MSCI_EUR=[-0.0309,0.0571,0.1986,-0.2958,-0.3128,0.4209,0.0308,-0.0913,0.0183,0.0691,0.3893,0.1362,0.2457,0.4145,0.1974,0.1580,0.1863,-0.0413,0.3172,0.1835,-0.2929,0.2456,-0.0037,0.3428,-0.0219,0.1477,0.1649,0.2936,0.1760,0.4620,-0.0626,-0.1218,-0.3267,0.1052,0.0637,0.2641,0.0755,-0.0245,-0.3729,0.2558,0.2050,-0.0245,0.1359,0.2119,0.1920,0.1055,0.1104,0.0758,-0.0438,0.3012,0.0611,0.3198,-0.1308,0.1949,0.2622,0.0707];
 const MSCI_YEARS=[1970,2025];
 const MSCI_GEO=Math.pow(MSCI_EUR.reduce((a,r)=>a*(1+r),1),1/MSCI_EUR.length)-1; // CAGR ~8,3 %
+const MSCI_GEO_10Y=Math.pow(MSCI_EUR.slice(-10).reduce((a,r)=>a*(1+r),1),1/10)-1; // 10r CAGR (2016-2025) ~11,3 % — akvizičná verejná verzia
 const MSCI_MEAN=MSCI_EUR.reduce((a,b)=>a+b,0)/MSCI_EUR.length;
 const MSCI_SD=Math.sqrt(MSCI_EUR.reduce((a,r)=>a+(r-MSCI_MEAN)**2,0)/MSCI_EUR.length)*100; // ~19 %
 /* ---- Investičné scenáre = podiel akciovej zložky v portfóliu ----
@@ -481,7 +482,7 @@ const SCENARIOS={
   dyn: {name:'Dynamický',     eq:0.90, stable:2.75}
 };
 let scen=SCENARIOS.dyn;
-const scenReturn=s=>s.eq*MSCI_GEO*100+(1-s.eq)*s.stable;
+const scenReturn=s=>s.eq*MSCI_GEO_10Y*100+(1-s.eq)*s.stable;  // predvolené profily = 10r priemer (editovateľné v poradenskej)
 
 /* portfóliové ročné faktory: akcie = história MSCI, zvyšok stabilný; re-centrované tak,
    aby geometrický priemer = poradcom zvolený očakávaný výnos (disperzia a krízy zostávajú). */
@@ -827,13 +828,14 @@ function render(){
   else if(o.zost>0&&!(mode==='rentier'&&goal==='duration')) arr.push(`<div class="note legacy"><span class="ic">♦</span><span>Na konci vyplácania zostáva na účte <b>${fmtEur(o.zost)}</b> — rezerva alebo dedičstvo.</span></div>`);
   if(mode==='accum'&&fund==='both'&&o.p0Covers) arr.push(`<div class="note legacy"><span class="ic">✓</span><span>Jednorazový vklad na cieľ postačuje — pravidelná investícia už nie je potrebná.</span></div>`);
   if(o.servis) arr.push(`<div class="note"><span class="ic">✓</span><span><b>Servisný prepočet</b> — existujúci majetok vstupuje do výpočtu bez vstupného poplatku, klient ho uhradil pri pôvodnej investícii.</span></div>`);
+  if(PUBLIC) arr.push(`<div class="note"><span class="ic">i</span><span><b>Ako čítať tieto výnosy:</b> profily vychádzajú z priemerného ročného výnosu indexu MSCI World za poslednú dekádu (2016–2025). Minulé výnosy nie sú zárukou budúcich — toto obdobie nezahŕňa výraznejší prepad ako v roku 2008. Čísla slúžia na orientáciu, nie ako prísľub konkrétneho výnosu.</span></div>`);
   notes.innerHTML=arr.join('');
 
   $('r-assump').innerHTML = PUBLIC
-    ? `Scenár ${scen.name} · očakávané zhodnotenie ${pct(o.rinv)} % p.a. · výsledné sumy sú už po odpočítaní poplatkov · ${o.rast?`inflácia zohľadnená (${pct(o.infl)} % ročne)`:'bez zohľadnenia inflácie'} · dane z výnosov výpočet neuvažuje.`
+    ? `Scenár ${scen.name} · priemerný ročný výnos MSCI World za posledných 10 rokov (2016–2025) ${pct(o.rinv)} % p.a. · výsledné sumy sú už po odpočítaní poplatkov · ${o.rast?`inflácia zohľadnená (${pct(o.infl)} % ročne)`:'bez zohľadnenia inflácie'} · dane z výnosov výpočet neuvažuje.`
     : `Scenár ${scen.name} · zhodnotenie ${pct(o.rinv)} % p.a., v rente ${pct(o.rrent)} % p.a. · poplatky ${pct(o.feeIn)} % vstupný, ${pct(o.feeM)} % p.a. manažovanie${o.rast?` · inflácia ${pct(o.infl)} % ročne`:''}${o.servis?' · servisný prepočet':''}.`;
 
-  $('r-assump-full').innerHTML=`${o.vyplatene?`Renta spolu vyplatená za sledované obdobie: ${fmtEur(o.vyplatene)}. `:''}Pásmo v grafe: 800 simulácií metódou historického bootstrapu na skutočných ročných výnosoch indexu MSCI World v EUR 1970–2025 (56 rokov, CAGR ${pct(MSCI_GEO*100)} %, ročná volatilita ${pct(MSCI_SD)} %; zdroj MSCI/curvo.eu). Scenár ${scen.name}: ${Math.round(scen.eq*100)} % akciová zložka + ${Math.round((1-scen.eq)*100)} % stabilná zložka ${pct(scen.stable)} % p.a.; re-centrované na zvolené zhodnotenie, volatilita portfólia ~${pct(o.volA)} % p.a. Mesačný výpočet, renta vyplácaná mesačne.`;
+  $('r-assump-full').innerHTML=`${o.vyplatene?`Renta spolu vyplatená za sledované obdobie: ${fmtEur(o.vyplatene)}. `:''}Pásmo v grafe: 800 simulácií metódou historického bootstrapu na skutočných ročných výnosoch indexu MSCI World v EUR 1970–2025 (56 rokov, CAGR ${pct(MSCI_GEO*100)} %, ročná volatilita ${pct(MSCI_SD)} %; zdroj MSCI/curvo.eu). Očakávaný výnos profilu vychádza z priemerného výnosu za posledných 10 rokov (2016–2025, ${pct(MSCI_GEO_10Y*100)} %); rizikové pásmo používa celú 56-ročnú históriu vrátane kríz. Scenár ${scen.name}: ${Math.round(scen.eq*100)} % akciová zložka + ${Math.round((1-scen.eq)*100)} % stabilná zložka ${pct(scen.stable)} % p.a.; re-centrované na zvolené zhodnotenie, volatilita portfólia ~${pct(o.volA)} % p.a. Mesačný výpočet, renta vyplácaná mesačne.`;
 
   drawChart({o,mc,stress});
 }
@@ -1052,6 +1054,10 @@ document.querySelectorAll('#chips-scenar .chip').forEach(b=>b.addEventListener('
   $('in-rinv').value=pct(r); $('in-rrent').value=pct(r);
   render();
 }));
+/* profilové labely aj predvyplnené polia z JEDNÉHO zdroja (scenReturn) — žiadny hardcode, žiadny dvojzdroj */
+document.querySelectorAll('#chips-scenar .chip').forEach(b=>{ const s=SCENARIOS[b.dataset.sc];
+  b.querySelector('small').textContent=`${pct(Math.round(scenReturn(s)*10)/10)} % p.a. (~${Math.round(s.eq*100)} % akcií)`; });
+{ const r0=Math.round(scenReturn(scen)*10)/10; $('in-rinv').value=pct(r0); $('in-rrent').value=pct(r0); }
 $('in-stress').addEventListener('change',()=>{stressOn=$('in-stress').checked;syncUI();render()});
 CRISIS_REF.forEach(p=>{ const b=document.createElement('span'); b.className='preset-box';
   b.innerHTML=`<b>${p.year}: −${p.drop} %</b><small>${p.desc}</small>`; $('crisis-presets').appendChild(b); });
