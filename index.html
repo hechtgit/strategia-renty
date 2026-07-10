@@ -21,9 +21,10 @@ html.embedded,body.embedded{overflow:hidden}
 
 /* ---------- layout ---------- */
 .grid{display:grid;grid-template-columns:minmax(430px,34%) minmax(0,1fr);gap:30px;align-items:start}
+.grid > *{min-width:0}
 @media(min-width:1500px){.grid{grid-template-columns:minmax(500px,34%) minmax(0,1fr);gap:34px}}
 @media(max-width:1120px){.grid{grid-template-columns:1fr}}
-.panel{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:30px;border:1px solid var(--line)}
+.panel{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:30px;border:1px solid var(--line);min-width:0}
 
 /* ---------- form ---------- */
 .q{margin:0 0 28px}
@@ -58,11 +59,6 @@ details.adv .inner{padding:6px 17px 18px;display:grid;grid-template-columns:1fr 
 .chip.active{border-color:var(--gold);color:var(--gold-strong);font-weight:600;background:#2e2a22}
 .chip small{display:block;font-size:14.5px;color:var(--muted);font-weight:400;margin-top:3px}
 .hint{font-size:15px;color:var(--muted);margin-top:10px}
-@media(max-width:640px){
-  .pills{flex-direction:column}
-  .pills .pill{width:100%}
-  .field label,.q-label{white-space:normal}
-}
 
 /* ---------- result ---------- */
 .r-eyebrow{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:0 0 16px;white-space:nowrap}
@@ -147,6 +143,53 @@ body.vystup .grid{grid-template-columns:1fr}
 .panel{background:#232323}
 .panel,.stat,.chip,.inputbox,.switchrow,.switchrow .mini,.cmp-card,.stress-panel,
 .note,.chartbox,.pdf-gate,details.adv,.preset-box,.pill,.vystup-head{border-color:rgba(174,135,83,.32)}
+
+@media(max-width:640px){
+  body{font-size:17px;line-height:1.45}
+  .wrap{padding:0 14px 54px}
+  .grid{gap:16px}
+  .panel{padding:18px 14px}
+  .q{margin-bottom:22px}
+  .q-label{font-size:14px;letter-spacing:.035em}
+  .pills{flex-direction:column}
+  .pills .pill{width:100%;min-width:0}
+  .pill{padding:12px 14px;font-size:16px;line-height:1.25;white-space:normal;overflow-wrap:anywhere}
+  .fields{grid-template-columns:minmax(0,1fr);gap:12px}
+  .field{min-width:0}
+  .field label,.q-label{white-space:normal}
+  .field label{font-size:14.5px;line-height:1.3}
+  .inputbox{min-width:0}
+  .inputbox input{min-width:0;padding:13px 12px;font-size:17px}
+  .inputbox .unit{padding-right:12px;font-size:14.5px}
+  .switchrow{align-items:flex-start;padding:13px 12px}
+  .switchrow .t{font-size:15.5px;line-height:1.42;min-width:0}
+  .switchrow .mini{margin:4px 2px}
+  details.adv summary{padding:13px 14px;font-size:14px}
+  details.adv .inner{grid-template-columns:minmax(0,1fr);padding:4px 14px 16px}
+  .chip{padding:12px 14px;font-size:16px;line-height:1.25}
+  .chip small{font-size:13.5px}
+  .hint{font-size:14px;line-height:1.45}
+  .r-eyebrow{white-space:normal;line-height:1.4}
+  .sentence{font-size:26px;line-height:1.34}
+  .sentence.second{font-size:21px;line-height:1.38}
+  .sentence b{white-space:normal}
+  .stats{grid-template-columns:minmax(0,1fr);gap:10px}
+  .stat{padding:14px}
+  .stat .v{font-size:24px;white-space:normal;overflow-wrap:anywhere}
+  .compare{grid-template-columns:minmax(0,1fr)}
+  .cmp-card h4{white-space:normal}
+  .stress-panel{padding:13px 12px}
+  .stress-controls{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+  .stress-controls .field{min-width:0}
+  canvas{height:260px}
+  .note{padding:14px;font-size:15.5px;line-height:1.45}
+  .pdf-gate{padding:16px 14px}
+  .gate-fields{grid-template-columns:minmax(0,1fr)}
+  .gate-fields .inputbox:last-child{grid-column:auto}
+  .gate-actions,.actions{display:grid;grid-template-columns:minmax(0,1fr)}
+  .btn{width:100%;padding:17px 20px;font-size:16px;line-height:1.3;white-space:normal;text-align:center}
+  .assump{font-size:13.5px;overflow-wrap:anywhere}
+}
 
 /* ---------- print (svetlý dokument) ---------- */
 .print-head{display:none}
