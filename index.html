@@ -735,25 +735,29 @@ function render(){
 
   const vekStart=Math.round(o.vek+o.N);
   const rastTxt=o.rast?`, každý rok vyššiu o ${pct(o.infl)} %`:'';
-  const dobaTxt=o.nek?'— a majetok sa pritom nemusí nikdy minúť':keepShort(`počas ${o.T} rokov`);
+  const rastTxtNom=o.rast?`, každý rok vyššia o ${pct(o.infl)} %`:'';
+  const dobaTxt=keepShort(`počas ${o.T} rokov`);
+  const legacyTxt='Pri tomto variante sa renta vypláca z výnosov a kapitál sa nemusí minúť.';
 
   let s1='', s2='';
   if(mode==='accum'){
     const cielTxt = o.rast
       ? `rentu ${keepShort(`<b>${fmtEur(o.Rtoday)} mesačne</b>`)} v dnešných cenách ${keep(`(pri&nbsp;začiatku výplaty ${fmtEur(o.R)})`)}`
       : `rentu ${keepShort(`<b>${fmtEur(o.Rtoday)} mesačne</b>`)}`;
-    s1=`Na ${cielTxt} ${keepShort(`od&nbsp;vašich <b>${vekStart} rokov</b>`)} ${dobaTxt} je potrebný majetok približne <b>${fmtEur(o.capGross)}</b>.`;
-    if(o.N===0) s2=`Tento kapitál máte pripravený — výplata môže začať okamžite.`;
-    else if(o.M===0||fund==='lump') s2=`Máte potenciál ho vytvoriť ${keep('jednorazovou&nbsp;investíciou')} <b>${fmtEur(o.P0)}</b> ${keepShort(`na&nbsp;obdobie ${o.N} rokov`)}.`;
-    else if(o.P0>0) s2=`Máte potenciál ho vytvoriť vkladom <b>${fmtEur(o.P0)}</b> a ${keep('pravidelnou&nbsp;investíciou')} ${keepShort(`<b>${fmtEur(o.M)} mesačne</b>`)} ${keepShort(`počas ${o.N} rokov`)}.`;
-    else s2=`Máte potenciál ho vytvoriť ${keep('pravidelnou&nbsp;investíciou')} ${keepShort(`<b>${fmtEur(o.M)} mesačne</b>`)} ${keepShort(`počas ${o.N} rokov`)}.`;
+    s1=`Na ${cielTxt} ${keepShort(`od&nbsp;vašich <b>${vekStart} rokov</b>`)}${o.nek?'':` ${dobaTxt}`} je potrebný majetok približne <b>${fmtEur(o.capGross)}</b>.`;
+    let fundingTxt='';
+    if(o.N===0) fundingTxt=`Tento kapitál máte pripravený — výplata môže začať okamžite.`;
+    else if(o.M===0||fund==='lump') fundingTxt=`Máte potenciál ho vytvoriť ${keep('jednorazovou&nbsp;investíciou')} <b>${fmtEur(o.P0)}</b> ${keepShort(`na&nbsp;obdobie ${o.N} rokov`)}.`;
+    else if(o.P0>0) fundingTxt=`Máte potenciál ho vytvoriť vkladom <b>${fmtEur(o.P0)}</b> a ${keep('pravidelnou&nbsp;investíciou')} ${keepShort(`<b>${fmtEur(o.M)} mesačne</b>`)} ${keepShort(`počas ${o.N} rokov`)}.`;
+    else fundingTxt=`Máte potenciál ho vytvoriť ${keep('pravidelnou&nbsp;investíciou')} ${keepShort(`<b>${fmtEur(o.M)} mesačne</b>`)} ${keepShort(`počas ${o.N} rokov`)}.`;
+    s2=o.nek?`${legacyTxt} ${fundingTxt}`:fundingTxt;
   } else if(goal==='rent'){
     const odkladTxt=o.N>0?` má ${keepShort(`o&nbsp;${o.N} rokov`)} — ${keepShort(`od&nbsp;vašich <b>${vekStart} rokov</b>`)} —`:` má ${keepShort(`od&nbsp;vašich <b>${vekStart} rokov</b>`)}`;
-    s1=`Majetok <b>${fmtEur(o.C0)}</b>${odkladTxt} potenciál zabezpečiť rentu na úrovni ${keepShort(`<b>${fmtEur(o.R)} mesačne</b>`)}${rastTxt} ${dobaTxt}.`;
-    s2=o.nek?`Renta sa vypláca iba z výnosov, podstata majetku zostáva nedotknutá.`:'';
+    s1=`Majetok <b>${fmtEur(o.C0)}</b>${odkladTxt} potenciál zabezpečiť rentu na úrovni ${keepShort(`<b>${fmtEur(o.R)} mesačne</b>`)}${rastTxt}${o.nek?'':` ${dobaTxt}`}.`;
+    s2=o.nek?legacyTxt:'';
   } else {
     if(o.forever){
-      s1=`Renta ${keepShort(`<b>${fmtEur(o.R)} mesačne</b>`)}${rastTxt} je pri týchto predpokladoch plne krytá výnosmi majetku <b>${fmtEur(o.C0)}</b>.`;
+      s1=`Renta ${keepShort(`<b>${fmtEur(o.R)} mesačne</b>`)}${rastTxtNom}${o.rast?',':''} je pri týchto predpokladoch plne krytá výnosmi majetku <b>${fmtEur(o.C0)}</b>.`;
       s2=`Majetok sa pri nej nemusí nikdy minúť.`;
     } else {
       const yrs=Math.floor(o.months/12), endAge=Math.round(o.vek+o.N+o.months/12);
