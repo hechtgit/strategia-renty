@@ -71,7 +71,6 @@ details.adv .inner{padding:6px 17px 18px;display:grid;grid-template-columns:1fr 
 .sentence .keep,.sentence .keep-short{white-space:nowrap}
 .sentence.second{font-size:clamp(20px,1.65vw,27px);color:#ddd8ce;margin-bottom:26px}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(176px,1fr));gap:12px;margin-bottom:24px}
-@media(min-width:1280px){.stats{grid-template-columns:repeat(4,minmax(0,1fr))}.stats .stat:nth-child(5):last-child{grid-column:span 2}}
 .stat{background:var(--inset);border:1px solid var(--line);border-radius:0;padding:16px 17px}
 .stat .k{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;line-height:1.35}
 .stat .v{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:5px;color:var(--ink);white-space:nowrap}
@@ -775,8 +774,6 @@ function render(){
 
   /* staty */
   const stats=[];
-  const endBal = o.nek||o.forever ? o.pay.path[o.pay.path.length-1] : (mode==='rentier'&&goal==='duration' ? 0 : o.zost);
-  const zisk = (o.vyplatene||0) + endBal - o.vlozene;
   if(mode==='rentier'&&goal==='duration'){
     if(o.forever) stats.push({k:'Výdrž majetku',v:'neobmedzená',hero:true});
     else stats.push({k:'Výdrž majetku',v:Math.floor(o.months/12)+' r '+(o.months%12)+' m',hero:true});
@@ -790,7 +787,6 @@ function render(){
     if(mode==='accum'&&o.M>0) stats.push({k:'Mesačná investícia',v:fmtEur(o.M)});
     if(mode==='accum'&&fund!=='lump') stats.push({k:o.N>0?`Spolu vložíte za ${o.N} rokov`:'Spolu vložíte',v:fmtEur(o.vlozene)});
   }
-  if(isFinite(zisk)&&(o.vyplatene||endBal)) stats.push({k:o.nek||o.forever?'Navyše po 30 rokoch':'Navyše oproti vkladom',v:fmtEur(zisk),sub:'vyplatené renty + majetok na konci, po odpočítaní vkladov'});
   if(!PUBLIC) stats.push({k:'Renta by mala vydržať do',v:vekIstoty,sub:'aj keby trhy sklamali — platí v 9 z 10 scenárov'});
   $('r-stats').innerHTML=stats.map(s=>`<div class="stat${s.hero?' hero':''}"><div class="k">${s.k}</div><div class="v">${s.v}</div>${s.sub?`<div class="statsub">${s.sub}</div>`:''}</div>`).join('');
   polishLineBreaks($('r-stats'));
