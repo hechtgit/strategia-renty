@@ -353,7 +353,7 @@ body.vystup .grid{grid-template-columns:1fr}
     <div class="cta">Konzultácia k vašej stratégii: <b>hechtberger.com/rezervacia</b></div>
   </div>
 
-  <div class="vystup-head" id="vystup-head" hidden>Výstup Stratégia privátnej renty · orientačný výpočet pripravený na základe vášho zadania</div>
+  <div class="vystup-head" id="vystup-head" hidden>Modelácia privátnej renty · orientačný výpočet pripravený na základe vášho zadania</div>
   <p class="r-eyebrow" id="r-typ"></p>
   <p class="sentence" id="r-s1"></p>
   <p class="sentence second" id="r-s2"></p>
@@ -382,23 +382,23 @@ body.vystup .grid{grid-template-columns:1fr}
   <div class="pdf-gate" id="pdf-gate" hidden>
     <div id="gate-intro">
       <button type="button" class="btn primary" id="gate-open">Zaslať modeláciu na e-mail</button>
-      <p class="gate-note">Výstup zhrnie váš scenár privátnej renty, hlavné čísla a predpoklady orientačného výpočtu.</p>
+      <p class="gate-note">Modelácia zhrnie váš scenár privátnej renty, hlavné čísla a predpoklady orientačného výpočtu.</p>
     </div>
     <div class="gate-form" id="gate-form" hidden>
       <h3 class="gate-h">Kam vám máme poslať odkaz?</h3>
-      <p class="gate-label" id="gate-form-text">Zadajte meno, priezvisko a email. Výstup si budete môcť otvoriť hneď po odoslaní.</p>
+      <p class="gate-label" id="gate-form-text">Zadajte meno, priezvisko a email. Modeláciu si budete môcť otvoriť hneď po odoslaní.</p>
       <div class="gate-fields">
         <div class="inputbox"><input type="text" id="gate-first" placeholder="Meno" autocomplete="given-name"></div>
         <div class="inputbox"><input type="text" id="gate-last" placeholder="Priezvisko" autocomplete="family-name"></div>
         <div class="inputbox"><input type="email" id="gate-email" placeholder="Email" autocomplete="email"></div>
       </div>
-      <button type="button" class="btn primary" id="gate-submit">Pokračovať k výstupu</button>
+      <button type="button" class="btn primary" id="gate-submit">Pokračovať k modelácii</button>
       <p class="gate-error" id="gate-error" hidden>Nepodarilo sa odoslať email. Skúste to prosím ešte raz.</p>
-      <p class="gate-consent-line">Vaše údaje použijeme na odoslanie výstupu a nadväzujúcu komunikáciu k téme Wealth managementu.</p>
+      <p class="gate-consent-line">Vaše údaje použijeme na odoslanie modelácie a nadväzujúcu komunikáciu k téme Wealth managementu.</p>
     </div>
     <div class="gate-done" id="gate-done" hidden>
-      <h3 class="gate-h">Výstup Stratégia privátnej renty je pripravený</h3>
-      <p class="gate-label" id="gate-done-text">Nižšie nájdete výstup k scenáru privátnej renty, ktorý ste si práve prepočítali.</p>
+      <h3 class="gate-h">Modelácia privátnej renty je pripravená</h3>
+      <p class="gate-label" id="gate-done-text">Nižšie nájdete modeláciu k scenáru privátnej renty, ktorý ste si práve prepočítali.</p>
       <div class="gate-actions">
         <a class="btn primary" id="gate-view" href="#" target="_blank" rel="noopener">Otvoriť modeláciu renty</a>
       </div>
@@ -939,8 +939,8 @@ function syncUI(){
   polishLineBreaks();
 }
 
-/* ---- Email-gate (verejný web): výstup k scenáru privátnej renty ----
-   Výstup dostane návštevník okamžite po úspešnom zápise kontaktu do Boldemu. */
+/* ---- Email-gate (verejný web): modelácia k scenáru privátnej renty ----
+   Modeláciu dostane návštevník okamžite po úspešnom zápise kontaktu do Boldemu. */
 const BOLDEM_FORMS_CONFIG_URL='https://front.boldem.cz/api/forms/get?uc=208268&wg=7c7d41e8-0a15-4317-9bb7-abebbc852fab&sc=0';
 const BOLDEM_FORM_GUID='dd1af774-e0b8-4e6b-b309-ef3ce906a2ac';
 const BOLDEM_SCENARIO_COLUMN_ID='3659';
@@ -950,8 +950,8 @@ function updateGate(){
   $('pdf-gate').hidden = !PUBLIC || OUTPUT_MODE;
   $('btn-pdf').style.display = PUBLIC ? 'none' : '';
   if(EMAIL_DELIVERY_READY){
-    $('gate-form-text').textContent='Zadajte meno, priezvisko a email. Výstup si budete môcť otvoriť hneď po odoslaní a odkaz vám pošleme aj emailom.';
-    $('gate-done-text').textContent='Nižšie nájdete výstup k scenáru privátnej renty, ktorý ste si práve prepočítali. Rovnaký odkaz sme vám poslali aj emailom.';
+    $('gate-form-text').textContent='Zadajte meno, priezvisko a email. Modeláciu si budete môcť otvoriť hneď po odoslaní a odkaz vám pošleme aj emailom.';
+    $('gate-done-text').textContent='Nižšie nájdete modeláciu k scenáru privátnej renty, ktorý ste si práve prepočítali. Rovnaký odkaz sme vám poslali aj emailom.';
   }
 }
 function markBad(inputId, cond){ $(inputId).closest('.inputbox').style.borderColor = cond ? 'var(--red)' : ''; return cond; }
