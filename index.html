@@ -56,8 +56,9 @@ details.adv[open] summary::after{content:"–"}
 details.adv .inner{padding:6px 17px 18px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .chips{display:flex;flex-direction:column;gap:10px;margin-top:12px}
 .chip{border:1px solid var(--line);background:var(--inset);border-radius:0;padding:14px 18px;font-size:17px;cursor:pointer;font:inherit;color:var(--ink);text-align:left;width:100%}
-.chip.active{border-color:var(--gold);color:var(--gold-strong);font-weight:600;background:#2e2a22}
+.chip.active{background:var(--gold);border-color:var(--gold);color:#1a1a1a;font-weight:600}
 .chip small{display:block;font-size:14.5px;color:var(--muted);font-weight:400;margin-top:3px}
+.chip.active small{color:rgba(26,26,26,.78)}
 .hint{font-size:15px;color:var(--muted);margin-top:10px}
 
 /* ---------- result ---------- */
@@ -70,9 +71,9 @@ details.adv .inner{padding:6px 17px 18px;display:grid;grid-template-columns:1fr 
 .stat{background:var(--inset);border:1px solid var(--line);border-radius:0;padding:16px 17px}
 .stat .k{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;line-height:1.35}
 .stat .v{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:5px;color:var(--ink);white-space:nowrap}
-.stat.hero{background:#ae8753}
-.stat.hero .k{color:#5c4720}
-.stat.hero .v{color:#1a1a1a;font-weight:700}
+.stat.hero{background:#303030}
+.stat.hero .k{color:var(--muted)}
+.stat.hero .v{color:var(--ink);font-weight:700}
 .compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
 .cmp-card{background:var(--inset);border:1px solid var(--line);border-radius:0;padding:17px}
 .cmp-card.current{border-color:var(--gold)}
@@ -92,7 +93,7 @@ details.adv .inner{padding:6px 17px 18px;display:grid;grid-template-columns:1fr 
 .preset-box b{color:var(--amber);font-weight:600;display:block}
 .preset-box small{color:var(--muted);font-size:12.5px;display:block}
 .stat .statsub{font-size:13px;color:var(--muted);margin-top:5px;line-height:1.35}
-.stat.hero .statsub{color:#5c4720}
+.stat.hero .statsub{color:var(--muted)}
 .chip.stress{border-color:#6b4b26;color:var(--amber)}
 .chip.stress.active{background:#33291d;border-color:var(--amber);color:var(--amber);font-weight:600}
 canvas{width:100%;height:320px;display:block}
@@ -208,7 +209,7 @@ html.embedded .wrap,body.embedded .wrap{padding-top:0}
   .r-eyebrow{color:#666}
   .stat{background:#f6f4f0;border-color:#e3ddd2}
   .stat .k{color:#777165}.stat .v{color:#1d1d1d}
-  .stat.hero{background:#ae8753}
+  .stat.hero{background:#ebe8e2}
   .cmp-card{background:#f6f4f0;border-color:#e3ddd2;color:#1d1d1d}
   .cmp-card h4{color:#8a6d3f}.cmp-card .sub{color:#777}
   .cmp-card td{border-color:#e3ddd2}
