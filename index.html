@@ -767,7 +767,7 @@ function render(){
     if(mode==='accum'&&o.M>0) stats.push({k:'Mesačná investícia',v:fmtEur(o.M)});
     if(mode==='accum'&&fund!=='lump') stats.push({k:o.N>0?`Spolu vložíte za ${o.N} rokov`:'Spolu vložíte',v:fmtEur(o.vlozene)});
   }
-  if(isFinite(zisk)&&(o.vyplatene||endBal)) stats.push({k:o.nek||o.forever?'Očakávaný zisk za 30 rokov':'Očakávaný zisk z investície',v:fmtEur(zisk),sub:'vyplatená renta + zostatok − vaše vklady'});
+  if(isFinite(zisk)&&(o.vyplatene||endBal)) stats.push({k:o.nek||o.forever?'Navyše po 30 rokoch':'Navyše oproti vkladom',v:fmtEur(zisk),sub:'vyplatené renty + majetok na konci, po odpočítaní vkladov'});
   if(!PUBLIC) stats.push({k:'Renta by mala vydržať do',v:vekIstoty,sub:'aj keby trhy sklamali — platí v 9 z 10 scenárov'});
   $('r-stats').innerHTML=stats.map(s=>`<div class="stat${s.hero?' hero':''}"><div class="k">${s.k}</div><div class="v">${s.v}</div>${s.sub?`<div class="statsub">${s.sub}</div>`:''}</div>`).join('');
   lastStats=stats; lastTyp=typLbl;
