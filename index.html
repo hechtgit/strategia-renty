@@ -9,6 +9,7 @@
   --bg:#1a1a1a; --surface:#242424; --inset:#2b2b2b; --ink:#ffffff; --muted:#b7afa5;
   --gold:#ae8753; --gold-strong:#c49a63; --btn-gold:#9a6929; --line:#332f28;
   --red:#d92036; --green:#5fa97c; --green-light:#a9cdb4; --amber:#e0a24d;
+  --frame-gap:clamp(24px,2.2vw,34px);
   --radius:0; --shadow:none;
   --serif:"pt-serif-pro-extended","PT Serif",Georgia,serif;
   --sans:"Asap","Helvetica Neue",Helvetica,Arial,sans-serif;
@@ -17,12 +18,12 @@
 html{background:var(--bg)}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:20px;line-height:1.5;letter-spacing:.2px;overflow-x:hidden}
 html.embedded,body.embedded{overflow:hidden}
-.wrap{width:100%;max-width:none;margin:0 auto;padding:72px clamp(24px,3.8vw,64px) 72px}
+.wrap{width:100%;max-width:none;margin:0 auto;padding:var(--frame-gap)}
 
 /* ---------- layout ---------- */
-.grid{display:grid;grid-template-columns:minmax(430px,34%) minmax(0,1fr);gap:30px;align-items:start}
+.grid{display:grid;grid-template-columns:minmax(430px,34%) minmax(0,1fr);gap:var(--frame-gap);align-items:start}
 .grid > *{min-width:0}
-@media(min-width:1500px){.grid{grid-template-columns:minmax(500px,34%) minmax(0,1fr);gap:34px}}
+@media(min-width:1500px){.grid{grid-template-columns:minmax(500px,34%) minmax(0,1fr)}}
 @media(max-width:1120px){.grid{grid-template-columns:1fr}}
 .panel{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:30px;border:1px solid var(--line);min-width:0}
 
@@ -146,9 +147,9 @@ body.vystup .grid{grid-template-columns:1fr}
 .note,.chartbox,.pdf-gate,details.adv,.preset-box,.pill,.vystup-head{border-color:rgba(174,135,83,.32)}
 
 @media(max-width:640px){
+  :root{--frame-gap:16px}
   body{font-size:17px;line-height:1.45}
-  .wrap{padding:54px 14px 54px}
-  .grid{gap:16px}
+  .wrap{padding:var(--frame-gap)}
   .panel{padding:18px 14px}
   .q{margin-bottom:22px}
   .q-label{font-size:14px;letter-spacing:.035em}
