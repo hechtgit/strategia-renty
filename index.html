@@ -745,7 +745,7 @@ function render(){
     const cielTxt = o.rast
       ? `rentu ${keepShort(`<b>${fmtEur(o.Rtoday)} mesačne</b>`)} v dnešných cenách ${keep(`(pri&nbsp;začiatku výplaty ${fmtEur(o.R)})`)}`
       : `rentu ${keepShort(`<b>${fmtEur(o.Rtoday)} mesačne</b>`)}`;
-    s1=`Na ${cielTxt} ${keepShort(`od&nbsp;vašich <b>${vekStart} rokov</b>`)}${o.nek?'':` ${dobaTxt}`} je potrebný majetok približne <b>${fmtEur(o.capGross)}</b>.`;
+    s1=`Na ${cielTxt} ${keepShort(`od&nbsp;vašich <b>${vekStart} rokov</b>`)}${o.nek?'':` ${dobaTxt}`} je potrebný kapitál približne <b>${fmtEur(o.capGross)}</b>.`;
     let fundingTxt='';
     if(o.N===0) fundingTxt=`Tento kapitál máte pripravený — výplata môže začať okamžite.`;
     else if(o.M===0||fund==='lump') fundingTxt=`Máte potenciál ho vytvoriť ${keep('jednorazovou&nbsp;investíciou')} <b>${fmtEur(o.P0)}</b> dnes, aby bol kapitál pripravený ${keepShort(`za&nbsp;${yearsText(o.N)}`)}.`;
@@ -783,7 +783,7 @@ function render(){
     if(!o.forever) stats.push({k:'Renta vyplácaná do veku',v:Math.round(o.vek+o.N+o.months/12)+' rokov'});
   } else {
     stats.push({k:'Očakávaná mesačná renta',v:fmtEur(o.R),hero:true});
-    stats.push({k:mode==='rentier'?'Hodnota vášho majetku':'Potrebný majetok na začiatku renty',v:fmtEur(o.capGross)});
+    stats.push({k:mode==='rentier'?'Hodnota vášho majetku':'Potrebný kapitál na začiatku výplaty',v:fmtEur(o.capGross)});
     if(mode==='accum'&&o.P0>0) stats.push({k:'Jednorazový vklad dnes',v:fmtEur(o.P0)});
     if(mode==='accum'&&o.M>0) stats.push({k:'Mesačná investícia',v:fmtEur(o.M)});
     if(mode==='accum'&&fund!=='lump') stats.push({k:o.N>0?`Spolu vložíte za ${o.N} rokov`:'Spolu vložíte',v:fmtEur(o.vlozene)});
@@ -801,7 +801,7 @@ function render(){
     if(stress.phase==='accum'){
       const intro=`<b>Stres-test:</b> prepad trhu&nbsp;o <b>${stress.dropPct} %</b> ${kdy} — počas budovania majetku.`;
       const rentTxt = stress.rentStressed!=null ? ` Ak by ste plán neupravili, dosiahnuteľná renta by klesla na približne <b>${fmtEur(stress.rentStressed)}</b> (namiesto ${fmtEur(o.R)}) — počas sporenia však máte čas to dorovnať vyššou investíciou alebo dlhším horizontom.` : '';
-      arr.push(`<div class="note stress"><span class="ic">⚡</span><span>${intro} Kríza počas sporenia je zvládnuteľná: majetok pri štarte renty by vyšiel ~<b>${fmtEur(stress.capStressed)}</b> namiesto ${fmtEur(stress.capBase)}.${rentTxt} Prepad počas budovania bolí oveľa menej než na začiatku výplaty — a pravidelná investícia medzitým nakupuje lacnejšie.</span></div>`);
+      arr.push(`<div class="note stress"><span class="ic">⚡</span><span>${intro} Kríza počas sporenia je zvládnuteľná: kapitál pri začiatku výplaty by vyšiel ~<b>${fmtEur(stress.capStressed)}</b> namiesto ${fmtEur(stress.capBase)}.${rentTxt} Prepad počas budovania bolí oveľa menej než na začiatku výplaty — a pravidelná investícia medzitým nakupuje lacnejšie.</span></div>`);
     } else {
       const intro=`<b>Stres-test:</b> prepad trhu&nbsp;o <b>${stress.dropPct} %</b> ${kdy} — počas výplaty renty.`;
       if(o.nek){
