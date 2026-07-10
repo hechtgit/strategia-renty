@@ -801,8 +801,8 @@ function render(){
       }
     }
   }
-  if(o.rast&&o.N>0&&mode==='accum') arr.push(`<div class="note"><span class="ic">€</span><span>Renta je zadaná v dnešných cenách. Inflácia ${pct(o.infl)} % sa zohľadňuje už počas budovania majetku — pri začiatku výplaty o ${o.N} rokov bude renta <b>${fmtEur(o.R)}</b> a ďalej rastie každý rok.</span></div>`);
-  if(o.rast&&mode==='rentier'&&goal==='rent'&&o.N>0) arr.push(`<div class="note"><span class="ic">€</span><span>Renta ${fmtEur(o.R)} o ${o.N} rokov zodpovedá dnešnej kúpnej sile <b>${fmtEur(o.R/Math.pow(1+o.infl/100,o.N))}</b>.</span></div>`);
+  if(o.rast&&o.N>0&&mode==='accum') arr.push(`<div class="note"><span>Renta je zadaná v dnešných cenách. Inflácia ${pct(o.infl)} % sa zohľadňuje už počas budovania majetku — pri začiatku výplaty o ${o.N} rokov bude renta <b>${fmtEur(o.R)}</b> a ďalej rastie každý rok.</span></div>`);
+  if(o.rast&&mode==='rentier'&&goal==='rent'&&o.N>0) arr.push(`<div class="note"><span>Renta ${fmtEur(o.R)} o ${o.N} rokov zodpovedá dnešnej kúpnej sile <b>${fmtEur(o.R/Math.pow(1+o.infl/100,o.N))}</b>.</span></div>`);
   if(o.nek) arr.push(`<div class="note legacy"><span class="ic">∞</span><span>Renta sa vypláca iba z výnosov — kapitál <b>${fmtEur(o.capNet)}</b> zostáva zachovaný pre vás a ďalšiu generáciu.</span></div>`);
   else if(o.zost>0&&!(mode==='rentier'&&goal==='duration')) arr.push(`<div class="note legacy"><span class="ic">♦</span><span>Na konci vyplácania zostáva na účte <b>${fmtEur(o.zost)}</b> — rezerva alebo dedičstvo.</span></div>`);
   if(mode==='accum'&&fund==='both'&&o.p0Covers) arr.push(`<div class="note legacy"><span class="ic">✓</span><span>Jednorazový vklad na cieľ postačuje — pravidelná investícia už nie je potrebná.</span></div>`);
