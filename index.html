@@ -436,6 +436,7 @@ const $ = id => document.getElementById(id);
 const fmtEur = n => new Intl.NumberFormat('sk-SK',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(n);
 const num = el => { const v = parseFloat(String(el.value).replace(/\s/g,'').replace(',','.')); return isFinite(v)?v:0; };
 const pct = v => String(Math.round(v*10)/10).replace('.',',');
+const yearsText = n => `${n} ${n===1?'rok':(n>=2&&n<=4?'roky':'rokov')}`;
 const keep = html => `<span class="keep">${html}</span>`;
 const keepShort = html => `<span class="keep-short">${html}</span>`;
 function deOrphanPlain(el){
@@ -747,7 +748,7 @@ function render(){
     s1=`Na ${cielTxt} ${keepShort(`od&nbsp;vašich <b>${vekStart} rokov</b>`)}${o.nek?'':` ${dobaTxt}`} je potrebný majetok približne <b>${fmtEur(o.capGross)}</b>.`;
     let fundingTxt='';
     if(o.N===0) fundingTxt=`Tento kapitál máte pripravený — výplata môže začať okamžite.`;
-    else if(o.M===0||fund==='lump') fundingTxt=`Máte potenciál ho vytvoriť ${keep('jednorazovou&nbsp;investíciou')} <b>${fmtEur(o.P0)}</b> ${keepShort(`na&nbsp;obdobie ${o.N} rokov`)}.`;
+    else if(o.M===0||fund==='lump') fundingTxt=`Máte potenciál ho vytvoriť ${keep('jednorazovou&nbsp;investíciou')} <b>${fmtEur(o.P0)}</b> dnes, aby bol kapitál pripravený ${keepShort(`za&nbsp;${yearsText(o.N)}`)}.`;
     else if(o.P0>0) fundingTxt=`Máte potenciál ho vytvoriť vkladom <b>${fmtEur(o.P0)}</b> a ${keep('pravidelnou&nbsp;investíciou')} ${keepShort(`<b>${fmtEur(o.M)} mesačne</b>`)} ${keepShort(`počas ${o.N} rokov`)}.`;
     else fundingTxt=`Máte potenciál ho vytvoriť ${keep('pravidelnou&nbsp;investíciou')} ${keepShort(`<b>${fmtEur(o.M)} mesačne</b>`)} ${keepShort(`počas ${o.N} rokov`)}.`;
     s2=o.nek?`${legacyTxt} ${fundingTxt}`:fundingTxt;
