@@ -17,12 +17,7 @@
 html{background:var(--bg)}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:20px;line-height:1.5;letter-spacing:.2px;overflow-x:hidden}
 html.embedded,body.embedded{overflow:hidden}
-.wrap{width:100%;max-width:none;margin:0 auto;padding:38px clamp(24px,3.8vw,64px) 72px}
-
-/* ---------- header (full-width nad oboma stĺpcami) ---------- */
-header{border-bottom:1px solid var(--line);padding-bottom:24px;margin-bottom:30px}
-h1{font-family:var(--serif);font-weight:600;color:var(--gold);font-size:clamp(38px,3.6vw,52px);line-height:1.1;margin:0 0 12px;letter-spacing:normal;text-wrap:balance}
-.claim{color:var(--muted);margin:0;font-size:clamp(18px,1.55vw,22px);font-family:"Lora",var(--serif);font-style:normal;max-width:none}
+.wrap{width:100%;max-width:none;margin:0 auto;padding:0 clamp(24px,3.8vw,64px) 72px}
 
 /* ---------- layout ---------- */
 .grid{display:grid;grid-template-columns:minmax(430px,34%) minmax(0,1fr);gap:30px;align-items:start}
@@ -141,7 +136,7 @@ canvas{width:100%;height:320px;display:block}
 .assump-full{display:none}
 /* ---------- režim súkromného výstupu (?vystup) ---------- */
 .vystup-head{font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);border:1px solid var(--line);background:var(--inset);border-radius:0;padding:12px 15px;margin-bottom:18px}
-body.vystup .panel.form,body.vystup .stress-panel,body.vystup .actions,body.vystup .pdf-gate,body.vystup .pub-hook{display:none}
+body.vystup .panel.form,body.vystup .stress-panel,body.vystup .actions,body.vystup .pdf-gate{display:none}
 body.vystup .grid{grid-template-columns:1fr}
 .disclaimer{margin:30px auto 0;max-width:none;font-size:13px;color:#9d968c;line-height:1.6;border-top:1px solid var(--line);padding:16px 4px 0}
 .disclaimer b{color:#a29c93}
@@ -159,7 +154,7 @@ body.vystup .grid{grid-template-columns:1fr}
   body{background:#fff;color:#1d1d1d}
   .wrap{padding:0;max-width:none}
   .grid{grid-template-columns:1fr}
-  .panel.form,.chips,.actions,.claim,.rule,header,.chartbox,.stress-panel,.chart-cap,.pdf-gate,.vystup-head,.vystup-foot{display:none}
+  .panel.form,.chips,.actions,.rule,.chartbox,.stress-panel,.chart-cap,.pdf-gate,.vystup-head,.vystup-foot{display:none}
   .panel.result{box-shadow:none;border:0;padding:0;background:#fff}
   .sentence{color:#1d1d1d}
   .sentence.second{color:#333}
@@ -189,16 +184,9 @@ body.vystup .grid{grid-template-columns:1fr}
   .print-head .sub{color:#8a6d3f;font-size:13px;font-style:italic;font-family:var(--serif)}
   .print-head .cta{margin-top:10px;font-size:12px;color:#333}
 }
-.pub-hook{padding:16px 18px;margin-top:16px;border-radius:0;font-size:16.5px;line-height:1.55;color:#fff;background:var(--inset);border:1px solid rgba(174,135,83,.5)}
-.pub-hook b{color:var(--gold)}
 </style>
 
 <div class="wrap" id="top">
-<header>
-  <h1>Stratégia privátnej renty</h1>
-  <p class="claim">Nielen výška renty. Rozhoduje, aký kapitál ju má financovať, ako dlho má vydržať a s akou rezervou.</p>
-</header>
-
 <div class="grid">
 
 <!-- ================= FORM ================= -->
@@ -339,8 +327,6 @@ body.vystup .grid{grid-template-columns:1fr}
   <p class="chart-cap" id="chart-cap">Zelené pásmo ukazuje 800 modelových výpočtov vývoja majetku. Simulácia používa Monte Carlo prístup s historickým bootstrapom: náhodne skladá priebehy z reálnych ročných výnosov <b>MSCI World</b> v EUR (1970–2025). Zobrazené rozpätie je medzi 10. a 90. percentilom výsledkov, bez najextrémnejších okrajových scenárov. Nejde o predpoveď budúcnosti, ale o ilustráciu citlivosti privátnej renty na poradie dobrých a zlých rokov.</p>
 
   <div id="r-notes"></div>
-
-  <p class="pub-hook" id="pub-hook" hidden>Ako by táto renta obstála v kríze ako v roku 2008, pri dlhšej inflácii či slabých rokoch hneď na začiatku výplaty — <b>práve to rozhoduje, či peniaze vydržia</b>. Namodelujeme to spolu na osobnej konzultácii, priamo na vašich číslach.</p>
 
   <div class="pdf-gate" id="pdf-gate" hidden>
     <div id="gate-intro">
@@ -988,7 +974,6 @@ if(PUBLIC){
   $('stress-tools').style.display='none';
   document.querySelector('.chartbox').style.display='none';
   $('chart-cap').style.display='none';
-  if(!OUTPUT_MODE) $('pub-hook').hidden=false;
 }
 document.querySelectorAll('#pills-mode .pill').forEach(b=>b.addEventListener('click',()=>{mode=b.dataset.mode;syncUI();render()}));
 document.querySelectorAll('#pills-typ .pill').forEach(b=>b.addEventListener('click',()=>{typ=b.dataset.typ;syncUI();render()}));
