@@ -31,6 +31,8 @@ html.embedded,body.embedded{overflow:hidden}
 .q{margin:0 0 28px}
 .q:last-child{margin-bottom:0}
 .q-label{font-weight:700;font-size:15px;margin:0 0 12px;display:block;letter-spacing:.045em;text-transform:uppercase;color:var(--gold);white-space:nowrap}
+.field label,.hint,.switchrow .t,.presets > span:first-child,.stat .k,.stat .statsub,.cmp-card h4,.note,.chart-cap,.assump,.assump-full,.disclaimer,.gate-label,.gate-note{text-wrap:pretty}
+.field label{text-wrap:balance}
 .pills{display:flex;flex-wrap:nowrap;gap:10px}
 .pills .pill{flex:1 1 0;text-align:center}
 .pill{border:1px solid var(--line);background:var(--inset);border-radius:0;padding:13px 18px;font:inherit;font-size:17px;cursor:pointer;color:var(--ink);transition:all .15s;white-space:nowrap}
@@ -66,6 +68,7 @@ details.adv .inner{padding:6px 17px 18px;display:grid;grid-template-columns:1fr 
 .r-eyebrow{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:0 0 16px;white-space:nowrap}
 .sentence{font-family:var(--serif);font-size:clamp(24px,2vw,34px);line-height:1.45;margin:0 0 10px;text-wrap:balance}
 .sentence b{color:var(--gold-strong);font-weight:600;white-space:nowrap}
+.sentence .keep,.sentence .keep-short{white-space:nowrap}
 .sentence.second{font-size:clamp(20px,1.65vw,27px);color:#ddd8ce;margin-bottom:26px}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(176px,1fr));gap:12px;margin-bottom:24px}
 @media(min-width:1280px){.stats{grid-template-columns:repeat(4,minmax(0,1fr))}.stats .stat:nth-child(5):last-child{grid-column:span 2}}
@@ -89,7 +92,8 @@ details.adv .inner{padding:6px 17px 18px;display:grid;grid-template-columns:1fr 
 .stress-controls{display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;margin-top:14px}
 .stress-controls .field{min-width:120px}
 .stress-controls .inputbox:focus-within{border-color:var(--amber)}
-.presets{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:14px;color:var(--muted)}
+.presets{flex:1 1 100%;display:grid;grid-template-columns:repeat(3,minmax(112px,max-content));gap:8px;align-items:start;font-size:14px;color:var(--muted)}
+.presets > span:first-child{grid-column:1/-1}
 .preset-box{border:1px solid var(--line);background:var(--surface);border-radius:0;padding:6px 12px;font-size:13.5px;font-variant-numeric:tabular-nums;line-height:1.35}
 .preset-box b{color:var(--amber);font-weight:600;display:block}
 .preset-box small{color:var(--muted);font-size:12.5px;display:block}
@@ -175,6 +179,8 @@ body.vystup .grid{grid-template-columns:1fr}
   .sentence{font-size:26px;line-height:1.34}
   .sentence.second{font-size:21px;line-height:1.38}
   .sentence b{white-space:normal}
+  .sentence .keep{white-space:normal}
+  .sentence .keep-short{white-space:nowrap}
   .stats{grid-template-columns:minmax(0,1fr);gap:10px}
   .stat{padding:14px}
   .stat .v{font-size:24px;white-space:normal;overflow-wrap:anywhere}
@@ -183,6 +189,7 @@ body.vystup .grid{grid-template-columns:1fr}
   .stress-panel{padding:13px 12px}
   .stress-controls{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
   .stress-controls .field{min-width:0}
+  .presets{grid-template-columns:minmax(0,1fr)}
   canvas{height:260px}
   .note{padding:14px;font-size:15.5px;line-height:1.45}
   .pdf-gate{padding:16px 14px}
@@ -250,7 +257,7 @@ body.vystup .grid{grid-template-columns:1fr}
     <div class="fields">
       <div class="field"><label for="in-vek">Váš vek</label>
         <div class="inputbox"><input id="in-vek" inputmode="decimal" value="50"><span class="unit">rokov</span></div></div>
-      <div class="field"><label for="in-odklad" id="lbl-odklad">Výplata renty sa má začať o</label>
+      <div class="field"><label for="in-odklad" id="lbl-odklad">Výplata renty sa má začať&nbsp;o</label>
         <div class="inputbox"><input id="in-odklad" inputmode="decimal" value="15"><span class="unit">rokov</span></div></div>
     </div>
     <p class="hint" id="odklad-hint" style="margin-top:6px"></p>
@@ -358,9 +365,9 @@ body.vystup .grid{grid-template-columns:1fr}
     <label class="switchrow stress-toggle"><input type="checkbox" id="in-stress">
       <span class="t"><b>Stres-test</b> — čo ak príde prepad trhu</span></label>
     <div class="stress-controls" id="stress-controls" hidden>
-      <div class="field"><label>Prepad trhu o</label>
+      <div class="field"><label>Prepad trhu&nbsp;o</label>
         <div class="inputbox"><input id="in-drop" inputmode="decimal" value="37"><span class="unit">%</span></div></div>
-      <div class="field"><label>Príde o</label>
+      <div class="field"><label>Príde&nbsp;o</label>
         <div class="inputbox"><input id="in-crisisyr" inputmode="decimal" value="1"><span class="unit">rokov od dnes</span></div></div>
       <div class="presets" id="crisis-presets"><span>Pre predstavu — roky, keď svetové akcie (MSCI World, EUR) skončili najhlbšie v mínuse:</span></div>
     </div>
@@ -429,6 +436,17 @@ const $ = id => document.getElementById(id);
 const fmtEur = n => new Intl.NumberFormat('sk-SK',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(n);
 const num = el => { const v = parseFloat(String(el.value).replace(/\s/g,'').replace(',','.')); return isFinite(v)?v:0; };
 const pct = v => String(Math.round(v*10)/10).replace('.',',');
+const keep = html => `<span class="keep">${html}</span>`;
+const keepShort = html => `<span class="keep-short">${html}</span>`;
+function deOrphanPlain(el){
+  if(!el || el.children.length) return;
+  const plain=el.textContent.replace(/\u00a0/g,' ').trim();
+  if(!plain) return;
+  el.textContent=plain.replace(/\s+(\S{1,4})$/u,'\u00a0$1');
+}
+function polishLineBreaks(root=document){
+  root.querySelectorAll('.field label,.q-label,.hint,.presets > span:first-child,.stat .k,.stat .statsub,.cmp-card h4,.gate-label,.gate-note').forEach(deOrphanPlain);
+}
 
 let mode='accum', typ='docasna', fund='lump', goal='rent';
 let stressOn=false;
@@ -717,30 +735,30 @@ function render(){
 
   const vekStart=Math.round(o.vek+o.N);
   const rastTxt=o.rast?`, každý rok vyššiu o ${pct(o.infl)} %`:'';
-  const dobaTxt=o.nek?'— a majetok sa pritom nemusí nikdy minúť':`počas ${o.T} rokov`;
+  const dobaTxt=o.nek?'— a majetok sa pritom nemusí nikdy minúť':keepShort(`počas ${o.T} rokov`);
 
   let s1='', s2='';
   if(mode==='accum'){
     const cielTxt = o.rast
-      ? `rentu <b>${fmtEur(o.Rtoday)} mesačne</b> v dnešných cenách (pri začiatku výplaty ${fmtEur(o.R)})`
-      : `rentu <b>${fmtEur(o.Rtoday)} mesačne</b>`;
-    s1=`Na ${cielTxt} od vašich <b>${vekStart} rokov</b> ${dobaTxt} je potrebný majetok približne <b>${fmtEur(o.capGross)}</b>.`;
+      ? `rentu ${keepShort(`<b>${fmtEur(o.Rtoday)} mesačne</b>`)} v dnešných cenách ${keep(`(pri&nbsp;začiatku výplaty ${fmtEur(o.R)})`)}`
+      : `rentu ${keepShort(`<b>${fmtEur(o.Rtoday)} mesačne</b>`)}`;
+    s1=`Na ${cielTxt} ${keepShort(`od&nbsp;vašich <b>${vekStart} rokov</b>`)} ${dobaTxt} je potrebný majetok približne <b>${fmtEur(o.capGross)}</b>.`;
     if(o.N===0) s2=`Tento kapitál máte pripravený — výplata môže začať okamžite.`;
-    else if(o.M===0||fund==='lump') s2=`Máte potenciál ho vytvoriť jednorazovou investíciou <b>${fmtEur(o.P0)}</b> na obdobie ${o.N} rokov.`;
-    else if(o.P0>0) s2=`Máte potenciál ho vytvoriť vkladom <b>${fmtEur(o.P0)}</b> a pravidelnou investíciou <b>${fmtEur(o.M)} mesačne</b> počas ${o.N} rokov.`;
-    else s2=`Máte potenciál ho vytvoriť pravidelnou investíciou <b>${fmtEur(o.M)} mesačne</b> počas ${o.N} rokov.`;
+    else if(o.M===0||fund==='lump') s2=`Máte potenciál ho vytvoriť ${keep('jednorazovou&nbsp;investíciou')} <b>${fmtEur(o.P0)}</b> ${keepShort(`na&nbsp;obdobie ${o.N} rokov`)}.`;
+    else if(o.P0>0) s2=`Máte potenciál ho vytvoriť vkladom <b>${fmtEur(o.P0)}</b> a ${keep('pravidelnou&nbsp;investíciou')} ${keepShort(`<b>${fmtEur(o.M)} mesačne</b>`)} ${keepShort(`počas ${o.N} rokov`)}.`;
+    else s2=`Máte potenciál ho vytvoriť ${keep('pravidelnou&nbsp;investíciou')} ${keepShort(`<b>${fmtEur(o.M)} mesačne</b>`)} ${keepShort(`počas ${o.N} rokov`)}.`;
   } else if(goal==='rent'){
-    const odkladTxt=o.N>0?` má o ${o.N} rokov — od vašich <b>${vekStart} rokov</b> —`:` má od vašich <b>${vekStart} rokov</b>`;
-    s1=`Majetok <b>${fmtEur(o.C0)}</b>${odkladTxt} potenciál zabezpečiť rentu na úrovni <b>${fmtEur(o.R)} mesačne</b>${rastTxt} ${dobaTxt}.`;
+    const odkladTxt=o.N>0?` má ${keepShort(`o&nbsp;${o.N} rokov`)} — ${keepShort(`od&nbsp;vašich <b>${vekStart} rokov</b>`)} —`:` má ${keepShort(`od&nbsp;vašich <b>${vekStart} rokov</b>`)}`;
+    s1=`Majetok <b>${fmtEur(o.C0)}</b>${odkladTxt} potenciál zabezpečiť rentu na úrovni ${keepShort(`<b>${fmtEur(o.R)} mesačne</b>`)}${rastTxt} ${dobaTxt}.`;
     s2=o.nek?`Renta sa vypláca iba z výnosov, podstata majetku zostáva nedotknutá.`:'';
   } else {
     if(o.forever){
-      s1=`Renta <b>${fmtEur(o.R)} mesačne</b>${rastTxt} je pri týchto predpokladoch plne krytá výnosmi majetku <b>${fmtEur(o.C0)}</b>.`;
+      s1=`Renta ${keepShort(`<b>${fmtEur(o.R)} mesačne</b>`)}${rastTxt} je pri týchto predpokladoch plne krytá výnosmi majetku <b>${fmtEur(o.C0)}</b>.`;
       s2=`Majetok sa pri nej nemusí nikdy minúť.`;
     } else {
       const yrs=Math.floor(o.months/12), endAge=Math.round(o.vek+o.N+o.months/12);
-      s1=`Majetok <b>${fmtEur(o.C0)}</b> má pri rente <b>${fmtEur(o.Rtoday)} mesačne</b>${o.rast?(o.N>0?' (v dnešných cenách, indexovanej infláciou)':' (rastúcej s infláciou)'):''} potenciál vydržať približne <b>${yrs} rokov</b>.`;
-      s2=`Výplata by trvala do vašich <b>${endAge} rokov</b>.`;
+      s1=`Majetok <b>${fmtEur(o.C0)}</b> má pri rente ${keepShort(`<b>${fmtEur(o.Rtoday)} mesačne</b>`)}${o.rast?(o.N>0?' (v dnešných cenách, indexovanej infláciou)':' (rastúcej s infláciou)'):''} potenciál vydržať približne <b>${yrs} rokov</b>.`;
+      s2=`Výplata by trvala ${keepShort(`do&nbsp;vašich <b>${endAge} rokov</b>`)}.`;
     }
   }
   $('r-s1').innerHTML=s1; $('r-s2').innerHTML=s2;
@@ -770,19 +788,20 @@ function render(){
   if(isFinite(zisk)&&(o.vyplatene||endBal)) stats.push({k:o.nek||o.forever?'Navyše po 30 rokoch':'Navyše oproti vkladom',v:fmtEur(zisk),sub:'vyplatené renty + majetok na konci, po odpočítaní vkladov'});
   if(!PUBLIC) stats.push({k:'Renta by mala vydržať do',v:vekIstoty,sub:'aj keby trhy sklamali — platí v 9 z 10 scenárov'});
   $('r-stats').innerHTML=stats.map(s=>`<div class="stat${s.hero?' hero':''}"><div class="k">${s.k}</div><div class="v">${s.v}</div>${s.sub?`<div class="statsub">${s.sub}</div>`:''}</div>`).join('');
+  polishLineBreaks($('r-stats'));
   lastStats=stats; lastTyp=typLbl;
 
   /* poznámky */
   const arr=[];
   if(stress){
     const rok = n=> n===1?'rok':(n>=2&&n<=4?'roky':'rokov');
-    const kdy = stress.yr===0 ? 'hneď v prvom roku' : `o ${stress.yr} ${rok(stress.yr)} od dnes`;
+    const kdy = stress.yr===0 ? 'hneď v prvom roku' : `o&nbsp;${stress.yr} ${rok(stress.yr)} od dnes`;
     if(stress.phase==='accum'){
-      const intro=`<b>Stres-test:</b> prepad trhu o <b>${stress.dropPct} %</b> ${kdy} — počas budovania majetku.`;
+      const intro=`<b>Stres-test:</b> prepad trhu&nbsp;o <b>${stress.dropPct} %</b> ${kdy} — počas budovania majetku.`;
       const rentTxt = stress.rentStressed!=null ? ` Ak by ste plán neupravili, dosiahnuteľná renta by klesla na približne <b>${fmtEur(stress.rentStressed)}</b> (namiesto ${fmtEur(o.R)}) — počas sporenia však máte čas to dorovnať vyššou investíciou alebo dlhším horizontom.` : '';
       arr.push(`<div class="note stress"><span class="ic">⚡</span><span>${intro} Kríza počas sporenia je zvládnuteľná: majetok pri štarte renty by vyšiel ~<b>${fmtEur(stress.capStressed)}</b> namiesto ${fmtEur(stress.capBase)}.${rentTxt} Prepad počas budovania bolí oveľa menej než na začiatku výplaty — a pravidelná investícia medzitým nakupuje lacnejšie.</span></div>`);
     } else {
-      const intro=`<b>Stres-test:</b> prepad trhu o <b>${stress.dropPct} %</b> ${kdy} — počas výplaty renty.`;
+      const intro=`<b>Stres-test:</b> prepad trhu&nbsp;o <b>${stress.dropPct} %</b> ${kdy} — počas výplaty renty.`;
       if(o.nek){
         arr.push(`<div class="note stress"><span class="ic">⚡</span><span>${intro} Nekonečná renta by sa musela dočasne znížiť o približne <b>${Math.round(stress.cutPct)} %</b> (na ~${fmtEur(stress.newRent)}), aby podstata majetku zostala zachovaná. S návratom trhov sa renta opäť zvyšuje.</span></div>`);
       } else if(mode==='rentier'&&goal==='duration'){
@@ -801,8 +820,8 @@ function render(){
       }
     }
   }
-  if(o.rast&&o.N>0&&mode==='accum') arr.push(`<div class="note"><span>Renta je zadaná v dnešných cenách. Inflácia ${pct(o.infl)} % sa zohľadňuje už počas budovania majetku — pri začiatku výplaty o ${o.N} rokov bude renta <b>${fmtEur(o.R)}</b> a ďalej rastie každý rok.</span></div>`);
-  if(o.rast&&mode==='rentier'&&goal==='rent'&&o.N>0) arr.push(`<div class="note"><span>Renta ${fmtEur(o.R)} o ${o.N} rokov zodpovedá dnešnej kúpnej sile <b>${fmtEur(o.R/Math.pow(1+o.infl/100,o.N))}</b>.</span></div>`);
+  if(o.rast&&o.N>0&&mode==='accum') arr.push(`<div class="note"><span>Renta je zadaná v dnešných cenách. Inflácia ${pct(o.infl)} % sa zohľadňuje už počas budovania majetku — pri začiatku výplaty o&nbsp;${o.N} rokov bude renta <b>${fmtEur(o.R)}</b> a ďalej rastie každý rok.</span></div>`);
+  if(o.rast&&mode==='rentier'&&goal==='rent'&&o.N>0) arr.push(`<div class="note"><span>Renta ${fmtEur(o.R)} o&nbsp;${o.N} rokov zodpovedá dnešnej kúpnej sile <b>${fmtEur(o.R/Math.pow(1+o.infl/100,o.N))}</b>.</span></div>`);
   if(o.nek) arr.push(`<div class="note legacy"><span class="ic">∞</span><span>Renta sa vypláca iba z výnosov — kapitál <b>${fmtEur(o.capNet)}</b> zostáva zachovaný pre vás a ďalšiu generáciu.</span></div>`);
   else if(o.zost>0&&!(mode==='rentier'&&goal==='duration')) arr.push(`<div class="note legacy"><span class="ic">♦</span><span>Na konci vyplácania zostáva na účte <b>${fmtEur(o.zost)}</b> — rezerva alebo dedičstvo.</span></div>`);
   if(mode==='accum'&&fund==='both'&&o.p0Covers) arr.push(`<div class="note legacy"><span class="ic">✓</span><span>Jednorazový vklad na cieľ postačuje — pravidelná investícia už nie je potrebná.</span></div>`);
@@ -890,7 +909,7 @@ function syncUI(){
     : 'Chcem v budúcnosti poberať rentu — vypočítame, koľko treba investovať dnes.';
   $('q-majetok').hidden=!rentier;
   $('q-funding').style.display=rentier?'none':'';
-  $('lbl-odklad').textContent=rentier?'Výplata sa začne o':'Výplata renty sa má začať o';
+  $('lbl-odklad').innerHTML=rentier?'Výplata sa začne&nbsp;o':'Výplata renty sa má začať&nbsp;o';
   $('q-renta').style.display=(!rentier||goal==='duration')?'':'none';
   $('lbl-renta').textContent=rentier?'Vaša požadovaná renta':'Požadovaná renta';
   $('q-typ').style.display=(rentier&&goal==='duration')?'none':'';
@@ -914,6 +933,7 @@ function syncUI(){
     + (stressOn ? ' Prerušovaná čiara je váš zadaný stres-test.' : '');
 
   updateGate();
+  polishLineBreaks();
 }
 
 /* ---- Email-gate (verejný web): výstup k scenáru privátnej renty ----
