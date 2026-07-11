@@ -141,7 +141,12 @@ canvas{width:100%;height:320px;display:block}
 .assump{font-size:14px;color:var(--muted);margin-top:18px;line-height:1.6}
 .assump-full{display:none}
 /* ---------- režim súkromného výstupu (?vystup) ---------- */
-.vystup-head{font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);border:1px solid var(--line);background:var(--inset);border-radius:0;padding:12px 15px;margin-bottom:18px}
+.vystup-head{border:1px solid var(--line);background:var(--inset);border-radius:0;padding:22px 24px;margin-bottom:24px;color:var(--text)}
+.vystup-kicker{margin:0 0 8px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
+.vystup-head h3{font-family:var(--serif);font-size:26px;line-height:1.25;color:var(--gold-strong);margin:0 0 12px;font-weight:600}
+.vystup-head p{font-size:16px;line-height:1.6;color:var(--muted);max-width:760px;margin:0 0 14px}
+.vystup-head .gate-actions{margin-top:18px}
+.vystup-mail-note{display:block;font-size:14px;line-height:1.5;color:#9d968c;margin-top:12px}
 body.vystup .panel.form,body.vystup .stress-panel,body.vystup .actions,body.vystup .pdf-gate{display:none}
 body.vystup .grid{grid-template-columns:1fr}
 .disclaimer{margin:30px auto 0;max-width:none;font-size:13px;color:#9d968c;line-height:1.6;border-bottom:1px solid var(--line);padding:0 4px 16px}
@@ -358,7 +363,13 @@ body.vystup .grid{grid-template-columns:1fr}
     <div class="cta">Konzultácia k vašej stratégii: <b>hechtberger.com/rezervacia</b></div>
   </div>
 
-  <div class="vystup-head" id="vystup-head" hidden>Modelácia privátnej renty · orientačný výpočet pripravený na základe vášho zadania</div>
+  <div class="vystup-head" id="vystup-head" hidden>
+    <p class="vystup-kicker">Modelácia je pripravená</p>
+    <h3>Ďakujem, že ste si prepočítali scenár privátnej renty.</h3>
+    <p>Tento výstup berte ako prvý orientačný rámec. Ukazuje čísla, ale ešte nie celý kontext vášho majetku, likvidity, rizika a časového plánu.</p>
+    <div class="gate-actions"><a class="btn ghost" href="https://hechtberger.com/rezervacia" target="_blank" rel="noopener">Prejsť scenár na konzultácii</a></div>
+    <span class="vystup-mail-note">Odkaz na túto modeláciu sme poslali aj emailom, aby ste sa k nej vedeli vrátiť.</span>
+  </div>
   <p class="r-eyebrow" id="r-typ"></p>
   <p class="sentence" id="r-s1"></p>
   <p class="sentence second" id="r-s2"></p>
