@@ -398,7 +398,7 @@ body.vystup .grid{grid-template-columns:1fr}
         <div class="inputbox"><input type="email" id="gate-email" placeholder="Email" autocomplete="email"></div>
       </div>
       <button type="button" class="btn primary" id="gate-submit">Pokračovať k modelácii</button>
-      <p class="gate-error" id="gate-error" hidden>Nepodarilo sa odoslať email. Skúste to prosím ešte raz.</p>
+      <p class="gate-error" id="gate-error" hidden>Nepodarilo sa odoslať modeláciu emailom. Skúste to prosím ešte raz.</p>
       <p class="gate-consent-line">Vaše údaje použijeme na odoslanie modelácie a nadväzujúcu komunikáciu k téme Wealth managementu.</p>
     </div>
     <div class="gate-done" id="gate-done" hidden>
@@ -961,6 +961,7 @@ function syncUI(){
 const BOLDEM_FORMS_CONFIG_URL='https://front.boldem.cz/api/forms/get?uc=208268&wg=7c7d41e8-0a15-4317-9bb7-abebbc852fab&sc=0';
 const BOLDEM_FORM_GUID='dd1af774-e0b8-4e6b-b309-ef3ce906a2ac';
 const BOLDEM_SCENARIO_COLUMN_ID='3659';
+const BOLDEM_SCENARIO_FIELD='cc_'+BOLDEM_SCENARIO_COLUMN_ID;
 const EMAIL_DELIVERY_READY=true;
 let boldemFormPromise=null;
 function updateGate(){
@@ -968,7 +969,7 @@ function updateGate(){
   $('btn-pdf').style.display = PUBLIC ? 'none' : '';
   if(EMAIL_DELIVERY_READY){
     $('gate-form-text').textContent='Zadajte meno, priezvisko a email. Modeláciu si budete môcť otvoriť hneď po odoslaní a odkaz vám pošleme aj emailom.';
-    $('gate-done-text').textContent='Nižšie nájdete modeláciu k scenáru privátnej renty, ktorý ste si práve prepočítali. Rovnaký odkaz sme vám poslali aj emailom.';
+    $('gate-done-text').textContent='Nižšie nájdete modeláciu k scenáru privátnej renty, ktorý ste si práve prepočítali. Odkaz sme poslali aj emailom; ak by doručenie meškalo, otvoríte ho aj tlačidlom nižšie.';
   }
 }
 function markBad(inputId, cond){ $(inputId).closest('.inputbox').style.borderColor = cond ? 'var(--red)' : ''; return cond; }
@@ -1003,30 +1004,29 @@ async function loadBoldemForm(){
 }
 async function submitToBoldem({first,last,email,scenarioUrl,summary}){
   const form=await loadBoldemForm();
-  const basePayload={
+  const payload={
     main_mailing_list_guid:form.mainMailingListGuid,
     mailing_list_guids:form.mailingListGuids || [form.mainMailingListGuid],
     form_identifier:form.guid,
     name:first,
     surname:last,
     email,
-    source:'strategia-privatnej-renty'
-  };
-  const withScenario={
-    ...basePayload,
+    source:'strategia-privatnej-renty',
     scenar_url:scenarioUrl,
-    custom_columns:{cc_scenar_url:scenarioUrl,['cc_'+BOLDEM_SCENARIO_COLUMN_ID]:scenarioUrl},
+    [BOLDEM_SCENARIO_FIELD]:scenarioUrl,
     scenario_url:scenarioUrl,
     scenario_summary:summary
   };
-  const send=payload=>fetch(form.url,{
+  const res=await fetch(form.url,{
     method:'POST',
-    headers:{'Content-Type':'application/json'},
+    headers:{'Content-Type':'application/json','Accept':'application/json, text/plain, */*'},
     body:JSON.stringify(payload)
   });
-  let res=await send(withScenario);
-  if(!res.ok && res.status>=400 && res.status<500) res=await send(basePayload);
-  if(!res.ok) throw new Error('boldem-submit-failed');
+  const body=await res.text().catch(()=>'');
+  if(!res.ok) throw new Error('boldem-submit-failed:'+res.status+':'+body.slice(0,160));
+  if(/\b(false|error|failed|unable|invalid)\b|nepoda|chyba/i.test(body)){
+    throw new Error('boldem-submit-soft-failed:'+body.slice(0,160));
+  }
 }
 async function submitGate(){
   const first=$('gate-first').value.trim(), last=$('gate-last').value.trim(), email=$('gate-email').value.trim();
