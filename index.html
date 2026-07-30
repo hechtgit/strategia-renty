@@ -775,7 +775,7 @@ function render(){
   const rastTxt=o.rast?`, každý rok vyššiu o ${pct(o.infl)} %`:'';
   const rastTxtNom=o.rast?`, každý rok vyššia o ${pct(o.infl)} %`:'';
   const dobaTxt=keepShort(`počas ${o.T} rokov`);
-  const legacyTxt='Pri tomto variante sa renta vypláca z výnosov a kapitál sa nemusí minúť.';
+  const legacyTxt='Pri tomto variante sa renta vypláca z výnosov — v základnom modeli sa kapitál nevyčerpáva.';
 
   let s1='', s2='';
   if(mode==='accum'){
@@ -796,7 +796,7 @@ function render(){
   } else {
     if(o.forever){
       s1=`Renta ${keepShort(`<b>${fmtEur(o.R)} mesačne</b>`)}${rastTxtNom}${o.rast?',':''} je pri týchto predpokladoch plne krytá výnosmi majetku <b>${fmtEur(o.C0)}</b>.`;
-      s2=`Majetok sa pri nej nemusí nikdy minúť.`;
+      s2=`V základnom modeli sa kapitál nevyčerpáva.`;
     } else {
       const yrs=Math.floor(o.months/12), endAge=Math.round(o.vek+o.N+o.months/12);
       s1=`Majetok <b>${fmtEur(o.C0)}</b> má pri rente ${keepShort(`<b>${fmtEur(o.Rtoday)} mesačne</b>`)}${o.rast?(o.N>0?' (v dnešných cenách, indexovanej infláciou)':' (rastúcej s infláciou)'):''} potenciál vydržať približne <b>${yrs} rokov</b>.`;
@@ -831,10 +831,10 @@ function render(){
     if(mode==='accum'&&o.M>0) stats.push({k:'Mesačná investícia',v:fmtEur(o.M)});
     if(mode==='accum'&&fund!=='lump') stats.push({k:o.N>0?`Spolu vložíte za ${o.N} rokov`:'Spolu vložíte',v:fmtEur(o.vlozene)});
   }
-  stats.push({k:'Renta by mala vydržať',v:vekIstoty,
+  stats.push({k:'V modelovaných priebehoch vydrží',v:vekIstoty,
     sub:mcJeDolnaHranica
-      ? 'aj keby trhy sklamali — platí v 9 z 10 scenárov; model sleduje '+Math.round(o.payM/12)+' rokov výplaty'
-      : 'aj keby trhy sklamali — platí v 9 z 10 scenárov'});
+      ? 'tak dopadlo 9 z 10 priebehov na skutočných ročných výnosoch MSCI World (1970–2025); model sleduje '+Math.round(o.payM/12)+' rokov výplaty'
+      : 'tak dopadlo 9 z 10 priebehov na skutočných ročných výnosoch MSCI World (1970–2025)'});
   $('r-stats').innerHTML=stats.map(s=>`<div class="stat${s.hero?' hero':''}"><div class="k">${s.k}</div><div class="v">${s.v}</div>${s.sub?`<div class="statsub">${s.sub}</div>`:''}</div>`).join('');
   polishLineBreaks($('r-stats'));
   lastStats=stats; lastTyp=typLbl;
@@ -855,7 +855,7 @@ function render(){
       } else if(mode==='rentier'&&goal==='duration'){
         if(stress.dep!==null){
           const yrsS=Math.floor((stress.dep-o.Nm)/12), ageS=Math.round(o.vek+o.N+(stress.dep-o.Nm)/12);
-          const baseTxt=o.forever?'namiesto neobmedzenej výdrže':`namiesto ${Math.floor((o.months||0)/12)} rokov`;
+          const baseTxt=o.forever?'namiesto výdrže, pri ktorej sa kapitál v základnom modeli nevyčerpáva':`namiesto ${Math.floor((o.months||0)/12)} rokov`;
           arr.push(`<div class="note stress"><span class="ic">⚡</span><span>${intro} Majetok by vydržal približne <b>${yrsS} rokov</b> ${baseTxt} — do veku <b>${ageS} rokov</b>.</span></div>`);
         } else {
           arr.push(`<div class="note stress"><span class="ic">⚡</span><span>${intro} Majetok by krízu ustál — renta zostáva krytá počas celého sledovaného obdobia.</span></div>`);
