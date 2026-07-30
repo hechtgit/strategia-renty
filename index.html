@@ -531,21 +531,30 @@ const CRISIS_REF=[
   {year:1974, drop:31, desc:'Ropná kríza'}
 ];
 
-/* ---------------- finančný model (Swiss Life metodika) ----------------
-   Jednorazový vklad: ROČNÉ úročenie čistého p.a. výnosu. Pravidelná investícia
-   a renta: mesačný výpočet, sadzba (výnos − manažment)/12. Vklady × (1 − vstupný
-   poplatok). Renta: účet sa zhodnotí, potom vyplatí; rastie o infláciu/12 mesačne.
+/* ---------------- konverzia sadzieb — JEDINÉ MIESTO ----------------
+   Všetky vstupy "% p.a." sú EFEKTÍVNE ročné miery (profily = geometrický priemer
+   MSCI World). Na mesiac sa preto prevádzajú dvanástou odmocninou, nie delením
+   dvanástimi. Poplatok za manažovanie sa strháva mesačne z majetku.
+   Túto konverziu používa deterministický výpočet, stres-test aj Monte Carlo. */
+const MONTHS = 12;
+const mFactorPct    = (pa, feePA) => Math.pow(1 + pa/100, 1/MONTHS) * (1 - feePA/(100*MONTHS));
+const mFactorAnnual = (fac, feePA) => Math.pow(fac,      1/MONTHS) * (1 - feePA/(100*MONTHS));
+const mRate         = (pa, feePA) => mFactorPct(pa, feePA) - 1;
+const mInfl         = inflPA => Math.pow(1 + inflPA/100, 1/MONTHS) - 1;
+
+/* ---------------- finančný model ----------------
+   Jednorazový vklad aj pravidelná investícia rastú rovnakou mesačnou mierou
+   mRate(výnos, manažment). Vklady × (1 − vstupný poplatok). Renta: účet sa
+   zhodnotí, potom vyplatí; rastie o mInfl(inflácia) mesačne.
    Vo výplatnej fáze sa účtuje iba poplatok za manažovanie. */
 function accumPath(P0net, Mnet, months, r, feeM){
-  const rNet=(r-feeM)/100;
-  const fL=Math.pow(1+rNet,1/12);   // jednorazová zložka: ročné úročenie (po mesiacoch ekvivalentne)
-  const iM=rNet/12;                  // pravidelná zložka: mesačné úročenie
-  let balL=P0net, balM=0; const path=[balL];
-  for(let t=0;t<months;t++){ balL*=fL; balM=balM*(1+iM)+Mnet; path.push(balL+balM); }
+  const i=mRate(r,feeM);             // jedna miera pre vklad aj pravidelnú investíciu
+  let bal=P0net; const path=[bal];
+  for(let t=0;t<months;t++){ bal=bal*(1+i)+Mnet; path.push(bal); }
   return path;
 }
 function payoutPath(C, R0, months, rr, feeM, g){
-  const i=(rr-feeM)/1200, gm=g/1200;
+  const i=mRate(rr,feeM), gm=mInfl(g);
   let bal=C, R=R0; const path=[bal]; let paid=0;
   for(let t=0;t<months;t++){ bal=bal*(1+i)-R; paid+=R; R*=(1+gm); path.push(bal); }
   return {path, end:bal, paid};
@@ -566,7 +575,7 @@ function rentFromCapital(C, months, rr, feeM, g, endBal){
   return (lo+hi)/2;
 }
 function monthsUntilDepleted(C, R0, rr, feeM, g){
-  const i=(rr-feeM)/1200, gm=g/1200;
+  const i=mRate(rr,feeM), gm=mInfl(g);
   if(R0 <= C*(i-gm)) return Infinity;
   let bal=C, R=R0, t=0, paid=0; const path=[bal];
   while(bal>0 && t<1200){ bal=bal*(1+i)-R; paid+=Math.min(R,Math.max(0,bal+R)); R*=(1+gm); t++; path.push(Math.max(0,bal)); }
@@ -582,7 +591,7 @@ function compute(){
   const zost=num($('in-zost')), vek=num($('in-vek'));
   const T=Math.max(1,num($('in-doba'))), Tm=Math.round(T*12);
   const servis=$('in-servis').checked;
-  const i_r=(rrent-feeM)/1200, gm=g/1200, e=1-feeIn/100, eP0=servis?1:e;
+  const i_r=mRate(rrent,feeM), gm=mInfl(g), e=1-feeIn/100, eP0=servis?1:e;
 
   const o={N,Nm,g,rast,infl,rinv,rrent,feeIn,feeM,zost,vek,T,Tm,warn:null,goal,mode,servis,e};
 
@@ -604,13 +613,12 @@ function compute(){
       return o;
     }
     o.capGross = o.capNet;  // pri prechode do výplaty sa vstupný poplatok neúčtuje — platí sa len z nových vkladov
-    const rNetA=(rinv-feeM)/100;       // jednorazový vklad: ročné úročenie čistého výnosu
-    const iA=(rinv-feeM)/1200;         // pravidelná investícia: mesačné úročenie
+    const iA=mRate(rinv,feeM);         // jedna miera pre vklad aj pravidelnú investíciu
     if(Nm===0){ o.P0=o.capNet/eP0; o.M=0; }
-    else if(fund==='lump'){ o.P0=o.capNet/Math.pow(1+rNetA,N)/eP0; o.M=0; }
+    else if(fund==='lump'){ o.P0=o.capNet/Math.pow(1+iA,Nm)/eP0; o.M=0; }
     else{
       const P0=fund==='both'?num($('in-p0')):0;
-      const fromP0=P0*eP0*Math.pow(1+rNetA,N);
+      const fromP0=P0*eP0*Math.pow(1+iA,Nm);
       const annu = iA===0 ? Nm : (Math.pow(1+iA,Nm)-1)/iA;  // nulový čistý výnos → bez úročenia
       o.M=Math.max(0,(o.capNet-fromP0)/(annu*e)); o.P0=P0;
       o.p0Covers=fromP0>=o.capNet;
@@ -649,7 +657,7 @@ function simulateMC(o, runs=800){
   const facA=histFactors(o.rinv), facP=histFactors(o.rrent), nF=facA.length;
   const meanA=facA.reduce((a,b)=>a+b,0)/nF;
   o.volA=Math.sqrt(facA.reduce((a,f)=>a+(f-meanA)**2,0)/nF)*100; o.volP=o.volA;
-  const feeMo=o.feeM/1200, gm=o.g/1200, total=o.Nm+o.payM;
+  const gm=mInfl(o.g), total=o.Nm+o.payM;
   const nYearsA=Math.ceil(o.Nm/12), nYearsP=Math.ceil(o.payM/12);
   const byMonth=Array.from({length:total+1},()=>new Float64Array(runs));
   const depletion=new Float64Array(runs);
@@ -659,14 +667,14 @@ function simulateMC(o, runs=800){
     /* akumulácia — každý rok = náhodne vylosovaný skutočný rok MSCI World */
     let mi=0;
     for(let y=0;y<nYearsA;y++){
-      const mf=Math.pow(facA[Math.floor(rng()*nF)],1/12)*(1-feeMo);
+      const mf=mFactorAnnual(facA[Math.floor(rng()*nF)], o.feeM);
       for(let k=0;k<12 && mi<o.Nm;k++,mi++){ bal=bal*mf+o.MnetMC; byMonth[mi+1][r]=bal; }
     }
     bal*=o.transferF;
     /* výplata */
     let R=o.R, dep=Infinity, pm=0;
     for(let y=0;y<nYearsP;y++){
-      const mf=Math.pow(facP[Math.floor(rng()*nF)],1/12)*(1-feeMo);
+      const mf=mFactorAnnual(facP[Math.floor(rng()*nF)], o.feeM);
       for(let k=0;k<12 && pm<o.payM;k++,pm++){
         if(dep===Infinity){ bal=bal*mf-R; if(bal<=0){ dep=o.Nm+pm+1; bal=0; } else R*=(1+gm); }
         byMonth[o.Nm+pm+1][r]=Math.max(0,bal);
@@ -688,20 +696,19 @@ function simulateMC(o, runs=800){
    daného roka; kríza môže padnúť do akumulačnej aj výplatnej fázy. Po prepade sa
    vývoj vracia k zvolenému očakávanému zhodnoteniu (bez automatického V-odrazu). */
 function stressSim(o, dropPct, yrsFromNow){
-  const iP=(o.rrent-o.feeM)/1200, gm=o.g/1200;
-  const rNetA=(o.rinv-o.feeM)/100, fL=Math.pow(1+rNetA,1/12), iM=rNetA/12;
+  const iP=mRate(o.rrent,o.feeM), gm=mInfl(o.g);
+  const iA=mRate(o.rinv,o.feeM);
   const shock0=Math.max(0,Math.round(yrsFromNow*12));
   const sm=Math.pow(1-dropPct/100,1/12)-1;               // mesačný faktor rozložený na 12 mesiacov
   const inShock=t=> t>=shock0 && t<shock0+12;
   const phase = shock0 < o.Nm ? 'accum' : 'payout';
-  // akumulačná fáza — rovnaký dvojzložkový model ako accumPath (vklad ročne, pravidelná mesačne)
-  const accPath=[]; let balL=o.startMC, balM=0; accPath.push(balL);
+  // akumulačná fáza — rovnaký jednobilančný model ako accumPath
+  const accPath=[]; let bal=o.startMC; accPath.push(bal);
   for(let t=0;t<o.Nm;t++){
-    if(inShock(t)){ balL*=(1+sm); balM=balM*(1+sm)+o.MnetMC; }
-    else { balL*=fL; balM=balM*(1+iM)+o.MnetMC; }
-    accPath.push(balL+balM);
+    bal = bal*(1 + (inShock(t) ? sm : iA)) + o.MnetMC;
+    accPath.push(bal);
   }
-  const capStressed=balL+balM;
+  const capStressed=bal;
   // výplatná fáza (voliteľná úprava renty po kríze)
   const runPay=(startCap,rentFactor,adjMonth)=>{
     let b=startCap, R=o.R, dep=null; const path=[];
