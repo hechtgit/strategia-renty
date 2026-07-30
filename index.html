@@ -44,6 +44,8 @@ html.embedded,body.embedded{overflow:hidden;background:transparent}
 .field.wide{grid-column:1/-1}
 .field label{font-size:15.5px;color:var(--muted)}
 .inputbox{display:flex;align-items:center;border:1px solid var(--line);border-radius:0;background:var(--inset);overflow:hidden}
+/* polia v dvojstĺpci: popis môže mať jeden aj dva riadky — rámčeky držíme zarovnané dole */
+.field .inputbox{margin-top:auto}
 .inputbox:focus-within{border-color:var(--gold)}
 .inputbox input{border:0;outline:0;padding:14px 14px;width:100%;font:inherit;font-size:18px;font-variant-numeric:tabular-nums;background:transparent;color:var(--ink)}
 .inputbox .unit{padding:0 14px 0 4px;color:var(--muted);font-size:15.5px;white-space:nowrap}
@@ -53,6 +55,7 @@ html.embedded,body.embedded{overflow:hidden;background:transparent}
 .switchrow .mini{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:0;background:var(--surface);margin:0 4px;overflow:hidden}
 .switchrow .mini input{border:0;outline:0;width:54px;padding:4px 2px 4px 9px;font:inherit;font-size:16px;background:transparent;color:var(--ink);font-variant-numeric:tabular-nums}
 .switchrow .mini span{padding-right:8px;color:var(--muted);font-size:14.5px;white-space:nowrap}
+.switchrow .switchnote{display:block;margin-top:7px;color:var(--muted);font-size:14.5px}
 details.adv{border:1px solid var(--line);border-radius:0;padding:0;overflow:hidden;background:var(--inset)}
 details.adv summary{cursor:pointer;padding:15px 17px;font-weight:700;font-size:15px;color:var(--gold);list-style:none;display:flex;justify-content:space-between;align-items:center;letter-spacing:.04em;text-transform:uppercase}
 details.adv summary::after{content:"+";font-size:18px;color:var(--muted)}
@@ -307,7 +310,7 @@ body.vystup .grid{grid-template-columns:1fr}
 
   <div class="q">
     <label class="switchrow"><input type="checkbox" id="in-rast" checked>
-      <span class="t"><b>Zohľadniť infláciu</b> vo výške <span class="mini"><input id="in-infl" inputmode="decimal" value="3"><span>% ročne</span></span> — renta si udrží dnešnú kúpnu silu</span></label>
+      <span class="t"><b>Zohľadniť infláciu</b> vo výške <span class="mini"><input id="in-infl" inputmode="decimal" value="3"><span>% ročne</span></span><span class="switchnote">renta si udrží dnešnú kúpnu silu</span></span></label>
   </div>
 
   <div class="q" id="q-funding">
