@@ -699,7 +699,8 @@ function stressSim(o, dropPct, yrsFromNow){
   const iP=mRate(o.rrent,o.feeM), gm=mInfl(o.g);
   const iA=mRate(o.rinv,o.feeM);
   const shock0=Math.max(0,Math.round(yrsFromNow*12));
-  const sm=Math.pow(1-dropPct/100,1/12)-1;               // mesačný faktor rozložený na 12 mesiacov
+  const smGross=Math.pow(1-dropPct/100,1/12)-1;          // prepad rozložený na 12 mesiacov
+  const sm=(1+smGross)*(1-o.feeM/(100*MONTHS))-1;        // aj počas prepadu beží manažérsky poplatok
   const inShock=t=> t>=shock0 && t<shock0+12;
   const phase = shock0 < o.Nm ? 'accum' : 'payout';
   // akumulačná fáza — rovnaký jednobilančný model ako accumPath
@@ -804,15 +805,21 @@ function render(){
   }
   $('r-s1').innerHTML=s1; $('r-s2').innerHTML=s2;
 
-  /* vek istoty z Monte Carlo — jedna hodnota, vysvetlená v podtitulku karty (bez duplicitnej vety) */
-  const vekIstoty = mc.dep10===Infinity
-    ? ((o.nek||o.forever) ? 'bez obmedzenia' : Math.round(o.vek+o.N+o.payM/12)+' rokov')
-    : Math.round(o.vek+mc.dep10/12)+' rokov';
+  /* Vek istoty z Monte Carla. Simulácia beží len po o.payM mesiacov — pri nekonečnej
+     rente je to 30 rokov. Keď v tomto okne nedôjde k vyčerpaniu, nie je to dôkaz večnosti,
+     ale dolná hranica: preto "aspoň do". */
+  const mcHorizont = Math.round(o.vek+o.N+o.payM/12);
+  const mcDoBehla  = mc.dep10===Infinity;
+  const mcJeDolnaHranica = mcDoBehla && (o.nek||o.forever);
+  const vekIstoty = mcDoBehla
+    ? (mcJeDolnaHranica ? 'aspoň do '+mcHorizont+' rokov' : 'do '+mcHorizont+' rokov')
+    : 'do '+Math.round(o.vek+mc.dep10/12)+' rokov';
 
   /* staty */
   const stats=[];
   if(mode==='rentier'&&goal==='duration'){
-    if(o.forever) stats.push({k:'Výdrž majetku',v:'neobmedzená',hero:true});
+    if(o.forever) stats.push({k:'Výdrž majetku',v:'Pri pevnom výnose bez vyčerpania',hero:true,
+      sub:'Výpočet ráta s rovnakým ročným výnosom; skutočné trhy sa môžu vyvíjať inak.'});
     else stats.push({k:'Výdrž majetku',v:Math.floor(o.months/12)+' r '+(o.months%12)+' m',hero:true});
     stats.push({k:'Vaša mesačná renta',v:fmtEur(o.R)});
     stats.push({k:'Hodnota vášho majetku',v:fmtEur(o.C0)});
@@ -824,7 +831,10 @@ function render(){
     if(mode==='accum'&&o.M>0) stats.push({k:'Mesačná investícia',v:fmtEur(o.M)});
     if(mode==='accum'&&fund!=='lump') stats.push({k:o.N>0?`Spolu vložíte za ${o.N} rokov`:'Spolu vložíte',v:fmtEur(o.vlozene)});
   }
-  if(!PUBLIC) stats.push({k:'Renta by mala vydržať do',v:vekIstoty,sub:'aj keby trhy sklamali — platí v 9 z 10 scenárov'});
+  stats.push({k:'Renta by mala vydržať',v:vekIstoty,
+    sub:mcJeDolnaHranica
+      ? 'aj keby trhy sklamali — platí v 9 z 10 scenárov; model sleduje '+Math.round(o.payM/12)+' rokov výplaty'
+      : 'aj keby trhy sklamali — platí v 9 z 10 scenárov'});
   $('r-stats').innerHTML=stats.map(s=>`<div class="stat${s.hero?' hero':''}"><div class="k">${s.k}</div><div class="v">${s.v}</div>${s.sub?`<div class="statsub">${s.sub}</div>`:''}</div>`).join('');
   polishLineBreaks($('r-stats'));
   lastStats=stats; lastTyp=typLbl;
