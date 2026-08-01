@@ -792,6 +792,22 @@ function compute(){
 /* Modelované priebehy (Monte Carlo) sa v aplikácii nepočítajú ani nezobrazujú —
    konkrétny scenár sa na nich overuje až na osobnej konzultácii. */
 
+/* Popis úseku („Žijem z majetku · 25 rokov") leží na osi v tej istej výške ako
+   čísla vekovej stupnice a jeho šírka závisí od textu, takže sa fixnou medzerou
+   ošetriť nedá. Číslo, ktoré by padlo priamo do popisu, preto vynecháme — inak
+   sa cez text prekreslí a vyzerá to ako rozbitá diakritika. */
+function skryTickyPodPopismi(){
+  const popisy=[...document.querySelectorAll('.seg span')]
+    .filter(el=>el.textContent.trim()&&el.offsetParent!==null)
+    .map(el=>el.getBoundingClientRect())
+    .filter(r=>r.width>0);
+  document.querySelectorAll('.tick').forEach(t=>{
+    const r=t.getBoundingClientRect();
+    const koliduje=popisy.some(p=>r.left<p.right+8&&p.left-8<r.right);
+    t.style.visibility=koliduje?'hidden':'';
+  });
+}
+
 /* ===== os ===== */
 let AXMAX=110;
 const FA=40,FS=14;
@@ -931,6 +947,7 @@ function render(){
      +'Dane z výnosov výpočet nezohľadňuje. Výpočet prebieha na mesačnej báze.';
 
   layout(o,endEff,openEnd);
+  skryTickyPodPopismi();
 }
 
 /* ===== rozloženie ===== */
