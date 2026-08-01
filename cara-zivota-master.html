@@ -1145,6 +1145,34 @@ async function loadBoldemForm(){
   return boldemFormPromise;
 }
 
+/* Vyhodnotenie odpovede Boldemu.
+   Boldem vie odpovedať stavom 200 aj vtedy, keď kontakt odmietol, takže samotný
+   stav nestačí. Pravidlo je: klientovi nikdy nepovedať, že modelácia odišla, keď
+   neodišla. Preto sa hľadá výslovne záporný signál — holá hodnota false/0, záporný
+   príznak úspechu alebo textová chyba. Samotné slovo „false" v tele chybou nie je;
+   bežne sa objaví v poli typu {"error":false} a taká odpoveď je úspech. */
+function boldemOdmietol(body){
+  const t=(body||'').trim();
+  if(!t)return false;                         /* prázdne telo pri 2xx berieme ako úspech */
+  let json;
+  try{json=JSON.parse(t)}
+  catch(e){return /^(false|0)$/i.test(t)||/\b(error|failed|unable|invalid)\b|nepoda|chyba/i.test(t)}
+
+  if(json===false||json===0)return true;      /* holá odmietavá hodnota */
+  if(typeof json==='string')return /^(false|0|error|chyba)$/i.test(json.trim());
+  if(!json||typeof json!=='object')return false;
+
+  const ok=json.success??json.ok??json.result;
+  if(ok!==undefined&&(ok===false||ok===0||/^(false|0)$/i.test(String(ok))))return true;
+  if(json.error===true)return true;
+  if(typeof json.error==='string'&&json.error.trim())return true;
+  /* `message` je chyba len vtedy, keď odpoveď nenesie príznak úspechu a text
+     sám znie ako chyba — inak by sme z bežného {"message":"OK"} spravili zlyhanie */
+  if(ok===undefined&&typeof json.message==='string'
+     &&/\b(error|failed|unable|invalid)\b|nepoda|chyba/i.test(json.message))return true;
+  return false;
+}
+
 async function submitToBoldem({first,last,email,scenarioUrl,summary}){
   const form=await loadBoldemForm();
   const res=await fetch(form.url,{
@@ -1164,21 +1192,8 @@ async function submitToBoldem({first,last,email,scenarioUrl,summary}){
   });
   const body=await res.text().catch(()=>'');
   if(!res.ok)throw new Error('boldem-submit-failed:'+res.status+':'+body.slice(0,160));
-  /* Boldem vie odpovedať 200 aj pri odmietnutí, takže sa pozeráme aj do tela.
-     Ak je to JSON, riadime sa jeho vlastným príznakom; slovo „false" samo osebe
-     chybou nie je — bežne sa objaví v poli typu {"error":false} a takú odpoveď
-     sme predtým hlásili klientovi ako neúspech. */
-  let json=null;
-  try{json=JSON.parse(body)}catch(e){}
-  if(json&&typeof json==='object'){
-    const ok=json.success??json.ok??json.result;
-    if(ok===false)throw new Error('boldem-submit-rejected:'+body.slice(0,160));
-    const chyba=json.error??json.message;
-    if(typeof chyba==='string'&&chyba.trim())
-      throw new Error('boldem-submit-rejected:'+chyba.slice(0,160));
-  }else if(/\b(error|failed|unable|invalid)\b|nepoda|chyba/i.test(body)){
-    throw new Error('boldem-submit-soft-failed:'+body.slice(0,160));
-  }
+  if(boldemOdmietol(body))
+    throw new Error('boldem-submit-rejected:'+body.slice(0,160));
 }
 
 /* Krátke zhrnutie scenára pre CRM — rovnaké čísla, aké klient videl na obrazovke. */
