@@ -14,7 +14,7 @@
   "use strict";
 
   var A4 = { s: 210, v: 297 };          /* mm */
-  var OKRAJ = 18;
+  var OKRAJ = 16;
   var SIRKA = A4.s - 2 * OKRAJ;
 
   var ZLATA = [154, 105, 41];
@@ -45,10 +45,22 @@
     });
 
     var predpoklady = [];
-    document.querySelectorAll("details p").forEach(function (p) {
+    document.querySelectorAll(".blok p").forEach(function (p) {
       var t = text(p);
       if (t) predpoklady.push(t);
     });
+
+    var suhrn = null;
+    var sek = document.getElementById("suhrn");
+    if (sek && !sek.hidden) {
+      suhrn = {
+        nadpis: text(sek.querySelector("h2")),
+        polozky: Array.prototype.map.call(sek.querySelectorAll(".suhrn-polozka"), function (p) {
+          return [text(p.querySelector(".k")), text(p.querySelector(".v"))];
+        }),
+        pod: text(document.getElementById("suhrn-pod"))
+      };
+    }
 
     return {
       nadpis: text(document.querySelector("h1")),
@@ -56,7 +68,8 @@
       plan: text(document.querySelector(".section-head h2")),
       ciel: text(document.getElementById("ciel")),
       karty: karty,
-      predpokladyNadpis: text(document.querySelector("details summary")),
+      suhrn: suhrn,
+      predpokladyNadpis: text(document.querySelector(".blok h2")),
       predpoklady: predpoklady,
       vychodiskaNadpis: text(document.querySelector(".recap h3")),
       vychodiska: Array.prototype.map.call(document.querySelectorAll(".recap li"), text),
@@ -99,6 +112,16 @@
       }
     }
     function medzera(mm) { y += mm; }
+    /* Nadpis bez svojho textu na konci strany vyzerá ako chyba sadzby.
+       Odhadneme výšku nadpisu aj nasledujúceho odseku a zalomíme ich spolu. */
+    function nadpisSTelom(nadpis, telo, velN, velT) {
+      doc.setFont("Asap", "normal"); doc.setFontSize(velT);
+      var riadkov = doc.splitTextToSize(telo || "", SIRKA).length;
+      miesto(velN * 0.3528 * 1.22 + riadkov * velT * 0.3528 * 1.38 + 3);
+      odstavec(nadpis, velN, "bold", TMAVA, SIRKA, 1.22);
+      medzera(0.5);
+      if (telo) odstavec(telo, velT, "normal", SEDA, SIRKA, 1.38);
+    }
     function ciara() {
       miesto(6);
       doc.setDrawColor(LINKA[0], LINKA[1], LINKA[2]);
@@ -112,19 +135,19 @@
     medzera(1.5);
     odstavec(d.nadpis, 17, "bold", TMAVA, SIRKA, 1.2);
     medzera(1.5);
-    odstavec(d.uvod, 9, "normal", SEDA, SIRKA, 1.38);
-    medzera(3);
+    odstavec(d.uvod, 8.8, "normal", SEDA, SIRKA, 1.34);
+    medzera(2);
     ciara();
 
     /* ——— plán ——— */
     odstavec(d.plan, 12, "bold", TMAVA, SIRKA, 1.25);
     medzera(0.5);
     odstavec(d.ciel, 9, "normal", SEDA, SIRKA, 1.38);
-    medzera(3);
+    medzera(2);
 
     /* ——— míľniky ——— */
     d.karty.forEach(function (k) {
-      var vyskaBloku = 10.5 + k.riadky.length * 9 + (k.pod ? 5.5 : 0);
+      var vyskaBloku = 8 + k.riadky.length * 7.4 + (k.pod ? 4.6 : 0);
       miesto(vyskaBloku);
 
       var vrch = y;
@@ -148,7 +171,7 @@
         doc.setFontSize(13);
         doc.setTextColor(TMAVA[0], TMAVA[1], TMAVA[2]);
         doc.text(r[1], OKRAJ + SIRKA - 6, y, { align: "right" });
-        y += 9;
+        y += 7.4;
       });
 
       if (k.pod) {
@@ -157,42 +180,140 @@
         doc.setTextColor(SEDA[0], SEDA[1], SEDA[2]);
         doc.text(doc.splitTextToSize(k.pod, SIRKA - 12), OKRAJ + 6, y);
       }
-      y = vrch + vyskaBloku + 3.5;
+      y = vrch + vyskaBloku + 2;
     });
 
-    medzera(1);
+    medzera(0.5);
+
+    /* ——— čo to znamená v číslach ——— */
+    if (d.suhrn && d.suhrn.polozky.length) {
+      var vyskaS = 11 + 11 + (d.suhrn.pod ? 10.5 : 0);
+      miesto(vyskaS);
+      var vrchS = y;
+      doc.setFillColor(250, 246, 238);
+      doc.setDrawColor(ZLATA[0], ZLATA[1], ZLATA[2]);
+      doc.setLineWidth(0.3);
+      doc.roundedRect(OKRAJ, vrchS, SIRKA, vyskaS, 1.5, 1.5, "FD");
+      doc.setLineWidth(0.2);
+
+      y = vrchS + 6;
+      doc.setFont("Asap", "bold"); doc.setFontSize(11);
+      doc.setTextColor(TMAVA[0], TMAVA[1], TMAVA[2]);
+      doc.text(d.suhrn.nadpis, OKRAJ + 6, y);
+      y += 7;
+
+      var stlpec = (SIRKA - 12) / d.suhrn.polozky.length;
+      d.suhrn.polozky.forEach(function (p, i) {
+        var x = OKRAJ + 6 + i * stlpec;
+        doc.setFont("Asap", "normal"); doc.setFontSize(7);
+        doc.setTextColor(SEDA[0], SEDA[1], SEDA[2]);
+        doc.text(p[0].toUpperCase(), x, y);
+        doc.setFont("Asap", "bold"); doc.setFontSize(12.5);
+        doc.setTextColor(ZLATA[0], ZLATA[1], ZLATA[2]);
+        doc.text(p[1], x, y + 6);
+      });
+      y = vrchS + 11 + 14;
+
+      if (d.suhrn.pod) {
+        doc.setFont("Asap", "normal"); doc.setFontSize(8);
+        doc.setTextColor(SEDA[0], SEDA[1], SEDA[2]);
+        doc.text(doc.splitTextToSize(d.suhrn.pod, SIRKA - 12), OKRAJ + 6, y);
+      }
+      y = vrchS + vyskaS + 5;
+    }
+
     ciara();
 
-    /* ——— predpoklady a východiská ——— */
-    odstavec(d.predpokladyNadpis, 11, "bold", TMAVA, SIRKA, 1.22);
-    medzera(0.5);
-    d.predpoklady.forEach(function (p) { odstavec(p, 8, "normal", SEDA, SIRKA, 1.36); medzera(1); });
-    medzera(2.5);
+    /* ——— predpoklady a východiská ———
+       Dva stĺpce vedľa seba, rovnako ako na stránke: obsah oboch výstupov tak
+       sedí a dokument sa zmestí na jednu stranu. */
+    var MEDZISTLPEC = 10;
+    var stlp = (SIRKA - MEDZISTLPEC) / 2;
+    var xL = OKRAJ, xP = OKRAJ + stlp + MEDZISTLPEC;
 
-    odstavec(d.vychodiskaNadpis, 11, "bold", TMAVA, SIRKA, 1.22);
-    medzera(0.5);
+    function nadpisStlpca(t, x, yy) {
+      doc.setFont("Asap", "bold"); doc.setFontSize(10.5);
+      doc.setTextColor(TMAVA[0], TMAVA[1], TMAVA[2]);
+      doc.text(t, x, yy + 3);
+      return yy + 8;
+    }
+    function odstavecStlpca(t, x, yy, sirkaS) {
+      doc.setFont("Asap", "normal"); doc.setFontSize(7.6);
+      doc.setTextColor(SEDA[0], SEDA[1], SEDA[2]);
+      var r = doc.splitTextToSize(t, sirkaS);
+      var vr = 7.6 * 0.3528 * 1.36;
+      r.forEach(function (riadok, i) { doc.text(riadok, x, yy + i * vr + 2.4); });
+      return yy + r.length * vr + 2;
+    }
+
+    var vrchS2 = y;
+    var yL = nadpisStlpca(d.predpokladyNadpis, xL, vrchS2);
+    d.predpoklady.forEach(function (t) { yL = odstavecStlpca(t, xL, yL, stlp) + 1; });
+
+    var yP = nadpisStlpca(d.vychodiskaNadpis, xP, vrchS2);
+    doc.setFont("Asap", "normal"); doc.setFontSize(8.2);
     d.vychodiska.forEach(function (v) {
-      miesto(6);
-      doc.setFont("Asap", "normal");
-      doc.setFontSize(8.5);
       doc.setTextColor(SEDA[0], SEDA[1], SEDA[2]);
       doc.setFillColor(ZLATA[0], ZLATA[1], ZLATA[2]);
-      doc.circle(OKRAJ + 1.4, y + 1.4, 0.7, "F");
-      doc.text(doc.splitTextToSize(v, SIRKA - 6), OKRAJ + 5, y + 2.4);
-      y += 5.2;
+      doc.circle(xP + 1.3, yP + 2.1, 0.7, "F");
+      doc.text(doc.splitTextToSize(v, stlp - 5), xP + 4.6, yP + 3);
+      yP += 5.2;
     });
-    medzera(2.5);
+
+    y = Math.max(yL, yP) + 2;
     ciara();
 
     /* ——— ďalší krok ——— */
-    odstavec(d.dalejNadpis, 11, "bold", TMAVA, SIRKA, 1.22);
-    medzera(0.5);
-    odstavec(d.dalej, 8.5, "normal", SEDA, SIRKA, 1.38);
-    medzera(3);
+    nadpisSTelom(d.dalejNadpis, d.dalej, 11, 8.5);
+
+    /* ——— kto to pripravil ———
+       PDF putuje ďalej bez stránky, takže musí samo povedať, od koho je
+       a kam sa klient môže obrátiť.
+
+       Pätička sa neplaví s textom, ale kotví na spodok strany — tam patrí
+       a dokument tým nekončí prázdnou stranou len kvôli pár riadkom. */
+    doc.setFont("Asap", "normal"); doc.setFontSize(7);
+    var riadkovD = doc.splitTextToSize(d.disclaimer, SIRKA).length;
+    var VYSKA_PATKY = 5 + 18 + 5 + riadkovD * 7 * 0.3528 * 1.5 + 1;
+    var spodok = A4.v - OKRAJ;
+    if (y + VYSKA_PATKY > spodok) strana();
+    y = spodok - VYSKA_PATKY;
+
+    /* čiary sa kreslia priamo — ciara() by tu vlastnou kontrolou miesta
+       zbytočne zalomila stranu pod už ukotvenou pätičkou */
+    function linka() {
+      doc.setDrawColor(LINKA[0], LINKA[1], LINKA[2]);
+      doc.setLineWidth(0.2);
+      doc.line(OKRAJ, y, OKRAJ + SIRKA, y);
+      y += 5;
+    }
+    linka();
+    var vrchK = y;
+    doc.setFont("Asap", "bold"); doc.setFontSize(10.5);
+    doc.setTextColor(TMAVA[0], TMAVA[1], TMAVA[2]);
+    doc.text("Petr Hechtberger", OKRAJ, vrchK + 3.5);
+    doc.setFont("Asap", "normal"); doc.setFontSize(8);
+    doc.setTextColor(SEDA[0], SEDA[1], SEDA[2]);
+    doc.text("Wealth manager senior · Swiss Life Select Slovensko", OKRAJ, vrchK + 8.5);
+    doc.text("Framborská 252/19, 010 01 Žilina", OKRAJ, vrchK + 13);
+
+    doc.setFont("Asap", "normal"); doc.setFontSize(8.5);
+    doc.setTextColor(ZLATA[0], ZLATA[1], ZLATA[2]);
+    doc.textWithLink("hechtberger.com", OKRAJ + SIRKA, vrchK + 3.5,
+      { align: "right", url: "https://www.hechtberger.com" });
+    doc.setTextColor(SEDA[0], SEDA[1], SEDA[2]);
+    doc.textWithLink("petr@hechtberger.com", OKRAJ + SIRKA, vrchK + 8.5,
+      { align: "right", url: "mailto:petr@hechtberger.com" });
+    doc.text("+421 903 231 659", OKRAJ + SIRKA, vrchK + 13, { align: "right" });
+    y = vrchK + 18;
 
     /* ——— disclaimer ——— */
-    ciara();
-    odstavec(d.disclaimer, 7, "normal", [130, 125, 118], SIRKA, 1.5);
+    linka();
+    doc.setFont("Asap", "normal"); doc.setFontSize(7);
+    doc.setTextColor(130, 125, 118);
+    doc.splitTextToSize(d.disclaimer, SIRKA).forEach(function (r, i) {
+      doc.text(r, OKRAJ, y + i * 7 * 0.3528 * 1.5 + 2);
+    });
 
     return doc;
   }

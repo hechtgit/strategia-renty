@@ -786,6 +786,30 @@ function compute(){
   return o;
 }
 
+/* Súhrn, ktorý v samotnej simulácii nie je: koľko sa za celé obdobie vyplatí,
+   koľko z toho klient vloží a koľko pridá výnos. Sú to čísla, ktoré scenáru dajú
+   mieru — mesačná renta sama osebe nepovie, o akých sumách sa rozhodujeme.
+   Pri rente bez konca sa celková výplata nedá sčítať, vtedy sa neuvádza. */
+function prehladCiastok(){
+  const o=compute();
+  if(o.warn)return null;
+  const nekonecne=!!(o.nek||o.forever);
+
+  let vklady;
+  if(S.sit==='have')vklady=S.existing;
+  else if(o.immediate)vklady=o.P0;
+  else if(S.mode==='lump')vklady=o.P0;
+  else if(S.mode==='monthly')vklady=o.M*o.Nm;
+  else vklady=S.combo+o.M*o.Nm;
+
+  if(nekonecne)return {nekonecne:true, vklady, kapital:o.cap};
+
+  /* rastúca renta je geometrický rad; pri nulovom raste stačí súčin */
+  const m=o.Tm, R=o.R, g=o.g;
+  const vyplatene=Math.abs(g)<1e-12 ? R*m : R*(Math.pow(1+g,m)-1)/g;
+  return {nekonecne:false, vklady, vyplatene, vynos:Math.max(0,vyplatene-vklady), mesiacov:m};
+}
+
 /* JADRO:KONIEC */
 
 /* Modelované priebehy (Monte Carlo) sa v aplikácii nepočítajú ani nezobrazujú —

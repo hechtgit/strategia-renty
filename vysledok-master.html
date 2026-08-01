@@ -22,9 +22,9 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
 h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
 
 /* ===== úvod ===== */
-.hero{display:grid;grid-template-columns:1.05fr .95fr;min-height:390px;
-  border:1px solid var(--line);background:var(--panel)}
-.hero-copy{padding:52px 54px;display:flex;flex-direction:column;justify-content:center}
+.hero{display:grid;grid-template-columns:1.02fr .98fr;align-items:stretch;
+  border:1px solid var(--line);background:var(--panel);border-radius:4px;overflow:hidden}
+.hero-copy{padding:46px 48px;display:flex;flex-direction:column;justify-content:center}
 .kicker{font-size:12px;letter-spacing:.17em;color:var(--gold-strong);font-weight:700;margin-bottom:18px}
 .hero h1{font-size:clamp(30px,3.4vw,42px);line-height:1.12;max-width:680px}
 .lead{font-size:17px;line-height:1.62;color:var(--muted);max-width:680px;margin:20px 0 25px}
@@ -37,12 +37,15 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
 .btn-ghost{border:1px solid var(--gold);color:var(--ink);background:transparent}
 .btn-ghost:hover{border-color:var(--gold-strong);color:var(--gold-strong)}
 .mail-note{margin-top:18px;font-size:13px;color:#aaa49c}
-.hero-img{position:relative;overflow:hidden}
-.hero-img img{width:100%;height:100%;object-fit:cover;object-position:52% center;display:block}
+/* Obraz sa predtým orezával, lebo vypĺňal výšku textovej časti. Teraz drží
+   vlastný pomer strán a zobrazí sa celý. */
+.hero-img{position:relative;align-self:center;margin:0}
+.hero-img img{display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:cover;
+  object-position:50% 46%}
 
 /* ===== plán ===== */
-.section{padding:58px 0 0}
-.section-head{text-align:center;margin-bottom:34px}
+.section{padding:52px 0 0}
+.section-head{text-align:center;margin-bottom:30px}
 .section-head h2{font-size:clamp(25px,2.6vw,32px)}
 .section-head p{margin:12px auto 0;max-width:780px;color:var(--muted);line-height:1.55}
 .section-head strong{color:var(--ink);font-weight:600}
@@ -78,25 +81,36 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
 .card .value{font-family:var(--serif);font-size:27px;font-weight:700;margin-top:4px}
 .card .sub{font-size:12px;line-height:1.4;margin-top:4px;opacity:.82}
 
+/* ===== čo to znamená v číslach ===== */
+.suhrn{border:1px solid var(--gold);border-radius:4px;padding:26px 28px;margin:0 0 22px;
+  background:linear-gradient(180deg,rgba(174,135,83,.10),rgba(174,135,83,.03))}
+.suhrn h2{font-family:var(--serif);font-size:19px;font-weight:400;margin:0 0 18px;color:var(--ink)}
+.suhrn-mriezka{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.suhrn-polozka{display:flex;flex-direction:column;gap:5px}
+.suhrn-polozka .k{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.suhrn-polozka .v{font-family:var(--serif);font-size:25px;color:var(--gold-strong)}
+.suhrn-pod{margin:18px 0 0;font-size:13px;line-height:1.6;color:var(--muted)}
+
 /* ===== predpoklady ===== */
-.assumptions{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:0 0 52px}
-details{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:20px 0}
-summary{cursor:pointer;font-family:var(--serif);font-size:21px;color:#e6d8c4;list-style:none}
-summary::-webkit-details-marker{display:none}
-summary::after{content:" +";color:var(--gold-strong)}
-details[open] summary::after{content:" –"}
-details p{color:var(--muted);line-height:1.65;margin:16px 0 0;font-size:14px}
-.recap{border:1px solid var(--line);padding:22px 24px;border-radius:3px}
-.recap h3{font-size:20px;margin-bottom:14px}
-.recap ul{margin:0;padding:0;list-style:none;color:#c8c1b8;font-size:14px;line-height:1.75}
+.assumptions{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start;padding:0 0 44px}
+/* Dva rovnocenné bloky vedľa seba — rovnaké orámovanie, rovnaké odsadenie,
+   žiadne rozbaľovanie. Predpoklady patria klientovi rovno pred oči. */
+.blok,.recap{border:1px solid var(--line);border-radius:4px;padding:26px 28px}
+.blok h2,.recap h3{font-family:var(--serif);font-size:19px;font-weight:400;
+  color:var(--ink);margin:0 0 14px}
+.blok p{color:var(--muted);line-height:1.65;margin:0;font-size:14px}
+.blok p+p{margin-top:12px}
+.recap ul{margin:0;padding:0;list-style:none;color:var(--muted);font-size:14px;line-height:1.9}
+.recap li{padding-left:16px;position:relative}
+.recap li::before{content:"";position:absolute;left:0;top:.62em;width:5px;height:5px;
+  border-radius:50%;background:var(--gold)}
 
 /* ===== ďalší krok ===== */
-.next{border-top:1px solid var(--line);padding:46px 0 24px;display:grid;
-  grid-template-columns:1fr auto;gap:32px;align-items:center}
+.next{border-top:1px solid var(--line);padding:40px 0 8px;display:grid;
+  grid-template-columns:1fr auto;gap:36px;align-items:center}
 .next h2{font-size:clamp(24px,2.4vw,30px)}
 .next p{color:var(--muted);line-height:1.65;max-width:850px;margin:13px 0 0}
-.disclaimer{margin-top:30px;border-top:1px solid rgba(255,255,255,.12);padding:22px 0;
-  color:#8f8a83;font-size:11px;line-height:1.55}
+.disclaimer{margin-top:26px;padding:0 0 4px;color:#8f8a83;font-size:11.5px;line-height:1.6}
 
 .warn{margin:26px 0 0;padding:16px 18px;border:1px solid var(--gold);border-radius:3px;
   color:var(--gold-strong);line-height:1.6;font-size:15px}
@@ -105,12 +119,6 @@ details p{color:var(--muted);line-height:1.65;margin:16px 0 0;font-size:14px}
    Modelácia sa otvára v tom istom ráme ako aplikácia. Úvodný obraz aj poznámka
    o e-maile sú vtedy zbytočné — obraz je na stránke hneď nad rámom a klient práve
    klikol, takže nič nečaká. Pribudne návrat k scenáru. */
-/* Návrat ku scenáru má zmysel vždy — aj keď si klient modeláciu otvorí
-   z odkazu v záložkách, má sa mať ako dostať späť ku kalkulačke. */
-.spat{display:inline-flex;align-items:center;gap:9px;margin-bottom:18px;
-  color:var(--gold-strong);font-size:14px;text-decoration:none;background:none;border:0;
-  padding:0;cursor:pointer;font-family:var(--sans)}
-.spat:hover{color:#fff}
 .embedded .hero-img{display:none}
 .embedded .hero{grid-template-columns:1fr;min-height:0}
 .embedded .mail-note{display:none}
@@ -134,6 +142,7 @@ details p{color:var(--muted);line-height:1.65;margin:16px 0 0;font-size:14px}
   .card::after{display:none}
   .card{position:relative;left:auto;top:auto!important;bottom:auto!important;transform:none;width:100%}
   .phase{display:none}
+  .suhrn-mriezka{grid-template-columns:1fr;gap:16px}
   .assumptions{grid-template-columns:1fr;padding:0 0 38px}
   .next{grid-template-columns:1fr}
   .section{padding:42px 0 0}
@@ -150,7 +159,7 @@ details p{color:var(--muted);line-height:1.65;margin:16px 0 0;font-size:14px}
   /* vo vloženom stave má body priehľadné pozadie z .embedded — v tlači ho prebijeme */
   body,body.embedded{background:#fff!important;color:#1a1a1a}
   /* návrat k scenáru je ovládanie, na papier nepatrí */
-  .actions,.mail-note,.next .btn-primary,.spat{display:none!important}
+  .actions,.mail-note,.next .btn-primary{display:none!important}
   .shell{padding:0;max-width:none}
   .hero{border-color:#d8d2c8;background:#faf7f2;min-height:0;grid-template-columns:1fr}
   .hero-copy{padding:22px 0}
@@ -169,13 +178,13 @@ details p{color:var(--muted);line-height:1.65;margin:16px 0 0;font-size:14px}
   .card{position:relative;left:auto;top:auto!important;bottom:auto!important;transform:none;
     width:100%;break-inside:avoid}
   .assumptions{grid-template-columns:1fr;gap:12px;padding-bottom:18px}
+  .suhrn{border-color:#d8d2c8;background:#faf7f2;break-inside:avoid}
+  .suhrn h2{color:#1a1a1a}
+  .suhrn-polozka .v{color:#8a6a3c}
+  .suhrn-polozka .k,.suhrn-pod{color:#4a453e}
   /* nadpis sekcie nemá zostať sám na konci strany */
-  details,.recap,.next{break-inside:avoid}
-  details{border-color:#d8d2c8}
-  details p{display:block}
-  .recap{border-color:#d8d2c8}
-  summary{color:#1a1a1a}
-  summary::after{content:""}
+  .blok,.recap,.next{break-inside:avoid}
+  .blok,.recap{border-color:#d8d2c8}
   .next,.disclaimer{border-color:#d8d2c8}
   .disclaimer{color:#6b665f}
   .section{padding:22px 0 0}
@@ -187,8 +196,6 @@ details p{color:var(--muted);line-height:1.65;margin:16px 0 0;font-size:14px}
 
   <section class="hero">
     <div class="hero-copy">
-      <button class="spat" type="button" id="btn-spat">
-        <span aria-hidden="true">←</span> Upraviť scenár</button>
       <div class="kicker">VAŠA MODELÁCIA JE PRIPRAVENÁ</div>
       <h1>Váš prvý scenár privátnej renty je pripravený.</h1>
       <p class="lead">Modelácia ukazuje jednu možnú cestu k vašej privátnej rente. Je orientačným rámcom – zachytáva hlavné čísla a časový plán, nie však celý kontext vášho majetku, likvidity, rizika a ďalších cieľov.</p>
@@ -255,12 +262,22 @@ details p{color:var(--muted);line-height:1.65;margin:16px 0 0;font-size:14px}
     </div>
   </section>
 
+  <section class="suhrn" id="suhrn" hidden>
+    <h2>Čo to znamená v číslach</h2>
+    <div class="suhrn-mriezka">
+      <div class="suhrn-polozka"><span class="k" id="s1-k"></span><span class="v" id="s1-v"></span></div>
+      <div class="suhrn-polozka"><span class="k" id="s2-k"></span><span class="v" id="s2-v"></span></div>
+      <div class="suhrn-polozka"><span class="k" id="s3-k"></span><span class="v" id="s3-v"></span></div>
+    </div>
+    <p class="suhrn-pod" id="suhrn-pod"></p>
+  </section>
+
   <section class="assumptions">
-    <details>
-      <summary>Použité predpoklady</summary>
+    <div class="blok">
+      <h2>Použité predpoklady</h2>
       <p>Výpočet pracuje s dlhodobými predpokladmi výnosu a rizika pre jednotlivé investičné profily. Vychádzajú z historických údajov kapitálových trhov a z modelového zastúpenia jednotlivých tried aktív. Ide o orientačné predpoklady, nie o garantovaný budúci výnos.</p>
       <p id="metodika"></p>
-    </details>
+    </div>
     <div class="recap">
       <h3>Východiská modelácie</h3>
       <ul id="recap"></ul>
@@ -392,6 +409,27 @@ function vykresli(){
     $('e-label').textContent='Plánovaný horizont';
     $('e-value').textContent=`${endEff} rokov`;
     $('e-sub').textContent=`${yrs(Math.max(0,endEff-S.start))} pravidelného čerpania.`;
+  }
+
+  /* ===== čo to znamená v číslach ===== */
+  const c=prehladCiastok();
+  if(c){
+    $('suhrn').hidden=false;
+    if(c.nekonecne){
+      $('s1-k').textContent='Vaše vklady';       $('s1-v').textContent=fmtEur(c.vklady);
+      $('s2-k').textContent='Kapitál pri štarte'; $('s2-v').textContent=fmtEur(c.kapital);
+      $('s3-k').textContent='Renta';              $('s3-v').textContent='bez konca';
+      $('suhrn-pod').textContent='Renta beží z výnosov, takže samotný kapitál sa nemíňa — '
+        +'zostáva vám aj tým, ktorým ho raz odovzdáte.';
+    }else{
+      $('s1-k').textContent='Vaše vklady';        $('s1-v').textContent=fmtEur(c.vklady);
+      $('s2-k').textContent='Celkovo vyplatené';  $('s2-v').textContent=fmtEur(c.vyplatene);
+      $('s3-k').textContent='Z toho výnos';       $('s3-v').textContent=fmtEur(c.vynos);
+      const nasobok=c.vklady>0?Math.round(c.vyplatene/c.vklady*10)/10:null;
+      $('suhrn-pod').textContent='Za celé obdobie čerpania vám scenár vyplatí '
+        +fmtEur(c.vyplatene)+(nasobok?', teda '+String(nasobok).replace('.',',')+'-násobok toho, čo doň vložíte':'')
+        +'. Rozdiel pokrýva výnos portfólia.';
+    }
   }
 
   /* ===== východiská a metodika ===== */
@@ -580,14 +618,6 @@ if(QS.get('tlac')==='1'){
   if(document.fonts&&document.fonts.ready)document.fonts.ready.then(tlac);
   else addEventListener('load',tlac);
 }
-
-/* Návrat k scenáru: aplikácia si ho prečíta z tých istých parametrov, takže sa
-   klient vráti presne k tomu, čo mal nastavené. */
-$('btn-spat').addEventListener('click',()=>{
-  const p=new URLSearchParams(location.search);
-  p.delete('vystup');
-  location.href='cara-zivota.html?'+p.toString();
-});
 
 /* Rám sa vymenil za modeláciu, ale rodičovská stránka zostala odrolovaná tam, kde
    bola. Poprosíme ju, nech ukáže začiatok — inak klient pristane uprostred textu. */
