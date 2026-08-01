@@ -223,6 +223,14 @@ input[type=range]:disabled{opacity:.35;cursor:not-allowed}
 .assumptions-block{margin:0 0 18px;padding:17px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 .assumptions-block h3{font-family:var(--serif);font-size:17px;font-weight:700;margin:0 0 6px;color:#fff}
 .assumptions-block .assump{margin:0;color:#b7afa5}
+.metodika{margin-top:12px}
+.metodika summary{cursor:pointer;font-size:13px;color:var(--gold-strong);list-style:none;
+  display:inline-flex;align-items:center;gap:7px;padding:3px 0}
+.metodika summary::-webkit-details-marker{display:none}
+.metodika summary::after{content:"+";font-size:15px;line-height:1}
+.metodika[open] summary::after{content:"–"}
+.metodika summary:hover{color:#fff}
+.metodika p{margin:9px 0 0;font-size:12.5px;line-height:1.65;color:#9d968c}
 
 /* ===== mobil ===== */
 .mob{display:none}
@@ -572,6 +580,7 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
       <h3 id="consult-title">Ak chcete ísť ďalej</h3>
       <p>Výpočet v aplikácii je prvý orientačný rámec. Ak privátnu rentu reálne zvažujete, na osobnej konzultácii váš scenár prispôsobíme skutočnej situácii — doplníme reálne poplatky, daňový režim, štruktúru majetku, likvidnú rezervu aj krízové scenáre.</p>
       <p>Okrem toho váš konkrétny scenár preveríme pomocou Monte Carlo simulácie v 800 modelovaných priebehoch, ktoré náhodne skladajú skutočné ročné výnosy MSCI World v eurách z rokov 1970 až 2025. Uvidíte, s akou pravdepodobnosťou renta vydrží do zvoleného veku a aký kapitál by bol potrebný pre vyššiu mieru istoty.</p>
+      <p>Výsledná stratégia sa zároveň stane meradlom pre vaše súčasné portfólio. Ukáže, či jeho výnosový potenciál, riziko, likvidita a celková štruktúra zodpovedajú tomu, čo od svojho majetku skutočne potrebujete. Jednotlivé investičné produkty tak prestanú byť samostatným cieľom — stanú sa nástrojmi jednej dlhodobej stratégie, ktorá dá vášmu majetku štruktúru, poriadok a jasný účel.</p>
       <p>Pri väčšom majetku sa môžeme pozrieť aj na jeho celkové usporiadanie, komu má slúžiť a aké rozhodnutia bude potrebné urobiť v najbližších rokoch.</p>
       <a class="btn" href="https://hechtberger.com/rezervacia" target="_blank" rel="noopener">Rezervovať konzultáciu</a>
     </section>
@@ -580,6 +589,10 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
   <section class="assumptions-block" data-e style="--d:1.68s">
     <h3>Použité predpoklady</h3>
     <p class="assump" id="assump"></p>
+    <details class="metodika">
+      <summary>Technické detaily výpočtu</summary>
+      <p id="assump-detail"></p>
+    </details>
   </section>
   <footer class="disclaimer" data-e style="--d:1.74s">
     Tento modelový výpočet slúži výhradne na ilustračné a vzdelávacie účely. <b>Nejde o investičné poradenstvo,
@@ -793,6 +806,14 @@ function render(){
     :'Výpočet pracuje s dlhodobými predpokladmi výnosu a rizika pre jednotlivé investičné profily. '
      +'Vychádzajú z historických údajov kapitálových trhov a z modelového zastúpenia jednotlivých tried aktív. '
      +'Ide o orientačné predpoklady, nie o garantovaný budúci výnos.';
+
+  $('assump-detail').textContent=o.warn?''
+    :`Zvolený profil ${o.p.name.toLowerCase()} počíta s ${pctTxt(o.rPct)} % ročne, `
+     +`čo zodpovedá priemernému ročnému výnosu indexu MSCI World za obdobie 2016–2025 `
+     +`pri modelovom zastúpení ${Math.round(o.eq*100)} % akciovej zložky. `
+     +`Uvedené sumy sú po odpočítaní vstupného poplatku ${pctTxt(FEE_IN)} % a poplatku za správu ${pctTxt(FEE_M)} % ročne. `
+     +(o.rast?`Výpočet zohľadňuje infláciu ${pctTxt(o.infl)} % ročne. `:'Výpočet nezohľadňuje infláciu. ')
+     +'Dane z výnosov výpočet nezohľadňuje. Výpočet prebieha na mesačnej báze.';
 
   layout(o,endEff,openEnd);
 }
