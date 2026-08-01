@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Modelácia privátnej renty</title>
+<style>
+:root{
+  --bg:#1a1a1a;--panel:#222321;--surface:#ae8753;--ink:#fff;
+  --muted:#b7afa5;--gold:#ae8753;--gold-strong:#c49a63;
+  --line:rgba(255,255,255,.24);--axis:#dcc09b;--axis-ink:#2b2118;
+  --on-gold:#2b2118;--on-gold-line:rgba(43,33,24,.3);
+  --serif:"pt-serif-pro-extended","PT Serif",Georgia,serif;
+  --sans:"Asap","Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+  -webkit-font-smoothing:antialiased}
+.shell{max-width:1440px;margin:0 auto;padding:28px}
+h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
+
+/* ===== úvod ===== */
+.hero{display:grid;grid-template-columns:1.05fr .95fr;min-height:390px;
+  border:1px solid var(--line);background:var(--panel)}
+.hero-copy{padding:52px 54px;display:flex;flex-direction:column;justify-content:center}
+.kicker{font-size:12px;letter-spacing:.17em;color:var(--gold-strong);font-weight:700;margin-bottom:18px}
+.hero h1{font-size:clamp(30px,3.4vw,42px);line-height:1.12;max-width:680px}
+.lead{font-size:17px;line-height:1.62;color:var(--muted);max-width:680px;margin:20px 0 25px}
+.actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.btn-primary,.btn-ghost{display:inline-flex;align-items:center;justify-content:center;
+  min-height:48px;padding:0 22px;text-decoration:none;font-size:14px;font-weight:700;
+  letter-spacing:.02em;border-radius:3px;cursor:pointer;font-family:var(--sans)}
+.btn-primary{background:#9a6929;color:#fff;border:0}
+.btn-primary:hover{background:#ab7630}
+.btn-ghost{border:1px solid var(--gold);color:var(--ink);background:transparent}
+.btn-ghost:hover{border-color:var(--gold-strong);color:var(--gold-strong)}
+.mail-note{margin-top:18px;font-size:13px;color:#aaa49c}
+.hero-img{position:relative;overflow:hidden}
+.hero-img img{width:100%;height:100%;object-fit:cover;object-position:52% center;display:block}
+
+/* ===== plán ===== */
+.section{padding:58px 0 0}
+.section-head{text-align:center;margin-bottom:34px}
+.section-head h2{font-size:clamp(25px,2.6vw,32px)}
+.section-head p{margin:12px auto 0;max-width:780px;color:var(--muted);line-height:1.55}
+.section-head strong{color:var(--ink);font-weight:600}
+.line-wrap{position:relative;padding:210px 58px 160px}
+.track{height:88px;border-radius:6px;background:var(--axis);position:relative;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.18)}
+.track::before{content:"ROKY\A ŽIVOTA";white-space:pre;position:absolute;left:0;top:0;bottom:0;
+  width:78px;background:#242522;color:#fff;display:flex;align-items:center;justify-content:center;
+  text-align:center;font-size:11px;line-height:1.35;letter-spacing:.12em;border-radius:5px 0 0 5px}
+.age{position:absolute;top:50%;transform:translate(-50%,-50%);font-family:var(--serif);
+  color:var(--axis-ink);font-size:13px;opacity:.32}
+.phase{position:absolute;top:50%;transform:translate(-50%,-50%);z-index:2;background:#2a2926;
+  color:#fff;padding:10px 16px;text-align:center;font-size:12px;line-height:1.35;border-radius:3px}
+.phase strong{display:block;color:var(--gold-strong);font-size:14px;margin-top:3px}
+.milestone{position:absolute;top:50%;transform:translate(-50%,-50%);z-index:3}
+.marker{width:58px;height:58px;background:var(--axis);border:7px solid #9d7c53;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;color:var(--axis-ink);
+  font-family:var(--serif);font-size:20px;font-weight:700;margin:auto}
+/* Karta sa pri blízkych míľnikoch odsúva nabok (--dx), aby sa dve karty neprekryli.
+   Stopka preto nesedí v jej strede, ale na --cx — teda presne nad svojím míľnikom. */
+.card{position:absolute;width:268px;background:var(--surface);color:var(--on-gold);
+  padding:22px 24px;border-radius:6px;left:50%;
+  transform:translateX(calc(-50% + var(--dx,0px)))}
+.card::after{content:"";position:absolute;left:var(--cx,50%);width:16px;height:55px;
+  background:#9d7c53;transform:translateX(-50%)}
+.card.up{bottom:113px}
+.card.up::after{top:100%}
+.card.down{top:113px}
+.card.down::after{bottom:100%}
+.card h3{font-family:var(--sans);color:var(--on-gold);text-align:center;font-size:18px;
+  font-weight:700;margin-bottom:15px}
+.card .label{font-size:11px;letter-spacing:.07em;text-transform:uppercase;opacity:.72;margin-top:12px}
+.card .value{font-family:var(--serif);font-size:27px;font-weight:700;margin-top:4px}
+.card .sub{font-size:12px;line-height:1.4;margin-top:4px;opacity:.82}
+
+/* ===== predpoklady ===== */
+.assumptions{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:0 0 52px}
+details{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:20px 0}
+summary{cursor:pointer;font-family:var(--serif);font-size:21px;color:#e6d8c4;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::after{content:" +";color:var(--gold-strong)}
+details[open] summary::after{content:" –"}
+details p{color:var(--muted);line-height:1.65;margin:16px 0 0;font-size:14px}
+.recap{border:1px solid var(--line);padding:22px 24px;border-radius:3px}
+.recap h3{font-size:20px;margin-bottom:14px}
+.recap ul{margin:0;padding:0;list-style:none;color:#c8c1b8;font-size:14px;line-height:1.75}
+
+/* ===== ďalší krok ===== */
+.next{border-top:1px solid var(--line);padding:46px 0 24px;display:grid;
+  grid-template-columns:1fr auto;gap:32px;align-items:center}
+.next h2{font-size:clamp(24px,2.4vw,30px)}
+.next p{color:var(--muted);line-height:1.65;max-width:850px;margin:13px 0 0}
+.disclaimer{margin-top:30px;border-top:1px solid rgba(255,255,255,.12);padding:22px 0;
+  color:#8f8a83;font-size:11px;line-height:1.55}
+
+.warn{margin:26px 0 0;padding:16px 18px;border:1px solid var(--gold);border-radius:3px;
+  color:var(--gold-strong);line-height:1.6;font-size:15px}
+
+@media(max-width:900px){
+  .shell{padding:14px}
+  .hero{grid-template-columns:1fr}
+  .hero-copy{padding:35px 26px}
+  .hero-img{height:260px;grid-row:2}
+  .btn-primary,.btn-ghost{width:100%}
+  .line-wrap{padding:40px 5px}
+  /* Karty sú deťmi osi — skryť os celú by skrylo aj ich. Zmizne preto len jej
+     grafika a míľniky sa poskladajú pod seba. */
+  .track{height:auto;background:none;box-shadow:none;border-radius:0}
+  .track::before{display:none}
+  .age{display:none}
+  .milestone{position:relative;left:auto!important;top:auto;transform:none;margin:0 0 18px}
+  .marker{display:none}
+  .card::after{display:none}
+  .card{position:relative;left:auto;top:auto!important;bottom:auto!important;transform:none;width:100%}
+  .phase{display:none}
+  .assumptions{grid-template-columns:1fr;padding:0 0 38px}
+  .next{grid-template-columns:1fr}
+  .section{padding:42px 0 0}
+}
+
+/* ===== tlač / PDF =====
+   Modelácia sa ukladá cez tlač do PDF — na papieri preto zmizne všetko, čo sa
+   dá iba kliknúť, a tmavý podklad ustúpi bielemu, aby výtlačok nebol celý čierny. */
+@media print{
+  @page{size:A4;margin:14mm}
+  body{background:#fff;color:#1a1a1a}
+  .actions,.mail-note,.next .btn-primary{display:none!important}
+  .shell{padding:0;max-width:none}
+  .hero{border-color:#d8d2c8;background:#faf7f2;min-height:0;grid-template-columns:1fr}
+  .hero-copy{padding:22px 0}
+  .hero-img{display:none}
+  h1,h2,h3,.section-head strong{color:#1a1a1a}
+  .lead,.section-head p,.next p,details p,.recap ul{color:#4a453e}
+  .kicker{color:#8a6a3c}
+  .track{height:auto;background:none;box-shadow:none}
+  .track::before{display:none}
+  .age,.phase,.marker{display:none}
+  .card::after{display:none}
+  /* odsadenie okolo čiary nastavuje JS priamo na prvku — na papieri ho treba prebiť */
+  .line-wrap{padding:0!important}
+  .milestone{position:relative;left:auto!important;top:auto;transform:none;margin:0 0 12px;
+    break-inside:avoid}
+  .card{position:relative;left:auto;top:auto!important;bottom:auto!important;transform:none;
+    width:100%;break-inside:avoid}
+  .assumptions{grid-template-columns:1fr;gap:12px;padding-bottom:18px}
+  /* nadpis sekcie nemá zostať sám na konci strany */
+  details,.recap,.next{break-inside:avoid}
+  details{border-color:#d8d2c8}
+  details p{display:block}
+  .recap{border-color:#d8d2c8}
+  summary{color:#1a1a1a}
+  summary::after{content:""}
+  .next,.disclaimer{border-color:#d8d2c8}
+  .disclaimer{color:#6b665f}
+  .section{padding:22px 0 0}
+}
+</style>
+</head>
+<body>
+<main class="shell">
+
+  <section class="hero">
+    <div class="hero-copy">
+      <div class="kicker">VAŠA MODELÁCIA JE PRIPRAVENÁ</div>
+      <h1>Váš prvý scenár privátnej renty je pripravený.</h1>
+      <p class="lead">Modelácia ukazuje jednu možnú cestu k vašej privátnej rente. Je orientačným rámcom – zachytáva hlavné čísla a časový plán, nie však celý kontext vášho majetku, likvidity, rizika a ďalších cieľov.</p>
+      <div class="actions">
+        <button class="btn-primary" type="button" id="btn-pdf">Stiahnuť modeláciu v PDF</button>
+        <a class="btn-ghost" href="https://hechtberger.com/rezervacia" target="_blank" rel="noopener">Prejsť scenár na konzultácii</a>
+      </div>
+      <div class="mail-note">Odkaz na túto modeláciu sme vám poslali aj e-mailom, aby ste sa k nej mohli kedykoľvek vrátiť.</div>
+    </div>
+    <figure class="hero-img" style="margin:0">
+      <img src="hero-privatna-renta.jpg" alt="Manželský pár po päťdesiatke na palube lode pri pobreží za súmraku" decoding="async">
+    </figure>
+  </section>
+
+  <div class="warn" id="warn" hidden></div>
+
+  <section class="section" id="plan">
+    <div class="section-head">
+      <h2>Váš plán privátnej renty</h2>
+      <p id="ciel"></p>
+    </div>
+    <div class="line-wrap">
+      <div class="track" id="track">
+        <span class="age" data-age="20">20</span>
+        <span class="age" data-age="40">40</span>
+        <span class="age" data-age="60">60</span>
+        <span class="age" data-age="80">80</span>
+        <span class="age" data-age="100">100</span>
+        <div class="phase" id="ph-build" hidden>TVORBA KAPITÁLU<strong id="ph-build-v"></strong></div>
+        <div class="phase" id="ph-draw">VÝPLATA PRIVÁTNEJ RENTY<strong id="ph-draw-v"></strong></div>
+
+        <div class="milestone" id="m-today">
+          <div class="card up">
+            <h3>Dnes</h3>
+            <div class="label" id="t-label"></div>
+            <div class="value" id="t-value"></div>
+            <div class="sub" id="t-sub"></div>
+          </div>
+          <div class="marker" id="t-age"></div>
+        </div>
+
+        <div class="milestone" id="m-start">
+          <div class="marker" id="s-age"></div>
+          <div class="card down">
+            <h3>Začiatok čerpania</h3>
+            <div class="label" id="s-label1"></div>
+            <div class="value" id="s-value1"></div>
+            <div class="label" id="s-label2"></div>
+            <div class="value" id="s-value2"></div>
+            <div class="sub" id="s-sub"></div>
+          </div>
+        </div>
+
+        <div class="milestone" id="m-end">
+          <div class="card up">
+            <h3>Koniec čerpania</h3>
+            <div class="label" id="e-label"></div>
+            <div class="value" id="e-value"></div>
+            <div class="sub" id="e-sub"></div>
+          </div>
+          <div class="marker" id="e-age"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="assumptions">
+    <details>
+      <summary>Použité predpoklady</summary>
+      <p>Výpočet pracuje s dlhodobými predpokladmi výnosu a rizika pre jednotlivé investičné profily. Vychádzajú z historických údajov kapitálových trhov a z modelového zastúpenia jednotlivých tried aktív. Ide o orientačné predpoklady, nie o garantovaný budúci výnos.</p>
+      <p id="metodika"></p>
+    </details>
+    <div class="recap">
+      <h3>Východiská modelácie</h3>
+      <ul id="recap"></ul>
+    </div>
+  </section>
+
+  <section class="next">
+    <div>
+      <h2>Ak chcete ísť ďalej</h2>
+      <p>Jedna modelácia ukazuje základný smer, nie všetky podmienky, ktoré môžu počas desiatok rokov nastať. Pri osobnej konzultácii môžeme váš scenár preveriť na 800 výpočtových priebehoch a ukázať, ako by sa správal pri rôznom vývoji kapitálových trhov.</p>
+    </div>
+    <a class="btn-primary" href="https://hechtberger.com/rezervacia" target="_blank" rel="noopener">Preveriť môj scenár</a>
+  </section>
+
+  <div class="disclaimer">Tento modelový výpočet slúži výhradne na ilustračné a vzdelávacie účely. Nejde o investičné poradenstvo, investičné odporúčanie ani o ponuku či návrh na uzavretie zmluvy. Zhodnotenie nie je garantované, hodnota investície môže v čase kolísať a nie je zaručená návratnosť investovanej sumy.</div>
+</main>
+
+<script>
+(()=>{
+"use strict";
+const $=id=>document.getElementById(id);
+
+/* __JADRO__ */
+
+/* ===== rozmiestnenie na čiare =====
+   Os musí zvládnuť aj scenár, ktorý presiahne sto rokov, a nesmie nechať míľniky
+   preliezť cez seba. Preto sa mapuje na rozsah odvodený od samotného scenára. */
+const o=compute();
+const derived=S.sit==='have'&&S.goal==='duration';
+let endEff=S.end;
+if(derived&&!o.warn)endEff=o.forever?Math.max(S.start+1,100)
+  :Math.min(150,Math.max(S.start+1,Math.round(S.now+o.N+(o.months||0)/12)));
+const openEnd=!!(o.nek||o.forever);
+const AXMAX=endEff<=100?110:Math.min(150,Math.max(110,Math.ceil((endEff+2)/10)*10));
+
+
+/* ľavý pruh „ROKY ŽIVOTA“ zaberá 78 px — os sa preto kreslí až za ním */
+const LAVY=78;
+const MARKER=58;
+const poz=v=>`calc(${LAVY}px + (100% - ${LAVY}px) * ${Math.max(0,Math.min(1,v/AXMAX))})`;
+/* to isté v pixeloch — na rátanie, čo sa kam ešte zmestí */
+const pozPx=v=>{
+  const w=document.querySelector('.track').getBoundingClientRect().width;
+  return LAVY+(w-LAVY)*Math.max(0,Math.min(1,v/AXMAX));
+};
+
+function vykresli(){
+  document.querySelectorAll('.age').forEach(el=>{
+    const v=+el.dataset.age;
+    if(v>AXMAX){el.hidden=true;return}
+    el.style.left=poz(v);
+  });
+
+  $('t-age').textContent=S.now;
+  $('s-age').textContent=S.start;
+  $('e-age').textContent=openEnd?'∞':endEff;
+  $('m-today').style.left=poz(S.now);
+  $('m-start').style.left=poz(S.start);
+  $('m-end').style.left=poz(openEnd?Math.min(AXMAX,endEff):endEff);
+  $('m-start').hidden=o.immediate;
+
+  /* fázy sa umiestňujú do stredu svojho úseku, aby popis sedel na to, čo označuje */
+  $('ph-build').hidden=o.immediate;
+  if(!o.immediate)$('ph-build-v').textContent=yrs(o.N).toUpperCase();
+  $('ph-draw-v').textContent=openEnd?'BEZ KONCA':yrs(Math.max(0,endEff-S.start)).toUpperCase();
+
+  /* ===== cieľ ===== */
+  const dokedy=openEnd?'bez časového obmedzenia'
+    :`počas ${yrs(Math.max(0,endEff-S.start))}`;
+  if(S.sit==='build'||S.goal==='rent'){
+    const suma=S.sit==='build'?S.rent:o.R;
+    $('ciel').innerHTML=S.sit==='build'
+      ? `Vaším cieľom je privátna renta <strong>${fmtEur(suma)} mesačne</strong> v dnešnej hodnote `
+        +`od ${S.start} rokov ${dokedy}.`
+      : `Váš majetok môže od ${S.start} rokov priniesť privátnu rentu `
+        +`<strong>${fmtEur(suma)} mesačne</strong> ${dokedy}.`;
+  }else{
+    $('ciel').innerHTML=`Pri rente <strong>${fmtEur(S.rent)} mesačne</strong> v dnešnej hodnote `
+      +`od ${S.start} rokov by váš majetok `
+      +(o.forever?'nebolo potrebné vyčerpať.':`vydržal do ${endEff} rokov.`);
+  }
+
+  /* ===== karta DNES ===== */
+  if(S.sit==='build'){
+    if(o.immediate){
+      $('t-label').textContent='Musím mať pripravené';
+      $('t-value').textContent=fmtEur(o.P0);
+      $('t-sub').textContent='Renta sa začína čerpať hneď.';
+    }else if(S.mode==='lump'){
+      $('t-label').textContent='Jednorazový vklad';
+      $('t-value').textContent=fmtEur(o.P0);
+      $('t-sub').textContent=`Kapitál bude pracovať ${yrs(o.N)}.`;
+    }else if(S.mode==='monthly'){
+      $('t-label').textContent='Odkladám mesačne';
+      $('t-value').textContent=fmtEur(o.M);
+      $('t-sub').textContent=`Pravidelne počas ${yrs(o.N)}.`;
+    }else{
+      $('t-label').textContent='Jednorazový vklad';
+      $('t-value').textContent=fmtEur(S.combo);
+      if(o.covers){
+        $('t-sub').textContent=`Vklad na rentu stačí, mesačne už netreba dopĺňať.`;
+      }else{
+        $('t-sub').innerHTML=`a mesačne <strong>${fmtEur(o.M)}</strong> počas ${yrs(o.N)}.`;
+      }
+    }
+  }else{
+    $('t-label').textContent='Môj majetok dnes';
+    $('t-value').textContent=fmtEur(S.existing);
+    $('t-sub').textContent=o.immediate?'Renta sa začína čerpať hneď.'
+      :`Kapitál bude pracovať ${yrs(o.N)}.`;
+  }
+
+  /* ===== karta ZAČIATOK ČERPANIA ===== */
+  $('s-label1').textContent=S.sit==='have'?'Môj majetok vtedy':'Potrebný kapitál';
+  $('s-value1').textContent=fmtEur(o.cap);
+  $('s-label2').textContent='Renta pri začiatku';
+  $('s-value2').textContent=fmtEur(o.R);
+  $('s-sub').textContent=o.rast?'mesačne, pri zohľadnení inflácie':'mesačne';
+
+  /* ===== karta KONIEC ČERPANIA ===== */
+  if(openEnd){
+    $('e-label').textContent='Plánovaný horizont';
+    $('e-value').textContent='Bez konca';
+    $('e-sub').textContent=`Majetok ${fmtEur(o.cap)} zostáva nedotknutý — pre vás aj pre deti.`;
+  }else{
+    $('e-label').textContent='Plánovaný horizont';
+    $('e-value').textContent=`${endEff} rokov`;
+    $('e-sub').textContent=`${yrs(Math.max(0,endEff-S.start))} pravidelného čerpania.`;
+  }
+
+  /* ===== východiská a metodika ===== */
+  const sposob=S.sit==='have'?'existujúci majetok'
+    :(S.mode==='lump'?'jednorazový vklad'
+      :S.mode==='monthly'?'pravidelné mesačné investovanie'
+      :'jednorazový vklad a pravidelné investovanie');
+  const body=[
+    `Spôsob tvorby kapitálu: ${sposob}`,
+    `Investičný profil: ${o.p.name.toLowerCase()}`,
+    o.rast?`Inflácia: ${pctTxt(o.infl)} % ročne`:'Inflácia: nezohľadnená',
+    o.rast?'Renta rastie počas čerpania':'Renta zostáva počas čerpania rovnaká'
+  ];
+  $('recap').innerHTML=body.map(t=>`<li>${t}</li>`).join('');
+
+  $('metodika').textContent=
+    `Zvolený profil ${o.p.name.toLowerCase()} počíta s ${pctTxt(o.rPct)} % ročne, `
+    +`čo zodpovedá priemernému ročnému výnosu indexu MSCI World za obdobie 2016–2025 `
+    +`pri modelovom zastúpení ${Math.round(o.eq*100)} % akciovej zložky. `
+    +`Uvedené sumy sú po odpočítaní vstupného poplatku ${pctTxt(FEE_IN)} % a poplatku za správu ${pctTxt(FEE_M)} % ročne. `
+    +(o.rast?`Výpočet zohľadňuje infláciu ${pctTxt(o.infl)} % ročne. `:'Výpočet nezohľadňuje infláciu. ')
+    +'Dane z výnosov výpočet nezohľadňuje. Výpočet prebieha na mesačnej báze.';
+
+  /* až teraz — odsadenie okolo čiary aj rozostup kariet vychádzajú z ich výšky,
+     a tú karta dostane, až keď je v nej text */
+  prisposobOsi();
+}
+
+/* ===== čo sa na os ešte zmestí =====
+   Popis fázy sedí medzi dvoma míľnikmi. Pri krátkom úseku naň nie je miesto —
+   necháme ho zalomiť a keď ani to nestačí, radšej ho schováme, než aby prelieval
+   cez míľnik. O nič neprídeme: rovnaký údaj nesie aj podtitulok karty.
+   Zároveň sa dorovná odsadenie okolo čiary, aby karty nezasahovali do sekcií
+   nad ňou a pod ňou — ich výška závisí od toho, koľko riadkov scenár vypíše. */
+function prisposobOsi(){
+  const siroko=matchMedia('(min-width:901px)').matches;
+  const wrap=document.querySelector('.line-wrap');
+  const fazy=[
+    {el:$('ph-build'),od:S.now,po:S.start,zap:!o.immediate},
+    {el:$('ph-draw'),od:S.start,po:openEnd?AXMAX:endEff,zap:true}
+  ];
+
+  if(!siroko){
+    wrap.style.removeProperty('padding-top');
+    wrap.style.removeProperty('padding-bottom');
+    return;
+  }
+
+  fazy.forEach(f=>{
+    if(!f.zap){f.el.hidden=true;return}
+    const medzera=(pozPx(f.po)-MARKER/2)-(pozPx(f.od)+MARKER/2)-16;
+    f.el.hidden=medzera<78;
+    if(f.el.hidden)return;
+    f.el.style.left=poz((f.od+f.po)/2);
+    f.el.style.maxWidth=Math.floor(medzera)+'px';
+  });
+
+  /* karta stojí 113 px od stredu čiary; k tomu jej výška a trochu vzduchu */
+  const vyska=strana=>Math.max(0,...[...document.querySelectorAll('.card.'+strana)]
+    .filter(c=>!c.closest('.milestone').hidden)
+    .map(c=>c.getBoundingClientRect().height));
+  wrap.style.paddingTop=Math.round(113+vyska('up')+28)+'px';
+  wrap.style.paddingBottom=Math.round(113+vyska('down')+28)+'px';
+  rozostup();
+}
+
+/* ===== rozostup kariet =====
+   Míľniky môžu byť na čiare pár rokov od seba, karty majú pevných 268 px. Bez
+   rozostupu by sa dve karty nad čiarou prekryli a modelácia by bola nečitateľná.
+   Karta sa preto posunie nabok (--dx) a jej stopka sa presunie tak, aby stále
+   mierila na svoj míľnik (--cx). Pod 900 px sú karty v stĺpci pod sebou, tam
+   sa nerozostupuje. */
+function rozostup(){
+  const wrap=document.querySelector('.line-wrap');
+  const siroko=matchMedia('(min-width:901px)').matches;
+  const karty=[...document.querySelectorAll('.milestone')].map(m=>({
+    m,karta:m.querySelector('.card'),hore:!!m.querySelector('.card.up')
+  })).filter(k=>!k.m.hidden);
+
+  if(!siroko){
+    karty.forEach(k=>{k.karta.style.removeProperty('--dx');k.karta.style.removeProperty('--cx')});
+    return;
+  }
+  karty.forEach(k=>{k.karta.style.setProperty('--dx','0px')});
+
+  const rw=wrap.getBoundingClientRect();
+  const okraj=12;
+  const meraj=k=>{
+    const r=k.m.getBoundingClientRect(),c=k.karta.getBoundingClientRect();
+    return {stred:r.left+r.width/2-rw.left,sirka:c.width};
+  };
+
+  ['hore','dole'].forEach(strana=>{
+    const rad=karty.filter(k=>k.hore===(strana==='hore')).map(k=>({k,...meraj(k)}))
+      .sort((a,b)=>a.stred-b.stred);
+    if(!rad.length)return;
+    const min=x=>Math.max(okraj+x.sirka/2,Math.min(rw.width-okraj-x.sirka/2,x.stred));
+    rad.forEach(x=>{x.ciel=min(x)});
+    /* zľava doprava odtlačiť, potom sprava doľava dorovnať — inak by posledná
+       karta vytlačená k okraju zostala prilepená na predchádzajúcu */
+    for(let i=1;i<rad.length;i++){
+      const nutne=rad[i-1].ciel+rad[i-1].sirka/2+18+rad[i].sirka/2;
+      if(rad[i].ciel<nutne)rad[i].ciel=nutne;
+    }
+    for(let i=rad.length-2;i>=0;i--){
+      const strop=rad[i+1].ciel-rad[i+1].sirka/2-18-rad[i].sirka/2;
+      if(rad[i].ciel>strop)rad[i].ciel=strop;
+    }
+    rad.forEach(x=>{
+      const dx=x.ciel-x.stred;
+      x.k.karta.style.setProperty('--dx',dx.toFixed(1)+'px');
+      x.k.karta.style.setProperty('--cx',(x.sirka/2-dx).toFixed(1)+'px');
+    });
+  });
+}
+addEventListener('resize',()=>{if(!o.warn)prisposobOsi()});
+
+/* Scenár sa vykresľuje až tu — vyššie deklarované konštanty musia existovať skôr,
+   než sa ich vykresľovanie dotkne. */
+if(o.warn){
+  $('warn').hidden=false;
+  $('warn').textContent=o.warn;
+  $('plan').hidden=true;
+  document.querySelector('.assumptions').hidden=true;
+}else{
+  vykresli();
+}
+
+/* Tlač do PDF: prehliadač vypisuje iba rozbalené detaily, preto sa metodika
+   pred tlačou otvorí a po nej vráti do pôvodného stavu. */
+const det=document.querySelector('details');
+let bolOtvoreny=false;
+addEventListener('beforeprint',()=>{bolOtvoreny=det.open;det.open=true});
+addEventListener('afterprint',()=>{det.open=bolOtvoreny});
+$('btn-pdf').addEventListener('click',()=>window.print());
+})();
+</script>
+</body>
+</html>

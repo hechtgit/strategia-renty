@@ -1,15 +1,23 @@
 #!/usr/bin/env python3
-"""Zostaví cara-zivota.html (verziu pre iframe) z master súboru aplikácie.
+"""Zostaví nasadzované súbory stránky Stratégia privátnej renty.
 
-Master súbor je samostatná stránka — dá sa otvoriť priamo v prehliadači aj s úvodom
-a hero obrazom, takže sa v ňom pohodlne pracuje. Do Squarespace sa ale vkladá cez
-iframe, kde úvod, hero aj audio dodáva samotná stránka. Tento skript preto z mastera
-odstráni všetko, čo patrí Squarespace, a doplní hlásenie výšky rodičovskému oknu.
+Vzniknú dva:
+
+  cara-zivota.html   — aplikácia pre iframe v Squarespace. Master je samostatná
+                       stránka aj s úvodom a hero obrazom, aby sa v nej dalo
+                       pracovať priamo v prehliadači; do iframu ide bez toho,
+                       čo na stránke dodáva Squarespace, a s hlásením výšky rodičovi.
+
+  vysledok.html      — modelácia, ktorú klient dostane odkazom v e-maile. Číta scenár
+                       z adresy a musí ukazovať tie isté čísla ako aplikácia. Preto sa
+                       do nej vkladá finančné jadro vystrihnuté priamo z mastera
+                       aplikácie (medzi značkami JADRO:ZAČIATOK a JADRO:KONIEC) —
+                       matematika tak žije na jednom mieste a nemá ako sa rozísť.
 
 Použitie:
     python3 zostav.py [cesta/k/masteru.html]
 
-Bez argumentu si vezme cestu z premennej MASTER nižšie. Po zostavení treba súbor
+Bez argumentu si vezme cestu z premennej MASTER nižšie. Po zostavení treba súbory
 commitnúť a v code bloku stránky zvýšiť ?v=… (cache-buster), inak si prehliadače
 podržia starú verziu.
 """
@@ -20,6 +28,29 @@ from pathlib import Path
 MASTER = Path('/Users/hecht/.codex/visualizations/2026/07/31/'
               '019fb8e0-fb5d-7a72-a1b6-68903debfb3f/cara-zivota-codex-21-brand.html')
 VYSTUP = Path(__file__).with_name('cara-zivota.html')
+
+VYSLEDOK_MASTER = Path(__file__).with_name('vysledok-master.html')
+VYSLEDOK = Path(__file__).with_name('vysledok.html')
+
+JADRO_OD = '/* JADRO:ZAČIATOK'
+JADRO_PO = '/* JADRO:KONIEC */'
+JADRO_MIESTO = '/* __JADRO__ */'
+
+VYSLEDOK_HLAVICKA = """<!--
+  MODELÁCIA PRIVÁTNEJ RENTY — stránka s výsledkom scenára
+  ================================================================
+  POZOR: vygenerované skriptom zostav.py z vysledok-master.html.
+  Needituj tento súbor priamo — zmeny sa pri najbližšom zostavení stratia.
+
+  Scenár si stránka číta z adresy (rovnaké kľúče, aké zapisuje aplikácia).
+  Finančné jadro sem zostav.py prenáša z mastera aplikácie, takže čísla sú
+  zhodné s tým, čo klient videl na obrazovke. Meniť ho tu nemá zmysel —
+  pri najbližšom zostavení sa prepíše.
+
+  Odkaz na túto stránku skladá aplikácia (konštanta VYSTUP_BASE) a posiela ho
+  klientovi e-mailom cez Boldem.
+-->
+"""
 
 HLAVICKA = """<!--
   ČIARA ŽIVOTA — aplikácia pre stránku Stratégia privátnej renty
@@ -125,10 +156,47 @@ def zostav(master: Path) -> str:
     return s[:prve] + HLAVICKA + s[prve:]
 
 
+def vystrihni_jadro(s: str) -> str:
+    """Vráti kód medzi značkami JADRO — spoločnú matematiku aplikácie a modelácie."""
+    try:
+        i = s.index(JADRO_OD)
+        j = s.index(JADRO_PO, i)
+    except ValueError:
+        sys.exit(f'CHYBA: v masteri chýbajú značky {JADRO_OD}… / {JADRO_PO}')
+    jadro = s[i:j + len(JADRO_PO)]
+    for musi_byt in ('function compute(', 'const S=', 'applyScenarioFromUrl()'):
+        if musi_byt not in jadro:
+            sys.exit(f'CHYBA: v jadre chýba „{musi_byt}" — sedia značky JADRO?')
+    # Jadro sa vkladá do stránky, ktorá nemá DOM aplikácie. Dotyk DOM by tam spadol.
+    for zakazane in ('document.', 'window.', '$('):
+        if zakazane in jadro:
+            sys.exit(f'CHYBA: jadro sa dotýka „{zakazane}" — musí byť bez DOM, '
+                     'inak modelácia spadne.')
+    return jadro
+
+
+def zostav_vysledok(jadro: str) -> str:
+    if not VYSLEDOK_MASTER.is_file():
+        sys.exit(f'CHYBA: chýba {VYSLEDOK_MASTER}')
+    s = VYSLEDOK_MASTER.read_text(encoding='utf-8')
+    if s.count(JADRO_MIESTO) != 1:
+        sys.exit(f'CHYBA: {VYSLEDOK_MASTER.name} musí obsahovať práve jedno {JADRO_MIESTO}')
+    s = s.replace(JADRO_MIESTO, jadro, 1)
+    prve = s.index('\n') + 1                      # za <!doctype html>
+    return s[:prve] + VYSLEDOK_HLAVICKA + s[prve:]
+
+
 if __name__ == '__main__':
     master = Path(sys.argv[1]) if len(sys.argv) > 1 else MASTER
     if not master.is_file():
         sys.exit(f'CHYBA: master súbor neexistuje: {master}')
+
+    zdroj = master.read_text(encoding='utf-8')
     out = zostav(master)
     VYSTUP.write_text(out, encoding='utf-8')
-    print(f'OK {VYSTUP} ({len(out)} B) ← {master.name}')
+    print(f'OK {VYSTUP.name} ({len(out)} B) ← {master.name}')
+
+    jadro = vystrihni_jadro(zdroj)
+    vys = zostav_vysledok(jadro)
+    VYSLEDOK.write_text(vys, encoding='utf-8')
+    print(f'OK {VYSLEDOK.name} ({len(vys)} B) ← {VYSLEDOK_MASTER.name} + jadro ({len(jadro)} B)')

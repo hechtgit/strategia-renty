@@ -651,6 +651,10 @@ const lp=$('lp');
 const ANIM=document.documentElement.dataset.anim==='1';
 const REDUCED=matchMedia('(prefers-reduced-motion:reduce)').matches;
 
+/* JADRO:ZAČIATOK — od tejto značky po JADRO:KONIEC je kód, ktorý si zostav.py
+   prenáša aj do výsledkovej stránky. Je zámerne bez akéhokoľvek dotyku DOM, aby
+   obe stránky počítali to isté z toho istého zdroja. Čokoľvek sem pridané musí
+   platiť pre aplikáciu aj pre modeláciu. */
 const S={now:50,start:65,end:90,rent:3000,existing:600000,combo:100000,
   sit:'build',mode:'lump',goal:'rent',pension:'temporary',profile:'dyn',inflOn:true,infl:3};
 const PROFILES={kons:{name:'Konzervatívny',r:5.3,eq:.30},vyv:{name:'Vyvážený',r:7.9,eq:.60},dyn:{name:'Dynamický',r:10.5,eq:.90}};
@@ -667,9 +671,13 @@ const ENUM_KEYS={sit:['build','have'],mode:['lump','monthly','combo'],goal:['ren
 const QS=new URLSearchParams(location.search);
 const OUTPUT_MODE=QS.has('vystup');
 
-/* Kam vedie odkaz na modeláciu. Dnes ukazuje na túto aplikáciu v režime výstupu;
-   keď pribudne samostatná výsledková stránka, prepíše sa jediná táto adresa. */
-const VYSTUP_BASE=location.origin+location.pathname;
+/* Kam vedie odkaz na modeláciu — na výsledkovú stránku vedľa aplikácie.
+   Tá si scenár prečíta z rovnakých parametrov a počíta rovnakým jadrom.
+   Pri lokálnom otvorení mimo webu (file://) by relatívna cesta nesedela, preto
+   sa v takom prípade použije aspoň samotná aplikácia v režime výstupu. */
+const VYSTUP_BASE=location.protocol==='file:'
+  ? location.href.split('?')[0]
+  : location.origin+location.pathname.replace(/[^/]*$/,'vysledok.html');
 
 function scenarioParams(){
   const p=new URLSearchParams();
@@ -753,6 +761,8 @@ function compute(){
   }
   return o;
 }
+
+/* JADRO:KONIEC */
 
 /* Modelované priebehy (Monte Carlo) sa v aplikácii nepočítajú ani nezobrazujú —
    konkrétny scenár sa na nich overuje až na osobnej konzultácii. */
