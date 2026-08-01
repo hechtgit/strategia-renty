@@ -14,6 +14,9 @@ Aplikácia a modelácia pre stránku
 | `vysledok.html` | Vygenerované. Otvára si ju klient z e-mailu. **Needitovať.** |
 | `index.html` | Pôvodná verzia kalkulačky. Drží živú stránku, kým sa nová nezverejní. **Nemeniť.** |
 | `hero-privatna-renta.jpg` | Obraz pre úvod aplikácie aj modelácie. |
+| `pdf.js` | Zloží modeláciu do PDF priamo v prehliadači. Čísla číta z vykreslenej stránky, neprepočítava ich. |
+| `pdf-font.js` | Písmo pre PDF — Asap (OFL) orezaný na použité znaky vrátane slovenskej diakritiky. Vygenerované, needitovať. |
+| `jspdf.min.js` | Knižnica jsPDF 2.5.2, vendorovaná (žiadne CDN). |
 | `squarespace-injection.html` | **Zdrojová kópia** kódu vloženého v Squarespace (Page Settings → Advanced). Squarespace nie je verzionovaný — po každej zmene tam ju sem prekopíruj a commitni. Bez tohto kódu tok nefunguje. |
 
 ## Ako spraviť zmenu
@@ -58,6 +61,23 @@ Z toho plynú dve pravidlá:
 - Do jadra nepatrí nič, čo sa dotýka DOM — build to kontroluje a spadne.
 - Názvy parametrov v adrese sú zmluva navonok. Po premenovaní prestanú sedieť
   odkazy, ktoré klienti už dostali e-mailom.
+
+## PDF
+
+Tlačidlo *Stiahnuť modeláciu v PDF* nespúšťa tlač — zloží súbor v prehliadači
+a stiahne ho. Na telefóne bola tlačová ponuka funkčná, ale klient z nej PDF musel
+ešte vylúpiť; súbor je to, čo naozaj chce.
+
+Generátor, písmo a knižnica (spolu ~440 kB) sa načítajú **až po ťuknutí** —
+väčšina návštevníkov PDF nechce. Keby sa čokoľvek nenačítalo, tlačidlo spadne
+na tlač, teda na to, čo fungovalo predtým.
+
+Čísla sa do PDF **neprepočítavajú**, čítajú sa z už vykreslenej modelácie. PDF
+teda nemá ako ukázať niečo iné, než čo má klient pred očami.
+
+Písmo je orezané na znaky, ktoré dokument používa — vrátane `ľ ť ď ň ĺ ŕ` a
+nezlomiteľnej medzery z formátovania čísel. Pri zmene textov, ktoré by priniesli
+nový znak, treba `pdf-font.js` vygenerovať znova.
 
 ## Pomenovanie míľnikov
 

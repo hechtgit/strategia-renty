@@ -669,21 +669,46 @@ const det=document.querySelector('details');
 let bolOtvoreny=false;
 addEventListener('beforeprint',()=>{bolOtvoreny=det.open;det.open=true});
 addEventListener('afterprint',()=>{det.open=bolOtvoreny});
-/* Tlač z vnútra rámu sa v prehliadačoch správa rôzne — Chrome vytlačí obsah rámu,
-   Safari a iOS to majú inak. Vo vloženom stave preto modeláciu otvoríme ako
-   samostatný dokument a vytlačíme ju tam; okno sa otvára priamo v obsluhe
-   kliknutia, takže ho blokátory neriešia. Mimo rámu tlačíme rovno. */
-$('btn-pdf').addEventListener('click',()=>{
+/* PDF sa skladá priamo v prehliadači a stiahne sa ako súbor. Tlačový dialóg
+   bol funkčný, ale na telefóne z neho klient musí PDF ešte vyloviť — a súbor
+   je to, čo naozaj chce. Generátor aj písmo (~440 kB) sa načítajú až po
+   ťuknutí; väčšina návštevníkov PDF nechce.
+   Keby sa čokoľvek nepodarilo, spadneme na tlač — teda na to, čo fungovalo
+   doteraz, nie na prázdne tlačidlo. */
+let pdfNacitanie=null;
+function nacitaj(src){
+  return new Promise((ok,zle)=>{
+    const s=document.createElement('script');
+    s.src=src; s.onload=ok; s.onerror=()=>zle(new Error(src));
+    document.head.appendChild(s);
+  });
+}
+function zalozneTlacenie(){
   if(window.parent===window){window.print();return}
   const u=new URL(location.href);
   u.searchParams.set('tlac','1');
   /* Pozor: window.open s príznakom 'noopener' vracia null aj vtedy, keď okno
-     otvorí. Podmienka „keď null, tlač tu" by potom spustila tlač v ráme zakaždým —
-     klient by dostal dva tlačové dialógy. Okno preto otvárame bez toho príznaku
-     a väzbu na otvárača zrušíme sami. */
+     otvorí — podmienka „keď null, tlač tu" by spustila tlač zakaždým. */
   const w=window.open(u.toString(),'_blank');
   if(w){try{w.opener=null}catch(e){}}
-  else window.print();               /* okno naozaj neprešlo — tlačíme tu */
+  else window.print();
+}
+
+$('btn-pdf').addEventListener('click',async()=>{
+  const b=$('btn-pdf'), popis=b.textContent;
+  b.disabled=true; b.textContent='Pripravujem PDF…';
+  try{
+    if(!pdfNacitanie)pdfNacitanie=Promise.all([
+      nacitaj('jspdf.min.js'), nacitaj('pdf-font.js'), nacitaj('pdf.js')]);
+    await pdfNacitanie;
+    window.PH_PDF();
+  }catch(e){
+    console.warn('PDF sa nepodarilo zložiť, tlačím',e);
+    pdfNacitanie=null;
+    zalozneTlacenie();
+  }finally{
+    b.disabled=false; b.textContent=popis;
+  }
 });
 
 /* Otvorené s ?tlac=1 znamená „vytlač sa" — po dopočítaní rozloženia a fontov. */
