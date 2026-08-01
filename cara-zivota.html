@@ -62,13 +62,17 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font
 .stage{position:relative;height:var(--stage-h,700px);margin:2px 0 0}
 .axis-wrap{position:absolute;left:24px;right:24px;top:var(--axis-top,330px);height:46px}
 .axis{position:absolute;inset:0;background:#242424;border:1px solid var(--line);overflow:hidden;transform-origin:left center}
-.seg{position:absolute;top:0;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;
+.seg{position:absolute;top:0;height:100%;display:flex;align-items:center;justify-content:center;
   transition:left .24s var(--ease),width .24s var(--ease)}
 .seg.past{background:#2e2b26}
 .seg.build{background:linear-gradient(90deg,#8a5f24,#ae8753)}
 .seg.rent{background:var(--gold-strong)}
 #lp.perp .seg.rent{-webkit-mask-image:linear-gradient(90deg,#000 74%,transparent 99%);mask-image:linear-gradient(90deg,#000 74%,transparent 99%)}
-.seg span{font-size:13.5px;font-weight:600;white-space:nowrap;padding:0 12px}
+
+/* Popis úseku sa umiestňuje výpočtom (umiestniPopisyUsekov): keď sa medzi
+   míľniky nezmestí, uhne mimo nich. Preto absolútne, nie centrovaním. */
+.seg span{position:absolute;top:50%;transform:translateY(-50%);
+  font-size:13.5px;font-weight:600;white-space:nowrap;padding:0 12px}
 .seg.build span{color:#fff}
 .seg.rent span{color:#31230f}
 .tick{position:absolute;top:52px;transform:translateX(-50%);color:rgba(183,175,165,.55);font-size:12.5px;
@@ -787,6 +791,55 @@ function compute(){
 /* Modelované priebehy (Monte Carlo) sa v aplikácii nepočítajú ani nezobrazujú —
    konkrétny scenár sa na nich overuje až na osobnej konzultácii. */
 
+/* Popis úseku má prirodzené miesto medzi svojimi dvoma míľnikmi. Pri krátkom
+   úseku sa tam ale nezmestí a míľniky ho prekryjú. Vtedy uhne von zo zovretia:
+   „Budujem" doľava pred prvý míľnik, „Žijem z majetku" doprava za posledný —
+   teda vždy do tej strany, kde je na čiare voľno. Ak nie je miesto ani tam,
+   radšej zmizne, než aby ležal pod číslom míľnika.
+
+   Počíta sa z polôh, ktoré odložil layout(). Z DOM sa čítať nedajú: míľniky aj
+   segmenty majú prechod, takže rozmery tesne po prekreslení patria ešte
+   predchádzajúcemu stavu. */
+let POZ=null;
+const MILNIK=62;                      /* šírka míľnika na osi */
+
+function umiestniPopisyUsekov(){
+  if(isMob()||!POZ)return;            /* na mobile sú popisy skryté */
+  const MEDZERA=12;
+
+  const umiestni=(segId,odX,poX,maOd,maPo,kamUhnut)=>{
+    const seg=$(segId),sp=seg.querySelector('span');
+    if(!sp.textContent.trim()){sp.style.visibility='hidden';return}
+    sp.style.visibility='';
+    const sirka=sp.offsetWidth;                 /* šírka sa prechodom nemení */
+    const lavo =maOd?odX+MILNIK/2:odX;
+    const pravo=maPo?poX-MILNIK/2:poX;
+
+    let cielL=null;
+    if(pravo-lavo>=sirka+2*MEDZERA){
+      cielL=lavo+(pravo-lavo-sirka)/2;                       /* medzi míľniky */
+    }else if(kamUhnut==='vlavo'&&maOd&&odX-MILNIK/2-MEDZERA-sirka>=0){
+      cielL=odX-MILNIK/2-MEDZERA-sirka;                      /* pred prvý */
+    }else if(kamUhnut==='vpravo'&&maPo&&poX+MILNIK/2+MEDZERA+sirka<=POZ.axW){
+      cielL=poX+MILNIK/2+MEDZERA;                            /* za posledný */
+    }
+    if(cielL===null){sp.style.visibility='hidden';return}
+    /* ľavý okraj segmentu podľa modelu, nie podľa (animovaného) DOM */
+    const segL=parseFloat(seg.style.left)/100*POZ.axW;
+    sp.style.left=Math.round(cielL-segL)+'px';
+  };
+
+  umiestni('s-build',POZ.now,POZ.start,true,POZ.maStart,'vlavo');
+  umiestni('s-rent',POZ.start,POZ.end,POZ.maStart,POZ.maEnd,'vpravo');
+}
+
+/* Šírku popisu určuje písmo, a to sa načítava až po prvom vykreslení. Prvé
+   umiestnenie preto počíta so záložným písmom a vyjde užšie — po dobehnutí
+   fontov aj na ďalšom snímku sa prepočíta na skutočnú šírku. */
+if(document.fonts&&document.fonts.ready)
+  document.fonts.ready.then(()=>umiestniPopisyUsekov());
+
+
 /* Popis úseku („Žijem z majetku · 25 rokov") leží na osi v tej istej výške ako
    čísla vekovej stupnice a jeho šírka závisí od textu, takže sa fixnou medzerou
    ošetriť nedá. Číslo, ktoré by padlo priamo do popisu, preto vynecháme — inak
@@ -942,7 +995,10 @@ function render(){
      +'Dane z výnosov výpočet nezohľadňuje. Výpočet prebieha na mesačnej báze.';
 
   layout(o,endEff,openEnd);
+  umiestniPopisyUsekov();
   skryTickyPodPopismi();
+  /* ešte raz na ďalšom snímku — vtedy už majú popisy konečnú šírku */
+  requestAnimationFrame(()=>{umiestniPopisyUsekov();skryTickyPodPopismi()});
 }
 
 /* ===== rozloženie ===== */
@@ -967,6 +1023,10 @@ function layout(o,endEff,openEnd){
   if(over>0)vis.forEach(h=>h.d=(h.d||0)-over);
   const disp={...xs};vis.forEach(h=>disp[h.k]=h.x+(h.d||0));
   nN.style.left=disp.now+'px';nS.style.left=disp.start+'px';nE.style.left=disp.end+'px';
+  /* Popisy úsekov sa riadia týmito číslami — z DOM sa čítať nedajú,
+     lebo míľniky aj segmenty majú prechod a ten meranie oneskoruje. */
+  POZ={axW, now:disp.now, start:disp.start, end:disp.end,
+       maStart:!o.immediate, maEnd:true};
 
   const place=()=>{
     const cT=$('c-today'),cS=$('c-start'),cE=$('c-end'),pad=18;
