@@ -2,14 +2,18 @@
 <!--
   ČIARA ŽIVOTA — aplikácia pre stránku Stratégia privátnej renty
   ================================================================
+  POZOR: tento súbor je vygenerovaný skriptom zostav.py z master súboru.
+  Needituj ho priamo — zmeny sa pri najbližšom zostavení stratia.
+  Uprav master, spusti `python3 zostav.py`, commitni a zvýš ?v=… v code bloku stránky.
+
   Vkladá sa do Squarespace cez <iframe> v code bloku stránky.
   Obsahuje IBA aplikáciu: čiaru života s kartami, odoslanie modelácie,
   sekciu "Ak chcete ísť ďalej", použité predpoklady a disclaimer.
 
   ČO TU ZÁMERNE NIE JE a prečo:
     · úvodné texty a hero obraz  → zostávajú v Squarespace nad iframe,
-      pretože audio prehrávač (adam-player.js) sa zachytáva o druhý
-      odsek úvodu. Presunom sem by stratil svoj bod ukotvenia.
+      pretože audio prehrávač (adam-player.js) sa zachytáva o kotvu v úvode.
+      Presunom sem by stratil svoj bod ukotvenia.
     · audio prehrávač            → dodáva ho adam-player.js z repozitára
       hechtgit/adam-audio, vkladá sa sám. Nikdy ho sem nekopírovať —
       vznikli by dva prehrávače.
@@ -19,12 +23,8 @@
   zhodné s výsledkovou stránkou modelácie, PDF a scenárom pre audio.
   Pri zmene ho treba zmeniť vo všetkých štyroch výstupoch naraz.
 
-  ÚPRAVY: uprav tento súbor, commitni a v code bloku stránky zvýš ?v=…
-  (cache-buster), inak si prehliadače podržia starú verziu.
-
   index.html vedľa je pôvodná verzia kalkulačky — nemeniť, drží živú stránku.
 -->
-
 <html lang="sk" data-anim="1">
 <head>
 <meta charset="utf-8">
@@ -211,15 +211,25 @@ input[type=range]:disabled{opacity:.35;cursor:not-allowed}
 .client-panel p+p{margin-top:11px}
 .consult-panel h3{color:#fff}
 .consult-panel p{color:#b7afa5}
+.gate-label{margin-top:11px!important}
+.gate-names{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:18px}
+.gate-names+.email-row{margin-top:9px}
+.gate-names input,.email-row input{min-width:0;background:#fff;color:#1a1a1a;border:0;border-radius:3px;
+  padding:13px 14px;font:500 15px var(--sans)}
+.gate-names input:focus,.email-row input:focus{outline:2px solid #2b2118;outline-offset:2px}
+.gate-names input.bad,.email-row input.bad{outline:2px solid #8c2f2f;outline-offset:2px}
+.gate-view{display:inline-block;margin-top:18px;padding:14px 24px;border-radius:3px;
+  background:#2b2118;color:#fff;font:600 14px var(--sans);text-decoration:none}
+.gate-view:hover{background:#3a2c1c}
 .email-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;margin-top:18px}
-.email-row input{min-width:0;background:#fff;color:#1a1a1a;border:0;border-radius:3px;padding:13px 14px;font:500 15px var(--sans)}
-.email-row input:focus{outline:2px solid #2b2118;outline-offset:2px}
 .email-row button{border:0;border-radius:3px;background:#2b2118;color:#fff;padding:13px 20px;font:600 14px var(--sans);cursor:pointer}
 .email-row button:hover{background:#3a2c1c}
 .email-row button:disabled{opacity:.6;cursor:default}
 .privacy-note{display:block;margin-top:9px;font-size:12px;color:var(--on-gold-soft)}
 .send-status{min-height:20px;margin-top:8px!important;font-size:13px!important;color:var(--on-gold)!important;font-weight:600}
 .consult-panel .btn{margin-top:18px;padding:14px 24px;font-size:14px;letter-spacing:1.1px}
+/* režim výstupu: formulár je preč, výzva na konzultáciu zostáva sama v celej šírke */
+body.vystup .bottom-flow{grid-template-columns:1fr}
 .assumptions-block{margin:0 0 18px;padding:17px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 .assumptions-block h3{font-family:var(--serif);font-size:17px;font-weight:700;margin:0 0 6px;color:#fff}
 .assumptions-block .assump{margin:0;color:#b7afa5}
@@ -246,6 +256,8 @@ input[type=range]:disabled{opacity:.35;cursor:not-allowed}
   .card{position:static;width:100%;margin:12px 0 0;padding:17px;top:auto!important}
   .card::after,.card-stem{display:none}
   .btn{width:100%;text-align:center}
+  .gate-names,.email-row{grid-template-columns:1fr}
+  .gate-view{display:block;text-align:center}
 }
 </style>
 <style>
@@ -450,10 +462,6 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
 
 
 
-
-
-
-
 <div id="lp"><span id="kalkulacka" aria-hidden="true"></span>
 
   <header class="head" aria-hidden="true"></header>
@@ -567,14 +575,26 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
 
   <div class="bottom-flow" data-e style="--d:1.6s">
     <section class="client-panel delivery-panel" aria-labelledby="delivery-title">
-      <h3 id="delivery-title">Zaslať modeláciu na e-mail</h3>
-      <p>Modelácia zhrnie váš scenár privátnej renty, hlavné čísla a predpoklady orientačného výpočtu.</p>
-      <div class="email-row">
-        <input id="model-email" type="email" inputmode="email" autocomplete="email" placeholder="Váš e-mail" aria-label="Váš e-mail">
-        <button id="send-model" type="button">Zaslať modeláciu</button>
+      <div id="gate-form">
+        <h3 id="delivery-title">Zaslať modeláciu na e-mail</h3>
+        <p>Modelácia zhrnie váš scenár privátnej renty, hlavné čísla a predpoklady orientačného výpočtu.</p>
+        <p class="gate-label">Zadajte meno, priezvisko a email. Modeláciu si budete môcť otvoriť hneď po odoslaní a odkaz vám pošleme aj emailom.</p>
+        <div class="gate-names">
+          <input id="gate-first" type="text" autocomplete="given-name" placeholder="Meno" aria-label="Meno">
+          <input id="gate-last" type="text" autocomplete="family-name" placeholder="Priezvisko" aria-label="Priezvisko">
+        </div>
+        <div class="email-row">
+          <input id="model-email" type="email" inputmode="email" autocomplete="email" placeholder="Email" aria-label="Email">
+          <button id="send-model" type="button">Pokračovať k modelácii</button>
+        </div>
+        <small class="privacy-note">Vaše údaje použijeme na odoslanie modelácie a nadväzujúcu komunikáciu k téme Wealth managementu.</small>
+        <p class="send-status" id="send-status" aria-live="polite"></p>
       </div>
-      <small class="privacy-note">E-mail použijeme iba na zaslanie tejto modelácie.</small>
-      <p class="send-status" id="send-status" aria-live="polite"></p>
+      <div id="gate-done" hidden>
+        <h3>Modelácia privátnej renty je pripravená</h3>
+        <p>Nižšie nájdete modeláciu k scenáru privátnej renty, ktorý ste si práve prepočítali. Odkaz sme poslali aj emailom; ak by doručenie meškalo, otvoríte ho aj tlačidlom nižšie.</p>
+        <a class="gate-view" id="gate-view" href="#" target="_blank" rel="noopener">Otvoriť modeláciu renty</a>
+      </div>
     </section>
     <section class="client-panel consult-panel" aria-labelledby="consult-title">
       <h3 id="consult-title">Ak chcete ísť ďalej</h3>
@@ -613,6 +633,43 @@ const S={now:50,start:65,end:90,rent:3000,existing:600000,combo:100000,
   sit:'build',mode:'lump',goal:'rent',pension:'temporary',profile:'dyn',inflOn:true,infl:3};
 const PROFILES={kons:{name:'Konzervatívny',r:5.3,eq:.30},vyv:{name:'Vyvážený',r:7.9,eq:.60},dyn:{name:'Dynamický',r:10.5,eq:.90}};
 const FEE_IN=1.5,FEE_M=0.9;
+
+/* ===== scenár v adrese =====
+   Celý stav sa dá zapísať do odkazu a znovu z neho načítať. Na tom stojí modelácia,
+   ktorú klient dostane e-mailom — odkaz nesie presne ten scenár, ktorý si prepočítal.
+   Názvy kľúčov sú preto zmluva navonok: po premenovaní by staršie rozposlané odkazy
+   prestali sedieť, takže sa menia len vedome a s prechodom pre staré tvary. */
+const NUM_KEYS=['now','start','end','rent','existing','combo','infl'];
+const ENUM_KEYS={sit:['build','have'],mode:['lump','monthly','combo'],goal:['rent','duration'],
+  pension:['temporary','perpetuity'],profile:['kons','vyv','dyn']};
+const QS=new URLSearchParams(location.search);
+const OUTPUT_MODE=QS.has('vystup');
+
+/* Kam vedie odkaz na modeláciu. Dnes ukazuje na túto aplikáciu v režime výstupu;
+   keď pribudne samostatná výsledková stránka, prepíše sa jediná táto adresa. */
+const VYSTUP_BASE=location.origin+location.pathname;
+
+function scenarioParams(){
+  const p=new URLSearchParams();
+  NUM_KEYS.forEach(k=>p.set(k,String(S[k])));
+  Object.keys(ENUM_KEYS).forEach(k=>p.set(k,S[k]));
+  p.set('infl_on',S.inflOn?'1':'0');
+  return p;
+}
+function scenarioURL(){return VYSTUP_BASE+'?vystup&'+scenarioParams().toString()}
+
+function applyScenarioFromUrl(){
+  if(!QS.has('now'))return;
+  NUM_KEYS.forEach(k=>{const v=Number(QS.get(k));if(QS.has(k)&&Number.isFinite(v))S[k]=v});
+  Object.entries(ENUM_KEYS).forEach(([k,ok])=>{const v=QS.get(k);if(ok.includes(v))S[k]=v});
+  if(QS.has('infl_on'))S.inflOn=QS.get('infl_on')==='1';
+  /* poradie míľnikov musí platiť aj pri ručne prepísanom odkaze */
+  S.now=Math.min(Math.max(18,Math.round(S.now)),99);
+  S.start=Math.min(Math.max(S.now,Math.round(S.start)),120);
+  S.end=Math.min(150,Math.max(S.start+1,Math.round(S.end)));
+  S.infl=Math.min(10,Math.max(0,S.infl));
+}
+applyScenarioFromUrl();
 
 
 const fmtN=n=>Math.max(0,Math.round(n)).toLocaleString('sk-SK');
@@ -961,17 +1018,120 @@ $('sl-infl').value=S.infl;$('sl-infl').disabled=!S.inflOn;
 $('infl-v').textContent=pctTxt(S.infl)+' % ročne';
 $('infl-v').style.opacity=S.inflOn?'':'.4';
 
-/* odoslanie modelácie: pripraví odkaz na presne tento scenár */
-const sendModel=$('send-model');
-if(sendModel)sendModel.addEventListener('click',()=>{
-  const email=$('model-email'),status=$('send-status');
-  if(!email.value||!email.checkValidity()){
-    status.textContent='Zadajte, prosím, platnú e-mailovú adresu.';
-    email.focus();
-    return;
+/* ===== odoslanie modelácie =====
+   Kontakt ide do Boldemu (CRM + rozposielanie), spolu s odkazom na presne tento
+   scenár a jeho krátkym zhrnutím. Odkaz si klient otvorí hneď, aj keby e-mail meškal. */
+const BOLDEM_FORMS_CONFIG_URL='https://front.boldem.cz/api/forms/get?uc=208268&wg=7c7d41e8-0a15-4317-9bb7-abebbc852fab&sc=0';
+const BOLDEM_FORM_GUID='dd1af774-e0b8-4e6b-b309-ef3ce906a2ac';
+const BOLDEM_SCENARIO_FIELD='cc_3659';
+let boldemFormPromise=null;
+
+async function loadBoldemForm(){
+  if(!boldemFormPromise){
+    boldemFormPromise=fetch(BOLDEM_FORMS_CONFIG_URL,{cache:'no-store'})
+      .then(r=>{if(!r.ok)throw new Error('boldem-config-failed');return r.json()})
+      .then(forms=>{
+        const form=(Array.isArray(forms)?forms:[]).find(f=>f.guid===BOLDEM_FORM_GUID)||forms[0];
+        if(!form||!form.url||!form.mainMailingListGuid)throw new Error('boldem-form-missing');
+        return form;
+      })
+      .catch(e=>{boldemFormPromise=null;throw e});
   }
-  status.textContent='Modelácia je pripravená na odoslanie.';
-});
+  return boldemFormPromise;
+}
+
+async function submitToBoldem({first,last,email,scenarioUrl,summary}){
+  const form=await loadBoldemForm();
+  const res=await fetch(form.url,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Accept':'application/json, text/plain, */*'},
+    body:JSON.stringify({
+      main_mailing_list_guid:form.mainMailingListGuid,
+      mailing_list_guids:form.mailingListGuids||[form.mainMailingListGuid],
+      form_identifier:form.guid,
+      name:first,surname:last,email,
+      source:'strategia-privatnej-renty',
+      scenar_url:scenarioUrl,
+      [BOLDEM_SCENARIO_FIELD]:scenarioUrl,
+      scenario_url:scenarioUrl,
+      scenario_summary:summary
+    })
+  });
+  const body=await res.text().catch(()=>'');
+  if(!res.ok)throw new Error('boldem-submit-failed:'+res.status+':'+body.slice(0,160));
+  /* Boldem vie odpovedať 200 aj pri odmietnutí — chybu preto hľadáme aj v tele odpovede */
+  if(/\b(false|error|failed|unable|invalid)\b|nepoda|chyba/i.test(body))
+    throw new Error('boldem-submit-soft-failed:'+body.slice(0,160));
+}
+
+/* Krátke zhrnutie scenára pre CRM — rovnaké čísla, aké klient videl na obrazovke. */
+function scenarioSummary(){
+  const o=compute();
+  if(o.warn)return 'Scenár privátnej renty z orientačného výpočtu.';
+  const bits=[];
+  bits.push(`${S.now} r`);
+  bits.push(o.immediate?'renta hneď':`začiatok v ${S.start}`);
+  bits.push(o.nek||o.forever?'renta bez konca':`renta ${yrs(Math.max(0,S.end-S.start))}`);
+  if(S.sit==='build'){
+    bits.push(`chce ${fmtEur(S.rent)} / mes.`);
+    bits.push(`potrebný kapitál ${fmtEur(o.cap)}`);
+    if(o.M>0)bits.push(`mesačne ${fmtEur(o.M)}`);
+    if(o.P0>0)bits.push(`jednorazovo ${fmtEur(o.P0)}`);
+  }else{
+    bits.push(`má ${fmtEur(S.existing)}`);
+    if(S.goal==='rent')bits.push(`renta ${fmtEur(o.R)} / mes.`);
+    else bits.push(o.forever?'majetok sa nevyčerpá'
+      :`vydrží ${Math.floor(o.months/12)} r ${o.months%12} m`);
+  }
+  bits.push(`${o.p.name} profil`);
+  bits.push(o.rast?`inflácia ${pctTxt(o.infl)} %`:'bez inflácie');
+  return ('Privátna renta — '+bits.join(', ')+'.').slice(0,500);
+}
+
+const sendModel=$('send-model');
+if(sendModel){
+  const mark=(el,bad)=>{el.classList.toggle('bad',bad);return bad};
+  ['gate-first','gate-last','model-email'].forEach(id=>
+    $(id).addEventListener('input',()=>$(id).classList.remove('bad')));
+
+  sendModel.addEventListener('click',async()=>{
+    const fi=$('gate-first'),la=$('gate-last'),em=$('model-email'),status=$('send-status');
+    const first=fi.value.trim(),last=la.value.trim(),email=em.value.trim();
+    let bad=false;
+    bad=mark(fi,!first)||bad;
+    bad=mark(la,!last)||bad;
+    bad=mark(em,!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))||bad;
+    if(bad){
+      status.textContent='Vyplňte, prosím, meno, priezvisko a platný e-mail.';
+      (!first?fi:!last?la:em).focus();
+      return;
+    }
+    const url=scenarioURL();
+    const label=sendModel.textContent;
+    sendModel.disabled=true;sendModel.textContent='Odosielam…';
+    status.textContent='';
+    try{
+      await submitToBoldem({first,last,email,scenarioUrl:url,summary:scenarioSummary()});
+    }catch(e){
+      console.warn('Boldem submit failed',e);
+      status.textContent='Nepodarilo sa odoslať modeláciu emailom. Skúste to prosím ešte raz.';
+      sendModel.disabled=false;sendModel.textContent=label;
+      return;
+    }
+    sendModel.disabled=false;sendModel.textContent=label;
+    $('gate-view').href=url;
+    $('gate-form').hidden=true;
+    $('gate-done').hidden=false;
+  });
+}
+
+/* Režim výstupu: klient si otvoril odkaz na svoju modeláciu. Kontakt už máme,
+   takže sa formulár neopakuje — stránka ukazuje len prepočítaný scenár. */
+if(OUTPUT_MODE){
+  document.body.classList.add('vystup');
+  const panel=document.querySelector('.delivery-panel');
+  if(panel)panel.hidden=true;
+}
 
 addEventListener('resize',render);
 render();
@@ -1039,7 +1199,10 @@ if(ANIM&&!REDUCED){
 </script>
 
 <script>
-/* ---- Vloženie do Squarespace: hlásenie výšky rodičovi ---- */
+/* ---- Vloženie do Squarespace: hlásenie výšky rodičovi ----
+   Iframe nemá vlastný scroll — o výšku sa stará rodičovská stránka. Aplikácia jej
+   po každej zmene rozmeru pošle svoju skutočnú výšku a drží sa na začiatku, aby
+   vnorené posúvanie nebralo scroll celej stránke. */
 (()=>{
   if(window.parent===window) return;
   const lockScroll=()=>{
