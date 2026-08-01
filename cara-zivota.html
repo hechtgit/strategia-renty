@@ -2,7 +2,7 @@
 <!--
   ČIARA ŽIVOTA — aplikácia pre stránku Stratégia privátnej renty
   ================================================================
-  Tento súbor sa vkladá do Squarespace cez <iframe> v code bloku stránky.
+  Vkladá sa do Squarespace cez <iframe> v code bloku stránky.
   Obsahuje IBA aplikáciu: čiaru života s kartami, odoslanie modelácie,
   sekciu "Ak chcete ísť ďalej", použité predpoklady a disclaimer.
 
@@ -14,6 +14,10 @@
       hechtgit/adam-audio, vkladá sa sám. Nikdy ho sem nekopírovať —
       vznikli by dva prehrávače.
     · hlavička a pätička webu    → má ich Squarespace.
+
+  POMENOVANIE míľnikov (Dnes / Začiatok čerpania / Koniec čerpania) je
+  zhodné s výsledkovou stránkou modelácie, PDF a scenárom pre audio.
+  Pri zmene ho treba zmeniť vo všetkých štyroch výstupoch naraz.
 
   ÚPRAVY: uprav tento súbor, commitni a v code bloku stránky zvýš ?v=…
   (cache-buster), inak si prehliadače podržia starú verziu.
@@ -86,7 +90,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font
 .handle:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 .handle small{position:absolute;top:calc(100% + 3px);left:50%;transform:translateX(-50%);
   font:400 11.5px var(--sans);color:var(--muted);white-space:nowrap;letter-spacing:.02em}
-#lp.perp #n-end{display:none}
+#lp.perp #n-end .handle{opacity:.5}   /* pri nekonečnej rente ostáva, len neovplyvňuje výpočet */
 
 /* ===== karty — kapitoly vyrastajúce z milníka ===== */
 .card{position:absolute;width:326px;background:var(--surface);border:1px solid var(--line);padding:18px 20px 20px;z-index:5}
@@ -461,12 +465,12 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
           aria-valuemin="18" aria-valuemax="105" aria-valuenow="50"><span id="v-now">50</span><small>dnes</small></button>
       </div>
       <div class="node" id="n-start" style="--d:.9s">
-        <button class="handle" id="h-start" data-key="start" role="slider" aria-label="Kedy chcem začať poberať rentu"
-          aria-valuemin="18" aria-valuemax="149" aria-valuenow="65"><span id="v-start">65</span><small>prvá renta</small></button>
+        <button class="handle" id="h-start" data-key="start" role="slider" aria-label="Vek začiatku čerpania renty"
+          aria-valuemin="18" aria-valuemax="149" aria-valuenow="65"><span id="v-start">65</span><small>začiatok čerpania</small></button>
       </div>
       <div class="node" id="n-end" style="--d:1.05s">
-        <button class="handle" id="h-end" data-key="end" role="slider" aria-label="Dokedy chcem rentu poberať"
-          aria-valuemin="19" aria-valuemax="150" aria-valuenow="90"><span id="v-end">90</span><small id="lbl-end">posledná renta</small></button>
+        <button class="handle" id="h-end" data-key="end" role="slider" aria-label="Vek konca čerpania renty"
+          aria-valuemin="19" aria-valuemax="150" aria-valuenow="90"><span id="v-end">90</span><small id="lbl-end">koniec čerpania</small></button>
       </div>
     </div>
     <p class="mob" id="mob"></p>
@@ -519,7 +523,7 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
 
     <!-- PRVÁ RENTA -->
     <div class="card below" id="c-start" data-e style="--d:1.16s"><span class="card-stem" aria-hidden="true"></span>
-      <h2>Prvá renta</h2>
+      <h2>Začiatok čerpania</h2>
       <p class="when" id="w-start">O 15 rokov, keď budem mať 65</p>
 
       <label class="sl" id="sl-rent-wrap">
@@ -538,7 +542,7 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
 
     <!-- POSLEDNÁ RENTA -->
     <div class="card above" id="c-end" data-e style="--d:1.3s"><span class="card-stem" aria-hidden="true"></span>
-      <h2>Posledná renta</h2>
+      <h2>Koniec čerpania</h2>
       <p class="when" id="w-end">Vo veku 90 rokov</p>
 
       <div class="tg c2" id="tg-pension">
@@ -578,9 +582,9 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
     <p class="assump" id="assump"></p>
   </section>
   <footer class="disclaimer" data-e style="--d:1.74s">
-    Tento výpočet slúži na orientačné a vzdelávacie účely a vychádza zo zadaných hodnôt a zvolených predpokladov.
-    <b>Nejde o investičné poradenstvo ani investičné odporúčanie.</b> Budúce zhodnotenie nie je garantované,
-    hodnota investície môže kolísať a skutočný výsledok sa môže od modelácie líšiť. Minulé výnosy nie sú zárukou budúcich výnosov.
+    Tento modelový výpočet slúži výhradne na ilustračné a vzdelávacie účely. <b>Nejde o investičné poradenstvo,
+    investičné odporúčanie ani o ponuku či návrh na uzavretie zmluvy.</b> Zhodnotenie nie je garantované,
+    hodnota investície môže v čase kolísať a nie je zaručená návratnosť investovanej sumy.
   </footer>
 </div>
 
@@ -711,7 +715,7 @@ function render(){
   $('h-end').setAttribute('aria-valuenow',endEff);$('h-end').setAttribute('aria-valuemin',S.start+1);
   $('h-end').dataset.locked=(derived||openEnd)?'1':'0';
   $('c-end').classList.toggle('locked',derived||openEnd);
-  txt($('lbl-end'),derived?'dovtedy vydrží':'posledná renta');
+  txt($('lbl-end'),derived?'dovtedy vydrží':(openEnd?'životný horizont':'koniec čerpania'));
 
   /* podnadpisy kariet — reč o živote, nie o produkte */
   txt($('w-now'),`Mám ${S.now} rokov`);
@@ -785,8 +789,10 @@ function render(){
 
   /* Predpoklady sa opisujú všeobecne — bez konkrétneho profilu a percenta,
      aby orientačný prepočet nepôsobil ako prísľub konkrétneho výnosu. */
-  $('assump').textContent=o.warn?'':
-    `Predpokladané zhodnotenie jednotlivých investičných profilov vychádza z priemerného ročného výnosu indexu MSCI World za obdobie 2016–2025 a z modelového podielu akciovej zložky v jednotlivých profiloch · výsledné sumy sú po odpočítaní vstupného poplatku ${pctTxt(FEE_IN)} % a poplatku za správu ${pctTxt(FEE_M)} % ročne · ${o.rast?`inflácia ${pctTxt(o.infl)} % ročne`:'inflácia sa nezohľadňuje'} · dane z výnosov výpočet nezohľadňuje.`;
+  $('assump').textContent=o.warn?''
+    :'Výpočet pracuje s dlhodobými predpokladmi výnosu a rizika pre jednotlivé investičné profily. '
+     +'Vychádzajú z historických údajov kapitálových trhov a z modelového zastúpenia jednotlivých tried aktív. '
+     +'Ide o orientačné predpoklady, nie o garantovaný budúci výnos.';
 
   layout(o,endEff,openEnd);
 }
@@ -795,7 +801,7 @@ function render(){
 function layout(o,endEff,openEnd){
   const nN=$('n-now'),nS=$('n-start'),nE=$('n-end');
   nS.style.display=o.immediate?'none':'';
-  nE.style.display=openEnd?'none':'';
+  nE.style.display='';   /* tretí míľnik ostáva na čiare aj pri nekonečnej rente */
   if(isMob()){
     [[nN,S.now],[nS,S.start],[nE,endEff]].forEach(([n,v])=>{n.style.left=pct(v)+'%'});
     ['c-today','c-start','c-end'].forEach(id=>{$(id).style.left='';$(id).style.setProperty('--cx','50%')});
@@ -807,7 +813,7 @@ function layout(o,endEff,openEnd){
   const xs={now:pct(S.now)/100*axW,start:pct(S.start)/100*axW,end:pct(endEff)/100*axW};
 
   const MIN=66;
-  const vis=[{k:'now',x:xs.now},{k:'start',x:xs.start,off:o.immediate},{k:'end',x:xs.end,off:openEnd}].filter(h=>!h.off);
+  const vis=[{k:'now',x:xs.now},{k:'start',x:xs.start,off:o.immediate},{k:'end',x:xs.end}].filter(h=>!h.off);
   for(let i=1;i<vis.length;i++)vis[i].d=Math.max(0,vis[i-1].x+(vis[i-1].d||0)+MIN-vis[i].x);
   const over=(vis[vis.length-1].x+(vis[vis.length-1].d||0))-axW;
   if(over>0)vis.forEach(h=>h.d=(h.d||0)-over);
@@ -1012,10 +1018,7 @@ if(ANIM&&!REDUCED){
 </script>
 
 <script>
-/* ---- Vloženie do Squarespace: hlásenie výšky rodičovi ----
-   Code block na stránke počúva správu 'ph-renta-height' a podľa nej nastaví
-   výšku iframe. Bez toho by sa obsah orezal na pevnú výšku rámu.
-   Mechanizmus je zhodný s pôvodnou kalkulačkou (index.html). */
+/* ---- Vloženie do Squarespace: hlásenie výšky rodičovi ---- */
 (()=>{
   if(window.parent===window) return;
   const lockScroll=()=>{
@@ -1024,16 +1027,10 @@ if(ANIM&&!REDUCED){
   };
   const notify=()=>requestAnimationFrame(()=>{
     lockScroll();
-    /* celá výška dokumentu vrátane spodného odsadenia — meranie po poslednom
-       prvku by odrezalo padding a rám by potom skroloval sám */
     const h=Math.max(document.body.scrollHeight,document.documentElement.scrollHeight,
                      document.body.offsetHeight,document.documentElement.offsetHeight);
-    window.parent.postMessage({
-      type:'ph-renta-height',
-      height:Math.ceil(h),
-      scrollY:Math.round(window.scrollY),
-      h1Top:null
-    },'*');
+    window.parent.postMessage({type:'ph-renta-height',height:Math.ceil(h),
+      scrollY:Math.round(window.scrollY),h1Top:null},'*');
   });
   document.documentElement.classList.add('embedded');
   document.body.classList.add('embedded');
