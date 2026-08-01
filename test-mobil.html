@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Test na mobile — Stratégia privátnej renty</title>
+<!--
+  DOČASNÁ TESTOVACIA STRÁNKA — po overení na iPhone zmazať.
+
+  Napodobňuje presne to, čo na stránke robí Squarespace page injection:
+  drží adresu rámu, nastavuje jeho výšku podľa správ z rámu, na žiadosť
+  odroluje na začiatok a overuje pôvod aj odosielateľa každej správy.
+
+  Zmysel: na iPhone sa nedá otvoriť konzola, takže všetko podstatné
+  vypisujeme priamo na stránku. Vďaka tomu sa dá otestovať skutočný tok
+  vrátane tlače z modelácie vnútri rámu — čo samostatne otvorená
+  modelácia neoverí.
+
+  Rám sa zámerne otvára rovno na modelácii: tá je to podstatné (tlač) a
+  neodošle sa pritom žiadny kontakt do CRM. Tlačidlo nižšie prepne rám
+  na aplikáciu, ak treba prejsť aj celý tok od začiatku — vtedy ale
+  odoslanie formulára vytvorí skutočný kontakt.
+-->
+<style>
+  :root{--z:#ae8753}
+  *{box-sizing:border-box}
+  body{margin:0;background:#1a1a1a;color:#fff;
+    font:15px/1.5 -apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+  header{padding:16px 16px 10px}
+  h1{font-size:17px;margin:0 0 4px}
+  p{margin:0;color:#b7afa5;font-size:13.5px}
+  .ovladanie{display:flex;gap:8px;flex-wrap:wrap;padding:10px 16px}
+  button{flex:1 1 auto;min-height:44px;padding:0 14px;border:1px solid var(--z);
+    border-radius:4px;background:transparent;color:#fff;font:600 14px/1 inherit}
+  button.hlavne{background:var(--z);color:#2b2118;border-color:var(--z)}
+  #log{margin:10px 16px;padding:12px 14px;background:#242424;border:1px solid #3a3a3a;
+    border-radius:4px;font:12.5px/1.6 ui-monospace,Menlo,monospace;color:#d8d2c8;
+    white-space:pre-wrap;word-break:break-word;max-height:34vh;overflow:auto}
+  .stav{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;margin:0 16px 10px;
+    font-size:13px;color:#b7afa5}
+  .stav b{color:#fff;font-weight:600}
+  #ram{display:block;width:100%;border:0;height:800px;background:#1a1a1a}
+</style>
+</head>
+<body>
+<header>
+  <h1>Test na mobile</h1>
+  <p>Dočasná stránka na overenie toku v ráme. Nie je súčasťou webu.</p>
+</header>
+
+<div class="ovladanie">
+  <button class="hlavne" id="b-modelacia">Modelácia v ráme</button>
+  <button id="b-aplikacia">Celý tok od aplikácie</button>
+  <button id="b-vycisti">Vyčistiť výpis</button>
+</div>
+
+<div class="stav">
+  <span>V ráme:</span><b id="s-kde">—</b>
+  <span>Výška rámu:</span><b id="s-vyska">—</b>
+  <span>Šírka okna:</span><b id="s-sirka">—</b>
+  <span>Orientácia:</span><b id="s-orient">—</b>
+</div>
+
+<div id="log">Čakám…</div>
+
+<div id="ph-renta-calculator">
+  <iframe id="ram" title="Aplikácia"></iframe>
+</div>
+
+<script>
+(function () {
+  var HOST = "https://hechtgit.github.io";
+  var APP  = HOST + "/strategia-renty/cara-zivota.html?v=13";
+  var MODEL = HOST + "/strategia-renty/vysledok.html"
+    + "?now=50&start=65&end=90&rent=3000&existing=600000&combo=100000&infl=3"
+    + "&sit=build&mode=lump&goal=rent&pension=temporary&profile=dyn&infl_on=1";
+
+  var mount = document.getElementById("ph-renta-calculator");
+  var ram = document.getElementById("ram");
+  var log = document.getElementById("log");
+  var riadky = [];
+  var ocakavane = MODEL;          /* adresa, ktorú má rám držať */
+
+  function zapis(t) {
+    var cas = new Date().toTimeString().slice(0, 8);
+    riadky.push(cas + "  " + t);
+    if (riadky.length > 60) riadky.shift();
+    log.textContent = riadky.join("\n");
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function stav() {
+    document.getElementById("s-vyska").textContent = Math.round(ram.getBoundingClientRect().height) + " px";
+    document.getElementById("s-sirka").textContent = window.innerWidth + " px";
+    document.getElementById("s-orient").textContent =
+      window.innerWidth > window.innerHeight ? "na šírku" : "na výšku";
+  }
+
+  function nastav(url, popis) {
+    ocakavane = url;
+    ram.setAttribute("src", url);
+    document.getElementById("s-kde").textContent = popis;
+    zapis("otváram: " + popis);
+  }
+
+  /* ——— to isté, čo robí injection na ostrej stránke ——— */
+  function jeModelacia(s) { return !!s && s.indexOf("vysledok.html") > -1; }
+  function oprav() {
+    var f = mount.querySelector("iframe"); if (!f) return;
+    var s = f.getAttribute("src");
+    if (ocakavane === APP && !jeModelacia(s) && s !== APP) {
+      zapis("stráž: adresa prepísaná späť na aplikáciu");
+      f.setAttribute("src", APP);
+    }
+  }
+  new MutationObserver(oprav).observe(mount,
+    { childList: true, subtree: true, attributes: true, attributeFilter: ["src"] });
+
+  function odNasho(e) {
+    if (e.origin !== HOST) { zapis("odmietnutá správa z cudzieho pôvodu: " + e.origin); return null; }
+    var f = mount.querySelector("iframe");
+    if (!f || e.source !== f.contentWindow) { zapis("odmietnutá správa od cudzieho okna"); return null; }
+    return f;
+  }
+
+  var poslednaVyska = 0;
+  window.addEventListener("message", function (e) {
+    if (!e.data) return;
+    var f = odNasho(e); if (!f) return;
+
+    if (e.data.type === "ph-renta-height") {
+      var h = Number(e.data.height) || 0;
+      if (h < 400 || h > 8000) { zapis("výška mimo rozsahu: " + h); return; }
+      if (f.style.height !== h + "px") {
+        f.style.height = h + "px";
+        if (Math.abs(h - poslednaVyska) > 4) { zapis("výška rámu → " + h + " px"); poslednaVyska = h; }
+        stav();
+      }
+      return;
+    }
+    if (e.data.type === "ph-renta-na-zaciatok") {
+      zapis("rám požiadal o posun na začiatok");
+      var y = mount.getBoundingClientRect().top + window.pageYOffset - 8;
+      window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+    }
+  });
+
+  ram.addEventListener("load", function () {
+    var kde = ocakavane === APP ? "aplikácia" : "modelácia";
+    document.getElementById("s-kde").textContent = kde;
+    zapis("rám načítaný: " + kde);
+    stav();
+  });
+
+  document.getElementById("b-modelacia").addEventListener("click", function () {
+    nastav(MODEL, "modelácia");
+  });
+  document.getElementById("b-aplikacia").addEventListener("click", function () {
+    if (!confirm("Odoslanie formulára v aplikácii vytvorí skutočný kontakt v CRM. Pokračovať?")) return;
+    nastav(APP, "aplikácia");
+  });
+  document.getElementById("b-vycisti").addEventListener("click", function () {
+    riadky = []; log.textContent = "—";
+  });
+
+  window.addEventListener("resize", stav);
+  window.addEventListener("orientationchange", function () { setTimeout(stav, 300) });
+  window.addEventListener("error", function (e) { zapis("CHYBA: " + (e.message || e)) });
+
+  zapis("stránka pripravená");
+  nastav(MODEL, "modelácia");
+  stav();
+})();
+</script>
+</body>
+</html>
