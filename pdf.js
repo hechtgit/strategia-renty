@@ -45,7 +45,7 @@
     });
 
     var predpoklady = [];
-    document.querySelectorAll(".blok p").forEach(function (p) {
+    document.querySelectorAll(".blok p:not(.vystraha)").forEach(function (p) {
       var t = text(p);
       if (t) predpoklady.push(t);
     });
@@ -69,6 +69,7 @@
       ciel: text(document.getElementById("ciel")),
       karty: karty,
       suhrn: suhrn,
+      vystraha: text(document.querySelector(".blok .vystraha")),
       predpokladyNadpis: text(document.querySelector(".blok h2")),
       predpoklady: predpoklady,
       vychodiskaNadpis: text(document.querySelector(".recap h3")),
@@ -131,7 +132,13 @@
     }
 
     /* ——— hlavička ——— */
+    var vrchH = y;
     odstavec("MODELÁCIA PRIVÁTNEJ RENTY", 7.5, "bold", ZLATA, SIRKA, 1.2);
+    doc.setFont("Asap", "normal"); doc.setFontSize(7.5);
+    doc.setTextColor(SEDA[0], SEDA[1], SEDA[2]);
+    doc.text("Vyhotovené " + new Date().toLocaleDateString("sk-SK",
+      { day: "numeric", month: "long", year: "numeric" }),
+      OKRAJ + SIRKA, vrchH + 7.5 * 0.3528 * 0.8, { align: "right" });
     medzera(1.5);
     odstavec(d.nadpis, 17, "bold", TMAVA, SIRKA, 1.2);
     medzera(1.5);
@@ -143,11 +150,11 @@
     odstavec(d.plan, 12, "bold", TMAVA, SIRKA, 1.25);
     medzera(0.5);
     odstavec(d.ciel, 9, "normal", SEDA, SIRKA, 1.38);
-    medzera(2);
+    medzera(1.5);
 
     /* ——— míľniky ——— */
     d.karty.forEach(function (k) {
-      var vyskaBloku = 8 + k.riadky.length * 7.4 + (k.pod ? 4.6 : 0);
+      var vyskaBloku = 7.5 + k.riadky.length * 7.2 + (k.pod ? 4.4 : 0);
       miesto(vyskaBloku);
 
       var vrch = y;
@@ -171,7 +178,7 @@
         doc.setFontSize(13);
         doc.setTextColor(TMAVA[0], TMAVA[1], TMAVA[2]);
         doc.text(r[1], OKRAJ + SIRKA - 6, y, { align: "right" });
-        y += 7.4;
+        y += 7.2;
       });
 
       if (k.pod) {
@@ -238,10 +245,10 @@
       return yy + 8;
     }
     function odstavecStlpca(t, x, yy, sirkaS) {
-      doc.setFont("Asap", "normal"); doc.setFontSize(7.6);
+      doc.setFont("Asap", "normal"); doc.setFontSize(7.4);
       doc.setTextColor(SEDA[0], SEDA[1], SEDA[2]);
       var r = doc.splitTextToSize(t, sirkaS);
-      var vr = 7.6 * 0.3528 * 1.36;
+      var vr = 7.4 * 0.3528 * 1.32;
       r.forEach(function (riadok, i) { doc.text(riadok, x, yy + i * vr + 2.4); });
       return yy + r.length * vr + 2;
     }
@@ -264,7 +271,13 @@
       yP += Math.max(5.2, riadky.length * vrOdr + 1.4);
     });
 
-    y = Math.max(yL, yP) + 2;
+    y = Math.max(yL, yP) + 1.5;
+    if (d.vystraha) {
+      doc.setFont("Asap", "bold"); doc.setFontSize(7.8);
+      doc.setTextColor(TMAVA[0], TMAVA[1], TMAVA[2]);
+      doc.text(d.vystraha, OKRAJ, y + 2.5);
+      y += 6;
+    }
     ciara();
 
     /* ——— ďalší krok ——— */

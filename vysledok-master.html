@@ -100,6 +100,7 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
   color:var(--ink);margin:0 0 14px}
 .blok p{color:var(--muted);line-height:1.65;margin:0;font-size:14px}
 .blok p+p{margin-top:12px}
+.blok .vystraha{color:#d8c9b4;font-weight:600}
 .recap ul{margin:0;padding:0;list-style:none;color:var(--muted);font-size:14px;line-height:1.9}
 .recap li{padding-left:16px;position:relative}
 .recap li::before{content:"";position:absolute;left:0;top:.62em;width:5px;height:5px;
@@ -166,6 +167,7 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
   .hero-img{display:none}
   h1,h2,h3,.section-head strong{color:#1a1a1a}
   .lead,.section-head p,.next p,.blok p,.recap ul{color:#4a453e}
+  .blok .vystraha{color:#1a1a1a}
   .kicker{color:#8a6a3c}
   .track{height:auto;background:none;box-shadow:none}
   .track::before{display:none}
@@ -277,6 +279,7 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
       <h2>Použité predpoklady</h2>
       <p>Výpočet pracuje s dlhodobými predpokladmi výnosu a rizika pre jednotlivé investičné profily. Vychádzajú z historických údajov kapitálových trhov a z modelového zastúpenia jednotlivých tried aktív. Ide o orientačné predpoklady, nie o garantovaný budúci výnos.</p>
       <p id="metodika"></p>
+      <p class="vystraha">Minulá výkonnosť nie je spoľahlivým ukazovateľom budúcich výsledkov.</p>
     </div>
     <div class="recap">
       <h3>Východiská modelácie</h3>
@@ -416,19 +419,17 @@ function vykresli(){
   if(c){
     $('suhrn').hidden=false;
     if(c.nekonecne){
-      $('s1-k').textContent='Vaše vklady';       $('s1-v').textContent=fmtEur(c.vklady);
-      $('s2-k').textContent='Kapitál pri štarte'; $('s2-v').textContent=fmtEur(c.kapital);
-      $('s3-k').textContent='Renta';              $('s3-v').textContent='bez konca';
+      $('s1-k').textContent='Vložený kapitál';    $('s1-v').textContent=fmtEur(c.vklady);
+      $('s2-k').textContent='Kapitál pri štarte';  $('s2-v').textContent=fmtEur(c.kapital);
+      $('s3-k').textContent='Čerpanie';            $('s3-v').textContent='bez konca';
       $('suhrn-pod').textContent='Renta beží z výnosov, takže samotný kapitál sa nemíňa — '
         +'zostáva vám aj tým, ktorým ho raz odovzdáte.';
     }else{
-      $('s1-k').textContent='Vaše vklady';        $('s1-v').textContent=fmtEur(c.vklady);
-      $('s2-k').textContent='Celkovo vyplatené';  $('s2-v').textContent=fmtEur(c.vyplatene);
-      $('s3-k').textContent='Z toho výnos';       $('s3-v').textContent=fmtEur(c.vynos);
-      const nasobok=c.vklady>0?Math.round(c.vyplatene/c.vklady*10)/10:null;
-      $('suhrn-pod').textContent='Za celé obdobie čerpania vám scenár vyplatí '
-        +fmtEur(c.vyplatene)+(nasobok?', teda '+String(nasobok).replace('.',',')+'-násobok toho, čo doň vložíte':'')
-        +'. Rozdiel pokrýva výnos portfólia.';
+      $('s1-k').textContent='Vložený kapitál';           $('s1-v').textContent=fmtEur(c.vklady);
+      $('s2-k').textContent='Objem vyplatenej renty';    $('s2-v').textContent=fmtEur(c.vyplatene);
+      $('s3-k').textContent='Krytie výnosom portfólia';  $('s3-v').textContent=fmtEur(c.vynos);
+      $('suhrn-pod').textContent='Renta v objeme '+fmtEur(c.vyplatene)+' je počas čerpania krytá '
+        +'vloženým kapitálom a modelovaným výnosom portfólia. Sumy sú nominálne, pred zdanením.';
     }
   }
 
