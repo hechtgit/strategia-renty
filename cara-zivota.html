@@ -404,6 +404,12 @@ html,body{background:var(--bg)}
 .card :is(button,label.sw),.card input[type=range]{cursor:pointer}
 .card h2{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--on-gold);margin:0 0 5px;text-align:center}
 .card .when{font-size:13.5px;color:var(--on-gold-soft);text-align:center;margin-bottom:15px}
+/* Krokovanie veku v karte — na desktope sa vek nastavuje ťahaním, tu je zbytočné. */
+.step{display:none;width:44px;height:44px;padding:0;border:1px solid var(--on-gold-line);
+  border-radius:3px;background:transparent;color:var(--on-gold);
+  font:400 22px/1 var(--sans);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.step:active{background:rgba(43,33,24,.12)}
+.step[disabled]{opacity:.32;cursor:default}
 .tg{gap:6px}
 /* neaktívne prepínače sú svetlé, aby v karte nebolo priveľa tmavej plochy */
 .tg button{border:1px solid rgba(255,255,255,.34);background:rgba(255,255,255,.2);
@@ -454,6 +460,10 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
   .intro p{font-size:16px;line-height:1.7}
   .intro-audio{padding:16px 16px;margin:28px 0 4px}
   .intro-audio-top{gap:14px}
+  /* Míľniky sa na dotykovom displeji ťahať nedajú — vek sa nastavuje priamo v karte. */
+  .when-row{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:8px}
+  .when-row .when{margin-bottom:0}
+  .step{display:block}
 }
 </style>
 </head>
@@ -494,7 +504,11 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
     <!-- DNES -->
     <div class="card above lead" id="c-today" data-e style="--d:1.02s"><span class="card-stem" aria-hidden="true"></span>
       <h2>Dnes</h2>
-      <p class="when" id="w-now">Mám 50 rokov</p>
+      <div class="when-row">
+        <button type="button" class="step" data-step="now" data-dir="-1" aria-label="Znížiť môj vek o rok">−</button>
+        <p class="when" id="w-now">Mám 50 rokov</p>
+        <button type="button" class="step" data-step="now" data-dir="1" aria-label="Zvýšiť môj vek o rok">+</button>
+      </div>
 
       <div class="tg c2" id="tg-sit">
         <button type="button" class="on" data-sit="build">Majetok budujem</button>
@@ -540,7 +554,11 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
     <!-- PRVÁ RENTA -->
     <div class="card below" id="c-start" data-e style="--d:1.16s"><span class="card-stem" aria-hidden="true"></span>
       <h2>Začiatok čerpania</h2>
-      <p class="when" id="w-start">O 15 rokov, keď budem mať 65</p>
+      <div class="when-row">
+        <button type="button" class="step" data-step="start" data-dir="-1" aria-label="Začať čerpať o rok skôr">−</button>
+        <p class="when" id="w-start">O 15 rokov, keď budem mať 65</p>
+        <button type="button" class="step" data-step="start" data-dir="1" aria-label="Začať čerpať o rok neskôr">+</button>
+      </div>
 
       <label class="sl" id="sl-rent-wrap">
         <span class="row"><span class="k" id="rent-k">Chcem mesačne (v dnešných cenách)</span><span class="v" id="rent-v">3 000 €</span></span>
@@ -559,7 +577,11 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
     <!-- POSLEDNÁ RENTA -->
     <div class="card above" id="c-end" data-e style="--d:1.3s"><span class="card-stem" aria-hidden="true"></span>
       <h2>Koniec čerpania</h2>
-      <p class="when" id="w-end">Vo veku 90 rokov</p>
+      <div class="when-row">
+        <button type="button" class="step" data-step="end" data-dir="-1" aria-label="Skrátiť čerpanie o rok">−</button>
+        <p class="when" id="w-end">Vo veku 90 rokov</p>
+        <button type="button" class="step" data-step="end" data-dir="1" aria-label="Predĺžiť čerpanie o rok">+</button>
+      </div>
 
       <div class="tg c2" id="tg-pension">
         <button type="button" class="on" data-pension="temporary">Na určitý čas</button>
@@ -784,6 +806,7 @@ function render(){
   $('h-start').setAttribute('aria-valuenow',S.start);$('h-start').setAttribute('aria-valuemin',S.now);$('h-start').setAttribute('aria-valuemax',S.end-1);
   $('h-end').setAttribute('aria-valuenow',endEff);$('h-end').setAttribute('aria-valuemin',S.start+1);
   $('h-end').dataset.locked=(derived||openEnd)?'1':'0';
+  syncSteps(endEff,openEnd,derived);
   $('c-end').classList.toggle('locked',derived||openEnd);
   txt($('lbl-end'),derived?'dovtedy vydrží':(openEnd?'životný horizont':'koniec čerpania'));
 
@@ -977,6 +1000,42 @@ Object.entries({'c-today':'now','c-start':'start','c-end':'end'}).forEach(([id,k
     beginDrag(e,key,null);
   });
 });
+
+/* ===== krokovanie veku v karte (mobil) =====
+   Na dotykovom displeji sa míľnik ťahať nedá — o vek, začiatok a koniec čerpania
+   sa preto stará dvojica tlačidiel priamo v karte. Podržanie krokuje ďalej, aby
+   sa dalo prejsť z päťdesiatky na šesťdesiatpäť bez pätnástich ťuknutí. */
+document.querySelectorAll('.step').forEach(b=>{
+  const key=b.dataset.step,dir=+b.dataset.dir;
+  let cakanie=null,opakovanie=null;
+  const krok=()=>setAge(key,S[key]+dir);
+  const stop=()=>{clearTimeout(cakanie);clearInterval(opakovanie);cakanie=opakovanie=null};
+  b.addEventListener('pointerdown',e=>{
+    if(b.disabled)return;
+    e.preventDefault();                       /* aby ťuknutie nevyvolalo aj scroll */
+    b.setPointerCapture&&b.setPointerCapture(e.pointerId);
+    krok();
+    cakanie=setTimeout(()=>{opakovanie=setInterval(()=>{
+      if(b.disabled){stop();return}
+      krok();
+    },110)},420);
+  });
+  ['pointerup','pointercancel','pointerleave'].forEach(t=>b.addEventListener(t,stop));
+});
+
+/* Hranice krokovania sa musia zhodovať s tým, čo dovolí setAge — inak by tlačidlo
+   zostalo aktívne, no ťuknutie by už nič nezmenilo. */
+function syncSteps(endEff,openEnd,derived){
+  const medze={
+    now:[S.now>18,S.now<S.start],
+    start:[S.start>S.now,S.start<S.end-1],
+    end:[!(derived||openEnd)&&S.end>S.start+1,!(derived||openEnd)&&S.end<150]
+  };
+  document.querySelectorAll('.step').forEach(b=>{
+    const m=medze[b.dataset.step];
+    if(m)b.disabled=!(+b.dataset.dir<0?m[0]:m[1]);
+  });
+}
 
 /* ===== posuvníky ===== */
 function bindSlider(slId,valId,scale,get,set,unit){
