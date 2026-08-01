@@ -31,7 +31,7 @@
     var karty = [];
     ["m-today", "m-start", "m-end"].forEach(function (id) {
       var m = document.getElementById(id);
-      if (!m || m.hidden) return;
+      if (!m || m.hidden || m.closest('[hidden]')) return;
       var riadky = [];
       m.querySelectorAll(".label").forEach(function (l) {
         var v = l.nextElementSibling;
@@ -252,12 +252,16 @@
 
     var yP = nadpisStlpca(d.vychodiskaNadpis, xP, vrchS2);
     doc.setFont("Asap", "normal"); doc.setFontSize(8.2);
+    var vrOdr = 8.2 * 0.3528 * 1.34;
     d.vychodiska.forEach(function (v) {
       doc.setTextColor(SEDA[0], SEDA[1], SEDA[2]);
       doc.setFillColor(ZLATA[0], ZLATA[1], ZLATA[2]);
       doc.circle(xP + 1.3, yP + 2.1, 0.7, "F");
-      doc.text(doc.splitTextToSize(v, stlp - 5), xP + 4.6, yP + 3);
-      yP += 5.2;
+      var riadky = doc.splitTextToSize(v, stlp - 5);
+      riadky.forEach(function (r, i) { doc.text(r, xP + 4.6, yP + 3 + i * vrOdr); });
+      /* dlhá odrážka sa zalomí — posun musí ísť podľa počtu riadkov,
+         inak nasledujúca odrážka pristane na nej */
+      yP += Math.max(5.2, riadky.length * vrOdr + 1.4);
     });
 
     y = Math.max(yL, yP) + 2;

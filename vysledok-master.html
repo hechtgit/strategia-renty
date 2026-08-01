@@ -129,7 +129,7 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
   .shell{padding:14px}
   .hero{grid-template-columns:1fr}
   .hero-copy{padding:35px 26px}
-  .hero-img{height:260px;grid-row:2}
+  .hero-img{grid-row:2}
   .btn-primary,.btn-ghost{width:100%}
   .line-wrap{padding:40px 5px}
   /* Karty sú deťmi osi — skryť os celú by skrylo aj ich. Zmizne preto len jej
@@ -165,7 +165,7 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
   .hero-copy{padding:22px 0}
   .hero-img{display:none}
   h1,h2,h3,.section-head strong{color:#1a1a1a}
-  .lead,.section-head p,.next p,details p,.recap ul{color:#4a453e}
+  .lead,.section-head p,.next p,.blok p,.recap ul{color:#4a453e}
   .kicker{color:#8a6a3c}
   .track{height:auto;background:none;box-shadow:none}
   .track::before{display:none}
@@ -560,16 +560,13 @@ if(o.warn){
   $('warn').textContent=o.warn;
   $('plan').hidden=true;
   document.querySelector('.assumptions').hidden=true;
+  /* Nie je čo dať do PDF — tlačidlo by vygenerovalo prázdny dokument. */
+  const bp=$('btn-pdf');
+  if(bp){bp.disabled=true;bp.title='Modeláciu sa nepodarilo spočítať';}
 }else{
   vykresli();
 }
 
-/* Tlač do PDF: prehliadač vypisuje iba rozbalené detaily, preto sa metodika
-   pred tlačou otvorí a po nej vráti do pôvodného stavu. */
-const det=document.querySelector('details');
-let bolOtvoreny=false;
-addEventListener('beforeprint',()=>{bolOtvoreny=det.open;det.open=true});
-addEventListener('afterprint',()=>{det.open=bolOtvoreny});
 /* PDF sa skladá priamo v prehliadači a stiahne sa ako súbor. Tlačový dialóg
    bol funkčný, ale na telefóne z neho klient musí PDF ešte vyloviť — a súbor
    je to, čo naozaj chce. Generátor aj písmo (~440 kB) sa načítajú až po
