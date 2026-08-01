@@ -1,30 +1,4 @@
 <!doctype html>
-<!--
-  ČIARA ŽIVOTA — aplikácia pre stránku Stratégia privátnej renty
-  ================================================================
-  POZOR: tento súbor je vygenerovaný skriptom zostav.py z master súboru.
-  Needituj ho priamo — zmeny sa pri najbližšom zostavení stratia.
-  Uprav master, spusti `python3 zostav.py`, commitni a zvýš ?v=… v code bloku stránky.
-
-  Vkladá sa do Squarespace cez <iframe> v code bloku stránky.
-  Obsahuje IBA aplikáciu: čiaru života s kartami, odoslanie modelácie,
-  sekciu "Ak chcete ísť ďalej", použité predpoklady a disclaimer.
-
-  ČO TU ZÁMERNE NIE JE a prečo:
-    · úvodné texty a hero obraz  → zostávajú v Squarespace nad iframe,
-      pretože audio prehrávač (adam-player.js) sa zachytáva o kotvu v úvode.
-      Presunom sem by stratil svoj bod ukotvenia.
-    · audio prehrávač            → dodáva ho adam-player.js z repozitára
-      hechtgit/adam-audio, vkladá sa sám. Nikdy ho sem nekopírovať —
-      vznikli by dva prehrávače.
-    · hlavička a pätička webu    → má ich Squarespace.
-
-  POMENOVANIE míľnikov (Dnes / Začiatok čerpania / Koniec čerpania) je
-  zhodné s výsledkovou stránkou modelácie, PDF a scenárom pre audio.
-  Pri zmene ho treba zmeniť vo všetkých štyroch výstupoch naraz.
-
-  index.html vedľa je pôvodná verzia kalkulačky — nemeniť, drží živú stránku.
--->
 <html lang="sk" data-anim="1">
 <head>
 <meta charset="utf-8">
@@ -48,7 +22,6 @@
 *{box-sizing:border-box}
 /* vlastné display pravidlá nesmú prebiť skrytie cez atribút hidden */
 [hidden]{display:none!important}
-html.embedded,body.embedded{overflow:hidden;background:transparent}
 html{background:var(--bg)}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5;letter-spacing:.2px}
 #lp{max-width:1340px;margin:0 auto;padding:26px 34px 34px}
@@ -473,9 +446,45 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
 </style>
 </head>
 <body>
+<header class="site-top">
+  <div class="site-brand">
+    <span class="site-brand-mark" aria-hidden="true">▲</span>
+    <span><strong>Petr Hechtberger</strong><small>WEALTH MANAGEMENT · SWISS LIFE SELECT</small></span>
+  </div>
+  <span class="site-menu" aria-label="Menu">☰</span>
+</header>
 
+<section class="intro-lead">
+  <div class="lead-text" data-e style="--d:.05s">
+    <h1>Stratégia privátnej renty</h1>
+    <a class="intro-jump" href="#kalkulacka">Prejsť priamo k aplikácii <span aria-hidden="true">↓</span></a>
 
+    <h2>Prečo privátna renta</h2>
+    <p>Majetok sám osebe nie je príjem. Ako Wealth manager senior sa v praxi opakovane stretávam s klientmi, ktorí majú hodnotné portfólio, no nevedia s istotou povedať, koľko si z neho môžu mesačne vyplácať bez rizika, že ho vyčerpajú skôr, než plánovali.</p>
+    <p><strong>Stratégia privátnej renty rieši práve toto:</strong> ako naakumulovaný majetok premeniť na pravidelný, infláciou chránený príjem, ktorý má vydržať aj desaťročia. Nie je to produkt. Je to architektúra na mieru vášmu majetku, veku a cieľom.</p>
+  </div>
+  <figure class="lead-img" data-e style="--d:.18s">
+    <img src="hero-privatna-renta.jpg"
+         alt="Manželský pár po päťdesiatke na palube lode pri pobreží za súmraku"
+         width="1774" height="887" decoding="async">
+  </figure>
+</section>
 
+<article class="intro">
+  <div class="intro-audio">
+    <div class="intro-audio-top">
+      <div><b>Nechce sa vám čítať?</b><small>Adam vám stručne predstaví aplikáciu.</small></div>
+      <button type="button" aria-label="Prehrať predstavenie aplikácie">▶</button>
+    </div>
+    <div class="intro-audio-line" aria-hidden="true"></div>
+  </div>
+
+  <h2>Ako aplikácia funguje?</h2>
+  <p>Na začiatku si zvolíte jeden z dvoch prístupov. <strong>Majetok budujem</strong> ukáže, koľko treba naakumulovať a koľko investovať, aby bola želaná renta možná. <strong>Majetok už mám</strong> ukáže, ako dlho by majetok vydržal, prípadne akú rentu umožní.</p>
+  <p>Na samotný orientačný prepočet <strong>nezadávate meno, e-mail ani telefón</strong>. Pracuje sa iba so vstupmi potrebnými pre modelový výpočet.</p>
+</article>
+
+<div class="calculator-divider" aria-hidden="true"></div>
 
 <div id="lp"><span id="kalkulacka" aria-hidden="true"></span>
 
@@ -1303,37 +1312,6 @@ if(ANIM&&!REDUCED){
   new MutationObserver(glow).observe(document.getElementById('axis'),
     {attributes:true,attributeFilter:['style'],subtree:true});
   glow();
-})();
-</script>
-
-<script>
-/* ---- Vloženie do Squarespace: hlásenie výšky rodičovi ----
-   Iframe nemá vlastný scroll — o výšku sa stará rodičovská stránka. Aplikácia jej
-   po každej zmene rozmeru pošle svoju skutočnú výšku a drží sa na začiatku, aby
-   vnorené posúvanie nebralo scroll celej stránke. */
-(()=>{
-  if(window.parent===window) return;
-  const lockScroll=()=>{
-    try{ history.scrollRestoration='manual' }catch(e){}
-    if(window.scrollX!==0||window.scrollY!==0) window.scrollTo(0,0);
-  };
-  const notify=()=>requestAnimationFrame(()=>{
-    lockScroll();
-    const h=Math.max(document.body.scrollHeight,document.documentElement.scrollHeight,
-                     document.body.offsetHeight,document.documentElement.offsetHeight);
-    window.parent.postMessage({type:'ph-renta-height',height:Math.ceil(h),
-      scrollY:Math.round(window.scrollY),h1Top:null},'*');
-  });
-  document.documentElement.classList.add('embedded');
-  document.body.classList.add('embedded');
-  lockScroll();
-  addEventListener('pageshow',lockScroll);
-  addEventListener('scroll',lockScroll,{passive:true});
-  addEventListener('load',notify);
-  addEventListener('resize',()=>{window.scrollTo(0,0);notify()});
-  if('ResizeObserver' in window) new ResizeObserver(notify).observe(document.body);
-  [0,100,500,1500,3000].forEach(ms=>setTimeout(notify,ms));
-  setInterval(notify,1500);
 })();
 </script>
 </body>

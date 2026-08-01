@@ -14,10 +14,13 @@ Vzniknú dva:
                        aplikácie (medzi značkami JADRO:ZAČIATOK a JADRO:KONIEC) —
                        matematika tak žije na jednom mieste a nemá ako sa rozísť.
 
+Oba mastre (cara-zivota-master.html, vysledok-master.html) sú v tomto repozitári —
+edituje sa vždy master, nikdy vygenerovaný súbor.
+
 Použitie:
     python3 zostav.py [cesta/k/masteru.html]
 
-Bez argumentu si vezme cestu z premennej MASTER nižšie. Po zostavení treba súbory
+Bez argumentu berie cara-zivota-master.html vedľa seba. Po zostavení treba súbory
 commitnúť a v code bloku stránky zvýšiť ?v=… (cache-buster), inak si prehliadače
 podržia starú verziu.
 """
@@ -25,8 +28,7 @@ import re
 import sys
 from pathlib import Path
 
-MASTER = Path('/Users/hecht/.codex/visualizations/2026/07/31/'
-              '019fb8e0-fb5d-7a72-a1b6-68903debfb3f/cara-zivota-codex-21-brand.html')
+MASTER = Path(__file__).with_name('cara-zivota-master.html')
 VYSTUP = Path(__file__).with_name('cara-zivota.html')
 
 VYSLEDOK_MASTER = Path(__file__).with_name('vysledok-master.html')

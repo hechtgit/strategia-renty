@@ -485,6 +485,12 @@ function rozostup(){
   });
 }
 addEventListener('resize',()=>{if(!o.warn)prisposobOsi()});
+/* Odsadenie okolo čiary vychádza z výšky kariet, a tá sa mení, keď dobehnú webfonty.
+   Bez prepočtu po ich načítaní by po studenom načítaní karta preliala do sekcie pod
+   sebou. Pred tlačou to isté — tam ide o zalomenie strán. */
+if(document.fonts&&document.fonts.ready)
+  document.fonts.ready.then(()=>{if(!o.warn)prisposobOsi()});
+addEventListener('beforeprint',()=>{if(!o.warn)prisposobOsi()});
 
 /* Scenár sa vykresľuje až tu — vyššie deklarované konštanty musia existovať skôr,
    než sa ich vykresľovanie dotkne. */

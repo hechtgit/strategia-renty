@@ -321,11 +321,17 @@ function applyScenarioFromUrl(){
   NUM_KEYS.forEach(k=>{const v=Number(QS.get(k));if(QS.has(k)&&Number.isFinite(v))S[k]=v});
   Object.entries(ENUM_KEYS).forEach(([k,ok])=>{const v=QS.get(k);if(ok.includes(v))S[k]=v});
   if(QS.has('infl_on'))S.inflOn=QS.get('infl_on')==='1';
-  /* poradie míľnikov musí platiť aj pri ručne prepísanom odkaze */
-  S.now=Math.min(Math.max(18,Math.round(S.now)),99);
-  S.start=Math.min(Math.max(S.now,Math.round(S.start)),120);
-  S.end=Math.min(150,Math.max(S.start+1,Math.round(S.end)));
-  S.infl=Math.min(10,Math.max(0,S.infl));
+  /* Odkaz môže niekto prepísať ručne. Každá hodnota preto musí prejsť tými istými
+     hranicami, aké dovolí ovládanie — inak by sa dala vyrobiť modelácia (a PDF)
+     s nezmyselnou sumou, ktorá vyzerá ako náš výstup. */
+  const medzi=(v,min,max)=>Math.min(max,Math.max(min,v));
+  S.now=Math.round(medzi(S.now,18,99));
+  S.start=Math.round(medzi(S.start,S.now,120));
+  S.end=Math.round(medzi(S.end,S.start+1,150));
+  S.infl=medzi(S.infl,0,10);
+  S.rent=Math.round(medzi(S.rent,500,50000));
+  S.existing=Math.round(medzi(S.existing,50000,30000000));
+  S.combo=Math.round(medzi(S.combo,0,10000000));
 }
 applyScenarioFromUrl();
 
@@ -615,6 +621,12 @@ function rozostup(){
   });
 }
 addEventListener('resize',()=>{if(!o.warn)prisposobOsi()});
+/* Odsadenie okolo čiary vychádza z výšky kariet, a tá sa mení, keď dobehnú webfonty.
+   Bez prepočtu po ich načítaní by po studenom načítaní karta preliala do sekcie pod
+   sebou. Pred tlačou to isté — tam ide o zalomenie strán. */
+if(document.fonts&&document.fonts.ready)
+  document.fonts.ready.then(()=>{if(!o.warn)prisposobOsi()});
+addEventListener('beforeprint',()=>{if(!o.warn)prisposobOsi()});
 
 /* Scenár sa vykresľuje až tu — vyššie deklarované konštanty musia existovať skôr,
    než sa ich vykresľovanie dotkne. */
