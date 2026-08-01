@@ -309,7 +309,12 @@ function scenarioParams(){
   p.set('infl_on',S.inflOn?'1':'0');
   return p;
 }
-function scenarioURL(){return VYSTUP_BASE+'?vystup&'+scenarioParams().toString()}
+/* Pri lokálnom otvorení odkaz vedie späť do aplikácie, ktorá režim výstupu pozná
+   podľa ?vystup. Výsledková stránka ten prepínač nepotrebuje. */
+function scenarioURL(){
+  const lokalne=location.protocol==='file:';
+  return VYSTUP_BASE+'?'+(lokalne?'vystup&':'')+scenarioParams().toString();
+}
 
 function applyScenarioFromUrl(){
   if(!QS.has('now'))return;
@@ -434,11 +439,14 @@ function vykresli(){
     :`počas ${yrs(Math.max(0,endEff-S.start))}`;
   if(S.sit==='build'||S.goal==='rent'){
     const suma=S.sit==='build'?S.rent:o.R;
+    /* Pri „majetok už mám" je renta v cenách roku, keď sa čerpanie začína, nie
+       v dnešných. Bez tejto poznámky si ju klient prečíta ako dnešnú hodnotu. */
     $('ciel').innerHTML=S.sit==='build'
       ? `Vaším cieľom je privátna renta <strong>${fmtEur(suma)} mesačne</strong> v dnešnej hodnote `
         +`od ${S.start} rokov ${dokedy}.`
       : `Váš majetok môže od ${S.start} rokov priniesť privátnu rentu `
-        +`<strong>${fmtEur(suma)} mesačne</strong> ${dokedy}.`;
+        +`<strong>${fmtEur(suma)} mesačne</strong>`
+        +(o.rast?' (pri zohľadnení inflácie)':'')+` ${dokedy}.`;
   }else{
     $('ciel').innerHTML=`Pri rente <strong>${fmtEur(S.rent)} mesačne</strong> v dnešnej hodnote `
       +`od ${S.start} rokov by váš majetok `

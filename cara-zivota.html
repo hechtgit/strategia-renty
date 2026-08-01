@@ -373,7 +373,7 @@ html,body{background:var(--bg)}
 .seg,.seg.past,.seg.build,.seg.rent{height:100%;background:transparent!important}
 #lp.perp .seg.rent{-webkit-mask-image:none;mask-image:none}
 .seg span{color:var(--axis-ink)!important;font-size:14px;font-weight:500;line-height:1.15;text-align:center;white-space:normal}
-.tick{top:17px;color:rgba(26,26,26,.22);font-size:15px;font-weight:500;z-index:1}
+.tick{top:17px;color:rgba(43,33,24,.62);font-size:15px;font-weight:500;z-index:1}
 .tick::before{display:none}
 .axis-cap{display:none}
 .longevity{top:59px;color:var(--gold-strong)}
@@ -464,6 +464,11 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
   .when-row{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:8px}
   .when-row .when{margin-bottom:0}
   .step{display:block}
+  /* dotykové ciele: prsty potrebujú viac miesta ako kurzor */
+  .tg button{min-height:44px}
+  .sw{min-height:44px}
+  .sw input{width:22px;height:22px}
+  input[type=range]{height:34px}
 }
 </style>
 </head>
@@ -686,7 +691,12 @@ function scenarioParams(){
   p.set('infl_on',S.inflOn?'1':'0');
   return p;
 }
-function scenarioURL(){return VYSTUP_BASE+'?vystup&'+scenarioParams().toString()}
+/* Pri lokálnom otvorení odkaz vedie späť do aplikácie, ktorá režim výstupu pozná
+   podľa ?vystup. Výsledková stránka ten prepínač nepotrebuje. */
+function scenarioURL(){
+  const lokalne=location.protocol==='file:';
+  return VYSTUP_BASE+'?'+(lokalne?'vystup&':'')+scenarioParams().toString();
+}
 
 function applyScenarioFromUrl(){
   if(!QS.has('now'))return;
@@ -842,7 +852,7 @@ function render(){
   let th='';
   for(let a=40;a<AXMAX;a+=10){const p=pct(a);
     if(hp.some(h=>Math.abs(h-p)<near))continue;
-    th+=`<span class="tick" style="left:${p}%">${a}</span>`}
+    th+=`<span class="tick" aria-hidden="true" style="left:${p}%">${a}</span>`}
   $('ticks').innerHTML=th;
 
   /* karta DNES */
