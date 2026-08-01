@@ -672,8 +672,13 @@ $('btn-pdf').addEventListener('click',()=>{
   if(window.parent===window){window.print();return}
   const u=new URL(location.href);
   u.searchParams.set('tlac','1');
-  const w=window.open(u.toString(),'_blank','noopener');
-  if(!w)window.print();               /* keby okno predsa neprešlo */
+  /* Pozor: window.open s príznakom 'noopener' vracia null aj vtedy, keď okno
+     otvorí. Podmienka „keď null, tlač tu" by potom spustila tlač v ráme zakaždým —
+     klient by dostal dva tlačové dialógy. Okno preto otvárame bez toho príznaku
+     a väzbu na otvárača zrušíme sami. */
+  const w=window.open(u.toString(),'_blank');
+  if(w){try{w.opener=null}catch(e){}}
+  else window.print();               /* okno naozaj neprešlo — tlačíme tu */
 });
 
 /* Otvorené s ?tlac=1 znamená „vytlač sa" — po dopočítaní rozloženia a fontov. */

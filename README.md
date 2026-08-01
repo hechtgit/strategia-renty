@@ -14,6 +14,7 @@ Aplikácia a modelácia pre stránku
 | `vysledok.html` | Vygenerované. Otvára si ju klient z e-mailu. **Needitovať.** |
 | `index.html` | Pôvodná verzia kalkulačky. Drží živú stránku, kým sa nová nezverejní. **Nemeniť.** |
 | `hero-privatna-renta.jpg` | Obraz pre úvod aplikácie aj modelácie. |
+| `squarespace-injection.html` | **Zdrojová kópia** kódu vloženého v Squarespace (Page Settings → Advanced). Squarespace nie je verzionovaný — po každej zmene tam ju sem prekopíruj a commitni. Bez tohto kódu tok nefunguje. |
 
 ## Ako spraviť zmenu
 
@@ -26,6 +27,8 @@ python3 zostav.py
 3. Commitni a pushni.
 4. V Squarespace v Page Settings → Advanced zvýš `?v=…` pri `cara-zivota.html`.
    Bez toho si prehliadače podržia starú verziu.
+5. Rovnaký obsah ulož do `squarespace-injection.html` a commitni — inak sa
+   zdrojová kópia rozíde s tým, čo naozaj beží na stránke.
 
 GitHub Pages nasadzuje zhruba minútu, kým sa nová verzia objaví na `hechtgit.github.io`.
 

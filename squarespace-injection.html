@@ -1,0 +1,201 @@
+<!-- ===================================================================
+     SQUARESPACE PAGE INJECTION — Stratégia privátnej renty
+     ===================================================================
+     Toto je zdrojová kópia toho, čo je vložené v Squarespace v
+     Page Settings → Advanced → Page Header Code Injection.
+     Squarespace nie je verzionovaný — táto kópia je jediné miesto,
+     kde sa dá zmena dohľadať, porovnať a obnoviť. Po každej úprave
+     v Squarespace ju sem prekopíruj a commitni, inak sa rozídu.
+
+     Bez tohto kódu nový tok nefunguje. Rieši štyri veci, ktoré
+     stránka sama nevie:
+       · prepína iframe na novú verziu aplikácie a bráni tomu, aby ju
+         pôvodný code block stránky prepísal späť na starú
+       · nastavuje výšku iframu podľa obsahu (pôvodný blok si výšku iba
+         zapíše do atribútu, ale rámu ju nikdy nenastaví — aplikácia aj
+         modelácia sú vyššie než jeho pevných 1700 px)
+       · na žiadosť modelácie odroluje stránku na začiatok rámu
+       · overuje pôvod aj odosielateľa každej správy
+
+     Prepne iframe na cara-zivota.html a doplní úvod s obrazom.
+     Pôvodný code block stránky zostáva nedotknutý — po zmazaní tohto
+     bloku sa stránka vráti do pôvodného stavu.
+
+     Aplikácia:  hechtgit/strategia-renty → cara-zivota.html
+     Audio:      adam-player.js sa zachytí o značku data-adam-audio-slug
+     ================================================================ -->
+<style>
+  #ph-renta-intro{display:none!important}          /* pôvodný úvod, ak by sa vložil */
+  /* CTA v site-wide pätičke je na tejto stránke duplicitná — vlastnú výzvu
+     nesie sekcia „Ak chcete ísť ďalej“ pod aplikáciou. Na ostatných
+     stránkach pätička zostáva nedotknutá. */
+  .ph-footer-cta{display:none!important}
+  .ph-site-footer .ph-footer-main{padding-top:36px}
+  .cz-lead{max-width:1240px;margin:0 auto;padding:56px 28px 8px;
+    display:grid;grid-template-columns:minmax(0,1.02fr) minmax(0,.98fr);gap:46px;align-items:center}
+  .cz-lead-text{min-width:0}
+  .cz-lead-text h1{font-family:"pt-serif-pro-extended","PT Serif",Georgia,serif;
+    font-size:clamp(42px,6vw,72px);font-weight:400;line-height:1.04;letter-spacing:-.025em;margin:0 0 22px;color:#fff}
+  .cz-lead-text h2{font-family:"pt-serif-pro-extended","PT Serif",Georgia,serif;
+    font-size:clamp(27px,3vw,36px);font-weight:400;line-height:1.15;margin:38px 0 16px;color:#fff}
+  .cz-lead-text p{font-size:17px;line-height:1.75;color:rgba(255,255,255,.86);margin:0 0 18px}
+  .cz-lead-text p strong{color:#fff;font-weight:600}
+  .cz-jump{display:inline-flex;align-items:center;gap:13px;color:#c49a63;font-weight:600;
+    text-decoration:none;border-bottom:1px solid #ae8753;padding:0 0 7px}
+  .cz-jump:hover{color:#fff;border-bottom-color:#c49a63}
+  .cz-lead-img{margin:0;min-width:0;overflow:hidden;border-radius:5px;aspect-ratio:16/10;background:#242424}
+  .cz-lead-img img{display:block;width:100%;height:100%;object-fit:cover}
+  .cz-body{max-width:910px;margin:0 auto;padding:8px 28px 20px}
+  .cz-body h2{font-family:"pt-serif-pro-extended","PT Serif",Georgia,serif;
+    font-size:clamp(27px,3vw,36px);font-weight:400;line-height:1.15;margin:40px 0 16px;color:#fff}
+  .cz-body p{font-size:17px;line-height:1.75;color:rgba(255,255,255,.86);margin:0 0 18px}
+  .cz-body p strong{color:#fff;font-weight:600}
+  @media(max-width:860px){
+    .cz-lead{grid-template-columns:1fr;gap:26px;padding:30px 16px 4px}
+    .cz-lead-text h2{margin-top:30px}
+    .cz-lead-img{aspect-ratio:16/9}
+    .cz-body{padding:4px 16px 16px}
+  }
+</style>
+<script>
+(function () {
+  if (window.__czNovaVerzia) return;
+  window.__czNovaVerzia = true;
+
+  var APP = "https://hechtgit.github.io/strategia-renty/cara-zivota.html?v=13";
+  var HERO = "https://hechtgit.github.io/strategia-renty/hero-privatna-renta.jpg?v=2";
+
+  function mount() { return document.getElementById("ph-renta-calculator"); }
+
+  /* 1. Aplikácia: prepnutie rámu na novú verziu.
+
+     Pôvodný code block stránky (ph-renta-embed-fix-v1-js) si adresu rámu prepisuje
+     sám a dosadzuje do nej vlastnú, zamrznutú verziu. Beží po nás, takže jednorazové
+     nastavenie by neprežilo — a hlavne by tým prestal fungovať cache-buster, čiže
+     po nasadení novej verzie by návštevníkom zostala v cache tá stará.
+     Adresu preto strážime a po každom cudzom zásahu ju vrátime.
+
+     Strážiť sa ale smie iba dovtedy, kým je v ráme aplikácia. Po odoslaní kontaktu
+     si rám sám prejde na modeláciu — tú by sme inak okamžite prepísali späť. */
+  var straz = null;
+  /* Legacy skript stránky mieri na koreň repozitára — teda na pôvodnú kalkulačku —
+     s vlastnou zamrznutou verziou. Nestačí preto strážiť len adresu aplikácie:
+     do rámu patrí aplikácia vždy, s jedinou výnimkou modelácie, na ktorú si rám
+     po odoslaní kontaktu prejde sám. */
+  function jeModelacia(src) {
+    return !!src && src.indexOf("vysledok.html") > -1;
+  }
+  function oprav() {
+    var m = mount(); if (!m) return false;
+    var f = m.querySelector("iframe"); if (!f) return false;
+    var src = f.getAttribute("src");
+    if (!jeModelacia(src) && src !== APP) f.setAttribute("src", APP);
+    return true;
+  }
+  function prepniRam() {
+    var m = mount(); if (!m) return false;
+    if (!oprav()) return false;
+    /* Sledujeme celý kontajner, nie samotný rám: legacy skript vie rám nahradiť
+       novým prvkom a strážca pripnutý na starý uzol by potom strážil odpojený
+       kus DOM. Takto zachytíme aj výmenu prvku, aj prepis atribútu. */
+    if (!straz && window.MutationObserver) {
+      straz = new MutationObserver(oprav);
+      straz.observe(m, { childList: true, subtree: true,
+                         attributes: true, attributeFilter: ["src"] });
+    }
+    return true;
+  }
+
+  /* 2. Rám sa po odoslaní vymení za modeláciu. Stránka pritom zostane odrolovaná
+        tam, kde bola, takže by klient pristál uprostred textu — modelácia si preto
+        vypýta posun na svoj začiatok. */
+  var POVOLENY_POVOD = "https://hechtgit.github.io";
+
+  /* Správy berieme len od vlastného rámu. Bez tejto kontroly by scroll stránky
+     alebo jej výšku vedel meniť ktorýkoľvek iný rám či skript na stránke. */
+  function odNasho(e) {
+    if (e.origin !== POVOLENY_POVOD) return null;
+    var m = mount(); if (!m) return null;
+    var f = m.querySelector("iframe");
+    if (!f || e.source !== f.contentWindow) return null;
+    return { mount: m, ram: f };
+  }
+
+  window.addEventListener("message", function (e) {
+    if (!e.data) return;
+    var c = odNasho(e); if (!c) return;
+
+    /* Výška rámu. Pôvodný code block stránky si síce výšku zapisuje do atribútu
+       na <html>, ale rámu ju nenastaví — ten má napevno 1700 px. Aplikácia aj
+       modelácia sú vyššie, takže bez tohto by im spodok chýbal. */
+    if (e.data.type === "ph-renta-height") {
+      var h = Number(e.data.height) || 0;
+      if (h < 400 || h > 8000) return;              /* zjavný nezmysel ignorujeme */
+      if (c.ram.style.height !== h + "px") c.ram.style.height = h + "px";
+      return;
+    }
+
+    /* Rám sa po odoslaní vymení za modeláciu, stránka pritom zostane odrolovaná
+       tam, kde bola — modelácia si preto vypýta posun na svoj začiatok. */
+    if (e.data.type === "ph-renta-na-zaciatok") {
+      var y = c.mount.getBoundingClientRect().top + window.pageYOffset - 80;
+      window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+    }
+  });
+
+  /* 2. Úvod: schválené texty vľavo, obraz vpravo; audio sa zachytí o značku nižšie */
+  function vlozUvod() {
+    if (document.getElementById("cz-uvod")) return;
+    var m = mount(); if (!m || !m.parentNode) return;
+
+    var lead = document.createElement("section");
+    lead.id = "cz-uvod";
+    lead.className = "cz-lead";
+    lead.innerHTML =
+      '<div class="cz-lead-text">' +
+        '<h1>Stratégia privátnej renty</h1>' +
+        '<a class="cz-jump" href="#ph-renta-calculator">Prejsť priamo k aplikácii <span aria-hidden="true">↓</span></a>' +
+        '<h2>Prečo privátna renta</h2>' +
+        '<p>Majetok sám osebe nie je príjem. Ako Wealth manager senior sa v praxi opakovane stretávam s klientmi, ktorí majú hodnotné portfólio, no nevedia s istotou povedať, koľko si z neho môžu mesačne vyplácať bez rizika, že ho vyčerpajú skôr, než plánovali.</p>' +
+        '<p><strong>Stratégia privátnej renty rieši práve toto:</strong> ako naakumulovaný majetok premeniť na pravidelný, infláciou chránený príjem, ktorý má vydržať aj desaťročia. Nie je to produkt. Je to architektúra na mieru vášmu majetku, veku a cieľom.</p>' +
+      '</div>' +
+      '<figure class="cz-lead-img">' +
+        '<img src="' + HERO + '" alt="Manželský pár po päťdesiatke na motorovom člne pri pobreží" decoding="async">' +
+      '</figure>';
+
+    var telo = document.createElement("section");
+    telo.className = "cz-body";
+    telo.innerHTML =
+      '<div id="cz-audio" data-adam-audio-slug="strategia-privatnej-renty" data-adam-audio-wrap="false"></div>' +
+      '<h2>Ako aplikácia funguje?</h2>' +
+      '<p>Základom aplikácie je <strong>Čiara života</strong> a tri pohyblivé míľniky. Prvý predstavuje dnešok, druhý vek, od ktorého chcete začať čerpať privátnu rentu, a tretí obdobie, dokedy má renta pokračovať. Každý míľnik môžete po čiare jednoducho posúvať — keď zmeníte svoj vek, začiatok čerpania alebo časový horizont, aplikácia celý scenár priebežne prepočíta.</p>' +
+      '<p>V karte <strong>Dnes</strong> si najskôr zvolíte, v akej situácii sa nachádzate. Ak majetok ešte len budujete, môžete pracovať s jednorazovou investíciou, pravidelným investovaním alebo ich kombináciou — aplikácia ukáže, aký kapitál je potrebné pripraviť na požadovanú rentu. Ak už majetok máte, pozriete sa na opačnú otázku: akú mesačnú rentu vám môže prinášať, alebo ako dlho by pri zvolenom čerpaní mohol vydržať.</p>' +
+      '<p>Druhý míľnik určuje, kedy sa má výplata začať a akú mesačnú sumu chcete dostávať v dnešnej hodnote. Tretí označuje koniec čerpania. Ak má renta pokračovať bez časového obmedzenia, môžete zvoliť <strong>nekonečnú rentu</strong> — míľnik na čiare zostane súčasťou vášho životného horizontu, ale jeho poloha už výpočet neovplyvní.</p>' +
+      '<p>Všetky číselné hodnoty nastavujete posuvníkmi, takže scenár môžete pokojne meniť a okamžite sledovať, čo s výsledkom urobí vyššia renta, skorší začiatok čerpania alebo dlhší horizont. Súčasťou modelu je aj investičný profil a inflácia — pomáhajú zachytiť rozdiel medzi dnešnou hodnotou peňazí a sumou, ktorú budete reálne potrebovať v budúcnosti.</p>' +
+      '<p>Na samotný výpočet <strong>nezadávate meno, e-mail ani telefón</strong>. Pracujete iba s údajmi potrebnými na vytvorenie modelového scenára. Výsledok berte ako prvý orientačný rámec, nie ako záväznú ponuku alebo investičné odporúčanie — nezahŕňa celý kontext vášho majetku, likvidity, daní ani individuálneho rizika.</p>';
+
+    m.parentNode.insertBefore(lead, m);
+    m.parentNode.insertBefore(telo, m);
+  }
+
+  /* 3. Audio: prehrávač beží skôr, než vznikne kotva vyššie, a nemá vlastný retry.
+        Po vložení úvodu ho preto načítame ešte raz — vtedy už kotvu nájde.
+        Skript nemá ochranu proti dvojitému behu, poistkou je kontrola nižšie. */
+  function nacitajPrehravac() {
+    if (document.querySelector('[id^="adam-"]')) return;      // prehrávač už na stránke je
+    if (!document.getElementById("cz-audio")) return;          // kotva ešte nie je
+    if (window.__czPrehravacNacitany) return;
+    window.__czPrehravacNacitany = true;
+    var s = document.createElement("script");
+    s.src = "https://hechtgit.github.io/adam-audio/adam-player.js?v=4c9ab5c";
+    document.body.appendChild(s);
+  }
+
+  function setup() { prepniRam(); vlozUvod(); nacitajPrehravac(); }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", setup);
+  else setup();
+  window.addEventListener("load", setup);
+  [300, 900, 2000, 3500].forEach(function (ms) { setTimeout(setup, ms); });
+})();
+</script>

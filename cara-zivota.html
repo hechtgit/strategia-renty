@@ -1325,9 +1325,10 @@ if(sendModel){
        z kontextu stránky. Odkaz zostáva samonosný, dá sa uložiť do záložiek. */
     zapamataj();
     sendModel.textContent='Otváram modeláciu…';
-    /* Keby prechod neprebehol (prehliadač ho zablokuje, sieť zlyhá), klient nesmie
-       zostať visieť na „Otváram…". Po chvíli mu ukážeme odkaz, aby sa k modelácii
-       dostal kliknutím. Vetu o e-maile pritom skrývame — odkaz e-mailom nechodí. */
+    /* Poistka pre prípad, že sa navigácia vôbec nezačne (prehliadač ju zablokuje).
+       Keď sa začne, tento dokument aj s časovačom zaniká — na zlyhanie pri načítaní
+       cieľovej stránky teda nepomôže, tam sa klient vráti tlačidlom späť.
+       Vetu o e-maile skrývame, odkaz e-mailom nechodí. */
     setTimeout(()=>{
       $('gate-view').href=url;
       const veta=$('gate-done-text');
