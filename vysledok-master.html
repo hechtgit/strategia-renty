@@ -105,15 +105,17 @@ details p{color:var(--muted);line-height:1.65;margin:16px 0 0;font-size:14px}
    Modelácia sa otvára v tom istom ráme ako aplikácia. Úvodný obraz aj poznámka
    o e-maile sú vtedy zbytočné — obraz je na stránke hneď nad rámom a klient práve
    klikol, takže nič nečaká. Pribudne návrat k scenáru. */
-.spat{display:none}
+/* Návrat ku scenáru má zmysel vždy — aj keď si klient modeláciu otvorí
+   z odkazu v záložkách, má sa mať ako dostať späť ku kalkulačke. */
+.spat{display:inline-flex;align-items:center;gap:9px;margin-bottom:18px;
+  color:var(--gold-strong);font-size:14px;text-decoration:none;background:none;border:0;
+  padding:0;cursor:pointer;font-family:var(--sans)}
+.spat:hover{color:#fff}
 .embedded .hero-img{display:none}
 .embedded .hero{grid-template-columns:1fr;min-height:0}
 .embedded .mail-note{display:none}
 .embedded .shell{padding:0 0 8px}
-.embedded .spat{display:inline-flex;align-items:center;gap:9px;margin-bottom:18px;
-  color:var(--gold-strong);font-size:14px;text-decoration:none;background:none;border:0;
-  padding:0;cursor:pointer;font-family:var(--sans)}
-.embedded .spat:hover{color:#fff}
+
 
 @media(max-width:900px){
   .shell{padding:14px}
@@ -135,6 +137,9 @@ details p{color:var(--muted);line-height:1.65;margin:16px 0 0;font-size:14px}
   .assumptions{grid-template-columns:1fr;padding:0 0 38px}
   .next{grid-template-columns:1fr}
   .section{padding:42px 0 0}
+  /* 11 px je na telefóne na hranici čitateľnosti, obzvlášť pre klienta 50+ */
+  .disclaimer{font-size:12.5px;line-height:1.6}
+  .card .sub{font-size:13px}
 }
 
 /* ===== tlač / PDF =====
