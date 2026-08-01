@@ -1246,13 +1246,37 @@ function scenarioSummary(){
    preklikávať odznova. Je to jeho vlastné zariadenie a žiadne osobné údaje to
    neobsahuje — iba čísla scenára. */
 const PAMAT='ph-renta-scenar';
+/* Scenár v adrese aj tak zostáva v histórii prehliadača, takže pamäť nič nové
+   neodkrýva. Aj tak ju necháme starnúť — po mesiaci už nikoho nezaujíma a na
+   spoločnom počítači nemá čo visieť donekonečna. Ukladáme iba čísla scenára,
+   žiadne meno ani e-mail. */
+const PAMAT_DNI=30;
 function zapamataj(){
-  try{localStorage.setItem(PAMAT, scenarioParams().toString())}catch(e){}
+  try{localStorage.setItem(PAMAT, JSON.stringify(
+    {kedy:Date.now(), scenar:scenarioParams().toString()}))}catch(e){}
 }
+function precitajPamat(){
+  let raw=null;
+  try{raw=localStorage.getItem(PAMAT)}catch(e){}
+  if(!raw)return null;
+  let d=null;
+  try{d=JSON.parse(raw)}catch(e){}
+  if(!d||!d.scenar||!d.kedy)return null;
+  if(Date.now()-d.kedy > PAMAT_DNI*24*3600*1000){
+    try{localStorage.removeItem(PAMAT)}catch(e){}
+    return null;
+  }
+  return d.scenar;
+}
+/* Pozor: v adrese býva aj technický cache-buster (?v=11). Pýtame sa preto na
+   scenárové kľúče, nie na to, či je query neprázdna — inak by sa ponuka návratu
+   v ostrej prevádzke neukázala nikdy. */
+const maScenarVAdrese = NUM_KEYS.some(k=>QS.has(k))
+  || Object.keys(ENUM_KEYS).some(k=>QS.has(k));
+
 function ponukniNavrat(){
-  if(QS.toString())return;                 /* scenár prišiel v odkaze, netreba */
-  let ulozene=null;
-  try{ulozene=localStorage.getItem(PAMAT)}catch(e){}
+  if(maScenarVAdrese)return;               /* scenár prišiel v odkaze, netreba */
+  const ulozene=precitajPamat();
   if(!ulozene)return;
   /* Ak si klient nič nezmenil, uložený scenár je ten istý, aký práve vidí —
      ponuka by potom viedla na kliknutie, po ktorom sa nič nestane. */
@@ -1305,7 +1329,6 @@ if(sendModel){
        zostať visieť na „Otváram…". Po chvíli mu ukážeme odkaz, aby sa k modelácii
        dostal kliknutím. Vetu o e-maile pritom skrývame — odkaz e-mailom nechodí. */
     setTimeout(()=>{
-      if(document.hidden)return;
       $('gate-view').href=url;
       const veta=$('gate-done-text');
       if(veta)veta.hidden=true;

@@ -527,7 +527,24 @@ const det=document.querySelector('details');
 let bolOtvoreny=false;
 addEventListener('beforeprint',()=>{bolOtvoreny=det.open;det.open=true});
 addEventListener('afterprint',()=>{det.open=bolOtvoreny});
-$('btn-pdf').addEventListener('click',()=>window.print());
+/* Tlač z vnútra rámu sa v prehliadačoch správa rôzne — Chrome vytlačí obsah rámu,
+   Safari a iOS to majú inak. Vo vloženom stave preto modeláciu otvoríme ako
+   samostatný dokument a vytlačíme ju tam; okno sa otvára priamo v obsluhe
+   kliknutia, takže ho blokátory neriešia. Mimo rámu tlačíme rovno. */
+$('btn-pdf').addEventListener('click',()=>{
+  if(window.parent===window){window.print();return}
+  const u=new URL(location.href);
+  u.searchParams.set('tlac','1');
+  const w=window.open(u.toString(),'_blank','noopener');
+  if(!w)window.print();               /* keby okno predsa neprešlo */
+});
+
+/* Otvorené s ?tlac=1 znamená „vytlač sa" — po dopočítaní rozloženia a fontov. */
+if(QS.get('tlac')==='1'){
+  const tlac=()=>setTimeout(()=>window.print(),350);
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(tlac);
+  else addEventListener('load',tlac);
+}
 
 /* Návrat k scenáru: aplikácia si ho prečíta z tých istých parametrov, takže sa
    klient vráti presne k tomu, čo mal nastavené. */
