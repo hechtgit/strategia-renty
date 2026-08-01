@@ -30,6 +30,7 @@
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
+html.embedded,body.embedded{overflow:hidden;background:transparent}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
   -webkit-font-smoothing:antialiased}
 .shell{max-width:1440px;margin:0 auto;padding:28px}
@@ -115,6 +116,20 @@ details p{color:var(--muted);line-height:1.65;margin:16px 0 0;font-size:14px}
 .warn{margin:26px 0 0;padding:16px 18px;border:1px solid var(--gold);border-radius:3px;
   color:var(--gold-strong);line-height:1.6;font-size:15px}
 
+/* ===== vložené v stránke =====
+   Modelácia sa otvára v tom istom ráme ako aplikácia. Úvodný obraz aj poznámka
+   o e-maile sú vtedy zbytočné — obraz je na stránke hneď nad rámom a klient práve
+   klikol, takže nič nečaká. Pribudne návrat k scenáru. */
+.spat{display:none}
+.embedded .hero-img{display:none}
+.embedded .hero{grid-template-columns:1fr;min-height:0}
+.embedded .mail-note{display:none}
+.embedded .shell{padding:0 0 8px}
+.embedded .spat{display:inline-flex;align-items:center;gap:9px;margin-bottom:18px;
+  color:var(--gold-strong);font-size:14px;text-decoration:none;background:none;border:0;
+  padding:0;cursor:pointer;font-family:var(--sans)}
+.embedded .spat:hover{color:#fff}
+
 @media(max-width:900px){
   .shell{padding:14px}
   .hero{grid-template-columns:1fr}
@@ -142,8 +157,10 @@ details p{color:var(--muted);line-height:1.65;margin:16px 0 0;font-size:14px}
    dá iba kliknúť, a tmavý podklad ustúpi bielemu, aby výtlačok nebol celý čierny. */
 @media print{
   @page{size:A4;margin:14mm}
-  body{background:#fff;color:#1a1a1a}
-  .actions,.mail-note,.next .btn-primary{display:none!important}
+  /* vo vloženom stave má body priehľadné pozadie z .embedded — v tlači ho prebijeme */
+  body,body.embedded{background:#fff!important;color:#1a1a1a}
+  /* návrat k scenáru je ovládanie, na papier nepatrí */
+  .actions,.mail-note,.next .btn-primary,.spat{display:none!important}
   .shell{padding:0;max-width:none}
   .hero{border-color:#d8d2c8;background:#faf7f2;min-height:0;grid-template-columns:1fr}
   .hero-copy{padding:22px 0}
@@ -180,6 +197,8 @@ details p{color:var(--muted);line-height:1.65;margin:16px 0 0;font-size:14px}
 
   <section class="hero">
     <div class="hero-copy">
+      <button class="spat" type="button" id="btn-spat">
+        <span aria-hidden="true">←</span> Upraviť scenár</button>
       <div class="kicker">VAŠA MODELÁCIA JE PRIPRAVENÁ</div>
       <h1>Váš prvý scenár privátnej renty je pripravený.</h1>
       <p class="lead">Modelácia ukazuje jednu možnú cestu k vašej privátnej rente. Je orientačným rámcom – zachytáva hlavné čísla a časový plán, nie však celý kontext vášho majetku, likvidity, rizika a ďalších cieľov.</p>
@@ -646,6 +665,54 @@ let bolOtvoreny=false;
 addEventListener('beforeprint',()=>{bolOtvoreny=det.open;det.open=true});
 addEventListener('afterprint',()=>{det.open=bolOtvoreny});
 $('btn-pdf').addEventListener('click',()=>window.print());
+
+/* Návrat k scenáru: aplikácia si ho prečíta z tých istých parametrov, takže sa
+   klient vráti presne k tomu, čo mal nastavené. */
+$('btn-spat').addEventListener('click',()=>{
+  const p=new URLSearchParams(location.search);
+  p.delete('vystup');
+  location.href='cara-zivota.html?'+p.toString();
+});
+
+/* Rám sa vymenil za modeláciu, ale rodičovská stránka zostala odrolovaná tam, kde
+   bola. Poprosíme ju, nech ukáže začiatok — inak klient pristane uprostred textu. */
+if(window.parent!==window)
+  addEventListener('load',()=>window.parent.postMessage({type:'ph-renta-na-zaciatok'},'*'));
+})();
+</script>
+
+<script>
+/* ---- Vloženie do Squarespace: hlásenie výšky rodičovi ----
+   Iframe nemá vlastný scroll — o výšku sa stará rodičovská stránka. Aplikácia jej
+   po každej zmene rozmeru pošle svoju skutočnú výšku a drží sa na začiatku, aby
+   vnorené posúvanie nebralo scroll celej stránke. */
+(()=>{
+  if(window.parent===window) return;
+  const lockScroll=()=>{
+    try{ history.scrollRestoration='manual' }catch(e){}
+    if(window.scrollX!==0||window.scrollY!==0) window.scrollTo(0,0);
+  };
+  const notify=()=>requestAnimationFrame(()=>{
+    lockScroll();
+    /* Výška sa meria na <body>, nie na dokumente. Dokument sa vždy roztiahne aspoň
+       na výšku rámu, takže by hlásená hodnota vedela len rásť — po prechode
+       z modelácie späť na aplikáciu by rám zostal privysoký a pod obsahom by
+       zívala diera. Body má výšku svojho obsahu. */
+    const b=document.body;
+    const h=Math.max(b.getBoundingClientRect().height, b.scrollHeight, b.offsetHeight);
+    window.parent.postMessage({type:'ph-renta-height',height:Math.ceil(h),
+      scrollY:Math.round(window.scrollY),h1Top:null},'*');
+  });
+  document.documentElement.classList.add('embedded');
+  document.body.classList.add('embedded');
+  lockScroll();
+  addEventListener('pageshow',lockScroll);
+  addEventListener('scroll',lockScroll,{passive:true});
+  addEventListener('load',notify);
+  addEventListener('resize',()=>{window.scrollTo(0,0);notify()});
+  if('ResizeObserver' in window) new ResizeObserver(notify).observe(document.body);
+  [0,100,500,1500,3000].forEach(ms=>setTimeout(notify,ms));
+  setInterval(notify,1500);
 })();
 </script>
 </body>

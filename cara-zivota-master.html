@@ -214,6 +214,10 @@ body.vystup .bottom-flow{grid-template-columns:1fr}
 .metodika[open] summary::after{content:"–"}
 .metodika summary:hover{color:#fff}
 .metodika p{margin:9px 0 0;font-size:12.5px;line-height:1.65;color:#9d968c}
+.navrat{display:inline-flex;align-items:center;gap:8px;margin:0 0 14px;
+  color:var(--gold-strong);font-size:14px;text-decoration:none;
+  border-bottom:1px solid var(--line)}
+.navrat:hover{color:#fff;border-bottom-color:var(--gold-strong)}
 
 /* ===== mobil ===== */
 .mob{display:none}
@@ -628,7 +632,7 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
       </div>
       <div id="gate-done" hidden>
         <h3>Modelácia privátnej renty je pripravená</h3>
-        <p>Nižšie nájdete modeláciu k scenáru privátnej renty, ktorý ste si práve prepočítali. Odkaz sme poslali aj emailom; ak by doručenie meškalo, otvoríte ho aj tlačidlom nižšie.</p>
+        <p id="gate-done-text">Nižšie nájdete modeláciu k scenáru privátnej renty, ktorý ste si práve prepočítali. Odkaz sme poslali aj emailom; ak by doručenie meškalo, otvoríte ho aj tlačidlom nižšie.</p>
         <a class="gate-view" id="gate-view" href="#" target="_blank" rel="noopener">Otvoriť modeláciu renty</a>
       </div>
     </section>
@@ -1247,6 +1251,30 @@ function scenarioSummary(){
   return ('Privátna renta — '+bits.join(', ')+'.').slice(0,500);
 }
 
+/* Posledný scenár si necháme v prehliadači, aby sa klient pri návrate nemusel
+   preklikávať odznova. Je to jeho vlastné zariadenie a žiadne osobné údaje to
+   neobsahuje — iba čísla scenára. */
+const PAMAT='ph-renta-scenar';
+function zapamataj(){
+  try{localStorage.setItem(PAMAT, scenarioParams().toString())}catch(e){}
+}
+function ponukniNavrat(){
+  if(QS.toString())return;                 /* scenár prišiel v odkaze, netreba */
+  let ulozene=null;
+  try{ulozene=localStorage.getItem(PAMAT)}catch(e){}
+  if(!ulozene)return;
+  /* Ak si klient nič nezmenil, uložený scenár je ten istý, aký práve vidí —
+     ponuka by potom viedla na kliknutie, po ktorom sa nič nestane. */
+  if(ulozene===scenarioParams().toString())return;
+  const a=document.createElement('a');
+  a.className='navrat';
+  a.href='?'+ulozene;
+  a.textContent='Pokračovať tam, kde ste skončili';
+  const msg=$('msg');
+  msg.parentNode.insertBefore(a,msg);
+}
+ponukniNavrat();
+
 const sendModel=$('send-model');
 if(sendModel){
   const mark=(el,bad)=>{el.classList.toggle('bad',bad);return bad};
@@ -1277,10 +1305,23 @@ if(sendModel){
       sendModel.disabled=false;sendModel.textContent=label;
       return;
     }
-    sendModel.disabled=false;sendModel.textContent=label;
-    $('gate-view').href=url;
-    $('gate-form').hidden=true;
-    $('gate-done').hidden=false;
+    /* Modelácia sa otvorí rovno tu — rám prejde na výsledkovú stránku. Nový tab
+       zámerne nie: blokátory ho vedia zastaviť a na mobile klient vypadne
+       z kontextu stránky. Odkaz zostáva samonosný, dá sa uložiť do záložiek. */
+    zapamataj();
+    sendModel.textContent='Otváram modeláciu…';
+    /* Keby prechod neprebehol (prehliadač ho zablokuje, sieť zlyhá), klient nesmie
+       zostať visieť na „Otváram…". Po chvíli mu ukážeme odkaz, aby sa k modelácii
+       dostal kliknutím. Vetu o e-maile pritom skrývame — odkaz e-mailom nechodí. */
+    setTimeout(()=>{
+      if(document.hidden)return;
+      $('gate-view').href=url;
+      const veta=$('gate-done-text');
+      if(veta)veta.hidden=true;
+      $('gate-form').hidden=true;
+      $('gate-done').hidden=false;
+    },4000);
+    location.href=url;
   });
 }
 

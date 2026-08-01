@@ -108,8 +108,12 @@ SKRIPT_EMBED = """
   };
   const notify=()=>requestAnimationFrame(()=>{
     lockScroll();
-    const h=Math.max(document.body.scrollHeight,document.documentElement.scrollHeight,
-                     document.body.offsetHeight,document.documentElement.offsetHeight);
+    /* Výška sa meria na <body>, nie na dokumente. Dokument sa vždy roztiahne aspoň
+       na výšku rámu, takže by hlásená hodnota vedela len rásť — po prechode
+       z modelácie späť na aplikáciu by rám zostal privysoký a pod obsahom by
+       zívala diera. Body má výšku svojho obsahu. */
+    const b=document.body;
+    const h=Math.max(b.getBoundingClientRect().height, b.scrollHeight, b.offsetHeight);
     window.parent.postMessage({type:'ph-renta-height',height:Math.ceil(h),
       scrollY:Math.round(window.scrollY),h1Top:null},'*');
   });
@@ -184,6 +188,14 @@ def zostav_vysledok(jadro: str) -> str:
     if s.count(JADRO_MIESTO) != 1:
         sys.exit(f'CHYBA: {VYSLEDOK_MASTER.name} musí obsahovať práve jedno {JADRO_MIESTO}')
     s = s.replace(JADRO_MIESTO, jadro, 1)
+    # Modelácia sa otvára v tom istom ráme ako aplikácia, takže potrebuje rovnaké
+    # hlásenie výšky rodičovi. Bez neho by ju rám orezal na výšku aplikácie.
+    if CSS_KOTVA not in s:
+        sys.exit(f'CHYBA: v {VYSLEDOK_MASTER.name} chýba kotva pre CSS vloženia')
+    s = s.replace(CSS_KOTVA, CSS_KOTVA + CSS_EMBED, 1)
+    if '</body>' not in s:
+        sys.exit(f'CHYBA: v {VYSLEDOK_MASTER.name} chýba </body>')
+    s = s.replace('</body>', SKRIPT_EMBED + '</body>', 1)
     prve = s.index('\n') + 1                      # za <!doctype html>
     return s[:prve] + VYSLEDOK_HLAVICKA + s[prve:]
 
