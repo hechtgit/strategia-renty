@@ -1147,29 +1147,39 @@ async function loadBoldemForm(){
 
 /* Vyhodnotenie odpovede Boldemu.
    Boldem vie odpovedať stavom 200 aj vtedy, keď kontakt odmietol, takže samotný
-   stav nestačí. Pravidlo je: klientovi nikdy nepovedať, že modelácia odišla, keď
-   neodišla. Preto sa hľadá výslovne záporný signál — holá hodnota false/0, záporný
-   príznak úspechu alebo textová chyba. Samotné slovo „false" v tele chybou nie je;
-   bežne sa objaví v poli typu {"error":false} a taká odpoveď je úspech. */
+   stav nestačí. Pravidlo je jediné: klientovi nikdy nepovedať, že modelácia odišla,
+   keď neodišla. Preto sa hľadá výslovne záporný signál a za úspech sa berie len
+   výslovne kladný príznak — nie samotná prítomnosť nejakého poľa v odpovedi. */
+const BOLDEM_CHYBA=/\b(error|failed|unable|invalid)\b|nepoda|chyba/i;
+
 function boldemOdmietol(body){
   const t=(body||'').trim();
   if(!t)return false;                         /* prázdne telo pri 2xx berieme ako úspech */
   let json;
   try{json=JSON.parse(t)}
-  catch(e){return /^(false|0)$/i.test(t)||/\b(error|failed|unable|invalid)\b|nepoda|chyba/i.test(t)}
+  catch(e){return /^(false|0)$/i.test(t)||BOLDEM_CHYBA.test(t)}
 
   if(json===false||json===0)return true;      /* holá odmietavá hodnota */
   if(typeof json==='string')return /^(false|0|error|chyba)$/i.test(json.trim());
   if(!json||typeof json!=='object')return false;
 
+  /* Pole error: čokoľvek iné než výslovné „žiadna chyba" je odmietnutie.
+     Boldem ho môže poslať ako číslo aj ako objekt, nielen ako true alebo text. */
+  if('error' in json){
+    const e=json.error;
+    const bezChyby=e===false||e===0||e===null||e===undefined
+      ||(typeof e==='string'&&!e.trim());
+    if(!bezChyby)return true;
+  }
+
   const ok=json.success??json.ok??json.result;
-  if(ok!==undefined&&(ok===false||ok===0||/^(false|0)$/i.test(String(ok))))return true;
-  if(json.error===true)return true;
-  if(typeof json.error==='string'&&json.error.trim())return true;
-  /* `message` je chyba len vtedy, keď odpoveď nenesie príznak úspechu a text
-     sám znie ako chyba — inak by sme z bežného {"message":"OK"} spravili zlyhanie */
-  if(ok===undefined&&typeof json.message==='string'
-     &&/\b(error|failed|unable|invalid)\b|nepoda|chyba/i.test(json.message))return true;
+  if(ok===false||ok===0||/^(false|0)$/i.test(String(ok)))return true;
+
+  /* Chybovú správu smie umlčať iba výslovne kladný príznak úspechu. Samotná
+     prítomnosť poľa result — hoci s hodnotou null alebo {} — úspech neznamená;
+     inak by {"result":null,"message":"Invalid e-mail"} prešlo ako odoslané. */
+  const kladny=ok===true||ok===1||/^(true|1|ok|success)$/i.test(String(ok));
+  if(!kladny&&typeof json.message==='string'&&BOLDEM_CHYBA.test(json.message))return true;
   return false;
 }
 
