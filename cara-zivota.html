@@ -622,7 +622,7 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
           <input id="model-email" type="email" inputmode="email" autocomplete="email" placeholder="Email" aria-label="Email">
           <button id="send-model" type="button">Pokračovať k modelácii</button>
         </div>
-        <div id="turnstile" aria-hidden="true"></div>
+        <div id="overenie-box" aria-hidden="true"></div>
         <small class="privacy-note">Vaše údaje použijeme na odoslanie modelácie a nadväzujúcu komunikáciu k téme Wealth managementu.</small>
         <p class="send-status" id="send-status" aria-live="polite"></p>
       </div>
@@ -1234,7 +1234,11 @@ let turnstileId=null;
 
 /* Skript sa načítava s render=explicit, takže si sám nič nevykreslí a ohlási
    sa až týmto callbackom. Bez neho API na window nepripojí metódy — vyzerá
-   načítané, ale render() na ňom neexistuje. */
+   načítané, ale render() na ňom neexistuje.
+
+   Kontajner sa zámerne nevolá „turnstile": prehliadač z každého id urobí
+   globálnu premennú, takže <div id="turnstile"> pretieni window.turnstile
+   a knižnica ohlási „už načítané" a nepripojí sa. */
 const turnstileNacitane=new Promise((ok,zle)=>{
   window.onloadTurnstileCallback=()=>ok();
   setTimeout(()=>zle(new Error('turnstile-nenacitane')),10000);
@@ -1250,7 +1254,7 @@ async function overenieCloveka(){
     /* Widget sa vykresľuje nanovo pri každom pokuse — callbacky musia patriť
        tomuto pokusu, inak by odpoveď dorazila do už uzavretého sľubu. */
     if(turnstileId!==null){try{window.turnstile.remove(turnstileId)}catch(e){}}
-    turnstileId=window.turnstile.render('#turnstile',{
+    turnstileId=window.turnstile.render('#overenie-box',{
       sitekey:TURNSTILE_KLUC, appearance:'execute', execution:'execute',
       callback:uspech, 'error-callback':zlyhanie, 'timeout-callback':zlyhanie
     });
