@@ -194,6 +194,30 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
   .section{padding:22px 0 0}
 }
 </style>
+<script>
+/* Odkaz v e-maile nemôže niesť konkrétny scenár — Boldem cez verejný formulár
+   vlastné stĺpce neukladá (overené: tri tvary payloadu, hodnota vždy prázdna).
+   Odkaz je preto pevný a scenár si stránka vezme z pamäte prehliadača, ktorú
+   aplikácia zapísala pri odoslaní. Beží pred hlavným skriptom, aby si ten už
+   čítal doplnenú adresu. Bez pamäte niet čo ukázať — vtedy pošleme klienta
+   späť do aplikácie, nech si scenár nastaví, namiesto vymyslených čísel. */
+(function(){
+  var TECHNICKE={v:1,tlac:1,vystup:1};
+  var q=new URLSearchParams(location.search), maScenar=false;
+  q.forEach(function(_,k){ if(!TECHNICKE[k]) maScenar=true });
+  if(maScenar)return;
+  var d=null;
+  try{ d=JSON.parse(localStorage.getItem('ph-renta-scenar')||'null') }catch(e){}
+  if(d&&d.scenar&&d.kedy&&Date.now()-d.kedy<=30*24*3600*1000){
+    var nova=location.pathname+'?'+d.scenar
+      +(q.get('tlac')?'&tlac='+q.get('tlac'):'')
+      +(q.has('vystup')?'&vystup':'');
+    try{ history.replaceState(null,'',nova) }catch(e){ location.replace(nova) }
+    return;
+  }
+  location.replace('cara-zivota.html');
+})();
+</script>
 </head>
 <body>
 <main class="shell">
