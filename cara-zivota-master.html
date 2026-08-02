@@ -1417,6 +1417,9 @@ if(sendModel){
        zámerne nie: blokátory ho vedia zastaviť a na mobile klient vypadne
        z kontextu stránky. Odkaz zostáva samonosný, dá sa uložiť do záložiek. */
     zapamataj();
+    /* Meno pre modeláciu — ostáva v prehliadači klienta, do adresy nejde. */
+    try{localStorage.setItem('ph-renta-klient',
+      JSON.stringify({kedy:Date.now(), meno:(first+' '+last).trim()}))}catch(e){}
     sendModel.textContent='Otváram modeláciu…';
     /* Poistka pre prípad, že sa navigácia vôbec nezačne (prehliadač ju zablokuje).
        Keď sa začne, tento dokument aj s časovačom zaniká — na zlyhanie pri načítaní

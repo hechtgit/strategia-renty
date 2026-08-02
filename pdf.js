@@ -69,6 +69,8 @@
       ciel: text(document.getElementById("ciel")),
       karty: karty,
       suhrn: suhrn,
+      preKoho: text(document.getElementById("pre-koho")),
+      vyhotovene: text(document.getElementById("vyhotovene")),
       vystraha: text(document.querySelector(".blok .vystraha")),
       predpokladyNadpis: text(document.querySelector(".blok h2")),
       predpoklady: predpoklady,
@@ -134,11 +136,15 @@
     /* ——— hlavička ——— */
     var vrchH = y;
     odstavec("MODELÁCIA PRIVÁTNEJ RENTY", 7.5, "bold", ZLATA, SIRKA, 1.2);
-    doc.setFont("Asap", "normal"); doc.setFontSize(7.5);
-    doc.setTextColor(SEDA[0], SEDA[1], SEDA[2]);
-    doc.text("Vyhotovené " + new Date().toLocaleDateString("sk-SK",
-      { day: "numeric", month: "long", year: "numeric" }),
-      OKRAJ + SIRKA, vrchH + 7.5 * 0.3528 * 0.8, { align: "right" });
+    /* Meno aj dátum berieme zo stránky — nie z generátora, nech sa dokument
+       a stránka nemôžu rozísť. Idú na jeden riadok oproti rubrike, takže
+       dokumentu nepribudne ani milimeter výšky. */
+    var meta = [d.preKoho, d.vyhotovene].filter(Boolean).join("  ·  ");
+    if (meta) {
+      doc.setFont("Asap", "normal"); doc.setFontSize(7.5);
+      doc.setTextColor(SEDA[0], SEDA[1], SEDA[2]);
+      doc.text(meta, OKRAJ + SIRKA, vrchH + 7.5 * 0.3528 * 0.8, { align: "right" });
+    }
     medzera(1.5);
     odstavec(d.nadpis, 17, "bold", TMAVA, SIRKA, 1.2);
     medzera(1.5);

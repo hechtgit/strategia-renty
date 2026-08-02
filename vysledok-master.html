@@ -22,10 +22,14 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
 h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
 
 /* ===== úvod ===== */
-.hero{display:grid;grid-template-columns:1.02fr .98fr;align-items:stretch;
-  border:1px solid var(--line);background:var(--panel);border-radius:4px;overflow:hidden}
-.hero-copy{padding:46px 48px;display:flex;flex-direction:column;justify-content:center}
-.kicker{font-size:12px;letter-spacing:.17em;color:var(--gold-strong);font-weight:700;margin-bottom:18px}
+/* Modelácia je dokument, nie landing page — fotka páru na lodi zostáva
+   v aplikácii, kde predáva predstavu. Tu má presviedčať vecnosť. */
+.hero{border:1px solid var(--line);background:var(--panel);border-radius:4px}
+.hero-copy{padding:46px 52px}
+.kicker{font-size:12px;letter-spacing:.17em;color:var(--gold-strong);font-weight:700}
+/* Rubrika vľavo, meno a dátum vpravo — rovnaký riadok ako v PDF. */
+.hero-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;
+  gap:6px 20px;margin-bottom:18px}
 .hero h1{font-size:clamp(30px,3.4vw,42px);line-height:1.12;max-width:680px}
 .lead{font-size:17px;line-height:1.62;color:var(--muted);max-width:680px;margin:20px 0 25px}
 .actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
@@ -37,11 +41,11 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
 .btn-ghost{border:1px solid var(--gold);color:var(--ink);background:transparent}
 .btn-ghost:hover{border-color:var(--gold-strong);color:var(--gold-strong)}
 .mail-note{margin-top:18px;font-size:13px;color:#aaa49c}
-/* Obraz sa predtým orezával, lebo vypĺňal výšku textovej časti. Teraz drží
-   vlastný pomer strán a zobrazí sa celý. */
-.hero-img{position:relative;align-self:center;margin:0}
-.hero-img img{display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:cover;
-  object-position:50% 46%}
+/* Dokument putuje ďalej — manželke, účtovníkovi. Musí sám povedať, čí je
+   a ku ktorému dňu platí. */
+.doc-meta{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px;color:var(--muted)}
+.doc-meta span:empty{display:none}
+.doc-meta #pre-koho{color:#d8c9b4}
 
 /* ===== plán ===== */
 .section{padding:52px 0 0}
@@ -120,17 +124,14 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
    Modelácia sa otvára v tom istom ráme ako aplikácia. Úvodný obraz aj poznámka
    o e-maile sú vtedy zbytočné — obraz je na stránke hneď nad rámom a klient práve
    klikol, takže nič nečaká. Pribudne návrat k scenáru. */
-.embedded .hero-img{display:none}
-.embedded .hero{grid-template-columns:1fr;min-height:0}
+.embedded .hero{min-height:0}
 .embedded .mail-note{display:none}
 .embedded .shell{padding:0 0 8px}
 
 
 @media(max-width:900px){
   .shell{padding:14px}
-  .hero{grid-template-columns:1fr}
   .hero-copy{padding:35px 26px}
-  .hero-img{grid-row:2}
   .btn-primary,.btn-ghost{width:100%}
   .line-wrap{padding:40px 5px}
   /* Karty sú deťmi osi — skryť os celú by skrylo aj ich. Zmizne preto len jej
@@ -162,11 +163,12 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
   /* návrat k scenáru je ovládanie, na papier nepatrí */
   .actions,.mail-note,.next .btn-primary{display:none!important}
   .shell{padding:0;max-width:none}
-  .hero{border-color:#d8d2c8;background:#faf7f2;min-height:0;grid-template-columns:1fr}
+  .hero{border-color:#d8d2c8;background:#faf7f2;min-height:0}
   .hero-copy{padding:22px 0}
-  .hero-img{display:none}
   h1,h2,h3,.section-head strong{color:#1a1a1a}
   .lead,.section-head p,.next p,.blok p,.recap ul{color:#4a453e}
+  .doc-meta{color:#4a453e}
+  .doc-meta #pre-koho{color:#1a1a1a;font-weight:600}
   .blok .vystraha{color:#1a1a1a}
   .kicker{color:#8a6a3c}
   .track{height:auto;background:none;box-shadow:none}
@@ -198,7 +200,10 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
 
   <section class="hero">
     <div class="hero-copy">
-      <div class="kicker">VAŠA MODELÁCIA JE PRIPRAVENÁ</div>
+      <div class="hero-top">
+        <div class="kicker">VAŠA MODELÁCIA JE PRIPRAVENÁ</div>
+        <div class="doc-meta" id="doc-meta" hidden><span id="pre-koho"></span><span id="vyhotovene"></span></div>
+      </div>
       <h1>Váš prvý scenár privátnej renty je pripravený.</h1>
       <p class="lead">Modelácia ukazuje jednu možnú cestu k vašej privátnej rente. Je orientačným rámcom – zachytáva hlavné čísla a časový plán, nie však celý kontext vášho majetku, likvidity, rizika a ďalších cieľov.</p>
       <div class="actions">
@@ -207,9 +212,6 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
       </div>
       <div class="mail-note">Odkaz na túto modeláciu sme vám poslali aj e-mailom, aby ste sa k nej mohli kedykoľvek vrátiť.</div>
     </div>
-    <figure class="hero-img" style="margin:0">
-      <img src="hero-privatna-renta.jpg" alt="Manželský pár po päťdesiatke na motorovom člne pri pobreží" decoding="async">
-    </figure>
   </section>
 
   <div class="warn" id="warn" hidden></div>
@@ -553,6 +555,24 @@ addEventListener('resize',()=>{if(!o.warn)prisposobOsi()});
 if(document.fonts&&document.fonts.ready)
   document.fonts.ready.then(()=>{if(!o.warn)prisposobOsi()});
 addEventListener('beforeprint',()=>{if(!o.warn)prisposobOsi()});
+
+/* Meno klienta zadal ešte v aplikácii, v kroku tesne pred otvorením modelácie.
+   Prenáša sa pamäťou prehliadača, nie adresou — osobný údaj do URL nepatrí
+   a odkaz sa dá poslať ďalej. Keď si klient odkaz otvorí na inom zariadení,
+   meno sa jednoducho nezobrazí a zvyšok dokumentu funguje rovnako. */
+const KLIENT='ph-renta-klient', KLIENT_DNI=30;
+(function menoADatum(){
+  let meno='';
+  try{
+    const d=JSON.parse(localStorage.getItem(KLIENT)||'null');
+    if(d&&d.meno&&d.kedy&&Date.now()-d.kedy<=KLIENT_DNI*24*3600*1000)meno=String(d.meno);
+    else if(d)localStorage.removeItem(KLIENT);
+  }catch(e){}
+  if(meno)$('pre-koho').textContent='Pripravené pre: '+meno;
+  $('vyhotovene').textContent='Vyhotovené '+new Date().toLocaleDateString('sk-SK',
+    {day:'numeric',month:'long',year:'numeric'});
+  $('doc-meta').hidden=false;
+})();
 
 /* Scenár sa vykresľuje až tu — vyššie deklarované konštanty musia existovať skôr,
    než sa ich vykresľovanie dotkne. */
