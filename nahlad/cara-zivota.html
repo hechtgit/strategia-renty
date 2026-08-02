@@ -1,0 +1,1570 @@
+<!doctype html>
+<!--
+  ČIARA ŽIVOTA — aplikácia pre stránku Stratégia privátnej renty
+  ================================================================
+  POZOR: tento súbor je vygenerovaný skriptom zostav.py z master súboru.
+  Needituj ho priamo — zmeny sa pri najbližšom zostavení stratia.
+  Uprav master, spusti `python3 zostav.py`, commitni a zvýš ?v=… v code bloku stránky.
+
+  Vkladá sa do Squarespace cez <iframe> v code bloku stránky.
+  Obsahuje IBA aplikáciu: čiaru života s kartami, odoslanie modelácie,
+  sekciu "Ak chcete ísť ďalej", použité predpoklady a disclaimer.
+
+  ČO TU ZÁMERNE NIE JE a prečo:
+    · úvodné texty a hero obraz  → zostávajú v Squarespace nad iframe,
+      pretože audio prehrávač (adam-player.js) sa zachytáva o kotvu v úvode.
+      Presunom sem by stratil svoj bod ukotvenia.
+    · audio prehrávač            → dodáva ho adam-player.js z repozitára
+      hechtgit/adam-audio, vkladá sa sám. Nikdy ho sem nekopírovať —
+      vznikli by dva prehrávače.
+    · hlavička a pätička webu    → má ich Squarespace.
+
+  POMENOVANIE míľnikov (Dnes / Začiatok čerpania / Koniec čerpania) je
+  zhodné s výsledkovou stránkou modelácie, PDF a scenárom pre audio.
+  Pri zmene ho treba zmeniť vo všetkých štyroch výstupoch naraz.
+
+  index.html vedľa je pôvodná verzia kalkulačky — nemeniť, drží živú stránku.
+-->
+<html lang="sk" data-anim="1">
+<head>
+<meta name="robots" content="noindex,nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Čiara života — Codex 2.1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Asap:wght@400;500;600;700&family=PT+Serif:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ===== paleta hechtberger.com ===== */
+:root{
+  --bg:#1a1a1a; --surface:#242424; --inset:#2b2b2b; --ink:#fff; --muted:#b7afa5;
+  --gold:#ae8753; --gold-strong:#c49a63; --btn-gold:#9a6929;
+  --line:rgba(174,135,83,.34); --line-hi:rgba(196,154,99,.62);
+  --red:#d92036; --green:#a9cdb4; --green-bg:#233129; --green-line:#3c5a48;
+  --serif:"pt-serif-pro-extended","PT Serif",Georgia,serif;
+  --sans:"Asap","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --ease:cubic-bezier(.22,.61,.36,1);
+  --stem:34px;
+}
+*{box-sizing:border-box}
+/* vlastné display pravidlá nesmú prebiť skrytie cez atribút hidden */
+[hidden]{display:none!important}
+html.embedded,body.embedded{overflow:hidden;background:transparent}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5;letter-spacing:.2px}
+#lp{max-width:1340px;margin:0 auto;padding:26px 34px 34px}
+
+/* ===== hlavička ===== */
+.head{margin-bottom:14px}
+.head h1{font-family:var(--serif);font-weight:400;font-size:clamp(25px,2.4vw,32px);line-height:1.2;margin:0}
+.head p{color:var(--muted);font-size:14.5px;margin:6px 0 0}
+
+/* ===== javisko ===== */
+.stage{position:relative;height:var(--stage-h,700px);margin:2px 0 0}
+.axis-wrap{position:absolute;left:24px;right:24px;top:var(--axis-top,330px);height:46px}
+.axis{position:absolute;inset:0;background:#242424;border:1px solid var(--line);overflow:hidden;transform-origin:left center}
+.seg{position:absolute;top:0;height:100%;display:flex;align-items:center;justify-content:center;
+  transition:left .24s var(--ease),width .24s var(--ease)}
+.seg.past{background:#2e2b26}
+.seg.build{background:linear-gradient(90deg,#8a5f24,#ae8753)}
+.seg.rent{background:var(--gold-strong)}
+#lp.perp .seg.rent{-webkit-mask-image:linear-gradient(90deg,#000 74%,transparent 99%);mask-image:linear-gradient(90deg,#000 74%,transparent 99%)}
+
+/* Popis úseku sa umiestňuje výpočtom (umiestniPopisyUsekov): keď sa medzi
+   míľniky nezmestí, uhne mimo nich. Preto absolútne, nie centrovaním. */
+.seg span{position:absolute;top:50%;transform:translateY(-50%);
+  font-size:13.5px;font-weight:600;white-space:nowrap;padding:0 12px}
+.seg.build span{color:#fff}
+.seg.rent span{color:#31230f}
+.tick{position:absolute;top:52px;transform:translateX(-50%);color:rgba(183,175,165,.55);font-size:12.5px;
+  font-variant-numeric:tabular-nums;pointer-events:none}
+.tick::before{content:"";position:absolute;left:50%;top:-7px;width:1px;height:5px;background:rgba(183,175,165,.3)}
+.axis-cap{position:absolute;right:-2px;top:52px;color:rgba(183,175,165,.55);font-size:12.5px;pointer-events:none}
+.longevity{position:absolute;right:0;top:76px;color:var(--gold);font-size:12.5px;opacity:0;transition:opacity .3s;pointer-events:none}
+#lp.longevity .longevity{opacity:1}
+
+/* ===== milník: úchyt vyrastá z čiary a nesie kartu ===== */
+.node{position:absolute;top:23px;left:0;transform:translate(-50%,-50%);z-index:7}
+.handle{width:58px;height:46px;display:grid;place-items:center;padding:0;margin:0;cursor:grab;
+  background:var(--surface);border:1px solid var(--line-hi);color:var(--ink);
+  font:700 20px var(--serif);font-variant-numeric:tabular-nums;touch-action:none;user-select:none}
+.handle::after{content:"";position:absolute;inset:-10px}
+.handle:active{cursor:grabbing}
+.handle[data-locked="1"]{cursor:default;border-color:var(--line);color:var(--muted)}
+.handle[data-locked="1"]::after{display:none}
+.handle:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.handle small{position:absolute;top:calc(100% + 3px);left:50%;transform:translateX(-50%);
+  font:400 11.5px var(--sans);color:var(--muted);white-space:nowrap;letter-spacing:.02em}
+#lp.perp #n-end .handle{opacity:.5}   /* pri nekonečnej rente ostáva, len neovplyvňuje výpočet */
+
+/* ===== karty — kapitoly vyrastajúce z milníka ===== */
+.card{position:absolute;width:326px;background:var(--surface);border:1px solid var(--line);padding:18px 20px 20px;z-index:5}
+.card.above{top:var(--card-top,26px)}
+.card.below{top:var(--card-top,410px)}
+/* stopka spája kartu s milníkom — rovnaká šírka aj farba ako úchyt */
+.card::after{content:"";position:absolute;left:var(--cx,50%);transform:translateX(-50%);width:58px;
+  background:var(--surface);border-left:1px solid var(--line);border-right:1px solid var(--line)}
+.card.above::after{top:100%;height:var(--stem)}
+.card.below::after{bottom:100%;height:var(--stem)}
+.card.lead{border-color:var(--line-hi)}
+
+.card h2{font-family:var(--serif);font-weight:700;font-size:19px;color:var(--gold-strong);margin:0 0 3px;line-height:1.2}
+.card .when{font-size:13px;color:var(--muted);margin:0 0 14px}
+
+/* prepínače */
+.tg{display:grid;gap:5px;margin-bottom:10px}
+.tg.c2{grid-template-columns:1fr 1fr}
+.tg.c3{grid-template-columns:1fr 1fr 1fr}
+.tg button{border:1px solid var(--line);background:var(--inset);color:var(--ink);
+  font:500 13.5px/1.3 var(--sans);padding:10px 5px;cursor:pointer}
+.tg button:hover{border-color:var(--gold)}
+.tg button.on{background:var(--gold);border-color:var(--gold);color:#1a1a1a;font-weight:600}
+.tg button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.tg.off{opacity:.4;pointer-events:none}
+
+/* posuvník s hodnotou */
+.sl{display:block;margin:12px 0 0}
+.sl .row{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.sl .k{font-size:13px;color:var(--muted)}
+.sl .v{font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:22px;margin:6px 0 0;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:3px;background:rgba(255,255,255,.2)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;margin-top:-6px;border:0;border-radius:50%;
+  background:var(--gold);box-shadow:0 0 0 2px rgba(36,36,36,.9)}
+input[type=range]::-moz-range-track{height:3px;background:rgba(255,255,255,.2)}
+input[type=range]::-moz-range-thumb{width:15px;height:15px;border:0;border-radius:50%;background:var(--gold);box-shadow:0 0 0 2px rgba(36,36,36,.9)}
+input[type=range]:focus-visible{outline:2px solid var(--gold);outline-offset:4px}
+input[type=range]:disabled{opacity:.35;cursor:not-allowed}
+
+/* výsledok v karte */
+.out{margin-top:15px;padding-top:13px;border-top:1px solid var(--line)}
+.out .k{font-size:13px;color:var(--muted)}
+.out .v{font-size:25px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:3px;white-space:nowrap;line-height:1.12}
+.out .v small{font-size:13px;font-weight:400;color:var(--muted);margin-left:5px}
+.card.lead .out .v{color:var(--gold-strong)}
+.out.sec{margin-top:10px;padding-top:10px}
+.out.sec .v{font-size:18px}
+.leg{margin-top:12px;padding:10px 12px;background:var(--green-bg);border:1px solid var(--green-line);
+  color:var(--green);font-size:13px;line-height:1.45}
+
+/* nastavenia vnútri karty (profil, inflácia) */
+.set{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.set .cap{font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:7px}
+.sw{display:flex;align-items:center;gap:9px;cursor:pointer;user-select:none;font-size:13.5px;color:var(--muted)}
+.sw input{accent-color:var(--gold);width:17px;height:17px;margin:0;flex:none;cursor:pointer}
+.sw b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums;margin-left:auto;white-space:nowrap}
+
+/* ===== pod čiarou ===== */
+.warn{display:flex;gap:12px;padding:14px 16px;background:var(--red);border:1px solid var(--red);
+  font-size:15px;font-weight:600;line-height:1.45;margin:16px 0 0}
+.cta{display:flex;align-items:center;gap:22px;flex-wrap:wrap;margin:22px 0 22px}
+.btn{border:0;padding:17px 38px;font-family:var(--serif);font-size:16px;font-weight:700;letter-spacing:1.6px;
+  cursor:pointer;text-decoration:none;display:inline-block;background:var(--btn-gold);color:#fff;white-space:nowrap}
+.btn:hover{background:var(--gold)}
+.btn:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.cta p{font-size:14px;color:var(--muted);max-width:470px;margin:0;line-height:1.5}
+.assump{font-size:13px;color:var(--muted);line-height:1.6;margin:0 0 12px}
+.disclaimer{font-size:12.5px;color:#9d968c;line-height:1.6;border-top:1px solid var(--line);padding-top:13px}
+.disclaimer b{color:#a29c93}
+/* ===== úvodná časť nad aplikáciou ===== */
+.site-top{max-width:1480px;margin:0 auto;padding:22px 28px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
+.site-brand{display:flex;align-items:center;gap:13px;color:#fff}
+.site-brand-mark{color:var(--gold-strong);font-size:20px;line-height:1}
+.site-brand strong{display:block;font-family:var(--serif);font-size:17px;line-height:1.1}
+.site-brand small{display:block;margin-top:3px;color:#b7afa5;font-size:9px;letter-spacing:.12em}
+.site-menu{font-size:21px;color:var(--gold-strong);line-height:1}
+.intro{max-width:910px;margin:0 auto;padding:8px 28px 50px}
+.intro h1,.lead-text h1{font-family:var(--serif);font-size:clamp(42px,6vw,72px);font-weight:400;line-height:1.04;letter-spacing:-.025em;margin:0 0 25px;color:#fff}
+.intro h2,.lead-text h2{font-family:var(--serif);font-size:clamp(27px,3vw,36px);font-weight:400;line-height:1.15;margin:52px 0 16px;color:#fff}
+.intro p,.lead-text p{font-size:17px;line-height:1.75;color:rgba(255,255,255,.86);margin:0 0 18px}
+.intro p strong,.lead-text p strong{color:#fff;font-weight:600}
+.intro-jump{display:inline-flex;align-items:center;gap:13px;color:var(--gold-strong);font-weight:600;text-decoration:none;border-bottom:1px solid var(--gold);padding:0 0 7px;margin-bottom:6px}
+.intro-jump:hover{color:#fff;border-bottom-color:var(--gold-strong)}
+.intro-jump span{font-size:21px}
+.intro-audio{margin:38px 0 4px;padding:20px 22px;background:var(--surface);border-radius:5px;color:var(--on-gold)}
+.intro-audio-top{display:flex;align-items:center;justify-content:space-between;gap:20px}
+.intro-audio b{display:block;font-family:var(--serif);font-size:18px}
+.intro-audio small{display:block;color:var(--on-gold-soft);margin-top:3px;font-size:13px}
+.intro-audio button{width:43px;height:43px;flex:none;border:0;border-radius:50%;background:#2b2118;color:#fff;font-size:15px;cursor:pointer}
+.intro-audio button:hover{background:#3a2c1c}
+.intro-audio-line{height:2px;margin-top:17px;background:rgba(255,255,255,.38);position:relative}
+.intro-audio-line::before{content:"";display:block;width:16%;height:100%;background:#2b2118}
+.calculator-divider{max-width:1480px;margin:0 auto;border-top:1px solid var(--line)}
+/* Úvod: na šírke text vľavo, obraz vpravo — hlavné oznámenie ostáva v ľavom hornom
+   rohu, kam ide oko najskôr. Na mobile ide text prvý a obraz hneď pod ním. */
+.intro-lead{max-width:1240px;margin:0 auto;padding:64px 28px 8px;
+  display:grid;grid-template-columns:minmax(0,1.02fr) minmax(0,.98fr);gap:46px;align-items:center}
+.lead-text{min-width:0}
+.lead-text h1{margin-bottom:22px}
+.lead-text h2{margin-top:38px}
+.lead-img{margin:0;min-width:0;position:relative;overflow:hidden;border-radius:5px;
+  aspect-ratio:16/10;background:#242424}
+.lead-img img{display:block;width:100%;height:100%;object-fit:cover}
+@media(max-width:860px){
+  .intro-lead{grid-template-columns:1fr;gap:26px;padding:34px 16px 4px}
+  .lead-text h1{margin-bottom:18px}
+  .lead-text h2{margin-top:30px}
+  .lead-img{aspect-ratio:16/9}
+}
+
+/* ===== spodná časť: odoslanie modelácie, konzultácia, predpoklady ===== */
+.bottom-flow{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);gap:18px;margin:24px 0 20px}
+.client-panel{background:var(--surface);padding:24px 26px;border-radius:6px;color:var(--on-gold)}
+.client-panel.consult-panel{background:#242424;border:1px solid var(--line);color:#fff}
+.client-panel h3{font-family:var(--serif);font-size:22px;line-height:1.2;margin:0 0 9px;color:var(--on-gold)}
+.client-panel p{font-size:14px;line-height:1.55;margin:0;color:var(--on-gold-soft)}
+.client-panel p+p{margin-top:11px}
+.consult-panel h3{color:#fff}
+.consult-panel p{color:#b7afa5}
+.gate-label{margin-top:11px!important}
+.gate-names{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:18px}
+.gate-names+.email-row{margin-top:9px}
+.gate-names input,.email-row input{min-width:0;background:#fff;color:#1a1a1a;border:0;border-radius:3px;
+  padding:13px 14px;font:500 15px var(--sans)}
+.gate-names input:focus,.email-row input:focus{outline:2px solid #2b2118;outline-offset:2px}
+.gate-names input.bad,.email-row input.bad{outline:2px solid #8c2f2f;outline-offset:2px}
+.gate-view{display:inline-block;margin-top:18px;padding:14px 24px;border-radius:3px;
+  background:#2b2118;color:#fff;font:600 14px var(--sans);text-decoration:none}
+.gate-view:hover{background:#3a2c1c}
+.email-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;margin-top:18px}
+.email-row button{border:0;border-radius:3px;background:#2b2118;color:#fff;padding:13px 20px;font:600 14px var(--sans);cursor:pointer}
+.email-row button:hover{background:#3a2c1c}
+.email-row button:disabled{opacity:.6;cursor:default}
+.privacy-note{display:block;margin-top:9px;font-size:12px;color:var(--on-gold-soft)}
+.send-status{min-height:20px;margin-top:8px!important;font-size:13px!important;color:var(--on-gold)!important;font-weight:600}
+.consult-panel .btn{margin-top:18px;padding:14px 24px;font-size:14px;letter-spacing:1.1px}
+/* režim výstupu: formulár je preč, výzva na konzultáciu zostáva sama v celej šírke */
+body.vystup .bottom-flow{grid-template-columns:1fr}
+.assumptions-block{margin:0 0 18px;padding:17px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.assumptions-block h3{font-family:var(--serif);font-size:17px;font-weight:700;margin:0 0 6px;color:#fff}
+.assumptions-block .assump{margin:0;color:#b7afa5}
+.metodika{margin-top:12px}
+.metodika summary{cursor:pointer;font-size:13px;color:var(--gold-strong);list-style:none;
+  display:inline-flex;align-items:center;gap:7px;padding:3px 0}
+.metodika summary::-webkit-details-marker{display:none}
+.metodika summary::after{content:"+";font-size:15px;line-height:1}
+.metodika[open] summary::after{content:"–"}
+.metodika summary:hover{color:#fff}
+.metodika p{margin:9px 0 0;font-size:12.5px;line-height:1.65;color:#9d968c}
+.navrat{display:inline-flex;align-items:center;gap:8px;margin:0 0 14px;
+  color:var(--gold-strong);font-size:14px;text-decoration:none;
+  border-bottom:1px solid var(--line)}
+.navrat:hover{color:#fff;border-bottom-color:var(--gold-strong)}
+
+/* ===== mobil ===== */
+.mob{display:none}
+@media (max-width:860px){
+  #lp{padding:20px 16px 26px}
+  .stage{height:auto!important}
+  .axis-wrap{position:relative;inset:auto;top:0!important;height:26px;margin:12px 0 0}
+  .axis{height:26px}
+  .seg span,.tick,.axis-cap,.longevity,.handle small{display:none}
+  .node{top:13px;pointer-events:none}
+  .handle{width:38px;height:26px;font-size:14px}
+  .mob{display:block;text-align:center;font-size:13px;color:var(--muted);margin:10px 0 0}
+  .card{position:static;width:100%;margin:12px 0 0;padding:17px;top:auto!important}
+  .card::after,.card-stem{display:none}
+  .btn{width:100%;text-align:center}
+  .gate-names,.email-row{grid-template-columns:1fr}
+  .gate-view{display:block;text-align:center}
+}
+</style>
+<style>
+/* ============================================================
+   POHYBOVÁ VRSTVA — verzia s animáciami
+   Choreografia príchodu: čiara sa nakreslí → milníky dosadnú →
+   stopky vyrastú z čiary → kapitoly sa rozvinú → svetlo prebehne osou.
+   ============================================================ */
+
+/* --- 1. čiara sa nakreslí zľava doprava --- */
+@keyframes lpDrawAxis{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+html[data-anim] #lp.in .axis{animation:lpDrawAxis .95s var(--ease) .15s both}
+
+/* --- 2. milníky dosadnú na čiaru --- */
+@keyframes lpNodeIn{from{opacity:0;transform:translate(-50%,-50%) scale(.72)}
+  to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+html[data-anim] #lp.in .node{animation:lpNodeIn .5s var(--ease) both;animation-delay:var(--d,.8s)}
+
+/* --- 3. stopka vyrastie z čiary ku kapitole --- */
+@keyframes lpStem{from{transform:translateX(-50%) scaleY(0)}to{transform:translateX(-50%) scaleY(1)}}
+html[data-anim] #lp.in .card::after{animation:lpStem .4s var(--ease) both;
+  animation-delay:calc(var(--d,1s) - .12s)}
+html[data-anim] .card.above::after{transform-origin:bottom center}
+html[data-anim] .card.below::after{transform-origin:top center}
+
+/* --- 4. kapitola sa rozvinie od čiary --- */
+@keyframes lpCardAbove{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes lpCardBelow{from{opacity:0;transform:translateY(-14px) scale(.985)}to{opacity:1;transform:none}}
+html[data-anim] #lp.in .card.above{animation:lpCardAbove .62s var(--ease) both;animation-delay:var(--d,1s);
+  transform-origin:bottom center}
+html[data-anim] #lp.in .card.below{animation:lpCardBelow .62s var(--ease) both;animation-delay:var(--d,1s);
+  transform-origin:top center}
+
+/* --- 5. ostatný obsah stránky --- */
+@keyframes lpFadeUp{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+html[data-anim] #lp.in [data-e]:not(.card){animation:lpFadeUp .6s var(--ease) both;animation-delay:var(--d,0s)}
+
+/* --- 6. svetlo prebehne osou, keď je plán postavený --- */
+html[data-anim] .axis::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:3;
+  transform:translateX(-101%);
+  background:linear-gradient(105deg,transparent 34%,rgba(255,246,232,.17) 50%,transparent 66%)}
+@keyframes lpSweep{to{transform:translateX(101%)}}
+html[data-anim] #lp.in .axis::after{animation:lpSweep 1.15s var(--ease) 1.75s 1 both}
+
+/* ============================================================
+   ŽIVÁ ODOZVA PRI PRÁCI S PLÁNOM
+   ============================================================ */
+
+/* milníky a kapitoly sa presúvajú plynulo; počas ťahania vypnuté kvôli odozve */
+html[data-anim] #lp:not(.drag) .node{transition:left .4s var(--ease)}
+html[data-anim] #lp:not(.drag) .card{transition:left .4s var(--ease),top .4s var(--ease),border-color .25s var(--ease)}
+html[data-anim] #lp:not(.drag) .seg{transition:left .4s var(--ease),width .4s var(--ease)}
+html[data-anim] #lp.drag .node,html[data-anim] #lp.drag .card,html[data-anim] #lp.drag .seg{transition:none}
+
+/* milník pod rukou — mäkké zlaté svetlo */
+html[data-anim] .handle{transition:box-shadow .25s var(--ease),border-color .25s var(--ease),background .25s var(--ease)}
+html[data-anim] .handle:hover:not([data-locked="1"]){border-color:var(--gold-strong);
+  box-shadow:0 0 0 4px rgba(196,154,99,.14)}
+html[data-anim] #lp.drag .handle:active{border-color:var(--gold-strong);
+  box-shadow:0 0 0 5px rgba(196,154,99,.22),0 0 24px rgba(196,154,99,.3)}
+
+/* kapitola sa jemne prihlási pri práci s ňou */
+html[data-anim] .card:hover,html[data-anim] .card:focus-within{border-color:var(--line-hi)}
+html[data-anim] .card::after{transition:background .3s var(--ease),border-color .3s var(--ease)}
+
+/* výsledné číslo jemne dýchne pri prepočte */
+@keyframes lpBeat{0%{opacity:.5;transform:translateY(2px)}100%{opacity:1;transform:none}}
+html[data-anim] .out .v.beat{animation:lpBeat .42s var(--ease)}
+
+/* úsek, ktorý sa práve zmenil, sa nakrátko rozsvieti */
+@keyframes lpSegGlow{0%{filter:brightness(1)}35%{filter:brightness(1.16)}100%{filter:brightness(1)}}
+html[data-anim] .seg.glow{animation:lpSegGlow .6s var(--ease)}
+
+/* ovládanie */
+html[data-anim] .tg button{transition:background .2s var(--ease),color .2s var(--ease),
+  border-color .2s var(--ease),transform .12s var(--ease)}
+html[data-anim] .tg button:active{transform:scale(.98)}
+html[data-anim] input[type=range]::-webkit-slider-thumb{transition:transform .18s var(--ease),box-shadow .18s var(--ease)}
+html[data-anim] input[type=range]:active::-webkit-slider-thumb{transform:scale(1.24);
+  box-shadow:0 0 0 2px rgba(36,36,36,.9),0 0 12px rgba(196,154,99,.45)}
+html[data-anim] .btn{transition:background .22s var(--ease),transform .18s var(--ease),box-shadow .22s var(--ease)}
+html[data-anim] .btn:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(154,105,41,.32)}
+
+/* zhrnutie pod čiarou dorazí po dopočítaní */
+@keyframes lpSlideIn{from{opacity:0;transform:translateX(-5px)}to{opacity:1;transform:none}}
+html[data-anim] 
+@media (prefers-reduced-motion:reduce){
+  html[data-anim] *{animation:none!important;transition:none!important}
+}
+</style>
+<style>
+/* Codex 2.1 — čistý hybrid čáry života a Claudeovy informační disciplíny */
+:root{
+  /* Hierarchia podľa webu: #ae8753 = aktívna plocha (Dynamický, Jednorazovo) → karty,
+     #9a6929 zostáva len pre tlačidlo Rezervovať. Čiara je svetlejší tón zlatej,
+     aby sa od kariet zreteľne oddelila. */
+  --bg:#1a1a1a;--surface:#ae8753;--inset:#2b2b2b;--ink:#fff;
+  --muted:rgba(255,255,255,.82);--gold:#ae8753;--gold-strong:#c49a63;
+  --line:rgba(255,255,255,.24);--line-hi:rgba(255,255,255,.5);
+  --axis:#dcc09b;--axis-ink:#2b2118;--stem:38px;
+  /* Na zlatej sa nepíše čiernou — pôsobí tvrdo a chladne. Teplá tmavohnedá drží
+     kontrast nad normou a ladí so zlatou. Hierarchiu nesie veľkosť a rez písma,
+     nie priehľadnosť: tlmenie by na zlatej rýchlo spadlo pod čitateľnú mieru. */
+  --on-gold:#2b2118;--on-gold-soft:#2b2118;--on-gold-line:rgba(43,33,24,.3);
+}
+html,body{background:var(--bg)}
+#lp{max-width:1480px;padding:22px 28px 30px}
+.head{display:none}
+.stage{height:var(--stage-h,760px);margin-top:0}
+.axis-wrap{left:18px;right:18px;top:var(--axis-top,322px);height:52px}
+.axis{height:52px;background:var(--axis);border:0;border-radius:4px;overflow:hidden}
+/* čiara života je jednofarebná — úseky nesú len text, nie vlastný odtieň */
+.seg,.seg.past,.seg.build,.seg.rent{height:100%;background:transparent!important}
+#lp.perp .seg.rent{-webkit-mask-image:none;mask-image:none}
+.seg span{color:var(--axis-ink)!important;font-size:14px;font-weight:500;line-height:1.15;text-align:center;white-space:normal}
+.tick{top:17px;color:rgba(43,33,24,.62);font-size:15px;font-weight:500;z-index:1}
+.tick::before{display:none}
+.axis-cap{display:none}
+.longevity{top:59px;color:var(--gold-strong)}
+.node{top:26px}
+.handle{width:62px;height:52px;background:var(--surface);border:0;border-radius:0;color:var(--axis-ink);
+  font:700 20px var(--serif);z-index:8;box-shadow:none;padding:7px}
+.handle>span{width:48px;height:38px;display:grid;place-items:center;background:var(--axis);border-radius:5px}
+.handle small{display:none}
+.handle:hover:not([data-locked="1"]){box-shadow:none}
+.handle:hover:not([data-locked="1"])>span{box-shadow:0 0 0 2px rgba(255,255,255,.28)}
+.card{width:320px;min-height:292px;background:var(--surface);border:0;border-radius:6px;
+  padding:19px 20px 20px;color:var(--on-gold);box-shadow:0 22px 52px rgba(0,0,0,.24)}
+.card.above{top:var(--card-top,10px)}
+.card.below{top:var(--card-top,405px)}
+.card::after{display:none}
+.card-stem{position:absolute;left:var(--cx,50%);transform:translateX(-50%);width:62px;
+  height:38px;background:var(--surface);border:0;border-radius:0;z-index:6;pointer-events:none}
+.card.above .card-stem{top:100%}
+.card.below .card-stem{bottom:100%}
+.card.above::after{height:var(--stem)}
+.card.below::after{height:var(--stem)}
+.card.lead{border:0}
+/* celá karta je uchopiteľná; ovládacie prvky si držia vlastný kurzor */
+.card{cursor:grab;user-select:none;-webkit-user-select:none}
+.card.locked{cursor:default}
+#lp.drag .card:not(.locked){cursor:grabbing}
+.card :is(button,input,select,label,a){cursor:auto;user-select:auto;-webkit-user-select:auto}
+.card :is(button,label.sw),.card input[type=range]{cursor:pointer}
+.card h2{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--on-gold);margin:0 0 5px;text-align:center}
+.card .when{font-size:13.5px;color:var(--on-gold-soft);text-align:center;margin-bottom:15px}
+/* Krokovanie veku v karte — na desktope sa vek nastavuje ťahaním, tu je zbytočné. */
+.step{display:none;width:44px;height:44px;padding:0;border:1px solid var(--on-gold-line);
+  border-radius:3px;background:transparent;color:var(--on-gold);
+  font:400 22px/1 var(--sans);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.step:active{background:rgba(43,33,24,.12)}
+.step[disabled]{opacity:.32;cursor:default}
+.tg{gap:6px}
+/* neaktívne prepínače sú svetlé, aby v karte nebolo priveľa tmavej plochy */
+.tg button{border:1px solid rgba(255,255,255,.34);background:rgba(255,255,255,.2);
+  color:var(--on-gold);border-radius:4px;font-weight:600}
+.tg button.on{background:#2b2118;border-color:#2b2118;color:#fff;font-weight:600}
+.tg button:hover{border-color:rgba(255,255,255,.7)}
+.tg button.on:hover{border-color:#2b2118}
+.sl .k,.out .k{color:var(--on-gold-soft)}
+.sl .v,.out .v{color:var(--on-gold)}
+.out .v small{color:var(--on-gold-soft)}
+.out{border-top-color:var(--on-gold-line)}
+.card.lead .out .v{color:var(--on-gold)}
+.set{border-top-color:var(--on-gold-line)}
+.set .cap{color:var(--on-gold)}
+.sw{color:var(--on-gold-soft)}
+.sw b{color:var(--on-gold)}
+.card .sw input,.delivery-panel .sw input{accent-color:#2b2118}
+input[type=range]::-webkit-slider-runnable-track{background:rgba(255,255,255,.42)}
+input[type=range]::-webkit-slider-thumb{background:#2b2118;box-shadow:0 0 0 2px rgba(255,255,255,.6)}
+input[type=range]::-moz-range-track{background:rgba(255,255,255,.42)}
+input[type=range]::-moz-range-thumb{background:#2b2118;box-shadow:0 0 0 2px rgba(255,255,255,.6)}
+.leg{background:#233129;border-color:#3c5a48;color:#a9cdb4}
+.cta{margin-top:12px}.assump{margin-top:8px}
+
+/* klidná choreografie: čára se složí, milníky dosednou, výsledek dýchne */
+html[data-anim] #lp.in .axis{animation-duration:1.2s}
+html[data-anim] #lp.in .axis::after{animation:lpSweep 4.6s cubic-bezier(.25,.1,.25,1) 1.9s 1 both;
+  background:linear-gradient(100deg,transparent 39%,rgba(255,255,255,.2) 50%,transparent 61%)}
+html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px 60px rgba(0,0,0,.3)}
+
+@media(max-width:860px){
+  #lp{padding:16px 13px 24px}
+  .axis-wrap{height:36px;margin:6px 0 12px}
+  .axis{height:36px}
+  .node{top:18px}
+  .handle{width:46px;height:36px;font-size:15px;box-shadow:none;padding:4px}
+  .handle>span{width:38px;height:28px}
+  .card{min-height:0;width:100%;margin-top:14px;border-radius:5px;padding:18px;cursor:default;user-select:auto;-webkit-user-select:auto}
+  .card::after{display:none}
+  .tick{display:none}
+  .bottom-flow{grid-template-columns:1fr;gap:12px;margin-top:20px}
+  .client-panel{padding:20px 18px}
+  .email-row{grid-template-columns:1fr}
+  .email-row button{width:100%}
+  .site-top{padding:16px 14px}
+  .intro{padding:4px 16px 30px}
+  .intro h2{margin:36px 0 14px}
+  .intro p{font-size:16px;line-height:1.7}
+  .intro-audio{padding:16px 16px;margin:28px 0 4px}
+  .intro-audio-top{gap:14px}
+  /* Míľniky sa na dotykovom displeji ťahať nedajú — vek sa nastavuje priamo v karte. */
+  .when-row{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:8px}
+  .when-row .when{margin-bottom:0}
+  .step{display:block}
+  /* dotykové ciele: prsty potrebujú viac miesta ako kurzor */
+  .tg button{min-height:44px}
+  .sw{min-height:44px}
+  .sw input{width:22px;height:22px}
+  input[type=range]{height:34px}
+}
+</style>
+</head>
+<body>
+
+
+
+
+<div id="lp"><span id="kalkulacka" aria-hidden="true"></span>
+
+  <header class="head" aria-hidden="true"></header>
+
+  <section class="stage">
+    <div class="axis-wrap">
+      <div class="axis" id="axis">
+        <div class="seg past" id="s-past"></div>
+        <div class="seg build" id="s-build"><span></span></div>
+        <div class="seg rent" id="s-rent"><span></span></div>
+      </div>
+      <div id="ticks"></div>
+      <span class="axis-cap">vek</span>
+      <div class="longevity">a ďalej →</div>
+      <div class="node" id="n-now" style="--d:.75s">
+        <button class="handle" id="h-now" data-key="now" role="slider" aria-label="Koľko mám dnes rokov"
+          aria-valuemin="18" aria-valuemax="105" aria-valuenow="50"><span id="v-now">50</span><small>dnes</small></button>
+      </div>
+      <div class="node" id="n-start" style="--d:.9s">
+        <button class="handle" id="h-start" data-key="start" role="slider" aria-label="Vek začiatku čerpania renty"
+          aria-valuemin="18" aria-valuemax="149" aria-valuenow="65"><span id="v-start">65</span><small>začiatok čerpania</small></button>
+      </div>
+      <div class="node" id="n-end" style="--d:1.05s">
+        <button class="handle" id="h-end" data-key="end" role="slider" aria-label="Vek konca čerpania renty"
+          aria-valuemin="19" aria-valuemax="150" aria-valuenow="90"><span id="v-end">90</span><small id="lbl-end">koniec čerpania</small></button>
+      </div>
+    </div>
+    <p class="mob" id="mob"></p>
+
+    <!-- DNES -->
+    <div class="card above lead" id="c-today" data-e style="--d:1.02s"><span class="card-stem" aria-hidden="true"></span>
+      <h2>Dnes</h2>
+      <div class="when-row">
+        <button type="button" class="step" data-step="now" data-dir="-1" aria-label="Znížiť môj vek o rok">−</button>
+        <p class="when" id="w-now">Mám 50 rokov</p>
+        <button type="button" class="step" data-step="now" data-dir="1" aria-label="Zvýšiť môj vek o rok">+</button>
+      </div>
+
+      <div class="tg c2" id="tg-sit">
+        <button type="button" class="on" data-sit="build">Majetok budujem</button>
+        <button type="button" data-sit="have">Majetok už mám</button>
+      </div>
+
+      <div id="blk-build">
+        <div class="tg c3" id="tg-mode">
+          <button type="button" class="on" data-mode="lump">Jednorazovo</button>
+          <button type="button" data-mode="monthly">Pravidelne</button>
+          <button type="button" data-mode="combo">Kombinácia</button>
+        </div>
+        <label class="sl" id="sl-combo-wrap" hidden>
+          <span class="row"><span class="k">Vložím dnes</span><span class="v" id="combo-v">100 000 €</span></span>
+          <input type="range" id="sl-combo" min="0" max="1000" value="0" aria-label="Suma, ktorú vložím dnes">
+        </label>
+        <div class="out"><div class="k" id="fund-k">Vložím dnes</div><div class="v" id="fund-v">—</div></div>
+      </div>
+
+      <div id="blk-have" hidden>
+        <label class="sl">
+          <span class="row"><span class="k">Môj majetok na rentu</span><span class="v" id="c0-v">600 000 €</span></span>
+          <input type="range" id="sl-c0" min="0" max="1000" value="0" aria-label="Hodnota môjho majetku">
+        </label>
+        <div class="tg c2" id="tg-goal" style="margin-top:12px">
+          <button type="button" class="on" data-goal="rent">Koľko mi vyplatí</button>
+          <button type="button" data-goal="duration">Ako dlho vydrží</button>
+        </div>
+        <div class="out"><div class="k" id="have-k">Môžem si vyplácať</div><div class="v" id="have-v">—</div></div>
+      </div>
+
+      <div class="set">
+        <span class="cap">S akým zhodnotením počítať</span>
+        <input type="range" id="sl-vynos" min="0" max="50" step="0.1" value="8.3"
+               aria-label="Ročné zhodnotenie majetku">
+        <p class="when" id="vynos-v" style="margin:8px 0 0">8,3 % ročne</p>
+        <div class="tg c2" id="tg-tipy" style="margin-top:10px">
+          <button type="button" data-vynos="8.3">56 rokov · 8,3 %</button>
+          <button type="button" data-vynos="11.3">10 rokov · 11,3 %</button>
+        </div>
+        <p class="when" id="vynos-note" style="margin:8px 0 0"></p>
+      </div>
+    </div>
+
+    <!-- PRVÁ RENTA -->
+    <div class="card below" id="c-start" data-e style="--d:1.16s"><span class="card-stem" aria-hidden="true"></span>
+      <h2>Začiatok čerpania</h2>
+      <div class="when-row">
+        <button type="button" class="step" data-step="start" data-dir="-1" aria-label="Začať čerpať o rok skôr">−</button>
+        <p class="when" id="w-start">O 15 rokov, keď budem mať 65</p>
+        <button type="button" class="step" data-step="start" data-dir="1" aria-label="Začať čerpať o rok neskôr">+</button>
+      </div>
+
+      <label class="sl" id="sl-rent-wrap">
+        <span class="row"><span class="k" id="rent-k">Chcem mesačne (v dnešných cenách)</span><span class="v" id="rent-v">3 000 €</span></span>
+        <input type="range" id="sl-rent" min="0" max="1000" value="0" aria-label="Koľko chcem mesačne">
+      </label>
+
+      <div class="out" id="out-cap"><div class="k" id="cap-k">Budem na to potrebovať</div><div class="v" id="cap-v">—</div></div>
+      <div class="out sec" id="out-fut"><div class="k">Vtedy mi to vyplatí</div><div class="v" id="fut-v">—</div></div>
+
+      <div class="set">
+        <label class="sw"><input type="checkbox" id="in-inflon" checked>Rátam s infláciou<b id="infl-v">3 % ročne</b></label>
+        <input type="range" id="sl-infl" min="0" max="10" step="0.5" value="3" aria-label="Ročná inflácia">
+      </div>
+    </div>
+
+    <!-- POSLEDNÁ RENTA -->
+    <div class="card above" id="c-end" data-e style="--d:1.3s"><span class="card-stem" aria-hidden="true"></span>
+      <h2>Koniec čerpania</h2>
+      <div class="when-row">
+        <button type="button" class="step" data-step="end" data-dir="-1" aria-label="Skrátiť čerpanie o rok">−</button>
+        <p class="when" id="w-end">Vo veku 90 rokov</p>
+        <button type="button" class="step" data-step="end" data-dir="1" aria-label="Predĺžiť čerpanie o rok">+</button>
+      </div>
+
+      <div class="tg c2" id="tg-pension">
+        <button type="button" class="on" data-pension="temporary">Na určitý čas</button>
+        <button type="button" data-pension="perpetuity">Navždy</button>
+      </div>
+
+      <div class="out"><div class="k" id="end-k">Renta mi pobeží</div><div class="v" id="end-v">—</div></div>
+      <div class="leg" id="leg" hidden></div>
+    </div>
+  </section>
+
+  <div id="msg" aria-live="polite" data-e style="--d:1.5s"></div>
+
+  <div class="bottom-flow" data-e style="--d:1.6s">
+    <section class="client-panel delivery-panel" aria-labelledby="delivery-title">
+      <div id="gate-form">
+        <h3 id="delivery-title">Zaslať modeláciu na e-mail</h3>
+        <p id="gate-uvod">Modelácia zhrnie váš scenár privátnej renty a navyše ukáže, ako by rovnaký plán obstál v obdobiach, ktoré trhy za posledných 56 rokov naozaj zažili.</p>
+        <p class="gate-label">Zadajte meno, priezvisko a email. Modeláciu si budete môcť otvoriť hneď po odoslaní a odkaz vám pošleme aj emailom.</p>
+        <div class="gate-names">
+          <input id="gate-first" type="text" autocomplete="given-name" placeholder="Meno" aria-label="Meno">
+          <input id="gate-last" type="text" autocomplete="family-name" placeholder="Priezvisko" aria-label="Priezvisko">
+        </div>
+        <div class="email-row">
+          <input id="model-email" type="email" inputmode="email" autocomplete="email" placeholder="Email" aria-label="Email">
+          <button id="send-model" type="button">Pokračovať k modelácii</button>
+        </div>
+        <div id="overenie-box" aria-hidden="true"></div>
+        <small class="privacy-note">Vaše údaje použijeme na odoslanie modelácie a nadväzujúcu komunikáciu k téme Wealth managementu.</small>
+        <p class="send-status" id="send-status" aria-live="polite"></p>
+      </div>
+      <div id="gate-done" hidden>
+        <h3>Modelácia privátnej renty je pripravená</h3>
+        <p id="gate-done-text">Nižšie nájdete modeláciu k scenáru privátnej renty, ktorý ste si práve prepočítali. Odkaz sme poslali aj emailom; ak by doručenie meškalo, otvoríte ho aj tlačidlom nižšie.</p>
+        <a class="gate-view" id="gate-view" href="#" target="_blank" rel="noopener">Otvoriť modeláciu renty</a>
+      </div>
+    </section>
+    <section class="client-panel consult-panel" aria-labelledby="consult-title">
+      <h3 id="consult-title">Ak chcete ísť ďalej</h3>
+      <p>Aplikácia počíta s vaším predpokladom, modelácia ukáže, ako by obstál v minulosti. Na osobnej konzultácii pridám tretí pohľad — čo od najbližších rokov čakajú veľké investičné domy — a spojím ho s vaším skutočným majetkom: čo máte viazané, čo likvidné a čo už má iný účel.</p>
+      <p>Modelácia, ktorá vám príde e-mailom, ukazuje minulosť. Na konzultácii sa pozrieme dopredu: aké výnosy od najbližších rokov čakajú veľké investičné domy a čo to znamená pre vašu rentu.</p>
+      <p>Výsledná stratégia sa zároveň stane meradlom pre vaše súčasné portfólio. Ukáže, či jeho výnosový potenciál, riziko, likvidita a celková štruktúra zodpovedajú tomu, čo od svojho majetku skutočne potrebujete. Jednotlivé investičné produkty tak prestanú byť samostatným cieľom — stanú sa nástrojmi jednej dlhodobej stratégie, ktorá dá vášmu majetku štruktúru, poriadok a jasný účel.</p>
+      <p>Pri väčšom majetku sa môžeme pozrieť aj na jeho celkové usporiadanie, komu má slúžiť a aké rozhodnutia bude potrebné urobiť v najbližších rokoch.</p>
+      <a class="btn" href="https://hechtberger.com/rezervacia" target="_blank" rel="noopener">Rezervovať konzultáciu</a>
+    </section>
+  </div>
+
+  <section class="assumptions-block" data-e style="--d:1.68s">
+    <h3>Použité predpoklady</h3>
+    <p class="assump" id="assump"></p>
+    <details class="metodika">
+      <summary>Technické detaily výpočtu</summary>
+      <p id="assump-detail"></p>
+    </details>
+  </section>
+  <footer class="disclaimer" data-e style="--d:1.74s">
+    Tento modelový výpočet slúži výhradne na ilustračné a vzdelávacie účely. <b>Nejde o investičné poradenstvo,
+    investičné odporúčanie ani o ponuku či návrh na uzavretie zmluvy.</b> Zhodnotenie nie je garantované,
+    hodnota investície môže v čase kolísať a nie je zaručená návratnosť investovanej sumy.
+  </footer>
+</div>
+
+<script>
+(()=>{
+"use strict";
+const $=id=>document.getElementById(id);
+const lp=$('lp');
+const ANIM=document.documentElement.dataset.anim==='1';
+const REDUCED=matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+/* JADRO:ZAČIATOK — od tejto značky po JADRO:KONIEC je kód, ktorý si zostav.py
+   prenáša aj do výsledkovej stránky. Je zámerne bez akéhokoľvek dotyku DOM, aby
+   obe stránky počítali to isté z toho istého zdroja. Čokoľvek sem pridané musí
+   platiť pre aplikáciu aj pre modeláciu. */
+const S={now:50,start:65,end:90,rent:3000,existing:600000,combo:100000,
+  sit:'build',mode:'lump',goal:'rent',pension:'temporary',vynos:8.3,inflOn:true,infl:3};
+/* Aplikácia už nemá investičné profily. Zhodnotenie si zadáva klient sám a je
+   výhradne jeho predpokladom — nič netvrdíme o tom, čím ho dosiahne. Tlačidlá
+   pod jazdcom ponúkajú historické fakty o svetovom akciovom indexe, nie naše
+   odporúčania. Staré odkazy s parametrom profile sa mapujú na ich číslo, aby
+   nezostali visieť. */
+const STARE_PROFILY={kons:5.3, vyv:7.9, dyn:10.5};
+const VYNOS_MIN=0, VYNOS_MAX=50;
+/* Nad týmto číslom už svetový akciový index za žiadne z oboch sledovaných
+   období nebol — vtedy k jazdcu pribudne vecná poznámka. */
+const VYNOS_HISTORIA_10R=11.3, VYNOS_HISTORIA_56R=8.3;
+const FEE_IN=1.5,FEE_M=0.9;
+
+/* ===== scenár v adrese =====
+   Celý stav sa dá zapísať do odkazu a znovu z neho načítať. Na tom stojí modelácia,
+   ktorú klient dostane e-mailom — odkaz nesie presne ten scenár, ktorý si prepočítal.
+   Názvy kľúčov sú preto zmluva navonok: po premenovaní by staršie rozposlané odkazy
+   prestali sedieť, takže sa menia len vedome a s prechodom pre staré tvary. */
+const NUM_KEYS=['now','start','end','rent','existing','combo','infl','vynos'];
+const ENUM_KEYS={sit:['build','have'],mode:['lump','monthly','combo'],goal:['rent','duration'],
+  pension:['temporary','perpetuity']};
+const QS=new URLSearchParams(location.search);
+const OUTPUT_MODE=QS.has('vystup');
+
+/* Kam vedie odkaz na modeláciu — na výsledkovú stránku vedľa aplikácie.
+   Tá si scenár prečíta z rovnakých parametrov a počíta rovnakým jadrom.
+   Pri lokálnom otvorení mimo webu (file://) by relatívna cesta nesedela, preto
+   sa v takom prípade použije aspoň samotná aplikácia v režime výstupu. */
+const VYSTUP_BASE=location.protocol==='file:'
+  ? location.href.split('?')[0]
+  : location.origin+location.pathname.replace(/[^/]*$/,'vysledok.html');
+
+function scenarioParams(){
+  const p=new URLSearchParams();
+  NUM_KEYS.forEach(k=>p.set(k,String(S[k])));
+  Object.keys(ENUM_KEYS).forEach(k=>p.set(k,S[k]));
+  p.set('infl_on',S.inflOn?'1':'0');
+  return p;
+}
+/* Pri lokálnom otvorení odkaz vedie späť do aplikácie, ktorá režim výstupu pozná
+   podľa ?vystup. Výsledková stránka ten prepínač nepotrebuje. */
+function scenarioURL(){
+  const lokalne=location.protocol==='file:';
+  return VYSTUP_BASE+'?'+(lokalne?'vystup&':'')+scenarioParams().toString();
+}
+
+function applyScenarioFromUrl(){
+  if(!QS.has('now'))return;
+  NUM_KEYS.forEach(k=>{const v=Number(QS.get(k));if(QS.has(k)&&Number.isFinite(v))S[k]=v});
+  Object.entries(ENUM_KEYS).forEach(([k,ok])=>{const v=QS.get(k);if(ok.includes(v))S[k]=v});
+  /* odkaz z čias, keď sa vyberal profil */
+  if(!QS.has('vynos')&&STARE_PROFILY[QS.get('profile')]!==undefined)
+    S.vynos=STARE_PROFILY[QS.get('profile')];
+  if(QS.has('infl_on'))S.inflOn=QS.get('infl_on')==='1';
+  /* Odkaz môže niekto prepísať ručne. Každá hodnota preto musí prejsť tými istými
+     hranicami, aké dovolí ovládanie — inak by sa dala vyrobiť modelácia (a PDF)
+     s nezmyselnou sumou, ktorá vyzerá ako náš výstup. */
+  const medzi=(v,min,max)=>Math.min(max,Math.max(min,v));
+  S.now=Math.round(medzi(S.now,18,99));
+  S.start=Math.round(medzi(S.start,S.now,120));
+  S.end=Math.round(medzi(S.end,S.start+1,150));
+  S.infl=medzi(S.infl,0,10);
+  S.vynos=Math.round(medzi(S.vynos,VYNOS_MIN,VYNOS_MAX)*10)/10;
+  S.rent=Math.round(medzi(S.rent,500,50000));
+  S.existing=Math.round(medzi(S.existing,50000,30000000));
+  S.combo=Math.round(medzi(S.combo,0,10000000));
+}
+applyScenarioFromUrl();
+
+
+const fmtN=n=>Math.max(0,Math.round(n)).toLocaleString('sk-SK');
+const fmtEur=n=>fmtN(n)+' €';
+const pctTxt=v=>String(Math.round(v*10)/10).replace('.',',');
+const yrs=n=>`${n} ${n===1?'rok':(n>=2&&n<=4?'roky':'rokov')}`;
+
+/* nelineárne posuvníky — jemné pri malých sumách, dosah pri veľkých */
+function mkScale(min,max,pow,round){
+  return{toVal:t=>{const raw=min+(max-min)*Math.pow(t/1000,pow),st=round(raw);
+      return Math.max(min,Math.min(max,Math.round(raw/st)*st))},
+    toPos:v=>Math.round(1000*Math.pow(Math.max(0,v-min)/(max-min),1/pow))};
+}
+const SC={rent:mkScale(500,50000,2.1,v=>v<10000?100:500),
+  c0:mkScale(50000,30000000,2.6,v=>v<1000000?10000:100000),
+  combo:mkScale(0,10000000,2.4,v=>v<500000?5000:50000)};
+
+/* ===== finančné jadro (zhodné s ostrou kalkulačkou) ===== */
+const mRate=pa=>Math.pow(1+pa/100,1/12)*(1-FEE_M/1200)-1;
+const mInfl=pa=>Math.pow(1+pa/100,1/12)-1;
+function payEnd(C,R0,m,i,g){let b=C,R=R0;for(let t=0;t<m;t++){b=b*(1+i)-R;R*=1+g}return b}
+function capForRent(R0,m,i,g){let hi=1e6;while(payEnd(hi,R0,m,i,g)<0){hi*=2;if(hi>1e15)return null}
+  let lo=0;for(let k=0;k<60;k++){const x=(lo+hi)/2;if(payEnd(x,R0,m,i,g)<0)lo=x;else hi=x}return(lo+hi)/2}
+function rentFromCap(C,m,i,g){let lo=0,hi=C;for(let k=0;k<60;k++){const x=(lo+hi)/2;if(payEnd(C,x,m,i,g)>0)lo=x;else hi=x}return(lo+hi)/2}
+function monthsToZero(C,R0,i,g){if(R0<=C*(i-g))return Infinity;let b=C,R=R0,t=0;while(b>0&&t<1200){b=b*(1+i)-R;R*=1+g;t++}return t}
+
+function compute(){
+
+  const N=S.start-S.now,Nm=N*12,T=S.end-S.start,Tm=T*12;
+  const infl=S.inflOn?S.infl:0,i=mRate(S.vynos),g=mInfl(infl),e=1-FEE_IN/100;
+  const nek=S.pension==='perpetuity'&&!(S.sit==='have'&&S.goal==='duration');
+  const o={N,Nm,T,Tm,infl,rast:S.inflOn&&infl>0,i,g,e,nek,rPct:S.vynos,immediate:N===0,warn:null};
+
+  if(nek&&i<=g){
+    o.warn=infl>0
+      ?'Renta rastúca o '+pctTxt(infl)+' % ročne prerastá zadané zhodnotenie — navždy by takto nevydržala. Skúste vyššie zhodnotenie alebo nižšiu infláciu.'
+      :'Výnos portfólia po poplatkoch je nulový alebo záporný — renta navždy potrebuje kladný výnos.';
+    return o;
+  }
+  o.R=o.rast?S.rent*Math.pow(1+infl/100,N):S.rent;
+
+  if(S.sit==='build'){
+    o.Rtoday=S.rent;
+    o.cap=nek?o.R/(i-g):capForRent(o.R,Tm,i,g);
+    if(o.cap===null){o.warn='Takto vysokú rentu by ste na tento čas nedokázali pokryť — skúste nižšiu sumu alebo kratšie obdobie.';return o}
+    const grow=Math.pow(1+i,Nm);
+    if(o.immediate){o.P0=o.cap/e;o.M=0}
+    else if(S.mode==='lump'){o.P0=o.cap/grow/e;o.M=0}
+    else if(S.mode==='monthly'){o.M=o.cap/(((Math.pow(1+i,Nm)-1)/i)*e);o.P0=0}
+    else{const from=S.combo*e*grow,an=(Math.pow(1+i,Nm)-1)/i;
+      o.M=Math.max(0,(o.cap-from)/(an*e));o.P0=S.combo;o.covers=from>=o.cap}
+    o.payM=nek?360:Tm;
+  }else{
+    o.C0=S.existing;
+    o.avail=o.C0*Math.pow(1+i,Nm);o.cap=o.avail;
+    if(S.goal==='rent'){o.R=nek?o.avail*(i-g):rentFromCap(o.avail,Tm,i,g);o.payM=nek?360:Tm}
+    else{o.Rtoday=S.rent;const m=monthsToZero(o.avail,o.R,i,g);
+      if(m===Infinity){o.forever=true;o.payM=360}else{o.months=m;o.payM=Math.min(1200,Math.max(360,m+120))}}
+  }
+  return o;
+}
+
+/* Súhrn, ktorý v samotnej simulácii nie je: koľko sa za celé obdobie vyplatí,
+   koľko z toho klient vloží a koľko pridá výnos. Sú to čísla, ktoré scenáru dajú
+   mieru — mesačná renta sama osebe nepovie, o akých sumách sa rozhodujeme.
+   Pri rente bez konca sa celková výplata nedá sčítať, vtedy sa neuvádza. */
+function prehladCiastok(){
+  const o=compute();
+  if(o.warn)return null;
+  const nekonecne=!!(o.nek||o.forever);
+
+  let vklady;
+  if(S.sit==='have')vklady=S.existing;
+  else if(o.immediate)vklady=o.P0;
+  else if(S.mode==='lump')vklady=o.P0;
+  else if(S.mode==='monthly')vklady=o.M*o.Nm;
+  else vklady=S.combo+o.M*o.Nm;
+
+  if(nekonecne)return {nekonecne:true, vklady, kapital:o.cap};
+
+  /* rastúca renta je geometrický rad; pri nulovom raste stačí súčin */
+  const m=o.Tm, R=o.R, g=o.g;
+  const vyplatene=Math.abs(g)<1e-12 ? R*m : R*(Math.pow(1+g,m)-1)/g;
+  return {nekonecne:false, vklady, vyplatene, vynos:Math.max(0,vyplatene-vklady), mesiacov:m};
+}
+
+/* JADRO:KONIEC */
+
+/* Modelované priebehy (Monte Carlo) sa v aplikácii nepočítajú ani nezobrazujú —
+   konkrétny scenár sa na nich overuje až na osobnej konzultácii. */
+
+/* Popis úseku má prirodzené miesto medzi svojimi dvoma míľnikmi. Pri krátkom
+   úseku sa tam ale nezmestí a míľniky ho prekryjú. Vtedy uhne von zo zovretia:
+   „Budujem" doľava pred prvý míľnik, „Žijem z majetku" doprava za posledný —
+   teda vždy do tej strany, kde je na čiare voľno. Ak nie je miesto ani tam,
+   radšej zmizne, než aby ležal pod číslom míľnika.
+
+   Počíta sa z polôh, ktoré odložil layout(). Z DOM sa čítať nedajú: míľniky aj
+   segmenty majú prechod, takže rozmery tesne po prekreslení patria ešte
+   predchádzajúcemu stavu. */
+let POZ=null;
+const MILNIK=62;                      /* šírka míľnika na osi */
+
+function umiestniPopisyUsekov(){
+  if(isMob()||!POZ)return;            /* na mobile sú popisy skryté */
+  const MEDZERA=12;
+
+  const umiestni=(segId,odX,poX,maOd,maPo,kamUhnut)=>{
+    const seg=$(segId),sp=seg.querySelector('span');
+    if(!sp.textContent.trim()){sp.style.visibility='hidden';return}
+    sp.style.visibility='';
+    const sirka=sp.offsetWidth;                 /* šírka sa prechodom nemení */
+    const lavo =maOd?odX+MILNIK/2:odX;
+    const pravo=maPo?poX-MILNIK/2:poX;
+
+    let cielL=null;
+    if(pravo-lavo>=sirka+2*MEDZERA){
+      cielL=lavo+(pravo-lavo-sirka)/2;                       /* medzi míľniky */
+    }else if(kamUhnut==='vlavo'&&maOd&&odX-MILNIK/2-MEDZERA-sirka>=0){
+      cielL=odX-MILNIK/2-MEDZERA-sirka;                      /* pred prvý */
+    }else if(kamUhnut==='vpravo'&&maPo&&poX+MILNIK/2+MEDZERA+sirka<=POZ.axW){
+      cielL=poX+MILNIK/2+MEDZERA;                            /* za posledný */
+    }
+    if(cielL===null){sp.style.visibility='hidden';return}
+    /* ľavý okraj segmentu podľa modelu, nie podľa (animovaného) DOM */
+    const segL=parseFloat(seg.style.left)/100*POZ.axW;
+    sp.style.left=Math.round(cielL-segL)+'px';
+  };
+
+  umiestni('s-build',POZ.now,POZ.start,true,POZ.maStart,'vlavo');
+  umiestni('s-rent',POZ.start,POZ.end,POZ.maStart,POZ.maEnd,'vpravo');
+}
+
+/* Šírku popisu určuje písmo, a to sa načítava až po prvom vykreslení. Prvé
+   umiestnenie preto počíta so záložným písmom a vyjde užšie — po dobehnutí
+   fontov aj na ďalšom snímku sa prepočíta na skutočnú šírku. */
+if(document.fonts&&document.fonts.ready)
+  document.fonts.ready.then(()=>umiestniPopisyUsekov());
+
+
+/* Popis úseku („Žijem z majetku · 25 rokov") leží na osi v tej istej výške ako
+   čísla vekovej stupnice a jeho šírka závisí od textu, takže sa fixnou medzerou
+   ošetriť nedá. Číslo, ktoré by padlo priamo do popisu, preto vynecháme — inak
+   sa cez text prekreslí a vyzerá to ako rozbitá diakritika. */
+function skryTickyPodPopismi(){
+  const popisy=[...document.querySelectorAll('.seg span')]
+    .filter(el=>el.textContent.trim()&&el.offsetParent!==null)
+    .map(el=>el.getBoundingClientRect())
+    .filter(r=>r.width>0);
+  document.querySelectorAll('.tick').forEach(t=>{
+    const r=t.getBoundingClientRect();
+    const koliduje=popisy.some(p=>r.left<p.right+8&&p.left-8<r.right);
+    t.style.visibility=koliduje?'hidden':'';
+  });
+}
+
+/* ===== os ===== */
+let AXMAX=110;
+const FA=40,FS=14;
+const pct=v=>v<=FA?v/FA*FS:FS+(v-FA)/(AXMAX-FA)*(100-FS);
+const ageAt=p=>p<=FS?p/FS*FA:FA+(p-FS)/(100-FS)*(AXMAX-FA);
+const isMob=()=>matchMedia('(max-width:860px)').matches;
+
+const tw=new Map(),twSafe=new Map();
+function money(el,val,unit){
+  const to=Math.max(0,Math.round(val));
+  const draw=v=>{el.innerHTML=fmtN(v)+' €'+(unit?`<small>${unit}</small>`:'')};
+  if(!ANIM||REDUCED||typeof el._v!=='number'||document.hidden){draw(to);el._v=to;return}
+  const from=el._v;if(from===to){draw(to);return}
+  cancelAnimationFrame(tw.get(el));
+  const t0=performance.now();
+  const step=t=>{const k=Math.min(1,(t-t0)/240),e=1-Math.pow(1-k,3);
+    const v=Math.round(from+(to-from)*e);draw(v);el._v=v;if(k<1)tw.set(el,requestAnimationFrame(step))};
+  tw.set(el,requestAnimationFrame(step));
+  clearTimeout(twSafe.get(el));
+  twSafe.set(el,setTimeout(()=>{if(el._v!==to){cancelAnimationFrame(tw.get(el));draw(to);el._v=to}},420));
+}
+const txt=(el,t)=>{if(el.textContent!==t)el.textContent=t;el._v=undefined};
+
+/* ===== render ===== */
+function render(){
+  const o=compute();
+  const derived=S.sit==='have'&&S.goal==='duration';
+  let endEff=S.end;
+  if(derived&&!o.warn)endEff=o.forever?Math.max(S.start+1,100)
+    :Math.min(150,Math.max(S.start+1,Math.round(S.now+o.N+(o.months||0)/12)));
+  const openEnd=!!(o.nek||o.forever);
+  AXMAX=endEff<=100?110:Math.min(150,Math.max(110,Math.ceil((endEff+2)/10)*10));
+
+  lp.classList.toggle('perp',openEnd);
+  lp.classList.toggle('longevity',endEff>=100&&!openEnd);
+
+  $('blk-build').hidden=S.sit!=='build';
+  $('blk-have').hidden=S.sit!=='have';
+  $('sl-combo-wrap').hidden=!(S.sit==='build'&&S.mode==='combo');
+  $('tg-mode').classList.toggle('off',o.immediate);
+  $('sl-rent-wrap').style.display=(S.sit==='have'&&S.goal==='rent')?'none':'';
+  $('tg-pension').style.display=derived?'none':'';
+
+  /* milníky */
+  txt($('v-now'),String(S.now));txt($('v-start'),String(S.start));txt($('v-end'),String(endEff));
+  $('h-now').setAttribute('aria-valuenow',S.now);$('h-now').setAttribute('aria-valuemax',S.start);
+  $('h-start').setAttribute('aria-valuenow',S.start);$('h-start').setAttribute('aria-valuemin',S.now);$('h-start').setAttribute('aria-valuemax',S.end-1);
+  $('h-end').setAttribute('aria-valuenow',endEff);$('h-end').setAttribute('aria-valuemin',S.start+1);
+  $('h-end').dataset.locked=(derived||openEnd)?'1':'0';
+  syncSteps(endEff,openEnd,derived);
+  $('c-end').classList.toggle('locked',derived||openEnd);
+  txt($('lbl-end'),derived?'dovtedy vydrží':(openEnd?'životný horizont':'koniec čerpania'));
+
+  /* podnadpisy kariet — reč o živote, nie o produkte */
+  txt($('w-now'),`Mám ${S.now} rokov`);
+  txt($('w-start'),o.immediate?'Začínam hneď teraz'
+    :`O ${yrs(o.N)}, keď budem mať ${S.start}`);
+  txt($('w-end'),openEnd?'Renta pokračuje bez konca'
+    :(derived?`Vo veku ${endEff} rokov`:`Vo veku ${endEff} rokov`));
+
+  /* segmenty */
+  const put=(el,a,b)=>{el.style.left=pct(a)+'%';el.style.width=Math.max(0,pct(b)-pct(a))+'%'};
+  put($('s-past'),0,S.now);put($('s-build'),S.now,S.start);
+  put($('s-rent'),S.start,openEnd?ageAt(100):endEff);
+  $('s-build').querySelector('span').textContent=o.N>0?`Budujem · ${yrs(o.N)}`:'';
+  $('s-rent').querySelector('span').textContent=openEnd?'Žijem z majetku · bez konca'
+    :`Žijem z majetku · ${yrs(Math.max(0,endEff-S.start))}`;
+
+  /* ticky bez kolízie s milníkmi */
+  const wrapW=document.querySelector('.axis-wrap').getBoundingClientRect().width;
+  const near=wrapW>200?64/wrapW*100:0;
+  const hp=[pct(S.now)];if(!o.immediate)hp.push(pct(S.start));if(!openEnd)hp.push(pct(endEff));
+  let th='';
+  for(let a=40;a<AXMAX;a+=10){const p=pct(a);
+    if(hp.some(h=>Math.abs(h-p)<near))continue;
+    th+=`<span class="tick" aria-hidden="true" style="left:${p}%">${a}</span>`}
+  $('ticks').innerHTML=th;
+
+  /* karta DNES */
+  if(o.warn){txt($('fund-v'),'—');txt($('have-v'),'—')}
+  else if(S.sit==='build'){
+    if(o.immediate){txt($('fund-k'),'Musím mať pripravené');money($('fund-v'),o.P0)}
+    else if(S.mode==='lump'){txt($('fund-k'),'Vložím dnes');money($('fund-v'),o.P0)}
+    else if(o.covers){txt($('fund-k'),'Mesačne už nemusím nič');txt($('fund-v'),'Vklad stačí')}
+    else{txt($('fund-k'),'Odkladám mesačne');money($('fund-v'),o.M,'/ mes.')}
+  }else{
+    if(S.goal==='rent'){txt($('have-k'),'Môžem si vyplácať');money($('have-v'),o.R,'/ mes.')}
+    else{txt($('have-k'),'Majetok mi vydrží');
+      txt($('have-v'),o.forever?'Nevyčerpá sa':`${Math.floor(o.months/12)} r ${o.months%12} m`)}
+  }
+  /* Modelácia test odolnosti neukáže, keď scenár nemá plánované obdobie —
+     vtedy to ľavý panel nesmie sľubovať. */
+  const gu=$('gate-uvod');
+  /* Rovnaká podmienka, akú používa výsledková stránka: bez plánovaného obdobia
+     niet voči čomu prežitie merať, a renta bez konca ho tiež nemá. */
+  const bezOdolnosti = S.goal==='duration'
+    || (S.pension==='perpetuity' && !(S.sit==='have' && S.goal==='duration'));
+  if(gu)gu.textContent = bezOdolnosti
+    ? 'Modelácia zhrnie váš scenár privátnej renty, hlavné čísla aj použité predpoklady.'
+    : 'Modelácia zhrnie váš scenár privátnej renty a navyše ukáže, ako by rovnaký '
+      +'plán obstál v obdobiach, ktoré trhy za posledných 56 rokov naozaj zažili.';
+
+  txt($('vynos-v'),pctTxt(S.vynos)+' % ročne');
+  $('sl-vynos').value=S.vynos;
+  /* Nad históriou indexu nič nezakazujeme — len vedľa čísla postavíme fakt. */
+  txt($('vynos-note'), S.vynos>VYNOS_HISTORIA_10R
+    ? 'Svetový akciový index (MSCI World, EUR) dosiahol za posledných 10 rokov '
+      +pctTxt(VYNOS_HISTORIA_10R)+' % a za 56 rokov '+pctTxt(VYNOS_HISTORIA_56R)+' % ročne.'
+    : '');
+  document.querySelectorAll('#tg-tipy button').forEach(b=>
+    b.classList.toggle('on', Math.abs(Number(b.dataset.vynos)-S.vynos)<0.05));
+
+  /* karta PRVÁ RENTA */
+  if(o.warn){txt($('cap-v'),'—');$('out-fut').hidden=true}
+  else{
+    txt($('cap-k'),S.sit==='have'?'Môj majetok vtedy':'Budem na to potrebovať');
+    money($('cap-v'),o.cap);
+    const showFut=o.rast&&o.N>0&&!(S.sit==='have'&&S.goal==='rent');
+    $('out-fut').hidden=!showFut;
+    if(showFut)money($('fut-v'),o.R,'/ mes.');
+  }
+  txt($('rent-k'),o.rast?'Chcem mesačne (v dnešných cenách)':'Chcem mesačne');
+
+  /* karta POSLEDNÁ RENTA */
+  const leg=$('leg');
+  if(o.warn){txt($('end-v'),'—');leg.hidden=true}
+  else if(o.nek){txt($('end-k'),'Renta mi pobeží');txt($('end-v'),'Bez konca');
+    leg.hidden=false;leg.textContent=`Majetok ${fmtEur(o.cap)} zostáva nedotknutý — pre vás aj pre deti.`}
+  else if(derived){txt($('end-k'),'Renta mi pobeží');
+    txt($('end-v'),o.forever?'Bez konca':`do ${endEff} rokov`);
+    leg.hidden=!o.forever;if(o.forever)leg.textContent='Rentu pokryjú výnosy — majetok sa nemíňa.'}
+  else{txt($('end-k'),'Renta mi pobeží');txt($('end-v'),yrs(Math.max(0,endEff-S.start)));leg.hidden=true}
+
+  $('c-today').classList.toggle('lead',!derived);
+  $('c-end').classList.toggle('lead',derived);
+
+  $('mob').textContent=o.warn?'':
+    `${S.now} r · ${o.immediate?'renta hneď':'budujem '+yrs(o.N)} · ${openEnd?'renta bez konca':'renta '+yrs(Math.max(0,endEff-S.start))}`;
+
+  /* pod čiarou — modelované priebehy sa v aplikácii neukazujú, patria na konzultáciu */
+  const msg=$('msg');
+  msg.innerHTML=o.warn?`<div class="warn"><span>!</span><span>${o.warn}</span></div>`:'';
+
+  /* Predpoklady sa opisujú všeobecne — bez konkrétneho profilu a percenta,
+     aby orientačný prepočet nepôsobil ako prísľub konkrétneho výnosu. */
+  $('assump').textContent=o.warn?''
+    :'Aplikácia nepredpokladá žiadny výnos za vás. Počíta s tým, ktoré ste zadali, '
+     +'a ukazuje, čo z neho matematicky vyplýva. Nejde o odhad ani o odporúčanie.';
+
+  $('assump-detail').textContent=o.warn?''
+    :`Výpočet vychádza zo zhodnotenia ${pctTxt(o.rPct)} % ročne, ktoré ste zadali vy. `
+     +`Uvedené sumy sú po odpočítaní vstupného poplatku ${pctTxt(FEE_IN)} % a poplatku za správu ${pctTxt(FEE_M)} % ročne. `
+     +(o.rast?`Výpočet zohľadňuje infláciu ${pctTxt(o.infl)} % ročne. `:'Výpočet nezohľadňuje infláciu. ')
+     +'Dane z výnosov výpočet nezohľadňuje. Výpočet prebieha na mesačnej báze.';
+
+  layout(o,endEff,openEnd);
+  umiestniPopisyUsekov();
+  skryTickyPodPopismi();
+  /* ešte raz na ďalšom snímku — vtedy už majú popisy konečnú šírku */
+  requestAnimationFrame(()=>{umiestniPopisyUsekov();skryTickyPodPopismi()});
+}
+
+/* ===== rozloženie ===== */
+function layout(o,endEff,openEnd){
+  const nN=$('n-now'),nS=$('n-start'),nE=$('n-end');
+  nS.style.display=o.immediate?'none':'';
+  nE.style.display='';   /* tretí míľnik ostáva na čiare aj pri nekonečnej rente */
+  if(isMob()){
+    [[nN,S.now],[nS,S.start],[nE,endEff]].forEach(([n,v])=>{n.style.left=pct(v)+'%'});
+    ['c-today','c-start','c-end'].forEach(id=>{$(id).style.left='';$(id).style.setProperty('--cx','50%')});
+    return;
+  }
+  const wrap=document.querySelector('.axis-wrap'),axW=wrap.getBoundingClientRect().width;
+  const stage=document.querySelector('.stage'),stW=stage.getBoundingClientRect().width;
+  if(!axW)return;
+  const xs={now:pct(S.now)/100*axW,start:pct(S.start)/100*axW,end:pct(endEff)/100*axW};
+
+  const MIN=66;
+  const vis=[{k:'now',x:xs.now},{k:'start',x:xs.start,off:o.immediate},{k:'end',x:xs.end}].filter(h=>!h.off);
+  for(let i=1;i<vis.length;i++)vis[i].d=Math.max(0,vis[i-1].x+(vis[i-1].d||0)+MIN-vis[i].x);
+  const over=(vis[vis.length-1].x+(vis[vis.length-1].d||0))-axW;
+  if(over>0)vis.forEach(h=>h.d=(h.d||0)-over);
+  const disp={...xs};vis.forEach(h=>disp[h.k]=h.x+(h.d||0));
+  nN.style.left=disp.now+'px';nS.style.left=disp.start+'px';nE.style.left=disp.end+'px';
+  /* Popisy úsekov sa riadia týmito číslami — z DOM sa čítať nedajú,
+     lebo míľniky aj segmenty majú prechod a ten meranie oneskoruje. */
+  POZ={axW, now:disp.now, start:disp.start, end:disp.end,
+       maStart:!o.immediate, maEnd:true};
+
+  const place=()=>{
+    const cT=$('c-today'),cS=$('c-start'),cE=$('c-end'),pad=18;
+    const wT=cT.offsetWidth,wS=cS.offsetWidth,wE=cE.offsetWidth;
+    const anch={t:disp.now,s:o.immediate?disp.now:disp.start,e:openEnd?axW-40:disp.end};
+    let lT=Math.max(0,Math.min(stW-wT,pad+anch.t-wT/2));
+    let lE=Math.max(0,Math.min(stW-wE,pad+anch.e-wE/2));
+    if(lT+wT+18>lE){lE=Math.min(stW-wE,lT+wT+18);
+      if(lE+wE>stW){lE=stW-wE;lT=Math.max(0,lE-wT-18)}}
+    const lS=Math.max(0,Math.min(stW-wS,pad+anch.s-wS/2));
+    cT.style.left=lT+'px';cE.style.left=lE+'px';cS.style.left=lS+'px';
+    cT.style.setProperty('--cx',Math.max(30,Math.min(wT-30,pad+anch.t-lT))+'px');
+    cE.style.setProperty('--cx',Math.max(30,Math.min(wE-30,pad+anch.e-lE))+'px');
+    cS.style.setProperty('--cx',Math.max(30,Math.min(wS-30,pad+anch.s-lS))+'px');
+
+    const STEM=34,AX=46,BOT=52;
+    const hAbove=Math.max(cT.offsetHeight,openEnd?0:cE.offsetHeight);
+    const top=hAbove+STEM;
+    stage.style.setProperty('--axis-top',top+'px');
+    stage.style.setProperty('--stage-h',(top+AX+STEM+cS.offsetHeight+BOT)+'px');
+    cT.style.setProperty('--card-top',(top-STEM-cT.offsetHeight)+'px');
+    cE.style.setProperty('--card-top',(top-STEM-cE.offsetHeight)+'px');
+    cS.style.setProperty('--card-top',(top+AX+STEM)+'px');
+  };
+  if(document.hidden)place();else requestAnimationFrame(place);
+}
+
+/* ===== ťahanie milníkov ===== */
+function setAge(k,v){
+  if(!Number.isFinite(v))return;
+  v=Math.round(v);
+  if(k==='now')S.now=Math.max(18,Math.min(v,S.start));
+  if(k==='start')S.start=Math.max(S.now,Math.min(v,S.end-1));
+  if(k==='end'){if(v>=AXMAX-2&&AXMAX<150)AXMAX=Math.min(150,AXMAX+10);S.end=Math.min(150,Math.max(S.start+1,v))}
+  render();
+}
+/* Uchopiť sa dá milník na čiare aj celá karta — obe posúvajú ten istý bod v čase. */
+const isLocked=key=>{const h=document.querySelector('.handle[data-key="'+key+'"]');
+  return !h||h.dataset.locked==='1'};
+
+function beginDrag(e,key,focusEl){
+  if(isLocked(key))return;
+  const wrap=document.querySelector('.axis-wrap'),r0=wrap.getBoundingClientRect();
+  if(r0.width<1)return;
+  e.preventDefault();
+  if(focusEl)focusEl.focus();
+  lp.classList.add('drag');
+  /* uchopenie je relatívne: bod, za ktorý ťaháme, si drží odstup od milníka,
+     takže karta pod kurzorom nepodskočí na jeho pozíciu */
+  const grab=e.clientX-(r0.left+pct(S[key])/100*r0.width);
+  const move=ev=>{const r=wrap.getBoundingClientRect();if(r.width<1)return;
+    setAge(key,ageAt(Math.max(0,Math.min(1,(ev.clientX-grab-r.left)/r.width))*100))};
+  const up=()=>{lp.classList.remove('drag');
+    removeEventListener('pointermove',move);removeEventListener('pointerup',up);removeEventListener('pointercancel',up)};
+  addEventListener('pointermove',move);addEventListener('pointerup',up);addEventListener('pointercancel',up);
+}
+
+document.querySelectorAll('.handle').forEach(h=>{
+  h.addEventListener('pointerdown',e=>beginDrag(e,h.dataset.key,h));
+  h.addEventListener('keydown',e=>{
+    if(h.dataset.locked==='1')return;
+    const s=e.shiftKey?5:1;let d=0;
+    if(e.key==='ArrowLeft'||e.key==='ArrowDown')d=-s;
+    if(e.key==='ArrowRight'||e.key==='ArrowUp')d=s;
+    if(d){e.preventDefault();setAge(h.dataset.key,S[h.dataset.key]+d)}
+  });
+});
+
+/* karta sa ťahá kdekoľvek okrem svojich ovládacích prvkov */
+Object.entries({'c-today':'now','c-start':'start','c-end':'end'}).forEach(([id,key])=>{
+  const card=document.getElementById(id);
+  if(!card)return;
+  card.addEventListener('pointerdown',e=>{
+    /* na mobile sú karty v bežnom toku pod čiarou — ťahanie by tam bralo scrollovanie */
+    if(isMob())return;
+    if(e.button!==0&&e.pointerType==='mouse')return;
+    if(e.target.closest('button,input,select,textarea,label,a'))return;
+    beginDrag(e,key,null);
+  });
+});
+
+/* ===== krokovanie veku v karte (mobil) =====
+   Na dotykovom displeji sa míľnik ťahať nedá — o vek, začiatok a koniec čerpania
+   sa preto stará dvojica tlačidiel priamo v karte. Podržanie krokuje ďalej, aby
+   sa dalo prejsť z päťdesiatky na šesťdesiatpäť bez pätnástich ťuknutí. */
+document.querySelectorAll('.step').forEach(b=>{
+  const key=b.dataset.step,dir=+b.dataset.dir;
+  let cakanie=null,opakovanie=null;
+  const krok=()=>setAge(key,S[key]+dir);
+  const stop=()=>{clearTimeout(cakanie);clearInterval(opakovanie);cakanie=opakovanie=null};
+  let dotykom=false;
+  b.addEventListener('pointerdown',e=>{
+    if(b.disabled)return;
+    e.preventDefault();                       /* aby ťuknutie nevyvolalo aj scroll */
+    dotykom=true;
+    b.setPointerCapture&&b.setPointerCapture(e.pointerId);
+    krok();
+    cakanie=setTimeout(()=>{opakovanie=setInterval(()=>{
+      if(b.disabled){stop();return}
+      krok();
+    },110)},420);
+  });
+  ['pointerup','pointercancel','pointerleave'].forEach(t=>b.addEventListener(t,stop));
+  /* Enter a medzerník posielajú click, nie pointerdown — bez tohto by sa krokovanie
+     klávesnicou (a asistenčnými technológiami) nedalo použiť vôbec. Príznak bráni
+     tomu, aby ťuknutie prstom, ktoré click vyvolá tiež, krokovalo dvakrát. */
+  b.addEventListener('click',()=>{
+    if(dotykom){dotykom=false;return}
+    if(!b.disabled)krok();
+  });
+});
+
+/* Hranice krokovania sa musia zhodovať s tým, čo dovolí setAge — inak by tlačidlo
+   zostalo aktívne, no ťuknutie by už nič nezmenilo. */
+function syncSteps(endEff,openEnd,derived){
+  const medze={
+    now:[S.now>18,S.now<S.start],
+    start:[S.start>S.now,S.start<S.end-1],
+    end:[!(derived||openEnd)&&S.end>S.start+1,!(derived||openEnd)&&S.end<150]
+  };
+  document.querySelectorAll('.step').forEach(b=>{
+    const m=medze[b.dataset.step];
+    if(m)b.disabled=!(+b.dataset.dir<0?m[0]:m[1]);
+  });
+}
+
+/* ===== posuvníky ===== */
+function bindSlider(slId,valId,scale,get,set,unit){
+  const sl=$(slId),v=$(valId);
+  sl.value=scale.toPos(get());
+  const paint=()=>{v.textContent=fmtEur(get())+(unit||'')};
+  paint();
+  sl.addEventListener('input',()=>{set(scale.toVal(+sl.value));paint();render()});
+}
+bindSlider('sl-rent','rent-v',SC.rent,()=>S.rent,v=>S.rent=v,' / mes.');
+bindSlider('sl-c0','c0-v',SC.c0,()=>S.existing,v=>S.existing=v);
+bindSlider('sl-combo','combo-v',SC.combo,()=>S.combo,v=>S.combo=v);
+
+$('sl-infl').addEventListener('input',e=>{S.infl=+e.target.value;$('infl-v').textContent=pctTxt(S.infl)+' % ročne';render()});
+$('in-inflon').addEventListener('change',e=>{S.inflOn=e.target.checked;$('sl-infl').disabled=!S.inflOn;
+  $('infl-v').style.opacity=S.inflOn?'':'.4';render()});
+
+function bindTg(box,attr,fn){
+  $(box).querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+    $(box).querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
+    fn(b.dataset[attr]);render();
+  }));
+}
+bindTg('tg-sit','sit',v=>S.sit=v);
+bindTg('tg-mode','mode',v=>S.mode=v);
+bindTg('tg-goal','goal',v=>S.goal=v);
+bindTg('tg-pension','pension',v=>S.pension=v);
+$('sl-vynos').addEventListener('input',e=>{S.vynos=+e.target.value;render()});
+document.querySelectorAll('#tg-tipy button').forEach(b=>
+  b.addEventListener('click',()=>{S.vynos=Number(b.dataset.vynos);render()}));
+
+/* prepínače musia sedieť so stavom, keď scenár prišiel v odkaze */
+[['tg-sit','sit','sit'],['tg-mode','mode','mode'],['tg-goal','goal','goal'],
+ ['tg-pension','pension','pension']]
+  .forEach(([box,attr,key])=>{
+    const b=$(box);if(!b)return;
+    b.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset[attr]===S[key]));
+  });
+$('in-inflon').checked=S.inflOn;
+$('sl-infl').value=S.infl;$('sl-infl').disabled=!S.inflOn;
+$('infl-v').textContent=pctTxt(S.infl)+' % ročne';
+$('infl-v').style.opacity=S.inflOn?'':'.4';
+
+/* ===== odoslanie modelácie =====
+   Kontakt ide do Boldemu (CRM + rozposielanie), spolu s odkazom na presne tento
+   scenár a jeho krátkym zhrnutím. Odkaz si klient otvorí hneď, aj keby e-mail meškal. */
+/* Overenie, že na druhej strane je človek. Neviditeľný režim: klient nič nevidí
+   a na nič neklikne, widget sa spustí až pri odoslaní formulára. Bez neho by
+   ktokoľvek mohol volať medzičlánok priamo a písať do CRM — hlavička o pôvode
+   požiadavky sa mimo prehliadača podvrhne triviálne.
+
+   Token má krátku platnosť, preto sa pýta až pri kliknutí, nie pri načítaní
+   stránky. Keby sa skript nenačítal (blokátor, výpadok), povieme to klientovi
+   rovno — ticho ho neprepustíme, ale ani ho nenecháme hádať, čo sa deje. */
+const TURNSTILE_KLUC='0x4AAAAAAEEkpI9Ro2vHvIwv';
+let turnstileId=null;
+
+/* Skript sa načítava s render=explicit, takže si sám nič nevykreslí a ohlási
+   sa až týmto callbackom. Bez neho API na window nepripojí metódy — vyzerá
+   načítané, ale render() na ňom neexistuje.
+
+   Kontajner sa zámerne nevolá „turnstile": prehliadač z každého id urobí
+   globálnu premennú, takže <div id="turnstile"> pretieni window.turnstile
+   a knižnica ohlási „už načítané" a nepripojí sa. */
+const turnstileNacitane=new Promise((ok,zle)=>{
+  window.onloadTurnstileCallback=()=>ok();
+  setTimeout(()=>zle(new Error('turnstile-nenacitane')),10000);
+});
+
+async function overenieCloveka(){
+  await turnstileNacitane;
+  return new Promise((ok,zle)=>{
+    let hotovo=false;
+    const raz=(f)=>(v)=>{if(hotovo)return;hotovo=true;f(v)};
+    const uspech=raz(ok);
+    const zlyhanie=raz((kod)=>zle(new Error('turnstile-zlyhalo:'+kod)));
+    /* Widget sa vykresľuje nanovo pri každom pokuse — callbacky musia patriť
+       tomuto pokusu, inak by odpoveď dorazila do už uzavretého sľubu. */
+    if(turnstileId!==null){try{window.turnstile.remove(turnstileId)}catch(e){}}
+    turnstileId=window.turnstile.render('#overenie-box',{
+      sitekey:TURNSTILE_KLUC, appearance:'execute', execution:'execute',
+      callback:uspech, 'error-callback':zlyhanie, 'timeout-callback':zlyhanie
+    });
+    window.turnstile.execute(turnstileId);
+    setTimeout(zlyhanie,20000);
+  });
+}
+
+/* Zápis ide cez vlastný medzičlánok na Cloudflare, nie priamo do Boldemu.
+   Dôvod: verejný formulárový endpoint vlastné stĺpce neukladá (overené), takže
+   odkaz na konkrétnu modeláciu sa do e-mailu nemal ako dostať. Oficiálne API to
+   vie, ale jeho kľúč nesmie byť v stránke — ktokoľvek by si ho odtiaľ prečítal
+   a písal do CRM. Kľúč preto žije v medzičlánku a stránka volá jeho.
+
+   Navyše sa konečne dozvieme pravdu: verejný formulár vracal „prijaté" aj vtedy,
+   keď polovicu údajov zahodil. */
+const RELAY_URL='https://renta-boldem.renta-relay.workers.dev/';
+
+async function submitToBoldem({first,last,email,scenarioUrl,summary,overenie}){
+  const res=await fetch(RELAY_URL,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({meno:first,priezvisko:last,email,scenar:scenarioUrl,
+                         zhrnutie:summary,overenie})
+  });
+  const body=await res.text().catch(()=>'');
+  if(!res.ok)throw new Error('relay-failed:'+res.status+':'+body.slice(0,160));
+  let d=null;
+  try{d=JSON.parse(body)}catch(e){}
+  if(!d||d.ok!==true)throw new Error('relay-rejected:'+body.slice(0,160));
+}
+
+/* Krátke zhrnutie scenára pre CRM — rovnaké čísla, aké klient videl na obrazovke. */
+function scenarioSummary(){
+  const o=compute();
+  if(o.warn)return 'Scenár privátnej renty z orientačného výpočtu.';
+  const bits=[];
+  bits.push(`${S.now} r`);
+  bits.push(o.immediate?'renta hneď':`začiatok v ${S.start}`);
+  bits.push(o.nek||o.forever?'renta bez konca':`renta ${yrs(Math.max(0,S.end-S.start))}`);
+  if(S.sit==='build'){
+    bits.push(`chce ${fmtEur(S.rent)} / mes.`);
+    bits.push(`potrebný kapitál ${fmtEur(o.cap)}`);
+    if(o.M>0)bits.push(`mesačne ${fmtEur(o.M)}`);
+    if(o.P0>0)bits.push(`jednorazovo ${fmtEur(o.P0)}`);
+  }else{
+    bits.push(`má ${fmtEur(S.existing)}`);
+    if(S.goal==='rent')bits.push(`renta ${fmtEur(o.R)} / mes.`);
+    else bits.push(o.forever?'majetok sa nevyčerpá'
+      :`vydrží ${Math.floor(o.months/12)} r ${o.months%12} m`);
+  }
+  bits.push(`zhodnotenie ${pctTxt(S.vynos)} % ročne`);
+  bits.push(o.rast?`inflácia ${pctTxt(o.infl)} %`:'bez inflácie');
+  return ('Privátna renta — '+bits.join(', ')+'.').slice(0,500);
+}
+
+/* Posledný scenár si necháme v prehliadači, aby sa klient pri návrate nemusel
+   preklikávať odznova. Je to jeho vlastné zariadenie a žiadne osobné údaje to
+   neobsahuje — iba čísla scenára. */
+const PAMAT='ph-renta-scenar';
+/* Scenár v adrese aj tak zostáva v histórii prehliadača, takže pamäť nič nové
+   neodkrýva. Aj tak ju necháme starnúť — po mesiaci už nikoho nezaujíma a na
+   spoločnom počítači nemá čo visieť donekonečna. Ukladáme iba čísla scenára,
+   žiadne meno ani e-mail. */
+const PAMAT_DNI=30;
+function zapamataj(){
+  try{localStorage.setItem(PAMAT, JSON.stringify(
+    {kedy:Date.now(), scenar:scenarioParams().toString()}))}catch(e){}
+}
+function precitajPamat(){
+  let raw=null;
+  try{raw=localStorage.getItem(PAMAT)}catch(e){}
+  if(!raw)return null;
+  let d=null;
+  try{d=JSON.parse(raw)}catch(e){}
+  if(!d||!d.scenar||!d.kedy)return null;
+  if(Date.now()-d.kedy > PAMAT_DNI*24*3600*1000){
+    try{localStorage.removeItem(PAMAT)}catch(e){}
+    return null;
+  }
+  return d.scenar;
+}
+/* Pozor: v adrese býva aj technický cache-buster (?v=11). Pýtame sa preto na
+   scenárové kľúče, nie na to, či je query neprázdna — inak by sa ponuka návratu
+   v ostrej prevádzke neukázala nikdy. */
+const maScenarVAdrese = NUM_KEYS.some(k=>QS.has(k))
+  || Object.keys(ENUM_KEYS).some(k=>QS.has(k));
+
+function ponukniNavrat(){
+  if(maScenarVAdrese)return;               /* scenár prišiel v odkaze, netreba */
+  const ulozene=precitajPamat();
+  if(!ulozene)return;
+  /* Ak si klient nič nezmenil, uložený scenár je ten istý, aký práve vidí —
+     ponuka by potom viedla na kliknutie, po ktorom sa nič nestane. */
+  if(ulozene===scenarioParams().toString())return;
+  const a=document.createElement('a');
+  a.className='navrat';
+  a.href='?'+ulozene;
+  a.textContent='Pokračovať tam, kde ste skončili';
+  const msg=$('msg');
+  msg.parentNode.insertBefore(a,msg);
+}
+ponukniNavrat();
+
+const sendModel=$('send-model');
+if(sendModel){
+  const mark=(el,bad)=>{el.classList.toggle('bad',bad);return bad};
+  ['gate-first','gate-last','model-email'].forEach(id=>
+    $(id).addEventListener('input',()=>$(id).classList.remove('bad')));
+
+  sendModel.addEventListener('click',async()=>{
+    const fi=$('gate-first'),la=$('gate-last'),em=$('model-email'),status=$('send-status');
+    const first=fi.value.trim(),last=la.value.trim(),email=em.value.trim();
+    let bad=false;
+    bad=mark(fi,!first)||bad;
+    bad=mark(la,!last)||bad;
+    bad=mark(em,!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))||bad;
+    if(bad){
+      status.textContent='Vyplňte, prosím, meno, priezvisko a platný e-mail.';
+      (!first?fi:!last?la:em).focus();
+      return;
+    }
+    const url=scenarioURL();
+    const label=sendModel.textContent;
+    sendModel.disabled=true;sendModel.textContent='Odosielam…';
+    status.textContent='';
+    let overenie;
+    try{
+      overenie=await overenieCloveka();
+    }catch(e){
+      console.warn('Turnstile',e);
+      status.textContent='Nepodarilo sa overiť prehliadač. Skúste to prosím ešte raz, '
+        +'prípadne vypnite blokovanie skriptov.';
+      sendModel.disabled=false;sendModel.textContent=label;
+      return;
+    }
+    try{
+      await submitToBoldem({first,last,email,scenarioUrl:url,
+                            summary:scenarioSummary(),overenie});
+    }catch(e){
+      console.warn('Boldem submit failed',e);
+      status.textContent='Nepodarilo sa odoslať modeláciu emailom. Skúste to prosím ešte raz.';
+      sendModel.disabled=false;sendModel.textContent=label;
+      return;
+    }
+    /* Modelácia sa otvorí rovno tu — rám prejde na výsledkovú stránku. Nový tab
+       zámerne nie: blokátory ho vedia zastaviť a na mobile klient vypadne
+       z kontextu stránky. Odkaz zostáva samonosný, dá sa uložiť do záložiek. */
+    zapamataj();
+    /* Meno pre modeláciu — ostáva v prehliadači klienta, do adresy nejde. */
+    try{localStorage.setItem('ph-renta-klient', JSON.stringify(
+      {kedy:Date.now(), meno:(first+' '+last).trim(), scenar:scenarioParams().toString()}))}catch(e){}
+    sendModel.textContent='Otváram modeláciu…';
+    /* Poistka pre prípad, že sa navigácia vôbec nezačne (prehliadač ju zablokuje).
+       Keď sa začne, tento dokument aj s časovačom zaniká — na zlyhanie pri načítaní
+       cieľovej stránky teda nepomôže, tam sa klient vráti tlačidlom späť.
+       Vetu o e-maile skrývame, odkaz e-mailom nechodí. */
+    setTimeout(()=>{
+      $('gate-view').href=url;
+      const veta=$('gate-done-text');
+      if(veta)veta.hidden=true;
+      $('gate-form').hidden=true;
+      $('gate-done').hidden=false;
+    },4000);
+    location.href=url;
+  });
+}
+
+/* Režim výstupu: klient si otvoril odkaz na svoju modeláciu. Kontakt už máme,
+   takže sa formulár neopakuje — stránka ukazuje len prepočítaný scenár. */
+if(OUTPUT_MODE){
+  document.body.classList.add('vystup');
+  const panel=document.querySelector('.delivery-panel');
+  if(panel)panel.hidden=true;
+}
+
+addEventListener('resize',render);
+render();
+
+if(ANIM&&!REDUCED){
+  /* Sekvencia sa spustí až pri prvej skutočnej viditeľnosti — v tabe na pozadí prehliadač
+     animácie pozastaví. Poistka sa nastavuje až vtedy, inak by v tabe na pozadí stihla
+     vypnúť pohybovú vrstvu skôr, než sa na stránku vôbec niekto pozrie. */
+  const start=()=>{
+    setTimeout(()=>lp.classList.add('in'),60);
+    setTimeout(()=>{
+      if(getComputedStyle(document.querySelector('.head')).opacity==='0')
+        document.documentElement.removeAttribute('data-anim');
+    },6000);
+  };
+  if(document.hidden){
+    let armed=false;
+    const fire=()=>{
+      if(armed||document.hidden)return;
+      armed=true;
+      document.removeEventListener('visibilitychange',fire);
+      removeEventListener('focus',fire);
+      start();
+    };
+    document.addEventListener('visibilitychange',fire);
+    addEventListener('focus',fire);
+  }else start();
+}
+})();
+</script>
+<script>
+/* Pohybová vrstva: reakcie, ktoré potrebujú vedieť, že sa niečo prepočítalo. */
+(()=>{
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  const stage=document.querySelector('.stage');
+  if(!stage)return;
+
+  /* výsledné čísla jemne dýchnu pri každej zmene */
+  const outs=[...document.querySelectorAll('.out .v')];
+  const last=new WeakMap();
+  const beat=()=>outs.forEach(el=>{
+    const v=el.textContent,prev=last.get(el);
+    if(prev!==undefined&&prev!==v){el.classList.remove('beat');void el.offsetWidth;el.classList.add('beat')}
+    last.set(el,v);
+  });
+  new MutationObserver(beat).observe(stage,{childList:true,characterData:true,subtree:true});
+  beat();
+
+  /* úsek čiary, ktorého dĺžka sa práve zmenila, sa nakrátko rozsvieti */
+  const segs=[...document.querySelectorAll('.seg.build,.seg.rent')];
+  const geom=new WeakMap(), timers=new WeakMap();
+  const glow=()=>segs.forEach(el=>{
+    const k=el.style.left+'|'+el.style.width, prev=geom.get(el);
+    if(prev!==undefined&&prev!==k){
+      el.classList.remove('glow');void el.offsetWidth;el.classList.add('glow');
+      clearTimeout(timers.get(el));
+      timers.set(el,setTimeout(()=>el.classList.remove('glow'),620));
+    }
+    geom.set(el,k);
+  });
+  new MutationObserver(glow).observe(document.getElementById('axis'),
+    {attributes:true,attributeFilter:['style'],subtree:true});
+  glow();
+})();
+</script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit" async defer></script>
+
+<script>
+/* ---- Vloženie do Squarespace: hlásenie výšky rodičovi ----
+   Iframe nemá vlastný scroll — o výšku sa stará rodičovská stránka. Aplikácia jej
+   po každej zmene rozmeru pošle svoju skutočnú výšku a drží sa na začiatku, aby
+   vnorené posúvanie nebralo scroll celej stránke. */
+(()=>{
+  if(window.parent===window) return;
+  const lockScroll=()=>{
+    try{ history.scrollRestoration='manual' }catch(e){}
+    if(window.scrollX!==0||window.scrollY!==0) window.scrollTo(0,0);
+  };
+  const notify=()=>requestAnimationFrame(()=>{
+    lockScroll();
+    /* Výška sa meria na <body>, nie na dokumente. Dokument sa vždy roztiahne aspoň
+       na výšku rámu, takže by hlásená hodnota vedela len rásť — po prechode
+       z modelácie späť na aplikáciu by rám zostal privysoký a pod obsahom by
+       zívala diera. Body má výšku svojho obsahu. */
+    const b=document.body;
+    const h=Math.max(b.getBoundingClientRect().height, b.scrollHeight, b.offsetHeight);
+    window.parent.postMessage({type:'ph-renta-height',height:Math.ceil(h),
+      scrollY:Math.round(window.scrollY),h1Top:null},'*');
+  });
+  document.documentElement.classList.add('embedded');
+  document.body.classList.add('embedded');
+  lockScroll();
+  addEventListener('pageshow',lockScroll);
+  addEventListener('scroll',lockScroll,{passive:true});
+  addEventListener('load',notify);
+  addEventListener('resize',()=>{window.scrollTo(0,0);notify()});
+  if('ResizeObserver' in window) new ResizeObserver(notify).observe(document.body);
+  [0,100,500,1500,3000].forEach(ms=>setTimeout(notify,ms));
+  setInterval(notify,1500);
+})();
+</script>
+</body>
+</html>
