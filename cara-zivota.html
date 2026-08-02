@@ -622,6 +622,7 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
           <input id="model-email" type="email" inputmode="email" autocomplete="email" placeholder="Email" aria-label="Email">
           <button id="send-model" type="button">Pokračovať k modelácii</button>
         </div>
+        <div id="turnstile" aria-hidden="true"></div>
         <small class="privacy-note">Vaše údaje použijeme na odoslanie modelácie a nadväzujúcu komunikáciu k téme Wealth managementu.</small>
         <p class="send-status" id="send-status" aria-live="polite"></p>
       </div>
@@ -1220,6 +1221,53 @@ $('infl-v').style.opacity=S.inflOn?'':'.4';
 /* ===== odoslanie modelácie =====
    Kontakt ide do Boldemu (CRM + rozposielanie), spolu s odkazom na presne tento
    scenár a jeho krátkym zhrnutím. Odkaz si klient otvorí hneď, aj keby e-mail meškal. */
+/* Overenie, že na druhej strane je človek. Neviditeľný režim: klient nič nevidí
+   a na nič neklikne, widget sa spustí až pri odoslaní formulára. Bez neho by
+   ktokoľvek mohol volať medzičlánok priamo a písať do CRM — hlavička o pôvode
+   požiadavky sa mimo prehliadača podvrhne triviálne.
+
+   Token má krátku platnosť, preto sa pýta až pri kliknutí, nie pri načítaní
+   stránky. Keby sa skript nenačítal (blokátor, výpadok), povieme to klientovi
+   rovno — ticho ho neprepustíme, ale ani ho nenecháme hádať, čo sa deje. */
+const TURNSTILE_KLUC='0x4AAAAAAEEkpI9Ro2vHvIwv';
+let turnstileId=null;
+
+function turnstilePripravene(){
+  return new Promise((ok,zle)=>{
+    const cakaj=(zvysok)=>{
+      if(window.turnstile&&typeof window.turnstile.render==='function')return ok();
+      if(zvysok<=0)return zle(new Error('turnstile-nenacitane'));
+      setTimeout(()=>cakaj(zvysok-250),250);
+    };
+    cakaj(8000);
+  });
+}
+
+async function overenieCloveka(){
+  await turnstilePripravene();
+  return new Promise((ok,zle)=>{
+    let hotovo=false;
+    const dokonci=(f)=>(v)=>{if(hotovo)return;hotovo=true;f(v)};
+    const uspech=dokonci(ok), zlyhanie=dokonci(()=>zle(new Error('turnstile-zlyhalo')));
+    if(turnstileId===null){
+      turnstileId=window.turnstile.render('#turnstile',{
+        sitekey:TURNSTILE_KLUC, size:'invisible', execution:'execute',
+        callback:uspech, 'error-callback':zlyhanie, 'timeout-callback':zlyhanie
+      });
+    }else{
+      window.turnstile.reset(turnstileId);
+      /* pri opakovanom odoslaní treba callbacky prepnúť na tento pokus */
+      window.turnstile.remove(turnstileId);
+      turnstileId=window.turnstile.render('#turnstile',{
+        sitekey:TURNSTILE_KLUC, size:'invisible', execution:'execute',
+        callback:uspech, 'error-callback':zlyhanie, 'timeout-callback':zlyhanie
+      });
+    }
+    window.turnstile.execute(turnstileId);
+    setTimeout(zlyhanie,20000);
+  });
+}
+
 /* Zápis ide cez vlastný medzičlánok na Cloudflare, nie priamo do Boldemu.
    Dôvod: verejný formulárový endpoint vlastné stĺpce neukladá (overené), takže
    odkaz na konkrétnu modeláciu sa do e-mailu nemal ako dostať. Oficiálne API to
@@ -1230,11 +1278,12 @@ $('infl-v').style.opacity=S.inflOn?'':'.4';
    keď polovicu údajov zahodil. */
 const RELAY_URL='https://renta-boldem.renta-relay.workers.dev/';
 
-async function submitToBoldem({first,last,email,scenarioUrl,summary}){
+async function submitToBoldem({first,last,email,scenarioUrl,summary,overenie}){
   const res=await fetch(RELAY_URL,{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({meno:first,priezvisko:last,email,scenar:scenarioUrl,zhrnutie:summary})
+    body:JSON.stringify({meno:first,priezvisko:last,email,scenar:scenarioUrl,
+                         zhrnutie:summary,overenie})
   });
   const body=await res.text().catch(()=>'');
   if(!res.ok)throw new Error('relay-failed:'+res.status+':'+body.slice(0,160));
@@ -1337,8 +1386,19 @@ if(sendModel){
     const label=sendModel.textContent;
     sendModel.disabled=true;sendModel.textContent='Odosielam…';
     status.textContent='';
+    let overenie;
     try{
-      await submitToBoldem({first,last,email,scenarioUrl:url,summary:scenarioSummary()});
+      overenie=await overenieCloveka();
+    }catch(e){
+      console.warn('Turnstile',e);
+      status.textContent='Nepodarilo sa overiť prehliadač. Skúste to prosím ešte raz, '
+        +'prípadne vypnite blokovanie skriptov.';
+      sendModel.disabled=false;sendModel.textContent=label;
+      return;
+    }
+    try{
+      await submitToBoldem({first,last,email,scenarioUrl:url,
+                            summary:scenarioSummary(),overenie});
     }catch(e){
       console.warn('Boldem submit failed',e);
       status.textContent='Nepodarilo sa odoslať modeláciu emailom. Skúste to prosím ešte raz.';
@@ -1440,6 +1500,7 @@ if(ANIM&&!REDUCED){
   glow();
 })();
 </script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 
 <script>
 /* ---- Vloženie do Squarespace: hlásenie výšky rodičovi ----
