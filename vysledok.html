@@ -216,9 +216,12 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
    aplikácie, kde má výslovnú ponuku „Pokračovať tam, kde ste skončili" a vie,
    na čo klikol. Beží v hlavičke, aby hlavný skript už čítal správnu adresu. */
 (function(){
-  var TECHNICKE={v:1,tlac:1,vystup:1};
-  var q=new URLSearchParams(location.search), maScenar=false;
-  q.forEach(function(_,k){ if(!TECHNICKE[k]) maScenar=true });
+  /* Pýtame sa na skutočné scenárové kľúče, nie na „nejaký neznámy parameter".
+     Odkaz s utm_source z e-mailovej kampane by inak prešiel ako scenár
+     a stránka by ukázala východiskové čísla, ktoré nikomu nepatria. */
+  var POVINNE=['now','start','end','rent'];
+  var q=new URLSearchParams(location.search);
+  var maScenar=POVINNE.every(function(k){ return q.has(k) && q.get(k)!=='' });
   if(!maScenar) location.replace('cara-zivota.html');
 })();
 </script>
