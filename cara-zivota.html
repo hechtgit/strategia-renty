@@ -1232,38 +1232,28 @@ $('infl-v').style.opacity=S.inflOn?'':'.4';
 const TURNSTILE_KLUC='0x4AAAAAAEEkpI9Ro2vHvIwv';
 let turnstileId=null;
 
-function turnstilePripravene(){
-  return new Promise((ok,zle)=>{
-    const cakaj=(zvysok)=>{
-      if(window.turnstile&&typeof window.turnstile.render==='function')return ok();
-      if(zvysok<=0)return zle(new Error('turnstile-nenacitane'));
-      setTimeout(()=>cakaj(zvysok-250),250);
-    };
-    cakaj(8000);
-  });
-}
+/* Skript sa načítava s render=explicit, takže si sám nič nevykreslí a ohlási
+   sa až týmto callbackom. Bez neho API na window nepripojí metódy — vyzerá
+   načítané, ale render() na ňom neexistuje. */
+const turnstileNacitane=new Promise((ok,zle)=>{
+  window.onloadTurnstileCallback=()=>ok();
+  setTimeout(()=>zle(new Error('turnstile-nenacitane')),10000);
+});
 
 async function overenieCloveka(){
-  await turnstilePripravene();
+  await turnstileNacitane;
   return new Promise((ok,zle)=>{
     let hotovo=false;
-    const dokonci=(f)=>(v)=>{if(hotovo)return;hotovo=true;f(v)};
-    const uspech=dokonci(ok);
-    const zlyhanie=dokonci((kod)=>zle(new Error('turnstile-zlyhalo:'+kod)));
-    if(turnstileId===null){
-      turnstileId=window.turnstile.render('#turnstile',{
-        sitekey:TURNSTILE_KLUC, appearance:'execute', execution:'execute',
-        callback:uspech, 'error-callback':zlyhanie, 'timeout-callback':zlyhanie
-      });
-    }else{
-      window.turnstile.reset(turnstileId);
-      /* pri opakovanom odoslaní treba callbacky prepnúť na tento pokus */
-      window.turnstile.remove(turnstileId);
-      turnstileId=window.turnstile.render('#turnstile',{
-        sitekey:TURNSTILE_KLUC, appearance:'execute', execution:'execute',
-        callback:uspech, 'error-callback':zlyhanie, 'timeout-callback':zlyhanie
-      });
-    }
+    const raz=(f)=>(v)=>{if(hotovo)return;hotovo=true;f(v)};
+    const uspech=raz(ok);
+    const zlyhanie=raz((kod)=>zle(new Error('turnstile-zlyhalo:'+kod)));
+    /* Widget sa vykresľuje nanovo pri každom pokuse — callbacky musia patriť
+       tomuto pokusu, inak by odpoveď dorazila do už uzavretého sľubu. */
+    if(turnstileId!==null){try{window.turnstile.remove(turnstileId)}catch(e){}}
+    turnstileId=window.turnstile.render('#turnstile',{
+      sitekey:TURNSTILE_KLUC, appearance:'execute', execution:'execute',
+      callback:uspech, 'error-callback':zlyhanie, 'timeout-callback':zlyhanie
+    });
     window.turnstile.execute(turnstileId);
     setTimeout(zlyhanie,20000);
   });
@@ -1501,7 +1491,7 @@ if(ANIM&&!REDUCED){
   glow();
 })();
 </script>
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit" async defer></script>
 
 <script>
 /* ---- Vloženie do Squarespace: hlásenie výšky rodičovi ----
