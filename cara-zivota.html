@@ -1220,86 +1220,27 @@ $('infl-v').style.opacity=S.inflOn?'':'.4';
 /* ===== odoslanie modelácie =====
    Kontakt ide do Boldemu (CRM + rozposielanie), spolu s odkazom na presne tento
    scenár a jeho krátkym zhrnutím. Odkaz si klient otvorí hneď, aj keby e-mail meškal. */
-const BOLDEM_FORMS_CONFIG_URL='https://front.boldem.cz/api/forms/get?uc=208268&wg=7c7d41e8-0a15-4317-9bb7-abebbc852fab&sc=0';
-const BOLDEM_FORM_GUID='dd1af774-e0b8-4e6b-b309-ef3ce906a2ac';
-const BOLDEM_SCENARIO_FIELD='cc_3659';
-let boldemFormPromise=null;
+/* Zápis ide cez vlastný medzičlánok na Cloudflare, nie priamo do Boldemu.
+   Dôvod: verejný formulárový endpoint vlastné stĺpce neukladá (overené), takže
+   odkaz na konkrétnu modeláciu sa do e-mailu nemal ako dostať. Oficiálne API to
+   vie, ale jeho kľúč nesmie byť v stránke — ktokoľvek by si ho odtiaľ prečítal
+   a písal do CRM. Kľúč preto žije v medzičlánku a stránka volá jeho.
 
-async function loadBoldemForm(){
-  if(!boldemFormPromise){
-    boldemFormPromise=fetch(BOLDEM_FORMS_CONFIG_URL,{cache:'no-store'})
-      .then(r=>{if(!r.ok)throw new Error('boldem-config-failed');return r.json()})
-      .then(forms=>{
-        /* Žiadny náhradný formulár: keby sa GUID nenašiel, kontakt by ticho
-           skončil v cudzom zozname. Radšej nech odoslanie zlyhá nahlas. */
-        const form=(Array.isArray(forms)?forms:[]).find(f=>f.guid===BOLDEM_FORM_GUID);
-        if(!form||!form.url||!form.mainMailingListGuid)throw new Error('boldem-form-missing');
-        return form;
-      })
-      .catch(e=>{boldemFormPromise=null;throw e});
-  }
-  return boldemFormPromise;
-}
-
-/* Vyhodnotenie odpovede Boldemu.
-   Boldem vie odpovedať stavom 200 aj vtedy, keď kontakt odmietol, takže samotný
-   stav nestačí. Pravidlo je jediné: klientovi nikdy nepovedať, že modelácia odišla,
-   keď neodišla. Preto sa hľadá výslovne záporný signál a za úspech sa berie len
-   výslovne kladný príznak — nie samotná prítomnosť nejakého poľa v odpovedi. */
-const BOLDEM_CHYBA=/\b(error|failed|unable|invalid)\b|nepoda|chyba/i;
-
-function boldemOdmietol(body){
-  const t=(body||'').trim();
-  if(!t)return false;                         /* prázdne telo pri 2xx berieme ako úspech */
-  let json;
-  try{json=JSON.parse(t)}
-  catch(e){return /^(false|0)$/i.test(t)||BOLDEM_CHYBA.test(t)}
-
-  if(json===false||json===0)return true;      /* holá odmietavá hodnota */
-  if(typeof json==='string')return /^(false|0|error|chyba)$/i.test(json.trim());
-  if(!json||typeof json!=='object')return false;
-
-  /* Pole error: čokoľvek iné než výslovné „žiadna chyba" je odmietnutie.
-     Boldem ho môže poslať ako číslo aj ako objekt, nielen ako true alebo text. */
-  if('error' in json){
-    const e=json.error;
-    const bezChyby=e===false||e===0||e===null||e===undefined
-      ||(typeof e==='string'&&!e.trim());
-    if(!bezChyby)return true;
-  }
-
-  const ok=json.success??json.ok??json.result;
-  if(ok===false||ok===0||/^(false|0)$/i.test(String(ok)))return true;
-
-  /* Chybovú správu smie umlčať iba výslovne kladný príznak úspechu. Samotná
-     prítomnosť poľa result — hoci s hodnotou null alebo {} — úspech neznamená;
-     inak by {"result":null,"message":"Invalid e-mail"} prešlo ako odoslané. */
-  const kladny=ok===true||ok===1||/^(true|1|ok|success)$/i.test(String(ok));
-  if(!kladny&&typeof json.message==='string'&&BOLDEM_CHYBA.test(json.message))return true;
-  return false;
-}
+   Navyše sa konečne dozvieme pravdu: verejný formulár vracal „prijaté" aj vtedy,
+   keď polovicu údajov zahodil. */
+const RELAY_URL='https://renta-boldem.renta-relay.workers.dev/';
 
 async function submitToBoldem({first,last,email,scenarioUrl,summary}){
-  const form=await loadBoldemForm();
-  const res=await fetch(form.url,{
+  const res=await fetch(RELAY_URL,{
     method:'POST',
-    headers:{'Content-Type':'application/json','Accept':'application/json, text/plain, */*'},
-    body:JSON.stringify({
-      main_mailing_list_guid:form.mainMailingListGuid,
-      mailing_list_guids:form.mailingListGuids||[form.mainMailingListGuid],
-      form_identifier:form.guid,
-      name:first,surname:last,email,
-      source:'strategia-privatnej-renty',
-      scenar_url:scenarioUrl,
-      [BOLDEM_SCENARIO_FIELD]:scenarioUrl,
-      scenario_url:scenarioUrl,
-      scenario_summary:summary
-    })
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({meno:first,priezvisko:last,email,scenar:scenarioUrl,zhrnutie:summary})
   });
   const body=await res.text().catch(()=>'');
-  if(!res.ok)throw new Error('boldem-submit-failed:'+res.status+':'+body.slice(0,160));
-  if(boldemOdmietol(body))
-    throw new Error('boldem-submit-rejected:'+body.slice(0,160));
+  if(!res.ok)throw new Error('relay-failed:'+res.status+':'+body.slice(0,160));
+  let d=null;
+  try{d=JSON.parse(body)}catch(e){}
+  if(!d||d.ok!==true)throw new Error('relay-rejected:'+body.slice(0,160));
 }
 
 /* Krátke zhrnutie scenára pre CRM — rovnaké čísla, aké klient videl na obrazovke. */
