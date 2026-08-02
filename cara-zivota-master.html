@@ -1257,10 +1257,11 @@ async function overenieCloveka(){
   return new Promise((ok,zle)=>{
     let hotovo=false;
     const dokonci=(f)=>(v)=>{if(hotovo)return;hotovo=true;f(v)};
-    const uspech=dokonci(ok), zlyhanie=dokonci(()=>zle(new Error('turnstile-zlyhalo')));
+    const uspech=dokonci(ok);
+    const zlyhanie=dokonci((kod)=>zle(new Error('turnstile-zlyhalo:'+kod)));
     if(turnstileId===null){
       turnstileId=window.turnstile.render('#turnstile',{
-        sitekey:TURNSTILE_KLUC, size:'invisible', execution:'execute',
+        sitekey:TURNSTILE_KLUC, appearance:'execute', execution:'execute',
         callback:uspech, 'error-callback':zlyhanie, 'timeout-callback':zlyhanie
       });
     }else{
@@ -1268,7 +1269,7 @@ async function overenieCloveka(){
       /* pri opakovanom odoslaní treba callbacky prepnúť na tento pokus */
       window.turnstile.remove(turnstileId);
       turnstileId=window.turnstile.render('#turnstile',{
-        sitekey:TURNSTILE_KLUC, size:'invisible', execution:'execute',
+        sitekey:TURNSTILE_KLUC, appearance:'execute', execution:'execute',
         callback:uspech, 'error-callback':zlyhanie, 'timeout-callback':zlyhanie
       });
     }
