@@ -78,6 +78,7 @@
           riadky: Array.prototype.map.call(sek.querySelectorAll("tbody tr"), function (r) {
             return [text(r.querySelector(".co")), text(r.querySelector(".kolko"))];
           }),
+          vystraha: text(document.getElementById("odolnost-vystraha")),
           pod: text(document.getElementById("odolnost-pod"))
         };
       })(),
@@ -301,7 +302,7 @@
     /* ——— ako by plán obstál v minulosti ———
        Vlastná strana. Prvá strana je zhrnutie scenára, druhá je jediná téma:
        čo s tým plánom robí skutočný priebeh trhov. */
-    if (d.odolnost && d.odolnost.riadky.length) {
+    if (d.odolnost && (d.odolnost.riadky.length || d.odolnost.uvod)) {
       strana();
       odstavec(d.odolnost.nadpis, 13, "bold", TMAVA, SIRKA, 1.2);
       medzera(1.5);
@@ -326,11 +327,17 @@
         y += 6.5;
       });
 
-      medzera(6);
-      doc.setDrawColor(LINKA[0], LINKA[1], LINKA[2]);
-      doc.line(OKRAJ, y, OKRAJ + SIRKA, y);
-      y += 5;
-      odstavec(d.odolnost.pod, 7.5, "normal", [130, 125, 118], SIRKA, 1.5);
+      if (d.odolnost.vystraha) {
+        medzera(4);
+        odstavec(d.odolnost.vystraha, 8.5, "bold", TMAVA, SIRKA, 1.5);
+      }
+      if (d.odolnost.pod) {
+        medzera(6);
+        doc.setDrawColor(LINKA[0], LINKA[1], LINKA[2]);
+        doc.line(OKRAJ, y, OKRAJ + SIRKA, y);
+        y += 5;
+        odstavec(d.odolnost.pod, 7.5, "normal", [130, 125, 118], SIRKA, 1.5);
+      }
       medzera(9);
       nadpisSTelom(d.dalejNadpis, d.dalej, 11, 8.5);
     } else {
