@@ -18,6 +18,7 @@ Aplikácia a modelácia pre stránku
 | `pdf-font.js` | Písmo pre PDF — Asap (OFL) orezaný na použité znaky vrátane slovenskej diakritiky. Vygenerované, needitovať. |
 | `jspdf.min.js` | Knižnica jsPDF 2.5.2, vendorovaná (žiadne CDN). |
 | `squarespace-injection.html` | **Zdrojová kópia** kódu vloženého v Squarespace (Page Settings → Advanced). Squarespace nie je verzionovaný — po každej zmene tam ju sem prekopíruj a commitni. Bez tohto kódu tok nefunguje. |
+| `preview-local.html` | Lokálny vizuálny náhľad v rovnakom obale, fontoch a s rovnakým Adam prehrávačom ako ostrá Squarespace stránka. Nie je deploy artefakt. |
 
 ## Ako spraviť zmenu
 
