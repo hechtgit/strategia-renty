@@ -100,7 +100,7 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
 .suhrn-polozka .v{font-family:var(--serif);font-size:30px;color:var(--gold-strong)}
 .suhrn-pod{margin:18px 0 0;font-size:16px;line-height:1.6;color:var(--muted)}
 
-/* ===== rovnaký plán v referenčnej stratégii ===== */
+/* ===== historický pohľad na rovnaký plán ===== */
 .odolnost{border:1px solid var(--line);border-radius:4px;padding:28px 30px;margin:0 0 22px;
   background:var(--panel)}
 .odolnost h2{font-family:var(--serif);font-size:24px;font-weight:400;margin:0 0 12px;color:var(--ink)}
@@ -323,7 +323,7 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
   </section>
 
   <section class="odolnost" id="odolnost" hidden>
-    <h2>Rovnaký plán v referenčnej stratégii</h2>
+    <h2>Ako by rovnaký plán zvládol minulosť</h2>
     <p class="odolnost-uvod" id="odolnost-uvod"></p>
     <table class="odolnost-tab">
       <tbody id="odolnost-riadky"></tbody>
@@ -337,6 +337,7 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
       <h2>Použité predpoklady</h2>
       <p>Aplikácia za vás žiadny výnos nepredpokladá. Počíta so zhodnotením, ktoré ste zadali vy, a ukazuje, čo z neho matematicky vyplýva. Nejde o odhad ani o odporúčanie.</p>
       <p id="metodika"></p>
+      <p><strong>Dva pohľady, dve metodiky.</strong> Váš vlastný scenár používa zadané zhodnotenie počas celého obdobia. Historický pohľad používa MSCI World iba počas budovania majetku; počas čerpania používa modelový výnos 4 % ročne po investičných nákladoch, pred infláciou.</p>
       <p class="vystraha">Minulá výkonnosť nie je spoľahlivým ukazovateľom budúcich výsledkov.</p>
     </div>
     <div class="recap">
@@ -348,8 +349,8 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
   <section class="next">
     <div>
       <h2>Ak chcete ísť ďalej</h2>
-      <p>Aplikácia počíta s tým, čo od svojho majetku čakáte vy. Táto modelácia ukazuje, čo by s rovnakým plánom urobila minulosť. Zostáva tretí pohľad — dopredu.</p>
-      <p>Najväčšie investičné domy raz ročne zverejňujú, aké výnosy očakávajú od jednotlivých tried aktív v nasledujúcich desiatich až pätnástich rokoch. Sú to čísla, ktoré sa v novinách nedočítate, a dnes hovoria, že najbližšie roky budú skromnejšie než tie minulé. Na konzultácii vám ich ukážem na vašom scenári — a spojím ich s tým, čo naozaj máte: čo je viazané, čo likvidné a čo už má iný účel.</p>
+      <p>Aplikácia počíta s tým, čo od svojho majetku čakáte vy. Táto modelácia pridáva pohľad do minulosti. Na konzultácii doplníme tretí pohľad — aktuálne dlhodobé očakávania do budúcnosti.</p>
+      <p>Náš dlhodobý predpoklad vychádza z aktuálnych očakávaní viacerých renomovaných svetových investičných inštitúcií. Údaje zjednocujeme na porovnateľnú metodiku a výsledný predpoklad pravidelne aktualizujeme. Ide o modelový predpoklad, nie o garantovaný výnos. Na konzultácii ho premietneme do vášho scenára a spojíme s tým, čo naozaj máte: čo je viazané, čo likvidné a čo už má iný účel.</p>
     </div>
     <a class="btn-primary" href="https://hechtberger.com/rezervacia" target="_blank" rel="noopener">Preveriť môj scenár</a>
   </section>
@@ -367,31 +368,23 @@ const $=id=>document.getElementById(id);
 const HIST_OD=1970, HIST_DO=2025;
 const HIST_VYNOSY=[-0.0309,0.0571,0.1986,-0.2958,-0.3128,0.4209,0.0308,-0.0913,0.0183,0.0691,0.3893,0.1362,0.2457,0.4145,0.1974,0.158,0.1863,-0.0413,0.3172,0.1835,-0.2929,0.2456,-0.0037,0.3428,-0.0219,0.1477,0.1649,0.2936,0.176,0.462,-0.0626,-0.1218,-0.3267,0.1052,0.0637,0.2641,0.0755,-0.0245,-0.3729,0.2558,0.205,-0.0245,0.1359,0.2119,0.192,0.1055,0.1104,0.0758,-0.0438,0.3012,0.0611,0.3198,-0.1308,0.1949,0.2622,0.0707];
 
-/* ===================== test odolnosti =====================
-   Aplikácia počíta s tým, čo si klient zadal — nič netvrdí. Táto sekcia je to,
-   čo k tomu vieme pridať my: ako by sa plán s rovnakými vkladmi a rovnakou
-   rentou choval, keby peniaze prešli obdobiami, ktoré trhy naozaj zažili.
-
-   Referenčná stratégia, na ktorej to počítame, je jedna pre všetkých a klient
-   ju nenastavuje: 80 % svetových akcií počas budovania majetku, 60 % počas
-   čerpania renty. Zvyšok je stabilná zložka modelovaná pevnou sadzbou — nie je
-   to teda čistá história, ale model, ktorý akciovú časť berie zo skutočných
-   výnosov. Skladbu mení k dátumu štartu renty, bez prechodného obdobia.
+/* ===================== historický pohľad =====================
+   Aplikácia počíta s tým, čo si klient zadal — nič netvrdí. Táto sekcia k tomu
+   pridáva druhý, zreteľne oddelený pohľad. Počas budovania majetku používa
+   skutočné ročné výnosy MSCI World Net Total Return v EUR. Po začatí čerpania
+   už nejde o históriu: výplatná fáza používa jednotný plánovací predpoklad 4 %
+   nominálne ročne po investičných nákladoch, pred infláciou.
 
    Priebehy vznikajú skladaním súvislých úsekov histórie, nie losovaním
    jednotlivých rokov. Nezávislé losovanie by rozbilo poradie rokov a tým
    podcenilo práve zhluky prepadov, kvôli ktorým sa test robí. */
-const REF_AKCIE_BUDOVANIE=0.80, REF_AKCIE_CERPANIE=0.60;
-const REF_STABILNA=2.75;      /* % p.a., modelovaná pevnou sadzbou */
+const REF_CERPANIE=4;         /* % p.a. po investičných nákladoch, pred infláciou */
 const BLOK_ROKOV=5;           /* dĺžka súvislého úseku histórie */
 const PRIEBEHOV=800;
 const METY=[600,720];         /* pevné méty; keď ich scenár prekoná, povie sa to */
 
-const refFaktory=(akcie)=>HIST_VYNOSY.map(r=>akcie*(1+r)+(1-akcie)*(1+REF_STABILNA/100));
-/* Historický priemer referenčnej stratégie vo výplatnej fáze — používa sa len na
-   to, aby text netvrdil rozdiel, ktorý neexistuje. */
-const REF_HIST_CERPANIE=(Math.pow(refFaktory(REF_AKCIE_CERPANIE)
-  .reduce((a,f)=>a*f,1),1/HIST_VYNOSY.length)-1)*100;
+const REF_FAKTORY_A=HIST_VYNOSY.map(r=>1+r);
+const REF_FAKTOR_C=1+REF_CERPANIE/100;
 
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;
   let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;
@@ -401,7 +394,7 @@ function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;
    maticou. Inak by „koľko obstálo" kolísalo aj pri nezmenenom vklade a pôlenie
    by hľadalo hranicu v šume. */
 function refDrahy(rokovA,rokovC){
-  const fA=refFaktory(REF_AKCIE_BUDOVANIE), fC=refFaktory(REF_AKCIE_CERPANIE);
+  const fA=REF_FAKTORY_A;
   const n=HIST_VYNOSY.length, von=[];
   /* Začiatok bloku sa losuje len tak, aby sa celý zmestil do rady. Prepojenie
      konca na začiatok by vyrobilo úseky ako 2024–2025–1970, ktoré trh nikdy
@@ -413,7 +406,7 @@ function refDrahy(rokovA,rokovC){
     return p};
   for(let b=0;b<PRIEBEHOV;b++){
     const rng=mulberry32(1234+b*7919);
-    von.push({a:uspek(rng,fA,rokovA), c:uspek(rng,fC,rokovC)});
+    von.push({a:uspek(rng,fA,rokovA), c:Array(rokovC).fill(REF_FAKTOR_C)});
   }
   return von;
 }
@@ -432,7 +425,8 @@ function prezilo(d,o,nasobok){
   }
   let R=o.R;
   for(let y=0;y<d.c.length;y++){
-    const mf=Math.pow(d.c[y],1/12)*(1-mFee);
+    /* Štyri percentá sú už čistý výnos po investičných nákladoch. */
+    const mf=Math.pow(d.c[y],1/12);
     for(let k=0;k<12;k++){
       bal=bal*mf-R;
       if(bal<=0)return false;
@@ -608,64 +602,23 @@ function vykresli(){
     }
   }
 
-  /* ===== rovnaký plán v referenčnej stratégii =====
+  /* ===== historický pohľad na rovnaký plán =====
      Osemsto priebehov cez oba fázy je zhruba sekunda práce. Hlavné čísla preto
      nečakajú — sekcia sa doplní hneď po prvom vykreslení. */
   let odolnostHotova;
   const dokresliOdolnost=()=>{
-  /* Nad históriou indexu už niet s čím porovnávať — tabuľka by predstierala
-     meranie, ktoré sa nedá spraviť. Vetvíme pred simuláciou, nech sa sekunda
-     výpočtu nespotrebuje na čísla, ktoré aj tak zahodíme. */
-  const oPred=compute();
-  const daSaPorovnat = !oPred.warn && !oPred.nek && !oPred.forever
-    && S.goal!=='duration' && oPred.Tm>=12;
-  if(daSaPorovnat && S.vynos>VYNOS_HISTORIA_10R){
-    $('odolnost').hidden=false;
-    {
-      $('odolnost-uvod').textContent=
-        'Zadali ste zhodnotenie '+pctTxt(S.vynos)+' % ročne. Svetový akciový index '
-        +'(MSCI World, EUR) dosiahol za posledných '+VYNOS_HISTORIA_10R_ROKOV+' rokov '
-        +pctTxt(VYNOS_HISTORIA_10R)+' % a za '+(HIST_DO-HIST_OD+1)+' rokov '
-        +pctTxt(VYNOS_HISTORIA_56R)+' % ročne. Váš predpoklad leží nad oboma, '
-        +'takže porovnanie s históriou tohto indexu preň nedáva zmysel — nie je sa '
-        +'o čo oprieť.';
-      $('odolnost-riadky').innerHTML='';
-      $('odolnost-vystraha').textContent='';
-      $('odolnost-pod').textContent='';
-      document.dispatchEvent(new Event('odolnost-hotova'));
-      return;
-    }
-  }
-
   const od=testOdolnosti();
   if(od){
     $('odolnost').hidden=false;
     $('odolnost-uvod').textContent=
-      'Referenčná stratégia je investícia do najväčších firiem sveta — do tých, ktoré '
-      +'tvoria index MSCI World. '+Math.round(REF_AKCIE_BUDOVANIE*100)+' % počas '
-      +'budovania majetku, '+Math.round(REF_AKCIE_CERPANIE*100)+' % počas čerpania '
-      +'renty, zvyšok v stabilnej zložke. Nie je to odporúčanie, je to meradlo: keby '
-      +'ste tie isté peniaze dali do najväčších svetových firiem, na túto rentu by ich '
-      +'bolo treba toľkoto. '
-      +'Nižšie vidíte, ako by to dopadlo v obdobiach, ktoré trhy za posledných '
-      +(HIST_DO-HIST_OD+1)+' rokov naozaj zažili. '
-      +(function(){
-        /* Tvrdenie o rozdiele musí sedieť na skutočné čísla — pri zadaní pod
-           referenciou by veta o „nižšom výnose" bola nepravdivá. */
-        const rozdiel=S.vynos-REF_HIST_CERPANIE;
-        if(rozdiel>0.5)
-          return 'Tá stratégia mala v histórii nižší výnos ('+pctTxt(REF_HIST_CERPANIE)
-            +' % ročne počas čerpania), než ste zadali vy, takže čísla nižšie nie sú '
-            +'priamo porovnateľné s vaším scenárom.';
-        if(rozdiel<-0.5)
-          return 'Tá stratégia mala v histórii vyšší výnos ('+pctTxt(REF_HIST_CERPANIE)
-            +' % ročne počas čerpania), než ste zadali vy, takže vychádza priaznivejšie '
-            +'než váš vlastný predpoklad.';
-        return 'Jej historický výnos ('+pctTxt(REF_HIST_CERPANIE)+' % ročne počas '
-          +'čerpania) je blízko toho, čo ste zadali vy.';
-      })();
+      'Váš vlastný scenár počíta so zhodnotením '+pctTxt(S.vynos)+' % ročne. '
+      +'Tento druhý pohľad používa počas budovania majetku skutočné ročné výnosy '
+      +'indexu MSCI World Net Total Return v eurách za roky '+HIST_OD+'–'+HIST_DO+'. '
+      +'Od začiatku renty prechádza na jednotný plánovací predpoklad '
+      +pctTxt(REF_CERPANIE)+' % ročne po investičných nákladoch, pred infláciou. '
+      +'Nejde o odporúčanie ani o garantovaný výnos.';
     const riadky=[
-      {co:'Vaše vklady v referenčnej stratégii vydržali',
+      {co:'Váš plán v historických obdobiach vydržal',
        kolko:od.zaklad+' z '+od.priebehov, vas:true}
     ];
     od.urovne.forEach(u=>{
@@ -681,15 +634,13 @@ function vykresli(){
       'Uvedené sumy nie sú odporúčaná výška investície. Bez posúdenia celého vášho '
       +'majetku a rizikového profilu z nich nemožno robiť investičné rozhodnutie.';
     $('odolnost-pod').textContent=
-      'Počet priebehov nie je pravdepodobnosť ani predpoveď — je to opakovateľný '
-      +'stresový test na historických úsekoch. Priebehy vznikajú skladaním súvislých '
-      +'úsekov skutočných ročných výnosov indexu MSCI World v eurách za roky '
-      +HIST_OD+'–'+HIST_DO+'. Referenčná stratégia má '
-      +Math.round(REF_AKCIE_BUDOVANIE*100)+' % akcií počas budovania majetku a '
-      +Math.round(REF_AKCIE_CERPANIE*100)+' % počas čerpania renty; skladbu mení '
-      +'k dátumu štartu renty. Zvyšok portfólia je modelovaný pevným výnosom '
-      +String(REF_STABILNA).replace('.',',')+' % ročne, nejde teda o čistú históriu. '
-      +'Sumy sú súčtom vkladov za celé obdobie budovania majetku.';
+      'Počet priebehov nie je pravdepodobnosť ani predpoveď. Akumulačná fáza skladá '
+      +'súvislé úseky skutočných ročných výnosov MSCI World Net Total Return v EUR; '
+      +'nie jednotlivé náhodne premiešané roky. Výplatná fáza nie je historický test: '
+      +'počíta s konštantným čistým nominálnym výnosom '+pctTxt(REF_CERPANIE)+' % ročne '
+      +'a so zadanou infláciou. Skutočné výnosy kolíšu a najmä slabé výsledky na '
+      +'začiatku čerpania môžu skrátiť obdobie, počas ktorého renta vydrží. Sumy sú '
+      +'súčtom vkladov za celé obdobie budovania majetku.';
   }
   document.dispatchEvent(new Event('odolnost-hotova'));
   };

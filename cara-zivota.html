@@ -609,7 +609,7 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
     <section class="client-panel delivery-panel" aria-labelledby="delivery-title">
       <div id="gate-form">
         <h3 id="delivery-title">Zaslať modeláciu na e-mail</h3>
-        <p id="gate-uvod">Modelácia zhrnie váš scenár privátnej renty a navyše ukáže, ako by s rovnakými vkladmi naložila jedna referenčná stratégia v obdobiach, ktoré trhy za posledných 56 rokov naozaj zažili.</p>
+        <p id="gate-uvod">Modelácia zhrnie váš scenár privátnej renty a pridá historický pohľad na budovanie majetku prostredníctvom najväčších svetových firiem.</p>
         <p class="gate-label">Zadajte meno, priezvisko a email. Modeláciu si budete môcť otvoriť hneď po odoslaní a odkaz vám pošleme aj emailom.</p>
         <div class="gate-names">
           <input id="gate-first" type="text" autocomplete="given-name" placeholder="Meno" aria-label="Meno">
@@ -924,21 +924,16 @@ function render(){
     else{txt($('have-k'),'Majetok mi vydrží');
       txt($('have-v'),o.forever?'Nevyčerpá sa':`${Math.floor(o.months/12)} r ${o.months%12} m`)}
   }
-  /* Modelácia test odolnosti neukáže, keď scenár nemá plánované obdobie —
-     vtedy to ľavý panel nesmie sľubovať. */
+  /* Historický pohľad sa ukáže len tam, kde má scenár plánované obdobie. */
   const gu=$('gate-uvod');
   /* Rovnaká podmienka, akú používa výsledková stránka: bez plánovaného obdobia
      niet voči čomu prežitie merať, a renta bez konca ho tiež nemá. */
-  /* Rovnaká podmienka ako na výsledkovej stránke, vrátane zadania nad históriou
-     indexu — tam sa tabuľka nezobrazí, takže ju panel nesmie sľubovať. */
   const bezOdolnosti = S.goal==='duration'
-    || (S.pension==='perpetuity' && !(S.sit==='have' && S.goal==='duration'))
-    || S.vynos>VYNOS_HISTORIA_10R;
+    || (S.pension==='perpetuity' && !(S.sit==='have' && S.goal==='duration'));
   if(gu)gu.textContent = bezOdolnosti
     ? 'Modelácia zhrnie váš scenár privátnej renty, hlavné čísla aj použité predpoklady.'
-    : 'Modelácia zhrnie váš scenár privátnej renty a navyše ukáže, ako by s rovnakými '
-      +'vkladmi naložila jedna referenčná stratégia v obdobiach, ktoré trhy za '
-      +'posledných 56 rokov naozaj zažili.';
+    : 'Modelácia zhrnie váš scenár privátnej renty a pridá historický pohľad na '
+      +'budovanie majetku prostredníctvom najväčších svetových firiem.';
 
   txt($('vynos-v'),pctTxt(S.vynos)+' % ročne');
   $('sl-vynos').value=S.vynos;
