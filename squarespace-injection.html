@@ -181,8 +181,13 @@
         Po vložení úvodu ho preto načítame ešte raz — vtedy už kotvu nájde.
         Skript nemá ochranu proti dvojitému behu, poistkou je kontrola nižšie. */
   function nacitajPrehravac() {
-    if (document.querySelector('[id^="adam-"]')) return;      // prehrávač už na stránke je
-    if (!document.getElementById("cz-audio")) return;          // kotva ešte nie je
+    var mount = document.getElementById("cz-audio");
+    if (!mount) return;                                         // kotva ešte nie je
+    var existujuci = document.getElementById("adam-player");
+    if (existujuci) {
+      if (existujuci.parentNode !== mount) mount.appendChild(existujuci);
+      return;
+    }
     if (window.__czPrehravacNacitany) return;
     window.__czPrehravacNacitany = true;
     var s = document.createElement("script");
