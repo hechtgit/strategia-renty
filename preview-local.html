@@ -7,16 +7,16 @@
 <title>Stratégia privátnej renty — lokálny náhľad</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Asap:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Asap:wght@400;500;600;700&family=Lora:wght@400;500&display=swap" rel="stylesheet">
 <style>
 @font-face{font-family:"pt-serif-pro-extended";src:url("https://static1.squarespace.com/static/5aa7b897aa49a1758e33ac89/t/6314dd841f2e7f7fc0f615f6/1662311813095/ITC+Legacy+Serif+Std+Bold.otf") format("opentype");font-display:swap}
-:root{--bg:#1a1a1a;--text:rgba(255,255,255,.86);--gold:#c49a63;--serif:"pt-serif-pro-extended","PT Serif",Georgia,serif;--sans:Asap,Arial,Helvetica,sans-serif}
+:root{--bg:#1a1a1a;--text:rgba(255,255,255,.86);--gold:#c49a63;--serif:Lora,"PT Serif",Georgia,serif;--sans:Asap,Arial,Helvetica,sans-serif}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:#fff;font-family:var(--sans)}
 .preview-note{max-width:1240px;margin:0 auto;padding:14px 28px;color:rgba(255,255,255,.55);font-size:13px;border-bottom:1px solid rgba(174,135,83,.24)}
 .cz-lead{max-width:1240px;margin:0 auto;padding:56px 28px 8px;display:grid;grid-template-columns:minmax(0,1.02fr) minmax(0,.98fr);gap:46px;align-items:center}
 .cz-lead-text{min-width:0}
-.cz-lead-text h1{font-family:var(--serif);font-size:clamp(42px,6vw,72px);font-weight:400;line-height:1.04;letter-spacing:-.025em;margin:0 0 22px;color:#fff}
+.cz-lead-text h1{font-family:var(--serif);font-size:clamp(40px,4.4vw,56px);font-weight:400;line-height:1.04;letter-spacing:-.025em;margin:0 0 22px;color:#fff;white-space:nowrap}
 .cz-lead-text h2,.cz-body h2{font-family:var(--serif);font-size:clamp(27px,3vw,36px);font-weight:400;line-height:1.15;color:#fff}
 .cz-lead-text h2{margin:38px 0 16px}.cz-body h2{margin:40px 0 16px}
 .cz-lead-text p,.cz-body p{font-size:17px;line-height:1.75;color:var(--text);margin:0 0 18px}
@@ -25,38 +25,283 @@ html,body{margin:0;background:var(--bg);color:#fff;font-family:var(--sans)}
 .cz-jump:hover{color:#fff;border-bottom-color:var(--gold)}
 .cz-lead-img{margin:0;min-width:0;overflow:hidden;border-radius:5px;aspect-ratio:16/10;background:#242424}
 .cz-lead-img img{display:block;width:100%;height:100%;object-fit:cover}
+.hero-concepts{max-width:1440px;margin:0 auto;padding:34px 28px 24px}
+.hero-concepts-head{max-width:1240px;margin:0 auto 20px;display:flex;justify-content:space-between;gap:20px;align-items:end}
+.hero-concepts-head h1{font-family:var(--serif);font-size:clamp(30px,3vw,44px);font-weight:400;margin:0;color:#fff}
+.hero-concepts-head p{margin:0;color:var(--muted);font-size:14px}
+.hero-concept{position:relative;min-height:620px;margin:0 0 28px;border:1px solid rgba(174,135,83,.34);border-radius:7px;overflow:hidden;background:#dfe8ed center/cover no-repeat}
+.hero-concept::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(250,247,239,.96) 0%,rgba(250,247,239,.88) 31%,rgba(250,247,239,.2) 56%,rgba(174,135,83,.08) 100%)}
+.hero-concept.v1{background-image:url('hero-geese-v1.png')}
+.hero-concept.v2{background-image:url('hero-geese-v2.png')}
+.hero-concept.v3{background-image:url('hero-geese-v3.png')}
+.hero-concept.final{min-height:500px;background:none;margin-bottom:0}
+.hero-concept.final::before{content:"";position:absolute;left:0;top:0;width:100%;height:620px;background:url('hero-geese-final-v2.png') center/cover no-repeat}
+.hero-concept.final::after{background:linear-gradient(90deg,rgba(249,246,238,.97) 0%,rgba(249,246,238,.9) 34%,rgba(249,246,238,.22) 58%,rgba(174,135,83,.04) 100%)}
+.hero-copy{position:relative;z-index:1;width:min(650px,60%);padding:58px 54px 46px;color:#1b1a18}
+.hero-label{display:inline-block;margin:0 0 42px;color:#7d603c;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.hero-copy h2{font-family:var(--serif);font-size:clamp(38px,3.8vw,58px);font-weight:400;line-height:1.02;letter-spacing:-.025em;margin:0 0 42px;white-space:nowrap;color:#1b1a18}
+.hero-kicker{font-family:var(--serif);font-size:28px;line-height:1.15;margin:0 0 18px;color:#1b1a18}
+.hero-copytext{font-size:clamp(16px,1.25vw,18px);line-height:1.6;margin:0 0 28px;color:#34312d}
+.hero-copytext span{display:block;white-space:nowrap}
+.hero-cta{display:inline-flex;align-items:center;gap:12px;color:#725432;font-weight:700;text-decoration:none;border-bottom:1px solid #ae8753;padding:0 0 7px}
+.hero-concept.v2::after{background:linear-gradient(90deg,rgba(248,245,236,.97) 0%,rgba(248,245,236,.86) 35%,rgba(248,245,236,.12) 60%,rgba(174,135,83,.1) 100%)}
+.hero-concept.v3::after{background:linear-gradient(90deg,rgba(247,244,237,.97) 0%,rgba(247,244,237,.9) 33%,rgba(247,244,237,.18) 57%,rgba(174,135,83,.12) 100%)}
 .cz-body{max-width:910px;margin:0 auto;padding:8px 28px 20px}
-#ph-renta-calculator{width:100%;margin:0 auto}
-#ph-renta-calculator iframe{display:block;width:100%;height:1900px;border:0;background:#1a1a1a}
-@media(max-width:860px){.preview-note{padding:12px 16px}.cz-lead{grid-template-columns:1fr;gap:26px;padding:30px 16px 4px}.cz-lead-text h2{margin-top:30px}.cz-lead-img{aspect-ratio:16/9}.cz-body{padding:4px 16px 16px}}
+#ph-renta-calculator{box-sizing:border-box;width:100%;margin:0 auto;background:transparent}
+#ph-renta-calculator iframe{display:block;width:100%;height:1900px;border:0;background:transparent}
+@media(max-width:860px){.preview-note{padding:12px 16px}.hero-concepts{padding:24px 12px 16px}.hero-concepts-head{display:block}.hero-concepts-head p{margin-top:8px}.hero-concept{min-height:670px;background-position:62% center}.hero-concept.final{min-height:670px}.hero-concept.final::before{height:670px;background-position:62% center}.hero-concept::after,.hero-concept.v2::after,.hero-concept.v3::after{background:linear-gradient(180deg,rgba(250,247,239,.68) 0%,rgba(250,247,239,.9) 43%,rgba(250,247,239,.98) 100%)}.hero-copy{width:100%;padding:34px 24px;position:absolute;left:0;bottom:0}.hero-label{margin-bottom:170px}.hero-copy h2{font-size:clamp(27px,8vw,38px);margin-bottom:26px}.hero-kicker{font-size:25px}.hero-copytext{font-size:16px;line-height:1.55}.hero-copytext span{white-space:normal}.cz-body{padding:4px 16px 16px}}
+@media(max-width:350px){.hero-copy h2{font-size:23px}.hero-copy{padding-inline:20px}.hero-label{margin-bottom:160px}}
 </style>
 </head>
 <body>
 <div class="preview-note">Lokálny náhľad aktuálnej vetvy · nič nie je nasadené</div>
-<section class="cz-lead">
-  <div class="cz-lead-text">
-    <h1>Stratégia privátnej renty</h1>
-    <a class="cz-jump" href="#ph-renta-calculator">Prejsť priamo k aplikácii <span aria-hidden="true">↓</span></a>
-    <h2>Prečo privátna renta</h2>
-    <p>Majetok sám osebe nie je príjem. Ako Wealth manager senior sa v praxi opakovane stretávam s klientmi, ktorí majú hodnotné portfólio, no nevedia s istotou povedať, koľko si z neho môžu mesačne vyplácať bez rizika, že ho vyčerpajú skôr, než plánovali.</p>
-    <p><strong>Stratégia privátnej renty rieši práve toto:</strong> ako naakumulovaný majetok premeniť na pravidelný, infláciou chránený príjem, ktorý má vydržať aj desaťročia. Nie je to produkt. Je to architektúra na mieru vášmu majetku, veku a cieľom.</p>
-  </div>
-  <figure class="cz-lead-img"><img src="hero-privatna-renta.jpg" alt="Manželský pár po päťdesiatke na motorovom člne pri pobreží"></figure>
+<section class="hero-concepts" aria-label="Úvodný vizuál stratégie privátnej renty">
+  <article class="hero-concept final">
+    <div class="hero-copy">
+      <h2>Stratégia privátnej renty</h2>
+      <p class="hero-copytext"><span>Majetok sám osebe nie je príjem.</span><span>Aj majitelia hodnotných portfólií často nevedia,</span><span>koľko si z majetku môžu mesačne vyplácať,</span><span>aby ho nevyčerpali skôr, než plánovali.</span></p>
+      <a class="hero-cta" href="#ph-renta-calculator">Prejsť priamo k aplikácii <span aria-hidden="true">↓</span></a>
+    </div>
+  </article>
 </section>
 <section class="cz-body">
   <div id="cz-audio" data-adam-audio-slug="strategia-privatnej-renty" data-adam-audio-wrap="false"></div>
   <h2>Ako aplikácia funguje?</h2>
-  <p>Na začiatku si zvolíte jeden z dvoch prístupov. <strong>Majetok budujem</strong> ukáže, koľko treba naakumulovať a koľko investovať, aby bola želaná renta možná. <strong>Majetok už mám</strong> ukáže, ako dlho by majetok vydržal, prípadne akú rentu umožní.</p>
-  <p>Na samotný orientačný prepočet <strong>nezadávate meno, e-mail ani telefón</strong>. Pracuje sa iba so vstupmi potrebnými pre modelový výpočet.</p>
+  <p>Základom aplikácie je <strong>Čiara života</strong> a <strong>tri pohyblivé míľniky</strong>. Prvý predstavuje dnešok, druhý vek, od ktorého chcete začať čerpať privátnu rentu, a tretí obdobie, dokedy má renta pokračovať. Keď ktorýkoľvek míľnik posuniete, aplikácia celý scenár okamžite prepočíta.</p>
+  <p>V karte <strong>Dnes</strong> si zvolíte, či <strong>majetok ešte len budujete, alebo ho už máte</strong>. Pri budovaní môžete kombinovať jednorazovú investíciu s pravidelným investovaním a zistiť, aký kapitál potrebujete pripraviť. Ak už majetok máte, aplikácia ukáže, akú mesačnú rentu môže prinášať alebo ako dlho by pri zvolenom čerpaní mohol vydržať.</p>
+  <p>Následne nastavíte <strong>začiatok výplaty</strong>, mesačnú rentu v dnešnej hodnote a <strong>koniec čerpania</strong>. Zvoliť môžete aj rentu bez časového obmedzenia. Zhodnotenie si určujete sami a inflácia je vo výpočte započítaná tak, aby výsledok pracoval s dnešnou kúpnou silou.</p>
+  <p><strong>Základný orientačný prepočet</strong> nevyžaduje meno, e-mail ani telefón. <strong>Rozšírená modelácia</strong>, ktorú si môžete nechať poslať a stiahnuť ako PDF, pridáva historický pohľad na budovanie majetku cez MSCI World. Počas čerpania používa jednotný plánovací predpoklad štyri percentá ročne po investičných nákladoch, pred infláciou. Nejde o predpoveď ani garanciu, ale o pohľad na citlivosť vášho plánu.</p>
 </section>
-<div id="ph-renta-calculator"><iframe id="renta-frame" src="cara-zivota.html" title="Kalkulačka privátnej renty"></iframe></div>
+<div id="ph-renta-calculator"><iframe id="renta-frame" src="cara-zivota.html?preview=flow9&amp;legacy_preview=1" title="Kalkulačka privátnej renty"></iframe></div>
 <script src="https://hechtgit.github.io/adam-audio/adam-player.js?v=4c9ab5c"></script>
 <script>
+(function(){
+  var mount=document.getElementById("cz-audio"),copy="Nechce sa vám čítať?<br><b style=\"color:#c49a63;font-weight:500\">Adam</b> vám stručne vysvetlí, ako aplikácia funguje.";
+  function updateAdamCopy(){
+    var paragraphs=mount.querySelectorAll("p");
+    for(var i=0;i<paragraphs.length;i++){
+      if(!paragraphs[i].hasAttribute("data-renta-copy")&&/Nechce sa vám čítať|Adam vám článok prečíta/.test(paragraphs[i].textContent||"")){
+        paragraphs[i].innerHTML=copy;
+        paragraphs[i].setAttribute("data-renta-copy","");
+        return;
+      }
+    }
+  }
+  new MutationObserver(updateAdamCopy).observe(mount,{childList:true,subtree:true});
+  updateAdamCopy();
+})();
 addEventListener("message",function(e){
   if(!e.data||e.data.type!=="ph-renta-height")return;
   var f=document.getElementById("renta-frame"),h=Number(e.data.height)||0;
   if(e.source===f.contentWindow&&h>=400&&h<=8000)f.style.height=h+"px";
 });
+(function(){
+  var frame=document.getElementById("renta-frame");
+  function initPreviewFrame(){
+    var doc=frame.contentDocument,lp=doc&&doc.getElementById("lp"),msg=doc&&doc.getElementById("msg"),scheduled=false;
+    if(!lp||!msg)return;
+    frame.style.pointerEvents="auto";
+    lp.style.pointerEvents="auto";
+    function applyPreview(){
+      scheduled=false;
+      var style=doc.getElementById("renta-preview-overrides");
+      if(!style){
+        style=doc.createElement("style");
+        style.id="renta-preview-overrides";
+        style.textContent=".preview-journey-title{font-family:var(--serif);font-size:clamp(28px,3vw,40px);font-weight:500;color:var(--text);margin:0 0 24px}.calculator-preview-zone{margin:-22px -28px 0;padding:28px;background:#292929}.preview-step-head{display:grid;grid-template-columns:auto minmax(0,1fr);gap:18px;align-items:start;margin:0 0 28px}.preview-step-number{display:grid;place-items:center;width:52px;height:52px;border:1px solid var(--gold);color:var(--gold-strong);font-family:var(--serif);font-size:29px;line-height:1}.preview-step-title{font-family:var(--serif);font-size:clamp(24px,2.5vw,32px);font-weight:500;line-height:1.15;color:var(--text);margin:0 0 8px}.preview-step-copy{color:var(--muted);line-height:1.6;margin:0;max-width:850px}.bottom-flow.preview-stacked{grid-template-columns:minmax(0,1fr);gap:28px;margin:36px -28px 20px}.preview-stacked .client-panel{width:100%;margin:0;padding:clamp(24px,3vw,38px)}.preview-delivery-layout,.preview-consult-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(34px,5vw,76px);align-items:start}.preview-delivery-copy,.preview-delivery-form,.preview-consult-copy,.preview-consult-action{min-width:0}.preview-delivery-form,.preview-consult-action{display:grid;align-content:start}.preview-delivery-form .gate-label{margin-top:0!important}.preview-delivery-form .gate-names{margin-top:18px}.preview-delivery-form strong,.preview-consult-action strong{color:var(--text);font-weight:700}.preview-consult-body{color:var(--muted);font-size:16px;line-height:1.65;margin:0 0 24px}.preview-consult-action .btn{justify-self:start}@media(max-width:700px){.preview-journey-title{font-size:28px;margin-bottom:18px}.calculator-preview-zone{margin:-16px -13px 0;padding:20px}.preview-step-head{gap:13px;margin-bottom:22px}.preview-step-number{width:42px;height:42px;font-size:24px}.preview-step-title{font-size:22px}.bottom-flow.preview-stacked{gap:18px;margin:24px -13px 16px}.preview-stacked .client-panel{padding:22px 18px}.preview-delivery-layout,.preview-consult-layout{grid-template-columns:1fr;gap:20px}}";
+        style.textContent+=".preview-kicker{color:var(--gold-strong);font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;margin:0 0 12px}.preview-hook{font-family:var(--serif);font-size:clamp(22px,2vw,28px);font-weight:500;line-height:1.3;color:var(--gold-strong);margin:12px 0 20px}.preview-form-prompt{color:var(--text);font-weight:700;margin:20px 0 10px}.preview-method{display:block;color:var(--muted);font-size:13px;line-height:1.55;margin:16px 0 0}.privacy-note a{color:#111!important;text-decoration:underline!important;text-underline-offset:2px}.delivery-panel .preview-step-title,.consult-panel .preview-step-title{font-family:var(--serif);font-size:clamp(28px,2.5vw,34px);font-weight:700;line-height:1.12;margin:0;color:#2b2118}.preview-delivery-form{border-left:1px solid rgba(52,36,21,.3);padding-left:clamp(28px,4vw,58px)}.preview-delivery-form .email-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.consult-panel{position:relative;overflow:hidden;background:linear-gradient(135deg,#bd965f 0%,#b1874d 100%)!important;border:1px solid rgba(72,48,23,.42)!important;box-shadow:0 18px 44px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.22)}.consult-panel:before{display:none}.consult-panel .preview-consult-layout{align-items:start}.preview-consult-intro,.consult-panel .preview-consult-body{color:#2b2118;font-family:inherit;font-size:17px;line-height:1.55}.preview-consult-intro{margin:11px 0 0}.preview-consult-action{border-left:1px solid rgba(52,36,21,.3);padding-left:clamp(28px,4vw,58px)}.preview-consult-action .preview-consult-body{margin-bottom:28px}.consult-panel strong{color:#2b2118!important;font-weight:800}.consult-panel .btn,.delivery-panel #send-model{display:inline-flex!important;align-items:center;justify-content:center;background:var(--btn-gold)!important;color:#fff!important;border:0!important;border-radius:0!important;min-height:50px;padding:14px 24px;box-shadow:0 10px 24px rgba(50,31,14,.2);font-family:var(--serif);font-size:17px;font-weight:700;letter-spacing:1.1px;line-height:1.2}.consult-panel .btn:hover,.delivery-panel #send-model:hover{background:var(--gold)!important;transform:translateY(-1px)}@media(min-width:701px){.flow-lead .lead-p{white-space:nowrap}}@media(max-width:700px){.preview-delivery-form,.preview-consult-action{border-left:0;border-top:1px solid rgba(52,36,21,.3);padding:22px 0 0}.preview-delivery-form .email-row{grid-template-columns:1fr}.delivery-panel .preview-step-title,.consult-panel .preview-step-title{font-size:28px}.consult-panel .btn,.delivery-panel #send-model{width:100%;justify-content:center}}";
+        doc.head.appendChild(style);
+      }
+      var zone=doc.querySelector(".calculator-preview-zone");
+      if(!zone){
+        zone=doc.createElement("div");
+        zone.className="calculator-preview-zone";
+        lp.insertBefore(zone,lp.firstChild);
+        while(zone.nextSibling){
+          var node=zone.nextSibling;
+          zone.appendChild(node);
+          if(node===msg)break;
+        }
+      }
+      var oldJourneyTitle=doc.querySelector(".preview-journey-title"),oldStepOne=zone.querySelector("[data-preview-step='1']");
+      if(oldJourneyTitle)oldJourneyTitle.remove();
+      if(oldStepOne)oldStepOne.remove();
+      var assumptions=doc.querySelector(".assumptions-block");
+      if(assumptions)assumptions.remove();
+      var flow=doc.querySelector(".bottom-flow"),flowLead=doc.querySelector(".flow-lead"),delivery=doc.querySelector(".delivery-panel"),consult=doc.querySelector(".consult-panel");
+      if(flowLead){
+        flowLead.hidden=false;
+        var flowHeading=flowLead.querySelector(".lead-h"),flowCopy=flowLead.querySelector(".lead-p");
+        if(flowHeading)flowHeading.textContent="Svoj plán už vidíte v číslach. Obstál by však aj v skutočnom svete?";
+        if(flowCopy)flowCopy.textContent="Váš prepočet pracuje s rovnakým zhodnotením každý rok. Trhy sa však každý rok vyvíjajú inak.";
+      }
+      if(flow&&!flow.classList.contains("preview-stacked"))flow.classList.add("preview-stacked");
+      if(delivery){
+        var gateForm=delivery.querySelector("#gate-form"),deliveryTitle=delivery.querySelector("h3"),deliveryHook=delivery.querySelector("[data-preview-hook='delivery']"),deliveryKicker=delivery.querySelector("[data-preview-kicker='delivery']"),gateIntro=delivery.querySelector("#gate-uvod");
+        if(deliveryTitle&&!deliveryKicker){
+          deliveryKicker=doc.createElement("p");
+          deliveryKicker.className="preview-kicker";
+          deliveryKicker.setAttribute("data-preview-kicker","delivery");
+          deliveryKicker.textContent="";
+          deliveryTitle.before(deliveryKicker);
+        }
+        if(deliveryTitle){deliveryTitle.textContent="Vezmite si svoj plán so sebou";deliveryTitle.classList.add("preview-step-title");}
+        if(deliveryKicker)deliveryKicker.hidden=true;
+        if(deliveryHook){deliveryHook.remove();deliveryHook=null;}
+        if(gateIntro)gateIntro.remove();
+        var gateBonus=delivery.querySelector("#gate-bonus");
+        if(gateBonus)gateBonus.remove();
+        var gateLabel=delivery.querySelector(".gate-label");
+        if(gateLabel)gateLabel.innerHTML="Modeláciu vám spracujeme do <strong>prehľadného PDF</strong>, aby ste sa k nej mohli kedykoľvek vrátiť.<br><br>Ak má váš scenár obdobie budovania a <strong>vopred zvolený koniec čerpania</strong>, plán navyše preveríme v 800 modelovaných skúškach založených na historických výnosoch indexu MSCI World z rokov 1970 až 2025. Uvidíte, v koľkých skúškach kapitál pokryl všetky zvolené výplaty renty. Ide o podiel úspešných skúšok v tomto modeli, nie odhad pravdepodobnosti ani predpoveď budúceho vývoja.";
+        var gateNames=delivery.querySelector(".gate-names"),formPrompt=delivery.querySelector("[data-preview-form-prompt]");
+        if(!formPrompt&&gateNames){
+          formPrompt=doc.createElement("p");
+          formPrompt.className="preview-form-prompt";
+          formPrompt.setAttribute("data-preview-form-prompt","");
+          gateNames.before(formPrompt);
+        }
+        if(formPrompt)formPrompt.textContent="Kam vám máme poslať odkaz na modeláciu?";
+        var formNote=delivery.querySelector("[data-preview-form-note]");
+        if(!formNote&&formPrompt){
+          formNote=doc.createElement("p");
+          formNote.className="preview-step-copy";
+          formNote.setAttribute("data-preview-form-note","");
+          formPrompt.after(formNote);
+        }
+        if(formNote)formNote.textContent="Modelácia sa vám otvorí okamžite. Odkaz vám zároveň pošleme e-mailom, aby ste sa k nej mohli kedykoľvek vrátiť.";
+        var sendModel=delivery.querySelector("#send-model");
+        if(sendModel)sendModel.textContent="Získať moju modeláciu";
+        if(sendModel&&!sendModel.hasAttribute("data-local-test")){
+          var localSend=sendModel.cloneNode(true);
+          localSend.setAttribute("data-local-test","");
+          sendModel.replaceWith(localSend);
+          sendModel=localSend;
+          localSend.addEventListener("click",function(){
+            var first=doc.getElementById("gate-first"),last=doc.getElementById("gate-last"),email=doc.getElementById("model-email"),status=doc.getElementById("send-status");
+            var firstValue=first.value.trim(),lastValue=last.value.trim(),emailValue=email.value.trim();
+            var validEmail=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue);
+            first.classList.toggle("bad",!firstValue);
+            last.classList.toggle("bad",!lastValue);
+            email.classList.toggle("bad",!validEmail);
+            if(!firstValue||!lastValue||!validEmail){
+              status.textContent="Vyplňte, prosím, meno, priezvisko a platný e-mail.";
+              (!firstValue?first:!lastValue?last:email).focus();
+              return;
+            }
+            status.textContent="Otváram lokálnu modeláciu…";
+            try{
+              var modelUrl=frame.contentWindow.__previewScenarioURL()+"&preview_build=20260814-5";
+              frame.contentWindow.localStorage.setItem("ph-renta-klient",JSON.stringify({kedy:Date.now(),meno:(firstValue+" "+lastValue).trim()}));
+              var modelWindow=frame.contentWindow.open(modelUrl,"_blank");
+              if(!modelWindow)throw new Error("popup-blocked");
+              try{modelWindow.opener=null}catch(_error){}
+              status.textContent="Modelácia sa otvorila v novom okne.";
+            }catch(error){
+              console.warn("Local model preview",error);
+              status.textContent="Lokálnu modeláciu sa nepodarilo otvoriť.";
+            }
+          });
+        }
+        var deliveryMethod=delivery.querySelector("[data-preview-method='delivery']");
+        if(deliveryMethod)deliveryMethod.remove();
+        var privacyNote=delivery.querySelector(".privacy-note");
+        if(privacyNote)privacyNote.innerHTML="Odoslaním formulára beriete na vedomie spracovanie osobných údajov na účely vytvorenia a doručenia modelácie podľa <a href='https://www.hechtberger.com/pravidla-ochrany-osobnych-udajov' target='_blank' rel='noopener'>Pravidiel ochrany osobných údajov</a>.";
+        if(gateForm&&!gateForm.classList.contains("preview-delivery-layout")){
+          var copyCol=doc.createElement("div"),formCol=doc.createElement("div"),directChildren=Array.from(gateForm.children);
+          copyCol.className="preview-delivery-copy";
+          formCol.className="preview-delivery-form";
+          gateForm.classList.add("preview-delivery-layout");
+          gateForm.append(copyCol,formCol);
+          for(var d=0;d<directChildren.length;d++){
+            var child=directChildren[d];
+            if(child===deliveryKicker||child===deliveryTitle||child===gateLabel)copyCol.appendChild(child);
+            else formCol.appendChild(child);
+          }
+        }
+        var deliveryCopyCol=gateForm&&gateForm.querySelector(".preview-delivery-copy");
+        if(deliveryCopyCol){
+          if(deliveryTitle)deliveryCopyCol.appendChild(deliveryTitle);
+          if(gateLabel)deliveryCopyCol.appendChild(gateLabel);
+        }
+      }
+      if(consult){
+        var consultTitle=consult.querySelector("h3"),consultHook=consult.querySelector("[data-preview-hook='consult']"),consultKicker=consult.querySelector("[data-preview-kicker='consult']"),button=consult.querySelector(".btn"),paragraphs=consult.querySelectorAll(":scope > p:not(.preview-hook):not(.preview-kicker)");
+        if(consultTitle&&!consultKicker){
+          consultKicker=doc.createElement("p");
+          consultKicker.className="preview-kicker";
+          consultKicker.setAttribute("data-preview-kicker","consult");
+          consultKicker.textContent="";
+          consultTitle.before(consultKicker);
+        }
+        if(consultTitle&&!consultHook){
+          consultHook=doc.createElement("p");
+          consultHook.className="preview-hook preview-step-copy";
+          consultHook.setAttribute("data-preview-hook","consult");
+          consultHook.textContent="";
+          consultTitle.after(consultHook);
+        }
+        if(consultTitle){consultTitle.textContent="Čo môže váš plán znamenať pre váš skutočný majetok?";consultTitle.classList.add("preview-step-title");consultTitle.style.setProperty("color","#2b2118","important");}
+        if(consultKicker)consultKicker.hidden=true;
+        if(consultHook)consultHook.hidden=true;
+        for(var i=0;i<paragraphs.length;i++)paragraphs[i].remove();
+        var oldPoints=consult.querySelector(".preview-points");
+        if(oldPoints)oldPoints.remove();
+        var consultIntro=consult.querySelector("[data-preview-consult-intro]");
+        if(!consultIntro&&consultTitle){
+          consultIntro=doc.createElement("p");
+          consultIntro.className="preview-consult-intro gate-label";
+          consultIntro.setAttribute("data-preview-consult-intro","");
+          consultTitle.after(consultIntro);
+        }
+        if(consultIntro){consultIntro.className="preview-consult-intro gate-label";consultIntro.innerHTML="Využite osobnú konzultáciu (online/osobne). K vášmu plánu pridáme okrem historického testu aj pohľad do budúcnosti. <strong>Ako to urobíme?</strong><br><br>Použijeme aktuálne dlhodobé očakávania výnosov a rizík popredných svetových investičných inštitúcií — <strong>CMA (Capital Market Assumptions)</strong>.";consultIntro.style.setProperty("color","#2b2118","important");}
+        var consultBody=consult.querySelector("[data-preview-consult-copy]");
+        if(!consultBody&&button){
+          consultBody=doc.createElement("p");
+          consultBody.className="preview-consult-body";
+          consultBody.setAttribute("data-preview-consult-copy","");
+          button.before(consultBody);
+        }
+        if(consultBody){consultBody.innerHTML="Vďaka tomuto komplexnému pohľadu získate realistický pohľad na svoje súčasné portfólio, jeho výnosový potenciál, riziko, likviditu a schopnosť financovať plánovanú rentu a jednotlivé investičné produkty <strong>prestanú byť samotným cieľom a stanú sa nástrojmi vašej stratégie</strong>.";consultBody.style.setProperty("color","#2b2118","important");}
+        if(button)button.href="https://hechtberger.com/rezervacia";
+        var consultMethod=consult.querySelector("[data-preview-method='consult']");
+        if(consultMethod)consultMethod.remove();
+        if(!consult.querySelector(":scope > .preview-consult-layout")){
+          var consultLayout=doc.createElement("div"),consultCopy=doc.createElement("div"),consultAction=doc.createElement("div"),consultChildren=Array.from(consult.children);
+          consultLayout.className="preview-consult-layout";
+          consultCopy.className="preview-consult-copy";
+          consultAction.className="preview-consult-action";
+          consult.appendChild(consultLayout);
+          consultLayout.append(consultCopy,consultAction);
+          for(var c=0;c<consultChildren.length;c++){
+            var consultChild=consultChildren[c];
+            if(consultChild===consultKicker||consultChild===consultTitle||consultChild===consultHook||consultChild===consultIntro)consultCopy.appendChild(consultChild);
+            else consultAction.appendChild(consultChild);
+          }
+        }
+        var activeConsultLayout=consult.querySelector(":scope > .preview-consult-layout"),activeConsultCopy=activeConsultLayout&&activeConsultLayout.querySelector(".preview-consult-copy"),activeConsultAction=activeConsultLayout&&activeConsultLayout.querySelector(".preview-consult-action");
+        if(activeConsultCopy){
+          if(consultTitle)activeConsultCopy.appendChild(consultTitle);
+          if(consultIntro)activeConsultCopy.appendChild(consultIntro);
+        }
+        if(activeConsultAction){
+          if(consultBody)activeConsultAction.appendChild(consultBody);
+          if(button)activeConsultAction.appendChild(button);
+        }
+      }
+    }
+    function schedulePreview(){
+      if(scheduled)return;
+      scheduled=true;
+      setTimeout(applyPreview,0);
+    }
+    applyPreview();
+    new MutationObserver(schedulePreview).observe(lp,{childList:true,subtree:true,characterData:true});
+    setTimeout(applyPreview,250);
+    setTimeout(applyPreview,900);
+  }
+  frame.addEventListener("load",initPreviewFrame);
+  if(frame.contentDocument&&frame.contentDocument.readyState!=="loading")initPreviewFrame();
+})();
 </script>
 </body>
 </html>

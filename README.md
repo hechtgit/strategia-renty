@@ -15,6 +15,9 @@ Aplikácia a modelácia pre stránku
 | `index.html` | Pôvodná verzia kalkulačky. Drží živú stránku, kým sa nová nezverejní. **Nemeniť.** |
 | `hero-privatna-renta.jpg` | Obraz pre úvod aplikácie aj modelácie. |
 | `pdf.js` | Zloží modeláciu do PDF priamo v prehliadači. Čísla číta z vykreslenej stránky, neprepočítava ich. |
+| `renta-flow-10of10.css`, `renta-flow-10of10.js` | Kanonická obsahová a vizuálna vrstva nadväzujúcich modulov hlavnej kalkulačky. |
+| `vysledok-10of10.css`, `vysledok-10of10.js` | Kanonická vrstva výsledkovej stránky: jednotný dizajn, zrozumiteľné vysvetlenia a scenárové výnimky. |
+| `pdf-alternativa.js` | Kanonické klientské PDF; rozširuje základný generátor bez duplicitného prepočítavania čísel. |
 | `pdf-font.js` | Písmo pre PDF — Asap (OFL) orezaný na použité znaky vrátane slovenskej diakritiky. Vygenerované, needitovať. |
 | `jspdf.min.js` | Knižnica jsPDF 2.5.2, vendorovaná (žiadne CDN). |
 | `squarespace-injection.html` | **Zdrojová kópia** kódu vloženého v Squarespace (Page Settings → Advanced). Squarespace nie je verzionovaný — po každej zmene tam ju sem prekopíruj a commitni. Bez tohto kódu tok nefunguje. |
@@ -24,6 +27,9 @@ Aplikácia a modelácia pre stránku
 
 ```bash
 python3 zostav.py
+node audit-financne-jadro.mjs
+node audit-konzistencia-kanalov.mjs
+node audit-pdf-alternativa.mjs
 ```
 
 1. Uprav **master** (`cara-zivota-master.html` alebo `vysledok-master.html`).

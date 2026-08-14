@@ -1,0 +1,40 @@
+/* Jednotný dizajnový systém výsledku podľa kalkulačky a tlačovej modelácie. */
+:root{--bg:#1a1a1a;--serif:Lora,"PT Serif",Georgia,serif;--page-serif:var(--serif)}
+html,body{overflow:auto!important;height:auto!important}body{background:var(--bg)}
+.site-top{max-width:1480px;padding-left:28px;padding-right:28px}
+.shell{width:100%;max-width:1480px;padding:22px 28px 42px}
+.hero{background:transparent;border:0;border-bottom:1px solid var(--line);border-radius:0;box-shadow:none}
+.hero-copy{padding:38px 0 40px}
+.hero h1,.section-head h2,.suhrn h2,.odolnost h2,.blok h2,.recap h3,.next h2{font-family:var(--page-serif)}
+h1,h2,h3{word-break:normal;overflow-wrap:normal;text-wrap:balance}
+p,.lead,.co,.kolko,.mail-note,.disclaimer{word-break:normal;overflow-wrap:normal;text-wrap:pretty}
+.hero h1{font-size:clamp(32px,3.2vw,44px);line-height:1.14}.lead{max-width:72ch}
+.btn-primary,.btn-ghost{min-height:52px;line-height:20.4px;box-sizing:border-box}
+.section{margin:0 0 28px;padding:44px 28px 48px;background:#292929}
+.line-wrap{padding-top:178px;padding-bottom:142px}
+.suhrn,.odolnost{margin-bottom:24px}.assumptions{gap:24px;padding-bottom:28px}
+.odolnost-pod{border-top:1px solid var(--line);padding-top:16px;margin-top:18px;max-width:118ch}
+.odolnost-testuje{margin:0 0 22px;padding:18px 20px;border-left:3px solid var(--gold);background:rgba(174,135,83,.08);color:var(--ink);font-size:17px;line-height:1.6}
+.odolnost-testuje p{margin:0}.odolnost-testuje strong{color:#fff}
+.odolnost-testuje ul{display:grid;gap:7px;margin:0;padding:0;list-style:none}.odolnost-testuje li{margin:0}.odolnost-testuje .poznamka{margin-top:12px;color:var(--muted);font-size:16px}
+.odolnost-tab tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(245px,.42fr);gap:28px;padding:18px 0;border-top:1px solid var(--line)}
+.odolnost-tab tr:first-child{border-top:0}.odolnost-tab td{display:block;padding:0;border:0}
+.odolnost-tab .co{color:var(--ink);font-size:17px;line-height:1.5}.odolnost-tab .co strong{display:block;margin-bottom:3px;color:#fff;font-size:18px}.odolnost-tab .co small{display:block;color:var(--muted);font-size:16px;line-height:1.5}
+.odolnost-tab .kolko{text-align:left;white-space:normal!important;min-width:0;font-family:var(--sans);font-size:17px;line-height:1.45;color:var(--muted)}.odolnost-tab .kolko strong,.odolnost-tab .kolko span{display:block;max-width:100%;white-space:normal!important}.odolnost-tab .kolko strong{color:var(--gold-strong);font-family:var(--page-serif);font-size:23px;line-height:1.25;margin-bottom:3px}
+.odolnost-citlivost,.odolnost-metodika{margin:18px 0 0;border-top:1px solid var(--line)}
+.odolnost-citlivost>summary,.odolnost-metodika>summary{padding:17px 0;cursor:pointer;color:#fff;font-family:var(--page-serif);font-size:20px;line-height:1.3;font-weight:700;list-style-position:inside}
+.odolnost-citlivost .uvod{margin:0 0 8px;color:var(--muted);font-size:16px;line-height:1.5}
+.citlivost-rad{display:grid;grid-template-columns:minmax(0,1fr) minmax(245px,.42fr);gap:28px;padding:18px 0;border-top:1px solid var(--line)}
+.citlivost-rad .co strong{display:block;margin-bottom:3px;color:#fff;font-size:18px}.citlivost-rad .co small{display:block;color:var(--muted);font-size:16px;line-height:1.5}.citlivost-rad .kolko strong{display:block;color:var(--gold-strong);font-family:var(--page-serif);font-size:23px;line-height:1.25;margin-bottom:3px}.citlivost-rad .kolko span{color:var(--muted);font-size:16px;line-height:1.5}
+.odolnost-zaver{margin:22px 0 0;padding:16px 18px;background:rgba(255,255,255,.035);border-radius:4px;color:var(--ink);font-size:17px;line-height:1.55}.odolnost-zaver strong{color:#fff}
+.assumptions{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(320px,.55fr);gap:0;padding:0;margin:0 0 28px;background:var(--panel);border:1px solid var(--line);border-radius:6px;box-shadow:0 18px 44px rgba(0,0,0,.16);overflow:hidden}
+.predpoklady-detail{margin:0 0 28px}.predpoklady-detail>summary{display:none;padding:18px 20px;background:var(--panel);border:1px solid var(--line);color:#fff;font-family:var(--page-serif);font-size:20px;font-weight:700;cursor:pointer}.predpoklady-detail>.assumptions{margin:0}
+.blok,.recap{background:transparent;border:0;border-radius:0;color:var(--ink);box-shadow:none;height:100%}.recap{border-left:1px solid var(--line)}
+.blok h2,.recap h3{color:var(--ink)}.blok p,.recap ul{color:var(--muted)}.blok .vystraha{color:#d8c9b4}.recap li::before{background:var(--gold)}
+.next{margin-top:0}.disclaimer{margin-top:24px}
+@media(max-width:900px){
+  .site-top{padding:16px 18px}.shell{padding:0 18px 28px}.hero-copy{padding:30px 0 32px}.hero h1{font-size:32px}.section{margin:0 0 20px;padding:32px 18px 38px}.line-wrap{padding-top:40px;padding-bottom:40px}.suhrn,.odolnost,.blok,.recap,.next{padding:24px 20px}
+  .predpoklady-detail>summary{display:block}.predpoklady-detail:not([open])>.assumptions{display:none}.assumptions{grid-template-columns:1fr}.recap{border-left:0;border-top:1px solid var(--line)}
+  .odolnost-tab tr,.citlivost-rad{grid-template-columns:1fr;gap:10px;padding:18px 0}.odolnost-tab .kolko strong,.citlivost-rad .kolko strong{font-size:22px}.odolnost-testuje{padding:16px}.odolnost-citlivost>summary,.odolnost-metodika>summary{font-size:18px}
+  .next-grid{grid-template-columns:1fr;gap:20px}.next-action{border-left:0;border-top:1px solid rgba(52,36,21,.3);padding:20px 0 0}.actions{display:grid;grid-template-columns:1fr}.btn-primary,.btn-ghost{width:100%}.next .btn-primary{white-space:nowrap;font-size:16px;letter-spacing:.7px}
+}

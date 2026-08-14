@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Asap:wght@400;500;600;700&family=PT+Serif:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="renta-flow-10of10.css?v=20260814-2">
 <style>
 /* ===== paleta hechtberger.com ===== */
 :root{
@@ -162,20 +163,25 @@ input[type=range]:disabled{opacity:.35;cursor:not-allowed}
 .intro-lead{max-width:1240px;margin:0 auto;padding:64px 28px 8px;
   display:grid;grid-template-columns:minmax(0,1.02fr) minmax(0,.98fr);gap:46px;align-items:center}
 .lead-text{min-width:0}
-.lead-text h1{margin-bottom:22px}
+.lead-text h1{font-size:clamp(40px,4.4vw,56px);margin-bottom:22px;white-space:nowrap}
 .lead-text h2{margin-top:38px}
 .lead-img{margin:0;min-width:0;position:relative;overflow:hidden;border-radius:5px;
   aspect-ratio:16/10;background:#242424}
 .lead-img img{display:block;width:100%;height:100%;object-fit:cover}
 @media(max-width:860px){
   .intro-lead{grid-template-columns:1fr;gap:26px;padding:34px 16px 4px}
-  .lead-text h1{margin-bottom:18px}
+  .lead-text h1{font-size:clamp(27px,8vw,38px);margin-bottom:18px}
   .lead-text h2{margin-top:30px}
   .lead-img{aspect-ratio:16/9}
 }
 
-/* ===== spodná časť: odoslanie modelácie, konzultácia, predpoklady ===== */
-.bottom-flow{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);gap:18px;margin:24px 0 20px}
+/* ===== spodná časť: odoslanie modelácie, konzultácia, predpoklady =====
+   Prechod od hotového výpočtu k otázke, či by plán obstál aj v skutočnosti —
+   bez neho pôsobia oba panely ako formulár bez dôvodu. */
+.flow-lead{margin:30px 0 0;text-align:center}
+.flow-lead .lead-h{font-family:var(--serif);font-size:27px;line-height:1.25;margin:0;color:#fff}
+.flow-lead .lead-p{max-width:62ch;margin:9px auto 0;font-size:17px;line-height:1.55;color:#b7afa5}
+.bottom-flow{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);gap:18px;margin:18px 0 20px}
 .client-panel{background:var(--surface);padding:24px 26px;border-radius:6px;color:var(--on-gold)}
 .client-panel.consult-panel{background:#242424;border:1px solid var(--line);color:#fff}
 .client-panel h3{font-family:var(--serif);font-size:26px;line-height:1.2;margin:0 0 9px;color:var(--on-gold)}
@@ -202,6 +208,7 @@ input[type=range]:disabled{opacity:.35;cursor:not-allowed}
 .consult-panel .btn{margin-top:18px;padding:14px 24px;font-size:17px;letter-spacing:1.1px}
 /* režim výstupu: formulár je preč, výzva na konzultáciu zostáva sama v celej šírke */
 body.vystup .bottom-flow{grid-template-columns:1fr}
+body.vystup .flow-lead{display:none}
 .assumptions-block{margin:0 0 18px;padding:17px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 .assumptions-block h3{font-family:var(--serif);font-size:20px;font-weight:700;margin:0 0 6px;color:#fff}
 .assumptions-block .assump{margin:0;color:#b7afa5}
@@ -425,7 +432,10 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
   .card{min-height:0;width:100%;margin-top:14px;border-radius:5px;padding:18px;cursor:default;user-select:auto;-webkit-user-select:auto}
   .card::after{display:none}
   .tick{display:none}
-  .bottom-flow{grid-template-columns:1fr;gap:12px;margin-top:20px}
+  .flow-lead{margin-top:24px;text-align:left}
+  .flow-lead .lead-h{font-size:23px}
+  .flow-lead .lead-p{font-size:16px}
+  .bottom-flow{grid-template-columns:1fr;gap:12px;margin-top:14px}
   .client-panel{padding:20px 18px}
   .email-row{grid-template-columns:1fr}
   .email-row button{width:100%}
@@ -614,22 +624,28 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
 
   <div id="msg" aria-live="polite" data-e style="--d:1.5s"></div>
 
+  <div class="flow-lead" data-e style="--d:1.55s">
+    <p class="lead-h">Svoj plán už vidíte v číslach. Obstál by však aj v skutočnom svete?</p>
+    <p class="lead-p">Váš prepočet pracuje s rovnakým zhodnotením každý rok. Trhy sa však každý rok vyvíjajú inak.</p>
+  </div>
+
   <div class="bottom-flow" data-e style="--d:1.6s">
     <section class="client-panel delivery-panel" aria-labelledby="delivery-title">
       <div id="gate-form">
-        <h3 id="delivery-title">Zaslať modeláciu na e-mail</h3>
-        <p id="gate-uvod">Modelácia zhrnie váš scenár privátnej renty a pridá historický pohľad na budovanie majetku prostredníctvom najväčších svetových firiem.</p>
-        <p class="gate-label">Zadajte meno, priezvisko a email. Modeláciu si budete môcť otvoriť hneď po odoslaní a odkaz vám pošleme aj emailom.</p>
+        <h3 id="delivery-title">Vezmite si svoj plán so sebou</h3>
+        <p id="gate-uvod">Modeláciu vám spracujeme do prehľadného PDF, aby ste sa k nej mohli kedykoľvek vrátiť.</p>
+        <p id="gate-bonus">Ak má váš scenár obdobie budovania a vopred zvolený koniec čerpania, plán navyše preveríme v 800 modelovaných skúškach založených na historických výnosoch indexu MSCI World z rokov 1970 až 2025.</p>
+        <p class="gate-label">Kam vám máme poslať odkaz na modeláciu? Modelácia sa vám otvorí okamžite a odkaz vám zároveň pošleme e-mailom.</p>
         <div class="gate-names">
           <input id="gate-first" type="text" autocomplete="given-name" placeholder="Meno" aria-label="Meno">
           <input id="gate-last" type="text" autocomplete="family-name" placeholder="Priezvisko" aria-label="Priezvisko">
         </div>
         <div class="email-row">
           <input id="model-email" type="email" inputmode="email" autocomplete="email" placeholder="Email" aria-label="Email">
-          <button id="send-model" type="button">Pokračovať k modelácii</button>
+          <button id="send-model" type="button">Získať moju modeláciu</button>
         </div>
         <div id="overenie-box" aria-hidden="true"></div>
-        <small class="privacy-note">Vaše údaje použijeme na odoslanie modelácie a nadväzujúcu komunikáciu k téme Wealth managementu.</small>
+        <small class="privacy-note">Odoslaním formulára beriete na vedomie spracovanie osobných údajov na účely vytvorenia a doručenia modelácie podľa Pravidiel ochrany osobných údajov.</small>
         <p class="send-status" id="send-status" aria-live="polite"></p>
       </div>
       <div id="gate-done" hidden>
@@ -639,11 +655,9 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
       </div>
     </section>
     <section class="client-panel consult-panel" aria-labelledby="consult-title">
-      <h3 id="consult-title">Ak chcete ísť ďalej</h3>
-      <p>Aplikácia počíta s vaším predpokladom, modelácia ukáže, čo by s rovnakým plánom urobila história. Na osobnej konzultácii pridám tretí pohľad — čo od najbližších rokov čakajú veľké investičné domy — a spojím ho s vaším skutočným majetkom: čo máte viazané, čo likvidné a čo už má iný účel.</p>
-      <p>Modelácia, ktorá vám príde e-mailom, ukazuje minulosť. Na konzultácii sa pozrieme dopredu: aké výnosy od najbližších rokov čakajú veľké investičné domy a čo to znamená pre vašu rentu.</p>
-      <p>Výsledná stratégia sa zároveň stane meradlom pre vaše súčasné portfólio. Ukáže, či jeho výnosový potenciál, riziko, likvidita a celková štruktúra zodpovedajú tomu, čo od svojho majetku skutočne potrebujete. Jednotlivé investičné produkty tak prestanú byť samostatným cieľom — stanú sa nástrojmi jednej dlhodobej stratégie, ktorá dá vášmu majetku štruktúru, poriadok a jasný účel.</p>
-      <p>Pri väčšom majetku sa môžeme pozrieť aj na jeho celkové usporiadanie, komu má slúžiť a aké rozhodnutia bude potrebné urobiť v najbližších rokoch.</p>
+      <h3 id="consult-title">Čo môže váš plán znamenať pre váš skutočný majetok?</h3>
+      <p>Na osobnej konzultácii — online alebo osobne — zasadíme váš plán do kontextu skutočného majetku a doplníme pohľad založený na aktuálnych dlhodobých očakávaniach popredných svetových investičných inštitúcií.</p>
+      <p>Výsledná stratégia sa stane meradlom pre vaše súčasné portfólio. Jednotlivé investičné produkty tak prestanú byť samotným cieľom a stanú sa nástrojmi vašej stratégie.</p>
       <a class="btn" href="https://hechtberger.com/rezervacia" target="_blank" rel="noopener">Rezervovať konzultáciu</a>
     </section>
   </div>
@@ -721,7 +735,6 @@ function scenarioURL(){
   const lokalne=location.protocol==='file:';
   return VYSTUP_BASE+'?'+(lokalne?'vystup&':'')+scenarioParams().toString();
 }
-
 function applyScenarioFromUrl(){
   /* Stačí ktorýkoľvek podporovaný parameter. Podmienka na `now` ignorovala
      odkaz typu ?vynos=11.3 alebo ?profile=vyv a ticho použila predvolené
@@ -843,6 +856,10 @@ function prehladCiastok(){
 
 /* JADRO:KONIEC */
 
+/* Lokálny wrapper si cez túto úzku funkciu vie zostaviť skutočný výsledkový
+   odkaz bez Turnstile a bez odoslania údajov do Boldemu. */
+if(QS.has('preview'))window.__previewScenarioURL=scenarioURL;
+
 /* Modelované priebehy (Monte Carlo) sa v aplikácii nepočítajú ani nezobrazujú —
    konkrétny scenár sa na nich overuje až na osobnej konzultácii. */
 
@@ -933,16 +950,17 @@ function render(){
     else{txt($('have-k'),'Majetok mi vydrží');
       txt($('have-v'),o.forever?'Nevyčerpá sa':`${Math.floor(o.months/12)} r ${o.months%12} m`)}
   }
-  /* Historický pohľad sa ukáže len tam, kde má scenár plánované obdobie. */
-  const gu=$('gate-uvod');
   /* Rovnaká podmienka, akú používa výsledková stránka: bez plánovaného obdobia
-     niet voči čomu prežitie merať, a renta bez konca ho tiež nemá. */
-  const bezOdolnosti = S.goal==='duration'
-    || (S.pension==='perpetuity' && !(S.sit==='have' && S.goal==='duration'));
-  if(gu)gu.textContent = bezOdolnosti
-    ? 'Modelácia zhrnie váš scenár privátnej renty, hlavné čísla aj použité predpoklady.'
-    : 'Modelácia zhrnie váš scenár privátnej renty a pridá historický pohľad na '
-      +'budovanie majetku prostredníctvom najväčších svetových firiem.';
+     niet voči čomu prežitie merať, a renta bez konca ho tiež nemá. Vtedy mizne
+     aj otázka „obstál by v skutočnosti" — nemali by sme ju čím zodpovedať. */
+  const bezOdolnosti = o.immediate || S.goal==='duration' || S.pension==='perpetuity';
+  const bonus=$('gate-bonus'), lead=document.querySelector('.flow-lead');
+  if(bonus)bonus.hidden=bezOdolnosti;
+  if(lead)lead.hidden=bezOdolnosti;
+  const gateLabel=document.querySelector('.gate-label');
+  if(gateLabel)gateLabel.innerHTML=bezOdolnosti
+    ? 'Modeláciu vám spracujeme do <strong>prehľadného PDF</strong>, aby ste sa k nej mohli kedykoľvek vrátiť.'
+    : 'Modeláciu vám spracujeme do <strong>prehľadného PDF</strong>, aby ste sa k nej mohli kedykoľvek vrátiť.<br><br>Ak má váš scenár obdobie budovania a <strong>vopred zvolený koniec čerpania</strong>, plán navyše preveríme v 800 modelovaných skúškach založených na historických výnosoch indexu MSCI World z rokov 1970 až 2025. Uvidíte, v koľkých skúškach kapitál pokryl všetky zvolené výplaty renty. Ide o podiel úspešných skúšok v tomto modeli, nie odhad pravdepodobnosti ani predpoveď budúceho vývoja.';
 
   txt($('vynos-v'),pctTxt(S.vynos)+' % ročne');
   $('sl-vynos').value=S.vynos;
@@ -987,11 +1005,12 @@ function render(){
 
   /* Predpoklady sa opisujú všeobecne — bez konkrétneho profilu a percenta,
      aby orientačný prepočet nepôsobil ako prísľub konkrétneho výnosu. */
-  $('assump').textContent=o.warn?''
-    :'Aplikácia za vás žiadny výnos nepredpokladá. Počíta so zhodnotením, ktoré ste '
+  const assump=$('assump'),assumpDetail=$('assump-detail');
+  if(assump)assump.textContent=o.warn?''
+    :'Základný prepočet používa zhodnotenie, ktoré ste '
      +'zadali vy, a ukazuje, čo z neho matematicky vyplýva. Nejde o odhad ani o odporúčanie.';
 
-  $('assump-detail').textContent=o.warn?''
+  if(assumpDetail)assumpDetail.textContent=o.warn?''
     :`Výpočet vychádza zo zhodnotenia ${pctTxt(o.rPct)} % ročne, ktoré ste zadali vy. `
      +`Uvedené sumy sú po odpočítaní vstupného poplatku ${pctTxt(FEE_IN)} % a poplatku za správu ${pctTxt(FEE_M)} % ročne. `
      +(o.rast?`Výpočet zohľadňuje infláciu ${pctTxt(o.infl)} % ročne. `:'Výpočet nezohľadňuje infláciu. ')
@@ -1350,6 +1369,13 @@ if(sendModel){
       return;
     }
     const url=scenarioURL();
+    /* Okno treba vytvoriť ešte počas kliknutia. Po asynchrónnom overení by ho
+       prehliadač mohol vyhodnotiť ako nevyžiadané a zablokovať. */
+    const modelWindow=window.open('about:blank','_blank');
+    if(!modelWindow){
+      status.textContent='Povoľte, prosím, otváranie nových okien a skúste to znova.';
+      return;
+    }
     const label=sendModel.textContent;
     sendModel.disabled=true;sendModel.textContent='Odosielam…';
     status.textContent='';
@@ -1358,6 +1384,7 @@ if(sendModel){
       overenie=await overenieCloveka();
     }catch(e){
       console.warn('Turnstile',e);
+      try{modelWindow.close()}catch(_e){}
       status.textContent='Nepodarilo sa overiť prehliadač. Skúste to prosím ešte raz, '
         +'prípadne vypnite blokovanie skriptov.';
       sendModel.disabled=false;sendModel.textContent=label;
@@ -1368,30 +1395,18 @@ if(sendModel){
                             summary:scenarioSummary(),overenie});
     }catch(e){
       console.warn('Boldem submit failed',e);
+      try{modelWindow.close()}catch(_e){}
       status.textContent='Nepodarilo sa odoslať modeláciu emailom. Skúste to prosím ešte raz.';
       sendModel.disabled=false;sendModel.textContent=label;
       return;
     }
-    /* Modelácia sa otvorí rovno tu — rám prejde na výsledkovú stránku. Nový tab
-       zámerne nie: blokátory ho vedia zastaviť a na mobile klient vypadne
-       z kontextu stránky. Odkaz zostáva samonosný, dá sa uložiť do záložiek. */
     zapamataj();
     /* Meno pre modeláciu — ostáva v prehliadači klienta, do adresy nejde. */
     try{localStorage.setItem('ph-renta-klient', JSON.stringify(
       {kedy:Date.now(), meno:(first+' '+last).trim(), scenar:scenarioParams().toString()}))}catch(e){}
-    sendModel.textContent='Otváram modeláciu…';
-    /* Poistka pre prípad, že sa navigácia vôbec nezačne (prehliadač ju zablokuje).
-       Keď sa začne, tento dokument aj s časovačom zaniká — na zlyhanie pri načítaní
-       cieľovej stránky teda nepomôže, tam sa klient vráti tlačidlom späť.
-       Vetu o e-maile skrývame, odkaz e-mailom nechodí. */
-    setTimeout(()=>{
-      $('gate-view').href=url;
-      const veta=$('gate-done-text');
-      if(veta)veta.hidden=true;
-      $('gate-form').hidden=true;
-      $('gate-done').hidden=false;
-    },4000);
-    location.href=url;
+    modelWindow.location.replace(url);
+    status.textContent='Modelácia sa otvorila v novom okne. Odkaz vám posielame aj e-mailom.';
+    sendModel.disabled=false;sendModel.textContent=label;
   });
 }
 
@@ -1404,6 +1419,7 @@ if(OUTPUT_MODE){
 }
 
 addEventListener('resize',render);
+document.addEventListener('flow10of10-ready',render);
 render();
 
 if(ANIM&&!REDUCED){
@@ -1467,6 +1483,7 @@ if(ANIM&&!REDUCED){
   glow();
 })();
 </script>
+<script src="renta-flow-10of10.js?v=20260814-2"></script>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit" async defer></script>
 </body>
 </html>

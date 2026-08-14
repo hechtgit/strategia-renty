@@ -1,0 +1,35 @@
+/* Kanonické rozloženie spodnej časti aplikácie — modelácia + konzultácia. */
+.calculator-preview-zone{margin:-22px -28px 0;padding:28px;background:#292929}
+.flow-lead{margin-top:36px}
+.flow-lead .lead-h{font-family:var(--serif);font-size:clamp(25px,2.7vw,34px);font-weight:700;line-height:1.18;color:var(--text)}
+.flow-lead .lead-p{color:var(--muted);font-size:17px;line-height:1.55}
+.bottom-flow.flow-10of10{grid-template-columns:minmax(0,1fr);gap:28px;margin:36px -28px 20px}
+.flow-10of10 .client-panel{width:100%;margin:0;padding:clamp(24px,3vw,38px)}
+.flow-delivery-layout,.flow-consult-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(34px,5vw,76px);align-items:start}
+.flow-delivery-copy,.flow-delivery-form,.flow-consult-copy,.flow-consult-action{min-width:0}
+.flow-delivery-form,.flow-consult-action{display:grid;align-content:start;border-left:1px solid rgba(52,36,21,.3);padding-left:clamp(28px,4vw,58px)}
+.flow-title{font-family:var(--serif);font-size:clamp(28px,2.5vw,34px);font-weight:700;line-height:1.12;margin:0;color:#2b2118}
+.flow-form-prompt{color:var(--text);font-weight:700;margin:20px 0 10px}
+.flow-copy{color:var(--muted);font-size:17px;line-height:1.55;margin:11px 0 0}
+.flow-delivery-form .gate-names{margin-top:18px}
+.flow-delivery-form .email-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.flow-delivery-form strong,.flow-consult-action strong{color:var(--text);font-weight:700}
+.privacy-note a{color:#111!important;text-decoration:underline!important;text-underline-offset:2px}
+.consult-panel.flow-consult{position:relative;overflow:hidden;background:linear-gradient(135deg,#bd965f 0%,#b1874d 100%)!important;border:1px solid rgba(72,48,23,.42)!important;box-shadow:0 18px 44px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.22)}
+.consult-panel.flow-consult:before{display:none}
+.flow-consult .flow-copy{color:#2b2118}
+.flow-consult strong{color:#2b2118!important;font-weight:800}
+.flow-consult-action .flow-copy{margin:0 0 28px}
+.flow-consult .btn,.delivery-panel #send-model{display:inline-flex!important;align-items:center;justify-content:center;background:var(--btn-gold)!important;color:#fff!important;border:0!important;border-radius:0!important;min-height:50px;padding:14px 24px;box-shadow:0 10px 24px rgba(50,31,14,.2);font-family:var(--serif);font-size:17px;font-weight:700;letter-spacing:1.1px;line-height:1.2}
+.flow-consult .btn:hover,.delivery-panel #send-model:hover{background:var(--gold)!important;transform:translateY(-1px)}
+@media(min-width:701px){.flow-lead .lead-p{white-space:nowrap}}
+@media(max-width:700px){
+  .calculator-preview-zone{margin:-16px -13px 0;padding:20px}
+  .bottom-flow.flow-10of10{gap:18px;margin:24px -13px 16px}
+  .flow-10of10 .client-panel{padding:22px 18px}
+  .flow-delivery-layout,.flow-consult-layout{grid-template-columns:1fr;gap:20px}
+  .flow-delivery-form,.flow-consult-action{border-left:0;border-top:1px solid rgba(52,36,21,.3);padding:22px 0 0}
+  .flow-delivery-form .email-row{grid-template-columns:1fr}
+  .flow-title{font-size:28px}
+  .flow-consult .btn,.delivery-panel #send-model{width:100%;justify-content:center}
+}
