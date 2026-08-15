@@ -1578,7 +1578,18 @@ if(ANIM&&!REDUCED){
        z modelácie späť na aplikáciu by rám zostal privysoký a pod obsahom by
        zívala diera. Body má výšku svojho obsahu. */
     const b=document.body;
-    const h=Math.max(b.getBoundingClientRect().height, b.scrollHeight, b.offsetHeight);
+    const bodyTop=b.getBoundingClientRect().top;
+    let contentBottom=0;
+    /* Absolútne umiestnené karty časovej osi nezväčšujú scrollHeight rodiča.
+       Preto meriame aj skutočný spodný okraj potomkov. Bez toho rám hlásil
+       pôvodných 1700 px a spodné CTA zostali odrezané. */
+    b.querySelectorAll('*').forEach(el=>{
+      const s=getComputedStyle(el);
+      if(s.position==='fixed'||s.display==='none')return;
+      const r=el.getBoundingClientRect();
+      if(Number.isFinite(r.bottom))contentBottom=Math.max(contentBottom,r.bottom-bodyTop);
+    });
+    const h=Math.max(b.getBoundingClientRect().height, b.scrollHeight, b.offsetHeight, contentBottom);
     const vyska=Math.ceil(h);
     if(vyska===lastHeight){stableChecks++;return}
     lastHeight=vyska;stableChecks=0;

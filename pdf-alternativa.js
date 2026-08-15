@@ -26,9 +26,14 @@
       riadky: Array.prototype.map.call(
         zdrojoveRiadky,
         function (r) {
+          var hlavny = !r.querySelector(".co strong") && !!r.querySelector(".kolko strong");
           return {
-            nadpis: text(r.querySelector(".co strong")),
-            vysvetlenie: text(r.querySelector(".co small")),
+            nadpis: hlavny
+              ? text(odolnost.querySelector(".odolnost-testuje li:first-child"))
+              : text(r.querySelector(".co strong")),
+            vysvetlenie: hlavny
+              ? "Tento vstup testujeme v každej modelovanej simulácii."
+              : text(r.querySelector(".co small")),
             hodnota: text(r.querySelector(".kolko strong")),
             doplnenie: text(r.querySelector(".kolko span"))
           };
