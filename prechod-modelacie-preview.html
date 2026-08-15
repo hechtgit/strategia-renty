@@ -23,13 +23,12 @@
   .dot{position:absolute;z-index:2;top:3px;left:50%;width:16px;height:16px;margin-left:-8px;border:1.5px solid var(--gold);border-radius:50%;background:var(--bg);transition:background .35s ease,box-shadow .35s ease,transform .35s ease}
   .step.done,.step.active{color:#ddd6cd}
   .step.done .dot,.step.active .dot{background:var(--gold-hi)}
-  .step.done{color:#c7bcae}.step.active{color:#f0dfc5;text-shadow:0 0 14px rgba(208,171,115,.26)}
+  .step.done,.step.active{color:var(--gold-hi);font-size:18px;text-shadow:0 0 14px rgba(208,171,115,.24)}
   .step.active .dot{transform:scale(1.12);animation:breathe 2.175s ease-in-out infinite}
   .journey.finish .progress{box-shadow:0 0 13px rgba(208,171,115,.75),0 0 32px rgba(174,135,83,.22)}
   .journey.finish .dot{box-shadow:0 0 12px rgba(208,171,115,.55)}
-  .journey.finish .step{color:var(--gold-hi);font-size:18px;text-shadow:0 0 14px rgba(208,171,115,.2)}
   @keyframes breathe{0%,100%{box-shadow:0 0 0 0 rgba(208,171,115,0),0 0 8px rgba(208,171,115,.2)}50%{box-shadow:0 0 0 10px rgba(208,171,115,.18),0 0 18px rgba(208,171,115,.5)}}
-  @media(max-width:560px){body{padding:24px}.journey{margin-top:54px;gap:5px}.step{font-size:12px}.journey.finish .step{font-size:14px}}
+  @media(max-width:560px){body{padding:24px}.journey{margin-top:54px;gap:5px}.step{font-size:12px}.step.done,.step.active{font-size:14px}}
   @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}.progress{width:66.68%!important}.spark{display:none}.step{color:#ddd6cd}.dot{background:var(--gold-hi)}}
 </style>
 </head>
