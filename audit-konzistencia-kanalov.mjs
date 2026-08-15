@@ -49,6 +49,7 @@ for (const channel of ["landing", "result", "builtLanding", "builtResult"]) {
   forbid(channel, "Aby vydržali v");
   forbid(channel, "Aplikácia za vás žiadny výnos nepredpokladá");
   forbid(channel, "Prejsť scenár na konzultácii");
+  forbid(channel, "by váš majetok nebolo potrebné vyčerpať");
 }
 forbid("result", "Uvedené sumy nie sú odporúčaná výška investície");
 forbid("result", "z 800 z 800");

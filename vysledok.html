@@ -739,7 +739,7 @@ function vykresli(){
   }else{
     $('ciel').innerHTML=`Pri rente <strong>${fmtEur(S.rent)} mesačne</strong> v dnešnej hodnote `
       +`od ${S.start} rokov by váš majetok `
-      +(o.forever?'nebolo potrebné vyčerpať.':`vydržal do ${endEff} rokov.`);
+      +(o.forever?'sa nevyčerpal.':`vydržal do ${endEff} rokov.`);
   }
 
   /* ===== karta DNES ===== */
