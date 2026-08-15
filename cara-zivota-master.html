@@ -1423,20 +1423,39 @@ if(sendModel){
       const d=win.document;
       d.open();
       const page='<!doctype html><html lang="sk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+nadpis+'</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Asap:wght@400;500;600;700&family=PT+Serif:wght@400;700&display=swap" rel="stylesheet">'+
-        '<style>*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#1a1a1a;color:#f5f1ea}body{min-height:100vh;display:grid;place-items:center;padding:32px;font:16px/1.55 Asap,Arial,sans-serif}.stav{width:min(760px,100%);text-align:center;opacity:1;transition:opacity .3s ease}.brand{margin:0 0 20px;color:#c9a66f;font-size:12px;font-weight:700;letter-spacing:.2em;text-transform:uppercase}h1{margin:0;font:400 clamp(30px,4.2vw,46px)/1.15 "PT Serif",Georgia,serif;color:'+(chyba?'#f0d8d2':'#fff')+'}.lead{max-width:620px;margin:18px auto 0;color:#d8d2c9;font-size:17px}.progress{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:54px auto 0;max-width:620px}.line,.fill{position:absolute;top:9px;left:16.66%;right:16.66%;height:1px}.line{background:rgba(174,135,83,.32)}.fill{right:auto;width:33.34%;background:linear-gradient(90deg,rgba(174,135,83,.25),#c9a66f,rgba(174,135,83,.25));background-size:200% 100%;animation:flow 1.8s ease-in-out infinite}.step{position:relative;padding-top:30px;color:#8f887f;font-size:13px}.dot{position:absolute;top:4px;left:50%;width:11px;height:11px;margin-left:-5.5px;border:1px solid #ae8753;border-radius:50%;background:#1a1a1a}.step.done,.step.active{color:#d8d2c9}.step.done .dot{background:#ae8753}.step.active .dot{background:#c9a66f;animation:breathe 2.4s ease-in-out infinite}.secondary{margin:34px 0 0;color:#aaa39a;font-size:14px}.slow{min-height:22px;margin:10px 0 0;color:#c3bcb2;font-size:14px}.actions{margin-top:28px}button{min-height:48px;padding:12px 24px;border:0;background:#9a6929;color:#fff;font:700 16px/1.2 Asap,Arial,sans-serif;cursor:pointer}button:focus-visible{outline:3px solid #fff;outline-offset:4px}@keyframes flow{0%{background-position:100% 0}100%{background-position:-100% 0}}@keyframes breathe{0%,100%{box-shadow:0 0 0 0 rgba(201,166,111,0)}50%{box-shadow:0 0 0 7px rgba(201,166,111,.18)}}.stav.complete{opacity:0}.stav.complete .fill{width:66.68%;animation:none;background:#c9a66f}.stav.complete .step:nth-of-type(3){color:#d8d2c9}.stav.complete .step:nth-of-type(3) .dot{background:#c9a66f}@media(max-width:560px){body{padding:24px}.progress{margin-top:42px;gap:6px}.step{font-size:12px}.lead{font-size:16px}}@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}</style></head><body>'+
+        '<style>:root{--bg:#292929;--gold:#ae8753;--gold-hi:#d0ab73;--ink:#f6f1e9;--muted:#c4bdb4}*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink)}body{min-height:100vh;display:grid;place-items:center;padding:32px;font:16px/1.55 Asap,Arial,sans-serif}.stav{width:min(780px,100%);text-align:center;opacity:1;transition:opacity .3s ease}.brand{margin:0;color:var(--gold-hi);font:400 clamp(31px,4vw,45px)/1.15 "PT Serif",Georgia,serif;letter-spacing:.01em}.journey{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:70px auto 0;max-width:680px}.track,.progress{position:absolute;left:16.66%;right:16.66%;top:10px;height:2px}.track{background:rgba(174,135,83,.36);box-shadow:0 0 8px rgba(174,135,83,.09)}.progress{right:auto;width:0;background:linear-gradient(90deg,#9c7139,var(--gold-hi),#ebc889);box-shadow:0 0 8px rgba(208,171,115,.4),0 0 20px rgba(174,135,83,.16);transition:width 1.02s cubic-bezier(.22,.61,.36,1)}.spark{position:absolute;z-index:3;top:4px;left:16.66%;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:#f3d59f;box-shadow:0 0 8px 3px rgba(238,197,135,.72),0 0 25px 10px rgba(174,135,83,.28),0 0 46px 16px rgba(174,135,83,.10);opacity:0;transition:left 1.02s cubic-bezier(.22,.61,.36,1),opacity .27s ease}.step{position:relative;padding-top:38px;color:#817b73;font-size:15px;font-weight:500;transition:color .4s ease,text-shadow .4s ease,font-size .3s ease}.dot{position:absolute;z-index:2;top:3px;left:50%;width:16px;height:16px;margin-left:-8px;border:1.5px solid var(--gold);border-radius:50%;background:var(--bg);transition:background .35s ease,box-shadow .35s ease,transform .35s ease}.step.lit .dot{background:var(--gold-hi);box-shadow:0 0 12px rgba(208,171,115,.55)}.step.revealed{color:var(--gold-hi);font-size:18px;text-shadow:0 0 14px rgba(208,171,115,.24)}.step.active .dot{transform:scale(1.12);animation:breathe 2.175s ease-in-out infinite}.journey.finish .progress{box-shadow:0 0 13px rgba(208,171,115,.75),0 0 32px rgba(174,135,83,.22)}.journey.finish .dot{box-shadow:0 0 12px rgba(208,171,115,.55)}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.lead{max-width:620px;margin:18px auto 0;color:#d8d2c9;font-size:17px}.actions{margin-top:28px}button{min-height:48px;padding:12px 24px;border:0;background:#9a6929;color:#fff;font:700 16px/1.2 Asap,Arial,sans-serif;cursor:pointer}button:focus-visible{outline:3px solid #fff;outline-offset:4px}@keyframes breathe{0%,100%{box-shadow:0 0 0 0 rgba(208,171,115,0),0 0 8px rgba(208,171,115,.2)}50%{box-shadow:0 0 0 10px rgba(208,171,115,.18),0 0 18px rgba(208,171,115,.5)}}.stav.complete{opacity:0}@media(max-width:560px){body{padding:24px}.journey{margin-top:54px;gap:5px}.step{font-size:12px}.step.revealed{font-size:14px}}@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}.progress{width:66.68%!important}.spark{display:none}.step{color:#ddd6cd}.dot{background:var(--gold-hi)}}</style></head><body>'+
+        '<style>.stav[role=alert] h1{margin:24px 0 0;font:400 clamp(28px,3.8vw,42px)/1.18 "PT Serif",Georgia,serif;color:#f0d8d2}</style>'+
         (chyba
           ?'<main class="stav" role="alert"><p class="brand">Stratégia privátnej renty</p><h1>'+nadpis+'</h1><p class="lead">'+text+'</p><div class="actions"><button onclick="try{window.opener.focus()}catch(e){}window.close()">Vrátiť sa k formuláru</button></div></main>'
-          :'<main class="stav" id="model-state"><p class="brand">Stratégia privátnej renty</p><h1>'+nadpis+'</h1><p class="lead">'+text+'</p><div class="progress" aria-hidden="true"><span class="line"></span><span class="fill"></span><div class="step done"><span class="dot"></span>Scenár prijatý</div><div class="step active"><span class="dot"></span>Prebieha overenie</div><div class="step"><span class="dot"></span>Otvárame výsledok</div></div><p class="secondary" role="status" aria-live="polite">Výsledok sa otvorí automaticky. Toto okno nechajte otvorené.</p><p class="slow" id="slow-state" aria-live="polite"></p></main>')+
+          :'<main class="stav" id="model-state"><h1 class="brand">Stratégia privátnej renty</h1><div class="journey" id="journey" role="status" aria-live="polite" aria-label="Priebeh prípravy modelácie"><span class="track" aria-hidden="true"></span><span class="progress" aria-hidden="true"></span><span class="spark" aria-hidden="true"></span><div class="step"><span class="dot"></span>Scenár prijatý</div><div class="step"><span class="dot"></span>Prebieha overenie</div><div class="step"><span class="dot"></span>Otvárame výsledok</div></div></main>')+
         '</bo'+'dy></html>';
       d.write(page);
       d.close();
-      if(!chyba)win.setTimeout(()=>{const slow=d.getElementById('slow-state');if(slow)slow.textContent='Modelácia sa dokončuje. Okno, prosím, nechajte otvorené.'},7000);
-    }catch(e){}
+      if(chyba)return Promise.resolve();
+      const reduce=win.matchMedia&&win.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if(reduce)return Promise.resolve();
+      const journey=d.getElementById('journey');
+      const steps=[...journey.querySelectorAll('.step')];
+      const progress=journey.querySelector('.progress');
+      const spark=journey.querySelector('.spark');
+      const wait=ms=>new Promise(ok=>win.setTimeout(ok,ms));
+      return (async()=>{
+        await wait(390);
+        steps[0].classList.add('lit','active');spark.style.opacity='1';
+        await wait(105);steps[0].classList.add('revealed');
+        await wait(570);steps[0].classList.remove('active');progress.style.width='33.34%';spark.style.left='50%';
+        await wait(1020);steps[1].classList.add('lit','active');
+        await wait(105);steps[1].classList.add('revealed');
+        await wait(510);steps[1].classList.remove('active');progress.style.width='66.68%';spark.style.left='83.34%';
+        await wait(1020);steps[2].classList.add('lit','active');
+        await wait(105);steps[2].classList.add('revealed');
+        await wait(630);steps[2].classList.remove('active');journey.classList.add('finish');spark.style.opacity='0';
+        await wait(780);
+      })();
+    }catch(e){return Promise.resolve()}
   };
-  const otvorVysledok=async(win,url,zaciatok)=>{
-    const minimum=900;
-    const zostatok=Math.max(0,minimum-(Date.now()-zaciatok));
-    if(zostatok)await new Promise(ok=>setTimeout(ok,zostatok));
+  const otvorVysledok=async(win,url,animacia)=>{
+    await animacia;
     try{
       const stav=win.document.getElementById('model-state');
       if(stav)stav.classList.add('complete');
@@ -1468,8 +1487,7 @@ if(sendModel){
       status.textContent='Povoľte, prosím, otváranie nových okien a skúste to znova.';
       return;
     }
-    const otvorene=Date.now();
-    stavModelovehoOkna(modelWindow,'Pripravujeme vašu modeláciu','Overujeme odoslanie a pripravujeme výsledok v tejto karte.');
+    const animacia=stavModelovehoOkna(modelWindow,'Pripravujeme vašu modeláciu','Overujeme odoslanie a pripravujeme výsledok v tejto karte.');
     const label=sendModel.textContent;
     sendModel.disabled=true;sendModel.textContent='Odosielam…';
     status.textContent='';
@@ -1503,7 +1521,7 @@ if(sendModel){
     /* Meno pre modeláciu — ostáva v prehliadači klienta, do adresy nejde. */
     try{localStorage.setItem('ph-renta-klient', JSON.stringify(
       {kedy:Date.now(), meno:(first+' '+last).trim(), scenar:scenarioParams().toString()}))}catch(e){}
-    await otvorVysledok(modelWindow,url,otvorene);
+    await otvorVysledok(modelWindow,url,animacia);
     status.textContent='Modelácia sa otvorila v novom okne. Odkaz vám posielame aj e-mailom.';
     sendModel.disabled=false;sendModel.textContent=label;
   });
