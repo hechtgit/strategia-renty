@@ -28,11 +28,15 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font
 h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
 .site-top{max-width:1480px;margin:0 auto;padding:22px 28px;display:flex;align-items:center;
   justify-content:space-between;border-bottom:1px solid var(--line)}
-.site-brand{display:flex;align-items:center;gap:13px;color:#fff}
-.site-brand-mark{color:var(--gold-strong);font-size:24px;line-height:1}
-.site-brand strong{display:block;font-family:var(--serif);font-size:20px;line-height:1.1}
-.site-brand small{display:block;margin-top:3px;color:var(--muted);font-size:11px;letter-spacing:.12em}
-.site-menu{font-size:25px;color:var(--gold-strong);line-height:1}
+.site-brand{display:flex;align-items:center;color:#fff;text-decoration:none}
+.site-brand img{display:block;width:auto;height:45px;max-width:min(330px,70vw);object-fit:contain}
+.site-nav{position:relative;margin:0}
+.site-nav>summary{display:flex;align-items:center;justify-content:center;width:48px;height:48px;color:var(--gold-strong);font-size:28px;line-height:1;cursor:pointer;list-style:none}
+.site-nav>summary::-webkit-details-marker{display:none}
+.site-nav>summary:focus-visible{outline:2px solid var(--gold-strong);outline-offset:2px}
+.site-nav-panel{position:absolute;z-index:50;top:52px;right:0;width:min(330px,calc(100vw - 36px));padding:18px;background:#242424;border:1px solid var(--line);box-shadow:0 18px 44px rgba(0,0,0,.35)}
+.site-nav-panel a{display:block;padding:10px 12px;color:#fff;text-decoration:none;font-size:16px}
+.site-nav-panel a:hover,.site-nav-panel a:focus-visible{color:var(--gold-strong);background:rgba(174,135,83,.08)}
 
 /* ===== úvod ===== */
 /* Modelácia je dokument, nie landing page — fotka páru na lodi zostáva
@@ -271,11 +275,22 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
 </head>
 <body>
 <header class="site-top">
-  <div class="site-brand">
-    <span class="site-brand-mark" aria-hidden="true">▲</span>
-    <span><strong>Petr Hechtberger</strong><small>WEALTH MANAGEMENT · SWISS LIFE SELECT</small></span>
-  </div>
-  <span class="site-menu" aria-label="Menu">☰</span>
+  <a class="site-brand" href="https://www.hechtberger.com/" aria-label="Petr Hechtberger — domovská stránka">
+    <img src="https://images.squarespace-cdn.com/content/v1/5aa7b897aa49a1758e33ac89/bbbea8d7-0dad-41ad-b0bb-c8bbbb2bb1ec/logo_peto_2.png?format=500w" alt="Petr Hechtberger | Wealth management | Swiss Life Select">
+  </a>
+  <details class="site-nav">
+    <summary aria-label="Otvoriť menu">☰</summary>
+    <nav class="site-nav-panel" aria-label="Hlavná navigácia">
+      <a href="https://www.hechtberger.com/">Domov</a>
+      <a href="https://www.hechtberger.com/kto-som">O mne</a>
+      <a href="https://www.hechtberger.com/strategicka-sprava-kapitalu">Strategická správa kapitálu</a>
+      <a href="https://www.hechtberger.com/strategia-privatnej-renty">Privátna renta</a>
+      <a href="https://www.hechtberger.com/blog/">Články</a>
+      <a href="https://www.hechtberger.com/referencie-obsah">Referencie</a>
+      <a href="https://www.hechtberger.com/kontakt">Kontakt</a>
+      <a href="https://www.hechtberger.com/rezervacia">Rezervácia</a>
+    </nav>
+  </details>
 </header>
 <main class="shell">
 
@@ -297,10 +312,7 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
   <div class="warn" id="warn" hidden></div>
 
   <section class="section" id="plan">
-    <div class="section-head">
-      <h2>Váš plán privátnej renty</h2>
-      <p id="ciel"></p>
-    </div>
+    <p id="ciel" hidden></p>
     <div class="line-wrap">
       <div class="track" id="track">
         <span class="age" data-age="20">20</span>

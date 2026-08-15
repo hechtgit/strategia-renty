@@ -26,7 +26,7 @@ p,.lead,.co,.kolko,.mail-note,.disclaimer{word-break:normal;overflow-wrap:normal
 .odolnost-tab .vysledok-label{margin-bottom:7px;color:#fff;font-size:15px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
 .odolnost-citlivost,.odolnost-metodika{margin:18px 0 0;border-top:1px solid var(--line)}
 .odolnost-citlivost>summary,.odolnost-metodika>summary{padding:17px 0;cursor:pointer;color:#fff;font-family:var(--page-serif);font-size:20px;line-height:1.3;font-weight:700;list-style:none}
-.odolnost-citlivost>summary{color:var(--muted);font-family:var(--page-sans);font-size:17px;font-weight:600}
+.odolnost-citlivost>summary{color:#fff;font-family:var(--page-serif);font-size:20px;font-weight:700}
 .odolnost-citlivost>summary::-webkit-details-marker,.odolnost-metodika>summary::-webkit-details-marker{display:none}
 .odolnost-citlivost>summary::before,.odolnost-metodika>summary::before{content:"\25B6";display:inline-block;margin-right:11px;color:var(--gold-strong);font-size:.72em;transform-origin:50% 55%;animation:summary-heartbeat 2.6s ease-in-out infinite}
 .odolnost-citlivost[open]>summary::before,.odolnost-metodika[open]>summary::before{transform:rotate(90deg)}
