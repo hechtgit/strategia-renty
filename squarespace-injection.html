@@ -200,6 +200,8 @@
     var ps = mount.querySelectorAll("p");
     for (var i = 0; i < ps.length; i++) {
       if (/Nechce sa vám čítať|Adam vám článok prečíta/.test(ps[i].textContent || "")) {
+        if (ps[i].getAttribute("data-cz-audio-copy") === "1") return;
+        ps[i].setAttribute("data-cz-audio-copy", "1");
         ps[i].innerHTML = 'Nechce sa vám čítať?<br><b style="color:#c49a63;font-weight:500">Adam</b> vám stručne vysvetlí, ako aplikácia funguje.';
         return;
       }
