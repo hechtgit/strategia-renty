@@ -1,6 +1,9 @@
-export const MONTHS = 12;
+/* GENERATED from shared/renta-core.js sha256:001a305bc17a8901458cbe3cee81f16796535dcda00bc87150121f7f42b0dab9. Do not edit. */
+(() => {
+"use strict";
+const MONTHS = 12;
 
-export const PUBLIC_HISTORICAL_PROFILE = Object.freeze({
+const PUBLIC_HISTORICAL_PROFILE = Object.freeze({
   id: "public-history-v1",
   version: 1,
   runs: 800,
@@ -11,16 +14,16 @@ export const PUBLIC_HISTORICAL_PROFILE = Object.freeze({
   thresholds: [600, 720],
 });
 
-export function monthlyInflationRate(pa = 0) {
+function monthlyInflationRate(pa = 0) {
   return Math.pow(1 + pa / 100, 1 / MONTHS) - 1;
 }
 
-export function monthlyNetRate(pa = 0, managementFee = 0) {
+function monthlyNetRate(pa = 0, managementFee = 0) {
   return Math.pow(1 + pa / 100, 1 / MONTHS) *
     (1 - managementFee / (100 * MONTHS)) - 1;
 }
 
-export function paymentEnd(capital, rent, months, rate, growth) {
+function paymentEnd(capital, rent, months, rate, growth) {
   let balance = capital;
   let payment = rent;
   for (let month = 0; month < months; month += 1) {
@@ -30,7 +33,7 @@ export function paymentEnd(capital, rent, months, rate, growth) {
   return balance;
 }
 
-export function capitalForRent(rent, months, rate, growth, residual = 0) {
+function capitalForRent(rent, months, rate, growth, residual = 0) {
   let high = 1e6;
   while (paymentEnd(high, rent, months, rate, growth) < residual) {
     high *= 2;
@@ -45,7 +48,7 @@ export function capitalForRent(rent, months, rate, growth, residual = 0) {
   return (low + high) / 2;
 }
 
-export function rentFromCapital(capital, months, rate, growth, residual = 0) {
+function rentFromCapital(capital, months, rate, growth, residual = 0) {
   let low = 0;
   let high = capital;
   for (let iteration = 0; iteration < 60; iteration += 1) {
@@ -56,7 +59,7 @@ export function rentFromCapital(capital, months, rate, growth, residual = 0) {
   return (low + high) / 2;
 }
 
-export function monthsUntilDepleted(capital, rent, rate, growth, limit = 1200) {
+function monthsUntilDepleted(capital, rent, rate, growth, limit = 1200) {
   if (rent <= capital * (rate - growth)) return Infinity;
   let balance = capital;
   let payment = rent;
@@ -68,7 +71,7 @@ export function monthsUntilDepleted(capital, rent, rate, growth, limit = 1200) {
   }
   return months;
 }
-export function accumulationPath(initialNet, monthlyNet, months, annualReturn, managementFee) {
+function accumulationPath(initialNet, monthlyNet, months, annualReturn, managementFee) {
   const rate = monthlyNetRate(annualReturn, managementFee);
   let balance = initialNet;
   const path = [balance];
@@ -79,7 +82,7 @@ export function accumulationPath(initialNet, monthlyNet, months, annualReturn, m
   return path;
 }
 
-export function drawdownPath(capital, rent, months, annualReturn,
+function drawdownPath(capital, rent, months, annualReturn,
   managementFee, inflationRate, residual = 0) {
   const rate = monthlyNetRate(annualReturn, managementFee);
   const growth = monthlyInflationRate(inflationRate);
@@ -97,7 +100,7 @@ export function drawdownPath(capital, rent, months, annualReturn,
 }
 
 
-export function normalizeScenario(input = {}) {
+function normalizeScenario(input = {}) {
   return {
     nowAge: Number(input.nowAge ?? 50),
     startAge: Number(input.startAge ?? 65),
@@ -120,7 +123,7 @@ export function normalizeScenario(input = {}) {
   };
 }
 
-export function computePlan(rawScenario) {
+function computePlan(rawScenario) {
   const s = normalizeScenario(rawScenario);
   const yearsBuild = s.startAge - s.nowAge;
   const monthsBuild = yearsBuild * MONTHS;
@@ -255,7 +258,7 @@ export function computePlan(rawScenario) {
   return out;
 }
 
-export function summarizePlan(plan) {
+function summarizePlan(plan) {
   if (!plan || plan.warn) return null;
   const s = plan.scenario;
   const endless = Boolean(plan.nek || plan.forever);
@@ -277,7 +280,7 @@ export function summarizePlan(plan) {
   };
 }
 
-export function mulberry32(seed) {
+function mulberry32(seed) {
   return function random() {
     let a = seed | 0;
     a = a + 0x6D2B79F5 | 0;
@@ -288,7 +291,7 @@ export function mulberry32(seed) {
   };
 }
 
-export function blockBootstrapPaths({
+function blockBootstrapPaths({
   seriesByAsset,
   years,
   runs = 800,
@@ -320,7 +323,7 @@ export function blockBootstrapPaths({
   return paths;
 }
 
-export function survivesHistoricalPath(path, plan, multiplier, drawReturnNet) {
+function survivesHistoricalPath(path, plan, multiplier, drawReturnNet) {
   const s = plan.scenario;
   const feeMonthly = s.managementFee / 100 / MONTHS;
   const initialFactor = s.serviceMode ? 1 : 1 - s.entryFee / 100;
@@ -348,7 +351,7 @@ export function survivesHistoricalPath(path, plan, multiplier, drawReturnNet) {
   return balance >= s.residualCapital;
 }
 
-export function historicalResilience(rawScenario, annualReturns, profile = PUBLIC_HISTORICAL_PROFILE) {
+function historicalResilience(rawScenario, annualReturns, profile = PUBLIC_HISTORICAL_PROFILE) {
   const plan = computePlan(rawScenario);
   if (plan.warn || plan.nek || plan.forever || plan.scenario.goal === "duration" ||
       !plan.Tm || plan.Tm < MONTHS) return null;
@@ -395,7 +398,7 @@ export function historicalResilience(rawScenario, annualReturns, profile = PUBLI
   };
 }
 
-export function stressTest(rawScenario, {
+function stressTest(rawScenario, {
   dropPct,
   yearsFromNow,
 } = {}) {
@@ -443,3 +446,6 @@ export function stressTest(rawScenario, {
     path,
   };
 }
+
+globalThis.RentaCore = Object.freeze({MONTHS,PUBLIC_HISTORICAL_PROFILE,monthlyInflationRate,monthlyNetRate,paymentEnd,capitalForRent,rentFromCapital,monthsUntilDepleted,accumulationPath,drawdownPath,normalizeScenario,computePlan,summarizePlan,mulberry32,blockBootstrapPaths,survivesHistoricalPath,historicalResilience,stressTest});
+})();

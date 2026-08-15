@@ -1,0 +1,24 @@
+{
+  "coreSha256": "001a305bc17a8901458cbe3cee81f16796535dcda00bc87150121f7f42b0dab9",
+  "dataSha256": "f422cfa800d9e74b048f818ad134078e356a9e72869dda630be536d6f0a391bf",
+  "exports": [
+    "MONTHS",
+    "PUBLIC_HISTORICAL_PROFILE",
+    "monthlyInflationRate",
+    "monthlyNetRate",
+    "paymentEnd",
+    "capitalForRent",
+    "rentFromCapital",
+    "monthsUntilDepleted",
+    "accumulationPath",
+    "drawdownPath",
+    "normalizeScenario",
+    "computePlan",
+    "summarizePlan",
+    "mulberry32",
+    "blockBootstrapPaths",
+    "survivesHistoricalPath",
+    "historicalResilience",
+    "stressTest"
+  ]
+}

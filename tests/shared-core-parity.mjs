@@ -7,6 +7,7 @@ import {
   computePlan,
   historicalResilience,
   summarizePlan,
+  survivesHistoricalPath,
 } from "../shared/renta-core.js";
 
 const master = fs.readFileSync(new URL("../cara-zivota-master.html", import.meta.url), "utf8");
@@ -16,6 +17,12 @@ const start = master.indexOf(START);
 const end = master.indexOf(END, start);
 assert.ok(start >= 0 && end > start, "Chýba pôvodné verejné jadro.");
 const legacyCore = master.slice(start, end + END.length);
+const resultHtml = fs.readFileSync(new URL("../vysledok.html", import.meta.url), "utf8");
+const historicalStart = resultHtml.indexOf("const HIST_OD=");
+const historicalEnd = resultHtml.indexOf("/* ===== rozmiestnenie na čiare =====", historicalStart);
+assert.ok(historicalStart >= 0 && historicalEnd > historicalStart,
+  "Chýba pôvodný historický blok.");
+const legacyHistoricalCore = resultHtml.slice(historicalStart, historicalEnd);
 
 const defaults = {
   now: 50, start: 65, end: 90, rent: 3000, existing: 600000, combo: 100000,
@@ -41,6 +48,18 @@ function legacy(params) {
     console,
   });
   vm.runInContext(legacyCore + "\n;globalThis.__out={S,compute,prehladCiastok};", context);
+  return context.__out;
+}
+
+function legacyHistorical(params) {
+  const search = "?" + new URLSearchParams(params).toString();
+  const context = vm.createContext({
+    URLSearchParams,
+    location: { search, protocol: "https:", origin: "https://example.test", pathname: "/" },
+    console,
+  });
+  vm.runInContext(legacyCore + "\n" + legacyHistoricalCore +
+    "\n;globalThis.__out={S,compute,refDrahy,prezilo};", context);
   return context.__out;
 }
 
@@ -98,6 +117,29 @@ const resilience = historicalResilience(standard, dataset.vynosy);
 assert.equal(resilience.runs, 800);
 assert.equal(resilience.base, 268);
 close(resilience.levels[0].contribution, 735305, "600/800", 2e-6);
+const oldHistorical = legacyHistorical(defaults);
+const oldPlan = oldHistorical.compute();
+const oldPaths = oldHistorical.refDrahy(
+  Math.ceil(oldPlan.Nm / 12), Math.ceil(oldPlan.Tm / 12));
+const newPlan = computePlan(standard);
+const newPaths = blockBootstrapPaths({
+  seriesByAsset: { accumulation: dataset.vynosy },
+  years: Math.ceil(newPlan.Nm / 12),
+  runs: PUBLIC_HISTORICAL_PROFILE.runs,
+  blockYears: PUBLIC_HISTORICAL_PROFILE.blockYears,
+  seed: PUBLIC_HISTORICAL_PROFILE.seed,
+  seedStride: PUBLIC_HISTORICAL_PROFILE.seedStride,
+});
+assert.equal(oldPaths.length, newPaths.length);
+for (let index = 0; index < oldPaths.length; index += 1) {
+  const oldFactors = [...oldPaths[index].a];
+  const newFactors = newPaths[index].accumulation.map(value => 1 + value);
+  assert.deepEqual(newFactors, oldFactors, "Dráha " + index + " sa zmenila.");
+  const before = oldHistorical.prezilo(oldPaths[index], oldPlan, 1);
+  const after = survivesHistoricalPath(
+    newPaths[index], newPlan, 1, PUBLIC_HISTORICAL_PROFILE.drawReturnNet);
+  assert.equal(after, before, "Verdikt dráhy " + index + " sa zmenil.");
+}
 close(resilience.levels[1].contribution, 1115116, "720/800", 2e-6);
 
 const identical = blockBootstrapPaths({
@@ -119,4 +161,4 @@ const repeatedB = blockBootstrapPaths({
 });
 assert.deepEqual(repeatedA, repeatedB, "Bootstrap musí byť deterministický.");
 
-console.log("PASS shared core: public parity 8/8, historical 268/800, aligned blocks, deterministic seed.");
+console.log("PASS shared core: public parity 8/8, all 800 historical paths and verdicts, aligned blocks, deterministic seed.");
