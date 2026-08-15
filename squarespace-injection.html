@@ -50,6 +50,7 @@
   .cz-hero-copy p span{display:block;white-space:nowrap}
   .cz-jump{display:inline-flex;align-items:center;gap:12px;color:#725432;font-family:Asap,Arial,Helvetica,sans-serif;font-weight:700;text-decoration:none;border-bottom:1px solid #ae8753;padding:0 0 7px}
   .cz-body{max-width:910px;margin:0 auto;padding:8px 28px 20px}
+  #cz-audio{min-height:190px}
   .cz-body h2{font-family:Lora,"PT Serif",Georgia,serif;
     font-size:clamp(27px,3vw,36px);font-weight:400;line-height:1.15;margin:40px 0 16px;color:#fff}
   .cz-body p{font-size:17px;line-height:1.75;color:rgba(255,255,255,.86);margin:0 0 18px}
@@ -181,6 +182,14 @@
 
     m.parentNode.insertBefore(lead, m);
     m.parentNode.insertBefore(telo, m);
+
+    /* Pôvodný audio skript má vlastnú prázdnu kotvu nad kalkulačkou. Presunieme
+       ju do schváleného audio bloku ešte pred vykreslením prehrávača; inak by
+       najprv narástla nad hero sekciou a o chvíľu sa presunula, čo spôsobuje CLS. */
+    var povodnaAudioKotva = document.getElementById("adam-audio-mount");
+    var cielAudio = document.getElementById("cz-audio");
+    if (povodnaAudioKotva && cielAudio && povodnaAudioKotva.parentNode !== cielAudio)
+      cielAudio.appendChild(povodnaAudioKotva);
   }
 
   /* 3. Audio: prehrávač beží skôr, než vznikne kotva vyššie, a nemá vlastný retry.
