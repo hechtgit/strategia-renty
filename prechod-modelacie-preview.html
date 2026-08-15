@@ -21,14 +21,13 @@
   .spark{position:absolute;z-index:3;top:4px;left:16.66%;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:#f3d59f;box-shadow:0 0 8px 3px rgba(238,197,135,.72),0 0 25px 10px rgba(174,135,83,.28),0 0 46px 16px rgba(174,135,83,.10);opacity:0;transition:left 1.02s cubic-bezier(.22,.61,.36,1),opacity .27s ease}
   .step{position:relative;padding-top:38px;color:#817b73;font-size:15px;font-weight:500;transition:color .4s ease,text-shadow .4s ease}
   .dot{position:absolute;z-index:2;top:3px;left:50%;width:16px;height:16px;margin-left:-8px;border:1.5px solid var(--gold);border-radius:50%;background:var(--bg);transition:background .35s ease,box-shadow .35s ease,transform .35s ease}
-  .step.done,.step.active{color:#ddd6cd}
-  .step.done .dot,.step.active .dot{background:var(--gold-hi)}
-  .step.done,.step.active{color:var(--gold-hi);font-size:18px;text-shadow:0 0 14px rgba(208,171,115,.24)}
+  .step.lit .dot{background:var(--gold-hi);box-shadow:0 0 12px rgba(208,171,115,.55)}
+  .step.revealed{color:var(--gold-hi);font-size:18px;text-shadow:0 0 14px rgba(208,171,115,.24)}
   .step.active .dot{transform:scale(1.12);animation:breathe 2.175s ease-in-out infinite}
   .journey.finish .progress{box-shadow:0 0 13px rgba(208,171,115,.75),0 0 32px rgba(174,135,83,.22)}
   .journey.finish .dot{box-shadow:0 0 12px rgba(208,171,115,.55)}
   @keyframes breathe{0%,100%{box-shadow:0 0 0 0 rgba(208,171,115,0),0 0 8px rgba(208,171,115,.2)}50%{box-shadow:0 0 0 10px rgba(208,171,115,.18),0 0 18px rgba(208,171,115,.5)}}
-  @media(max-width:560px){body{padding:24px}.journey{margin-top:54px;gap:5px}.step{font-size:12px}.step.done,.step.active{font-size:14px}}
+  @media(max-width:560px){body{padding:24px}.journey{margin-top:54px;gap:5px}.step{font-size:12px}.step.revealed{font-size:14px}}
   @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}.progress{width:66.68%!important}.spark{display:none}.step{color:#ddd6cd}.dot{background:var(--gold-hi)}}
 </style>
 </head>
@@ -57,14 +56,23 @@
     steps.forEach(s=>s.className='step');
     progress.style.width='0';spark.style.left='16.66%';spark.style.opacity='0';
     await wait(390);
-    steps[0].classList.add('done');spark.style.opacity='1';
-    await wait(780);
-    steps[1].classList.add('active');progress.style.width='33.34%';spark.style.left='50%';
-    await wait(1140);
-    steps[1].classList.remove('active');steps[1].classList.add('done');
-    steps[2].classList.add('active');progress.style.width='66.68%';spark.style.left='83.34%';
-    await wait(1050);
-    steps[2].classList.remove('active');steps[2].classList.add('done');journey.classList.add('finish');spark.style.opacity='0';
+    steps[0].classList.add('lit','active');spark.style.opacity='1';
+    await wait(210);
+    steps[0].classList.add('revealed');
+    await wait(570);
+    steps[0].classList.remove('active');progress.style.width='33.34%';spark.style.left='50%';
+    await wait(1020);
+    steps[1].classList.add('lit','active');
+    await wait(210);
+    steps[1].classList.add('revealed');
+    await wait(510);
+    steps[1].classList.remove('active');progress.style.width='66.68%';spark.style.left='83.34%';
+    await wait(1020);
+    steps[2].classList.add('lit','active');
+    await wait(210);
+    steps[2].classList.add('revealed');
+    await wait(630);
+    steps[2].classList.remove('active');journey.classList.add('finish');spark.style.opacity='0';
     await wait(780);
     await wait(1500);
     play();
