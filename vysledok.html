@@ -179,6 +179,21 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
 .embedded .shell{padding:0 0 8px}
 
 
+@media(min-width:481px) and (max-width:680px){
+  .line-wrap{padding-left:18px;padding-right:18px}
+  .assumptions{gap:12px}
+  .blok,.recap{min-width:0;padding:20px 16px}
+  .recap li{overflow-wrap:anywhere}
+  .next{padding:24px 18px}
+  .next-grid{gap:18px}
+  .next-action{padding-left:18px}
+  .next .btn-primary{max-width:100%;padding:12px 14px;letter-spacing:.7px}
+  .card{width:calc((100vw - 54px)/2);padding:16px 14px 17px}
+  .card h3{font-size:20px}
+  .card .label,.card .sub{font-size:14px;line-height:1.42}
+  .card .value{font-size:25px}
+}
+
 @media(max-width:480px){
   .shell{padding:14px}
   .site-top{padding:16px 14px}
@@ -918,7 +933,7 @@ function vykresli(){
    Zároveň sa dorovná odsadenie okolo čiary, aby karty nezasahovali do sekcií
    nad ňou a pod ňou — ich výška závisí od toho, koľko riadkov scenár vypíše. */
 function prisposobOsi(){
-  const siroko=matchMedia('(min-width:641px)').matches;
+  const siroko=matchMedia('(min-width:481px)').matches;
   const wrap=document.querySelector('.line-wrap');
   const fazy=[
     {el:$('ph-build'),od:S.now,po:S.start,zap:!o.immediate},
@@ -959,7 +974,7 @@ function prisposobOsi(){
    sa nerozostupuje. */
 function rozostup(){
   const wrap=document.querySelector('.line-wrap');
-  const siroko=matchMedia('(min-width:641px)').matches;
+  const siroko=matchMedia('(min-width:481px)').matches;
   const karty=[...document.querySelectorAll('.milestone')].map(m=>({
     m,karta:m.querySelector('.card'),hore:!!m.querySelector('.card.up')
   })).filter(k=>!k.m.hidden);
@@ -989,9 +1004,23 @@ function rozostup(){
       const nutne=rad[i-1].ciel+rad[i-1].sirka/2+18+rad[i].sirka/2;
       if(rad[i].ciel<nutne)rad[i].ciel=nutne;
     }
+    /* Ak dopredný priechod vytlačí poslednú kartu za pravý okraj, najprv ju
+       vrátime do dostupnej plochy a až potom celý rad dorovnáme sprava. */
+    const pravyStrop=rw.width-okraj-rad[rad.length-1].sirka/2;
+    if(rad[rad.length-1].ciel>pravyStrop)rad[rad.length-1].ciel=pravyStrop;
     for(let i=rad.length-2;i>=0;i--){
       const strop=rad[i+1].ciel-rad[i+1].sirka/2-18-rad[i].sirka/2;
       if(rad[i].ciel>strop)rad[i].ciel=strop;
+    }
+    /* Pri veľmi úzkom tablete sa karty zmenšia cez CSS. Toto je posledná
+       poistka, aby ani prvá karta nikdy nezačala mimo ľavého okraja. */
+    const lavyLimit=okraj+rad[0].sirka/2;
+    if(rad[0].ciel<lavyLimit){
+      rad[0].ciel=lavyLimit;
+      for(let i=1;i<rad.length;i++){
+        const nutne=rad[i-1].ciel+rad[i-1].sirka/2+18+rad[i].sirka/2;
+        if(rad[i].ciel<nutne)rad[i].ciel=nutne;
+      }
     }
     rad.forEach(x=>{
       const dx=x.ciel-x.stred;
