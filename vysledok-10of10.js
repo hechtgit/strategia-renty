@@ -7,7 +7,14 @@
   function staticCopy(){
     const h1=document.querySelector(".hero h1"),lead=document.querySelector(".hero .lead");
     if(h1)h1.textContent="Váš plán privátnej renty v jednom prehľade";
-    if(lead)lead.textContent="Modelácia zachytáva scenár, ktorý ste si nastavili v kalkulačke. Ak má obdobie budovania a vopred zvolený koniec čerpania, dopĺňa ho o test založený na historických výnosoch. Je to orientačný rámec pre ďalšie rozhodovanie — nie úplný obraz vášho majetku, likvidity, rizika ani ďalších cieľov.";
+    if(lead){
+      const start=Number(q.get("start")),end=Number(q.get("end")),rent=Number(q.get("rent"));
+      const maHistorickyTest=Number(q.get("now"))<start&&q.get("pension")!=="perpetuity"&&q.get("goal")!=="duration";
+      const ciel=`Vaším cieľom je privátna renta ${fmt(rent)} mesačne v dnešnej hodnote od ${start} rokov počas ${end-start} rokov.`;
+      lead.textContent=maHistorickyTest
+        ? `${ciel} Nižšie uvidíte, aký kapitál si tento plán vyžaduje a ako obstál v modelovaných simuláciách založených na historických dátach.`
+        : `${ciel} Nižšie uvidíte, aký kapitál si tento plán vyžaduje a z akých predpokladov výpočet vychádza.`;
+    }
     const consult=document.querySelector(".next"),title=consult?.querySelector("h2"),paragraphs=consult?.querySelectorAll("p");
     if(title)title.textContent="Váš plán v dnešnom kontexte";
     if(paragraphs?.[0])paragraphs[0].textContent="Na osobnej konzultácii zasadíme váš plán do kontextu skutočného majetku a doplníme pohľad založený na aktuálnych dlhodobých očakávaniach popredných svetových investičných inštitúcií.";
@@ -46,25 +53,25 @@
     const label=document.getElementById("s1-k");if(label)label.textContent=sit==="have"?"Váš majetok dnes":mode==="lump"?"Koľko vložíte dnes":"Koľko vložíte spolu";
     odolnost.querySelector("h2").textContent="Obstál by váš plán aj pri rozdielnom vývoji trhov?";
     const intro=document.getElementById("odolnost-uvod");
-    if(intro)intro.textContent="Základný prepočet počíta každý rok s rovnakým zhodnotením, ktoré ste zadali. V 800 modelovaných skúškach meníme vývoj iba počas budovania majetku. Po začatí renty všetky skúšky používajú rovnaký plánovací výnos 4 % ročne po investičných nákladoch, pred infláciou.";
+    if(intro)intro.textContent="Základný prepočet počíta každý rok s rovnakým zhodnotením, ktoré ste zadali. V 800 modelovaných simuláciách meníme vývoj iba počas budovania majetku. Po začatí renty všetky simulácie používajú rovnaký plánovací výnos 4 % ročne po investičných nákladoch, pred infláciou.";
     let box=odolnost.querySelector(".odolnost-testuje");
     if(!box){box=document.createElement("div");box.className="odolnost-testuje";tbody.closest("table").before(box);}
     box.innerHTML='<p><strong>Čo presne testujeme?</strong></p><ul>'+
       '<li><strong>'+sentence+':</strong> '+today+'.</li>'+
       '<li><strong>Cieľ:</strong> renta '+fmt(rent)+' mesačne v dnešnej hodnote od '+start+' do '+end+' rokov; počas čerpania rastie so zadanou infláciou.</li>'+
       '<li><strong>Základný prepočet:</strong> pri rovnakom zhodnotení každý rok má táto suma do veku '+start+' rokov vyrásť na '+target+'.</li></ul>'+
-      '<p class="poznamka">V modelovaných skúškach sa zhodnotenie počas budovania každý rok mení. Preto sa mení aj kapitál, ktorý je k dispozícii na začiatku renty.</p>';
-    tbody.innerHTML='<tr class="vas"><td class="kolko" colspan="2"><span class="vysledok-label">Výsledok modelovaných skúšok</span><strong>Kapitál pokryl všetky plánované výplaty v '+success+'&nbsp;z&nbsp;800 skúšok</strong><span>Teda rentu '+fmt(rent)+' mesačne v dnešnej hodnote od '+start+' do '+end+' rokov, počas čerpania zvyšovanú o infláciu. Ide o podiel úspešných skúšok v tomto modeli, nie odhad pravdepodobnosti budúceho úspechu.</span></td></tr>';
+      '<p class="poznamka">V modelovaných simuláciách sa zhodnotenie počas budovania každý rok mení. Preto sa mení aj kapitál, ktorý je k dispozícii na začiatku renty.</p>';
+    tbody.innerHTML='<tr class="vas"><td class="kolko" colspan="2"><span class="vysledok-label">Výsledok modelovaných simulácií</span><strong>Kapitál pokryl všetky plánované výplaty v '+success+'&nbsp;z&nbsp;800 simulácií</strong><span>Teda rentu '+fmt(rent)+' mesačne v dnešnej hodnote od '+start+' do '+end+' rokov, počas čerpania zvyšovanú o infláciu. Ide o podiel úspešných simulácií v tomto modeli, nie odhad pravdepodobnosti budúceho úspechu.</span></td></tr>';
     let sensitivity=odolnost.querySelector(".odolnost-citlivost");
     if(!sensitivity){sensitivity=document.createElement("details");sensitivity.className="odolnost-citlivost";tbody.closest("table").after(sensitivity);}
     sensitivity.innerHTML='<summary>Ako sa výsledok mení s vyššou rezervou</summary><p class="uvod">Dve ilustračné úrovne ukazujú citlivosť výsledku na vyšší vstup. Nie sú odporúčanými cieľmi ani odhadom budúcej pravdepodobnosti.</p>'+
-      '<div class="citlivost-rad"><div class="co"><strong>Približná modelová výška vstupu: '+približne(meta600)+'</strong><small>Zaokrúhlená ilustračná hranica namiesto '+today+'.</small></div><div class="kolko"><strong>Kapitál by pokryl všetky výplaty aspoň v 600&nbsp;z&nbsp;800 skúšok</strong><span>Ilustračná úroveň 75 % skúšok v tomto modeli.</span></div></div>'+
-      '<div class="citlivost-rad"><div class="co"><strong>Približná modelová výška vstupu: '+približne(meta720)+'</strong><small>Zaokrúhlená ilustračná hranica namiesto '+today+'.</small></div><div class="kolko"><strong>Kapitál by pokryl všetky výplaty aspoň v 720&nbsp;z&nbsp;800 skúšok</strong><span>Ilustračná úroveň 90 % skúšok v tomto modeli.</span></div></div>';
+      '<div class="citlivost-rad"><div class="co"><strong>Približná modelová výška vstupu: '+približne(meta600)+'</strong><small>Zaokrúhlená ilustračná hranica namiesto '+today+'.</small></div><div class="kolko"><strong>Kapitál by pokryl všetky výplaty aspoň v 600&nbsp;z&nbsp;800 simulácií</strong><span>Ilustračná úroveň 75 % simulácií v tomto modeli.</span></div></div>'+
+      '<div class="citlivost-rad"><div class="co"><strong>Približná modelová výška vstupu: '+približne(meta720)+'</strong><small>Zaokrúhlená ilustračná hranica namiesto '+today+'.</small></div><div class="kolko"><strong>Kapitál by pokryl všetky výplaty aspoň v 720&nbsp;z&nbsp;800 simulácií</strong><span>Ilustračná úroveň 90 % simulácií v tomto modeli.</span></div></div>';
     let conclusion=odolnost.querySelector(".odolnost-zaver");
     if(!conclusion){conclusion=document.createElement("p");conclusion.className="odolnost-zaver";sensitivity.before(conclusion);}
-    conclusion.innerHTML="<strong>Čo si z toho odniesť?</strong> Základný prepočet predpokladá rovnaké zhodnotenie každý rok. Modelované skúšky ukazujú citlivosť na poradie výnosov počas budovania majetku. Kolísanie výnosov počas čerpania renty tento test nemodeluje.";
+    conclusion.innerHTML="<strong>Čo si z toho odniesť?</strong> Základný prepočet predpokladá rovnaké zhodnotenie každý rok. Modelované simulácie ukazujú citlivosť na poradie výnosov počas budovania majetku. Kolísanie výnosov počas čerpania renty tento test nemodeluje.";
     const method=document.getElementById("odolnost-pod");
-    if(method&&!method.closest(".odolnost-metodika")){const detail=document.createElement("details"),summary=document.createElement("summary");detail.className="odolnost-metodika";summary.textContent="Ako sme modelované skúšky počítali";method.before(detail);detail.append(summary,method);}
+    if(method&&!method.closest(".odolnost-metodika")){const detail=document.createElement("details"),summary=document.createElement("summary");detail.className="odolnost-metodika";summary.textContent="Ako sme modelované simulácie počítali";method.before(detail);detail.append(summary,method);}
     tbody.dataset.vysvetlene="1";
   }
 

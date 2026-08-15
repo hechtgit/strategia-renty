@@ -23,9 +23,10 @@ const forbid = (channel, phrase) => {
 for (const channel of ["landing", "result", "email"]) {
   must(channel, "vopred zvolený koniec čerpania");
 }
-for (const channel of ["landing", "result", "pdf", "email"]) {
+for (const channel of ["landing", "pdf", "email"]) {
   must(channel, "800 modelovaných skúš");
 }
+must("result", "800 modelovaných simuláci");
 must("landing", "Kam vám máme poslať odkaz na modeláciu?");
 must("landing", "Modelácia sa vám otvorí okamžite");
 must("result", "Kapitál pokryl všetky plánované výplaty");
@@ -53,7 +54,7 @@ forbid("result", "Uvedené sumy nie sú odporúčaná výška investície");
 forbid("result", "z 800 z 800");
 
 must("builtLanding", "renta-flow-10of10.js?v=20260814-2");
-must("builtResult", "vysledok-10of10.js?v=20260815-4");
+must("builtResult", "vysledok-10of10.js?v=20260815-5");
 must("builtResult", "pdf-alternativa.js?v=20260814-4");
 must("result", "id=\"model-kicker\"");
 must("builtResult", "id=\"model-kicker\"");
@@ -63,6 +64,8 @@ forbid("result", "id=\"pre-koho\"");
 forbid("builtResult", "id=\"pre-koho\"");
 forbid("result", "Pripravené pre:");
 forbid("builtResult", "Pripravené pre:");
+forbid("result", "skúšk");
+forbid("builtResult", "skúšk");
 
 if (errors.length) {
   console.error(errors.map(e => `CHYBA ${e}`).join("\n"));

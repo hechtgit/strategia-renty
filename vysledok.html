@@ -285,7 +285,7 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
         <div class="doc-meta" id="doc-meta" hidden><span id="vyhotovene"></span></div>
       </div>
       <h1>Váš plán privátnej renty v jednom prehľade</h1>
-      <p class="lead">Najskôr uvidíte svoj plán v číslach. Ak má váš scenár obdobie budovania a vopred zvolený koniec čerpania, potom aj to, ako obstál v modelovaných skúškach založených na skutočnom vývoji svetových akciových trhov.</p>
+      <p class="lead" id="model-lead">Vaším cieľom je privátna renta 3 000 € mesačne v dnešnej hodnote od 65 rokov počas 25 rokov. Nižšie uvidíte, aký kapitál si tento plán vyžaduje a ako obstál v modelovaných simuláciách založených na historických dátach.</p>
       <div class="actions">
         <button class="btn-primary" type="button" id="btn-pdf">Stiahnuť modeláciu v PDF</button>
       </div>
@@ -826,11 +826,11 @@ function vykresli(){
       +'Nejde o odporúčanie ani o garantovaný výnos.';
     const riadky=[
       {co:'Kapitál pokryl všetky plánované výplaty',
-       kolko:od.zaklad+' z '+od.priebehov+' skúšok', vas:true}
+       kolko:od.zaklad+' z '+od.priebehov+' simulácií', vas:true}
     ];
     od.urovne.forEach(u=>{
       riadky.push({
-        co:'Ilustračná úroveň '+u.meta+' z '+od.priebehov+' skúšok',
+        co:'Ilustračná úroveň '+u.meta+' z '+od.priebehov+' simulácií',
         kolko:u.splnene?'už spĺňa':(u.vklad===null?'—':fmtEur(u.vklad))
       });
     });
@@ -1117,7 +1117,7 @@ if(window.parent!==window)
   addEventListener('load',()=>window.parent.postMessage({type:'ph-renta-na-zaciatok'},'*'));
 })();
 </script>
-<script src="vysledok-10of10.js?v=20260815-4"></script>
+<script src="vysledok-10of10.js?v=20260815-5"></script>
 
 <script>
 /* ---- Vloženie do Squarespace: hlásenie výšky rodičovi ----
