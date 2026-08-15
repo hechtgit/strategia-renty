@@ -76,7 +76,6 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
    a ku ktorému dňu platí. */
 .doc-meta{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:15px;color:var(--muted)}
 .doc-meta span:empty{display:none}
-.doc-meta #pre-koho{color:#d8c9b4}
 
 /* ===== plán ===== */
 .section{background:transparent;border:0;border-radius:0;padding:44px 0 54px;margin-bottom:0}
@@ -222,7 +221,6 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
   h1,h2,h3,.section-head strong{color:#1a1a1a}
   .lead,.section-head p,.next p,.blok p,.recap ul{color:#4a453e}
   .doc-meta{color:#4a453e}
-  .doc-meta #pre-koho{color:#1a1a1a;font-weight:600}
   .blok .vystraha{color:#1a1a1a}
   .kicker{color:#8a6a3c}
   .track{height:auto;background:none;box-shadow:none}
@@ -283,8 +281,8 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
   <section class="hero">
     <div class="hero-copy">
       <div class="hero-top">
-        <div class="kicker">VAŠA MODELÁCIA JE PRIPRAVENÁ</div>
-        <div class="doc-meta" id="doc-meta" hidden><span id="pre-koho"></span><span id="vyhotovene"></span></div>
+        <div class="kicker" id="model-kicker">VAŠA MODELÁCIA JE PRIPRAVENÁ</div>
+        <div class="doc-meta" id="doc-meta" hidden><span id="vyhotovene"></span></div>
       </div>
       <h1>Váš plán privátnej renty v jednom prehľade</h1>
       <p class="lead">Najskôr uvidíte svoj plán v číslach. Ak má váš scenár obdobie budovania a vopred zvolený koniec čerpania, potom aj to, ako obstál v modelovaných skúškach založených na skutočnom vývoji svetových akciových trhov.</p>
@@ -1012,6 +1010,13 @@ addEventListener('beforeprint',()=>{if(!o.warn)prisposobOsi()});
    a odkaz sa dá poslať ďalej. Keď si klient odkaz otvorí na inom zariadení,
    meno sa jednoducho nezobrazí a zvyšok dokumentu funguje rovnako. */
 const KLIENT='ph-renta-klient', KLIENT_DNI=30;
+const NEPLATNE_MENA=new Set(['test','meno','name','klient','client','admin','používateľ','pouzivatel','užívateľ','uzivatel','user']);
+function bezpecneKrstneMeno(hodnota){
+  const token=String(hodnota||'').trim().split(/\s+/)[0].normalize('NFC');
+  if(!/^\p{L}[\p{L}\p{M}'’.-]{1,29}$/u.test(token))return '';
+  if(NEPLATNE_MENA.has(token.toLocaleLowerCase('sk-SK')))return '';
+  return token.toLocaleLowerCase('sk-SK').replace(/(^|[-'’])\p{L}/gu,znak=>znak.toLocaleUpperCase('sk-SK'));
+}
 (function menoADatum(){
   let meno='';
   try{
@@ -1025,7 +1030,10 @@ const KLIENT='ph-renta-klient', KLIENT_DNI=30;
     else if(d && d.kedy && Date.now()-d.kedy>KLIENT_DNI*24*3600*1000)
       localStorage.removeItem(KLIENT);
   }catch(e){}
-  if(meno)$('pre-koho').textContent='Pripravené pre: '+meno;
+  const krstneMeno=bezpecneKrstneMeno(meno);
+  $('model-kicker').textContent=krstneMeno
+    ? krstneMeno.toLocaleUpperCase('sk-SK')+', VAŠA MODELÁCIA JE PRIPRAVENÁ'
+    : 'VAŠA MODELÁCIA JE PRIPRAVENÁ';
   $('vyhotovene').textContent='Vyhotovené '+new Date().toLocaleDateString('sk-SK',
     {day:'numeric',month:'long',year:'numeric'});
   $('doc-meta').hidden=false;
