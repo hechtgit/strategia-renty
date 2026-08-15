@@ -841,7 +841,7 @@ function vykresli(){
       'Nejde o odporúčané výšky investície. Bez posúdenia celého vášho '
       +'majetku a rizikového profilu z nich nemožno robiť investičné rozhodnutie.';
     $('odolnost-pod').textContent=
-      'Počet priebehov nie je pravdepodobnosť ani predpoveď. Akumulačná fáza skladá '
+      'Počet úspešných simulácií nie je pravdepodobnosť ani predpoveď. Akumulačná fáza skladá '
       +'súvislé úseky skutočných ročných výnosov MSCI World Net Total Return v EUR; '
       +'nie jednotlivé náhodne premiešané roky. Výplatná fáza nie je historický test: '
       +'počíta s konštantným čistým nominálnym výnosom '+pctTxt(REF_CERPANIE)+' % ročne '
@@ -871,7 +871,7 @@ function vykresli(){
         try{
           $('odolnost').hidden=false;
           $('odolnost-uvod').textContent=
-            'Porovnanie s historickými priebehmi sa nepodarilo spočítať. '
+            'Porovnanie s historickými simuláciami sa nepodarilo spočítať. '
             +'Ozvite sa mi a pošlem vám ho samostatne.';
           $('odolnost-riadky').innerHTML='';
           $('odolnost-vystraha').textContent='';

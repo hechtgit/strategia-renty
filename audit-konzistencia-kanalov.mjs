@@ -65,7 +65,7 @@ forbid("builtResult", "id=\"pre-koho\"");
 forbid("result", "Pripravené pre:");
 forbid("builtResult", "Pripravené pre:");
 for (const channel of ["landing", "result", "pdf", "email", "builtLanding", "builtResult"]) {
-  forbid(channel, "skúšk");
+  forbid(channel, "skúš");
 }
 
 if (errors.length) {

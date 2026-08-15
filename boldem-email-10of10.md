@@ -12,7 +12,7 @@ Vaša modelácia je pripravená. Zachytáva hlavné čísla scenára, ktorý ste
 
 Ak má váš scenár obdobie budovania a vopred zvolený koniec čerpania, výstup navyše ukazuje, ako plán obstál v 800 modelovaných simuláciách založených na historických výnosoch indexu MSCI World. Kolísanie trhov modelujeme iba počas budovania majetku; čerpanie pracuje s jednotným plánovacím výnosom 4 % ročne po investičných nákladoch, pred infláciou.
 
-Výsledok vyjadruje podiel úspešných skúšok v tomto modeli. Nie je odhadom pravdepodobnosti ani predpoveďou budúceho výsledku.
+Výsledok vyjadruje podiel úspešných simulácií v tomto modeli. Nie je odhadom pravdepodobnosti ani predpoveďou budúceho výsledku.
 
 [Otvoriť moju modeláciu]
 
