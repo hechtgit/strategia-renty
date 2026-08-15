@@ -14,7 +14,7 @@ const el = textContent => ({ textContent });
 const testItems = [
   el("Váš dnešný vklad: 306 384 €."),
   el("Cieľ: renta 3 000 € mesačne od 65 do 90 rokov."),
-  el("Základný prepočet: pri rovnakom zhodnotení každý rok má táto suma do veku 65 rokov vyrásť na 871 922 €. V modelovaných skúškach sa zhodnotenie počas budovania každý rok mení.")
+  el("Základný prepočet: pri rovnakom zhodnotení každý rok má táto suma do veku 65 rokov vyrásť na 871 922 €. V modelovaných simuláciách sa zhodnotenie počas budovania každý rok mení.")
 ];
 
 function row(nadpis, vysvetlenie, hodnota, doplnenie) {
@@ -26,9 +26,9 @@ function row(nadpis, vysvetlenie, hodnota, doplnenie) {
 }
 
 const rows = [
-  row("Váš dnešný vklad: 306 384 €", "Testujeme, či tento vstup dokáže financovať všetky zvolené renty.", "Všetky renty vyplatil v 268 z 800 skúšok", "3 000 € mesačne od 65 do 90 rokov. Ide o podiel v tomto modeli, nie odhad budúcej pravdepodobnosti."),
-  row("Váš dnešný vklad: 735 305 €", "Ilustračný vyšší vstup namiesto 306 384 €; nejde o odporúčanie.", "Všetky renty by vyplatil aspoň v 600 z 800 skúšok", "75 % skúšok v tomto modeli, nie odhad 75 % budúcej pravdepodobnosti."),
-  row("Váš dnešný vklad: 1 115 116 €", "Ďalšia ilustrácia citlivosti; nejde o odporúčanie.", "Všetky renty by vyplatil aspoň v 720 z 800 skúšok", "90 % skúšok v tomto modeli, nie odhad 90 % budúcej pravdepodobnosti.")
+  row("Váš dnešný vklad: 306 384 €", "Testujeme, či tento vstup dokáže financovať všetky zvolené renty.", "Všetky renty vyplatil v 268 z 800 simulácií", "3 000 € mesačne od 65 do 90 rokov. Ide o podiel v tomto modeli, nie odhad budúcej pravdepodobnosti."),
+  row("Váš dnešný vklad: 735 305 €", "Ilustračný vyšší vstup namiesto 306 384 €; nejde o odporúčanie.", "Všetky renty by vyplatil aspoň v 600 z 800 simulácií", "75 % simulácií v tomto modeli, nie odhad 75 % budúcej pravdepodobnosti."),
+  row("Váš dnešný vklad: 1 115 116 €", "Ďalšia ilustrácia citlivosti; nejde o odporúčanie.", "Všetky renty by vyplatil aspoň v 720 z 800 simulácií", "90 % simulácií v tomto modeli, nie odhad 90 % budúcej pravdepodobnosti.")
 ];
 
 function value(textContent) {
@@ -58,10 +58,10 @@ const byId = {
   ...cards,
   odolnost: {
     hidden: false,
-    querySelector: selector => selector === "h2" ? el("Obstál by váš plán aj pri rozdielnom vývoji trhov?") : selector === ".odolnost-zaver" ? el("Čo si z toho odniesť? Základný prepočet funguje pri rovnakom zhodnotení každý rok. Modelované skúšky ukazujú citlivosť na poradie výnosov počas budovania majetku. Kolísanie výnosov počas čerpania renty tento test nemodeluje.") : null,
+    querySelector: selector => selector === "h2" ? el("Obstál by váš plán aj pri rozdielnom vývoji trhov?") : selector === ".odolnost-zaver" ? el("Čo si z toho odniesť? Základný prepočet funguje pri rovnakom zhodnotení každý rok. Modelované simulácie ukazujú citlivosť na poradie výnosov počas budovania majetku. Kolísanie výnosov počas čerpania renty tento test nemodeluje.") : null,
     querySelectorAll: selector => selector === ".odolnost-testuje li" ? testItems : []
   },
-  "odolnost-uvod": el("Základný prepočet počíta každý rok s rovnakým zhodnotením, ktoré ste zadali. V 800 modelovaných skúškach meníme vývoj iba počas budovania majetku. Po začatí renty všetky skúšky používajú rovnaký plánovací výnos 4 % ročne po investičných nákladoch, pred infláciou."),
+  "odolnost-uvod": el("Základný prepočet počíta každý rok s rovnakým zhodnotením, ktoré ste zadali. V 800 modelovaných simuláciách meníme vývoj iba počas budovania majetku. Po začatí renty všetky simulácie používajú rovnaký plánovací výnos 4 % ročne po investičných nákladoch, pred infláciou."),
   "odolnost-vystraha": el("Uvedené sumy nie sú odporúčaná výška investície. Bez posúdenia celého vášho majetku a rizikového profilu z nich nemožno robiť investičné rozhodnutie."),
   "odolnost-pod": el("Počet priebehov nie je pravdepodobnosť ani predpoveď. Modelované priebehy používajú päťročné súvislé bloky výnosov MSCI World z rokov 1970 až 2025. Výplatná fáza počíta s čistým nominálnym výnosom 4 % ročne a so zadanou infláciou.")
   ,suhrn: { hidden: false, querySelector: selector => selector === "h2" ? el("Čo to znamená v číslach") : null, querySelectorAll: selector => selector === ".suhrn-polozka" ? summaryItems : [] }

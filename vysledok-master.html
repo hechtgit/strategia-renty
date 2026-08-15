@@ -903,7 +903,7 @@ $('btn-pdf').addEventListener('click',async()=>{
     if(!pdfNacitanie)pdfNacitanie=(async()=>{
       await Promise.all([nacitaj('jspdf.min.js'),nacitaj('pdf-font.js')]);
       await nacitaj('pdf.js');
-      await nacitaj('pdf-alternativa.js?v=20260814-4');
+      await nacitaj('pdf-alternativa.js?v=20260815-5');
     })();
     await pdfNacitanie;
     window.PH_PDF();

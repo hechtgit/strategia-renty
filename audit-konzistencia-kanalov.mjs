@@ -23,16 +23,16 @@ const forbid = (channel, phrase) => {
 for (const channel of ["landing", "result", "email"]) {
   must(channel, "vopred zvolený koniec čerpania");
 }
-for (const channel of ["landing", "pdf", "email"]) {
-  must(channel, "800 modelovaných skúš");
+for (const channel of ["landing", "result", "email"]) {
+  must(channel, "800 modelovaných simuláci");
 }
-must("result", "800 modelovaných simuláci");
+must("pdf", "modelované simulácie");
 must("landing", "Kam vám máme poslať odkaz na modeláciu?");
 must("landing", "Modelácia sa vám otvorí okamžite");
 must("result", "Kapitál pokryl všetky plánované výplaty");
 must("result", "nie odhad pravdepodobnosti budúceho úspechu");
 must("pdf", "novej modelovanej kombinácie");
-must("pdf", "Podiel úspešných skúšok nie je odhadom pravdepodobnosti");
+must("pdf", "Podiel úspešných simulácií nie je odhadom pravdepodobnosti");
 must("email", "Nie je odhadom pravdepodobnosti ani predpoveďou");
 must("email", "Capital Market Assumptions, CMA");
 must("landing", "renta-boldem.renta-relay.workers.dev");
@@ -53,9 +53,9 @@ for (const channel of ["landing", "result", "builtLanding", "builtResult"]) {
 forbid("result", "Uvedené sumy nie sú odporúčaná výška investície");
 forbid("result", "z 800 z 800");
 
-must("builtLanding", "renta-flow-10of10.js?v=20260814-2");
+must("builtLanding", "renta-flow-10of10.js?v=20260815-3");
 must("builtResult", "vysledok-10of10.js?v=20260815-5");
-must("builtResult", "pdf-alternativa.js?v=20260814-4");
+must("builtResult", "pdf-alternativa.js?v=20260815-5");
 must("result", "id=\"model-kicker\"");
 must("builtResult", "id=\"model-kicker\"");
 must("result", "NEPLATNE_MENA");
@@ -64,8 +64,9 @@ forbid("result", "id=\"pre-koho\"");
 forbid("builtResult", "id=\"pre-koho\"");
 forbid("result", "Pripravené pre:");
 forbid("builtResult", "Pripravené pre:");
-forbid("result", "skúšk");
-forbid("builtResult", "skúšk");
+for (const channel of ["landing", "result", "pdf", "email", "builtLanding", "builtResult"]) {
+  forbid(channel, "skúšk");
+}
 
 if (errors.length) {
   console.error(errors.map(e => `CHYBA ${e}`).join("\n"));

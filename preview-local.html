@@ -152,7 +152,7 @@ addEventListener("message",function(e){
         var gateBonus=delivery.querySelector("#gate-bonus");
         if(gateBonus)gateBonus.remove();
         var gateLabel=delivery.querySelector(".gate-label");
-        if(gateLabel)gateLabel.innerHTML="Modeláciu vám spracujeme do <strong>prehľadného PDF</strong>, aby ste sa k nej mohli kedykoľvek vrátiť.<br><br>Ak má váš scenár obdobie budovania a <strong>vopred zvolený koniec čerpania</strong>, plán navyše preveríme v 800 modelovaných skúškach založených na historických výnosoch indexu MSCI World z rokov 1970 až 2025. Uvidíte, v koľkých skúškach kapitál pokryl všetky zvolené výplaty renty. Ide o podiel úspešných skúšok v tomto modeli, nie odhad pravdepodobnosti ani predpoveď budúceho vývoja.";
+        if(gateLabel)gateLabel.innerHTML="Modeláciu vám spracujeme do <strong>prehľadného PDF</strong>, aby ste sa k nej mohli kedykoľvek vrátiť.<br><br>Ak má váš scenár obdobie budovania a <strong>vopred zvolený koniec čerpania</strong>, plán navyše preveríme v 800 modelovaných simuláciách založených na historických výnosoch indexu MSCI World z rokov 1970 až 2025. Uvidíte, v koľkých simuláciách kapitál pokryl všetky zvolené výplaty renty. Ide o podiel úspešných simulácií v tomto modeli, nie odhad pravdepodobnosti ani predpoveď budúceho vývoja.";
         var gateNames=delivery.querySelector(".gate-names"),formPrompt=delivery.querySelector("[data-preview-form-prompt]");
         if(!formPrompt&&gateNames){
           formPrompt=doc.createElement("p");

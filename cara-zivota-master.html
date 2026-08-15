@@ -634,7 +634,7 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
       <div id="gate-form">
         <h3 id="delivery-title">Vezmite si svoj plán so sebou</h3>
         <p id="gate-uvod">Modeláciu vám spracujeme do prehľadného PDF, aby ste sa k nej mohli kedykoľvek vrátiť.</p>
-        <p id="gate-bonus">Ak má váš scenár obdobie budovania a vopred zvolený koniec čerpania, plán navyše preveríme v 800 modelovaných skúškach založených na historických výnosoch indexu MSCI World z rokov 1970 až 2025.</p>
+        <p id="gate-bonus">Ak má váš scenár obdobie budovania a vopred zvolený koniec čerpania, plán navyše preveríme v 800 modelovaných simuláciách založených na historických výnosoch indexu MSCI World z rokov 1970 až 2025.</p>
         <p class="gate-label">Kam vám máme poslať odkaz na modeláciu? Modelácia sa vám otvorí okamžite a odkaz vám zároveň pošleme e-mailom.</p>
         <div class="gate-names">
           <input id="gate-first" type="text" autocomplete="given-name" placeholder="Meno" aria-label="Meno">
@@ -960,7 +960,7 @@ function render(){
   const gateLabel=document.querySelector('.gate-label');
   if(gateLabel)gateLabel.innerHTML=bezOdolnosti
     ? 'Modeláciu vám spracujeme do <strong>prehľadného PDF</strong>, aby ste sa k nej mohli kedykoľvek vrátiť.'
-    : 'Modeláciu vám spracujeme do <strong>prehľadného PDF</strong>, aby ste sa k nej mohli kedykoľvek vrátiť.<br><br>Ak má váš scenár obdobie budovania a <strong>vopred zvolený koniec čerpania</strong>, plán navyše preveríme v 800 modelovaných skúškach založených na historických výnosoch indexu MSCI World z rokov 1970 až 2025. Uvidíte, v koľkých skúškach kapitál pokryl všetky zvolené výplaty renty. Ide o podiel úspešných skúšok v tomto modeli, nie odhad pravdepodobnosti ani predpoveď budúceho vývoja.';
+    : 'Modeláciu vám spracujeme do <strong>prehľadného PDF</strong>, aby ste sa k nej mohli kedykoľvek vrátiť.<br><br>Ak má váš scenár obdobie budovania a <strong>vopred zvolený koniec čerpania</strong>, plán navyše preveríme v 800 modelovaných simuláciách založených na historických výnosoch indexu MSCI World z rokov 1970 až 2025. Uvidíte, v koľkých simuláciách kapitál pokryl všetky zvolené výplaty renty. Ide o podiel úspešných simulácií v tomto modeli, nie odhad pravdepodobnosti ani predpoveď budúceho vývoja.';
 
   txt($('vynos-v'),pctTxt(S.vynos)+' % ročne');
   $('sl-vynos').value=S.vynos;
@@ -1483,7 +1483,7 @@ if(ANIM&&!REDUCED){
   glow();
 })();
 </script>
-<script src="renta-flow-10of10.js?v=20260814-2"></script>
+<script src="renta-flow-10of10.js?v=20260815-3"></script>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit" async defer></script>
 </body>
 </html>

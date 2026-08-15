@@ -32,7 +32,7 @@
       oldIntro?.remove();oldBonus?.remove();
       if(title){title.textContent="Vezmite si svoj plán so sebou";title.className="flow-title";}
       const label=delivery.querySelector(".gate-label");
-      if(label)label.innerHTML="Modeláciu vám spracujeme do <strong>prehľadného PDF</strong>, aby ste sa k nej mohli kedykoľvek vrátiť.<br><br>Ak má váš scenár obdobie budovania a <strong>vopred zvolený koniec čerpania</strong>, plán navyše preveríme v 800 modelovaných skúškach založených na historických výnosoch indexu MSCI World z rokov 1970 až 2025. Uvidíte, v koľkých skúškach kapitál pokryl všetky zvolené výplaty renty. Ide o podiel úspešných skúšok v tomto modeli, nie odhad pravdepodobnosti ani predpoveď budúceho vývoja.";
+      if(label)label.innerHTML="Modeláciu vám spracujeme do <strong>prehľadného PDF</strong>, aby ste sa k nej mohli kedykoľvek vrátiť.<br><br>Ak má váš scenár obdobie budovania a <strong>vopred zvolený koniec čerpania</strong>, plán navyše preveríme v 800 modelovaných simuláciách založených na historických výnosoch indexu MSCI World z rokov 1970 až 2025. Uvidíte, v koľkých simuláciách kapitál pokryl všetky zvolené výplaty renty. Ide o podiel úspešných simulácií v tomto modeli, nie odhad pravdepodobnosti ani predpoveď budúceho vývoja.";
       const names=delivery.querySelector(".gate-names");
       const prompt=document.createElement("p");prompt.className="flow-form-prompt";prompt.textContent="Kam vám máme poslať odkaz na modeláciu?";
       const note=document.createElement("p");note.className="flow-copy";note.textContent="Modelácia sa vám otvorí okamžite. Odkaz vám zároveň pošleme e-mailom, aby ste sa k nej mohli kedykoľvek vrátiť.";

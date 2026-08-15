@@ -38,7 +38,7 @@
       citlivostNadpis: text(odolnost.querySelector(".odolnost-citlivost summary")),
       citlivostUvod: text(odolnost.querySelector(".odolnost-citlivost .uvod")),
       upozornenie: text(document.getElementById("odolnost-vystraha")),
-      metodika: "Každá z 800 modelovaných skúšok vzniká spojením súvislých päťročných blokov ročných výnosov MSCI World Net Total Return v EUR z rokov 1970–2025 do novej modelovanej kombinácie. História sa používa iba počas budovania majetku; čerpanie pracuje s plánovacím výnosom 4 % ročne po nákladoch, pred infláciou. Podiel úspešných skúšok nie je odhadom pravdepodobnosti budúceho úspechu.",
+      metodika: "Každá z 800 modelovaných simulácií vzniká spojením súvislých päťročných blokov ročných výnosov MSCI World Net Total Return v EUR z rokov 1970–2025 do novej modelovanej kombinácie. História sa používa iba počas budovania majetku; čerpanie pracuje s plánovacím výnosom 4 % ročne po nákladoch, pred infláciou. Podiel úspešných simulácií nie je odhadom pravdepodobnosti budúceho úspechu.",
       konzultaciaNadpis: text(document.querySelector(".next h2")),
       konzultacia: Array.prototype.map.call(document.querySelectorAll(".next p"), text)
     };
@@ -128,11 +128,11 @@
       if (index) {
         var pomer = (r.hodnota.match(/([0-9]+)\s*z\s*800/) || [])[1];
         var percento = pomer === "600" ? "75 %" : pomer === "720" ? "90 %" : "";
-        napis((pomer ? pomer + " z 800 skúšok" : r.hodnota) + (percento ? " (" + percento + " skúšok v tomto modeli)" : ""), OKRAJ + lava + 8, 9.2, "bold", ZLATA, prava, 1.25);
+        napis((pomer ? pomer + " z 800 simulácií" : r.hodnota) + (percento ? " (" + percento + " simulácií v tomto modeli)" : ""), OKRAJ + lava + 8, 9.2, "bold", ZLATA, prava, 1.25);
         napis("Všetky plánované výplaty boli pokryté.", OKRAJ + lava + 8, 7.8, "normal", SEDA, prava, 1.3);
       } else {
         var uspesne = (r.hodnota.match(/([0-9]+)\s*z\s*800/) || [])[1];
-        napis(uspesne ? "Kapitál pokryl všetky výplaty v " + uspesne + " z 800 skúšok" : r.hodnota,
+        napis(uspesne ? "Kapitál pokryl všetky výplaty v " + uspesne + " z 800 simulácií" : r.hodnota,
           OKRAJ + lava + 8, 10.8, "bold", ZLATA, prava, 1.28);
         napis(r.doplnenie, OKRAJ + lava + 8, 8.3, "normal", SEDA, prava, 1.4);
       }
@@ -201,7 +201,7 @@
     docasneSkrat(predpoklady[0], "Výpočet používa zhodnotenie, ktoré ste zadali vy. Nejde o odhad ani odporúčanie.");
     docasneSkrat(predpoklady[1], "Zohľadňuje vstupný poplatok 1,5 %, správu 0,9 % ročne, zadanú infláciu a mesačný priebeh výpočtu; dane z výnosov nezohľadňuje.");
     docasneSkrat(predpoklady[2], dataDruhejStrany
-      ? "Základný prepočet a modelované skúšky používajú dve odlišné metodiky, vysvetlené na druhej strane."
+      ? "Základný prepočet a modelované simulácie používajú dve odlišné metodiky, vysvetlené na druhej strane."
       : "Tento scenár nemá obdobie budovania s vopred zvoleným koncom čerpania, preto sa historický test nezobrazuje.");
     docasneSkrat(document.querySelector(".next h2"), "");
     docasneSkrat(document.querySelector(".next p"), "");
