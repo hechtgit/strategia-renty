@@ -8,12 +8,14 @@
     const h1=document.querySelector(".hero h1"),lead=document.querySelector(".hero .lead");
     if(h1)h1.textContent="Váš plán privátnej renty v jednom prehľade";
     if(lead){
-      const start=Number(q.get("start")),end=Number(q.get("end")),rent=Number(q.get("rent"));
+      const start=Number(q.get("start"));
       const maHistorickyTest=Number(q.get("now"))<start&&q.get("pension")!=="perpetuity"&&q.get("goal")!=="duration";
-      const ciel=`Vaším cieľom je privátna renta ${fmt(rent)} mesačne v dnešnej hodnote od ${start} rokov počas ${end-start} rokov.`;
+      /* Prvú vetu preberáme z už vypočítaného cieľa. Tak ostane pravdivá aj pri
+         hotovom majetku, okamžitom čerpaní, rente bez konca a odvodenom horizonte. */
+      const ciel=document.getElementById("ciel")?.textContent.trim()||"Váš plán privátnej renty je pripravený.";
       lead.textContent=maHistorickyTest
         ? `${ciel} Nižšie uvidíte, aký kapitál si tento plán vyžaduje a ako obstál v modelovaných simuláciách založených na historických dátach.`
-        : `${ciel} Nižšie uvidíte, aký kapitál si tento plán vyžaduje a z akých predpokladov výpočet vychádza.`;
+        : `${ciel} Nižšie uvidíte hlavné čísla plánu a predpoklady, z ktorých výpočet vychádza.`;
     }
     const consult=document.querySelector(".next"),title=consult?.querySelector("h2"),paragraphs=consult?.querySelectorAll("p");
     if(title)title.textContent="Váš plán v dnešnom kontexte";
