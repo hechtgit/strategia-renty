@@ -23,6 +23,8 @@
   --stem:34px;
 }
 *{box-sizing:border-box}
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;
+  overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 /* vlastné display pravidlá nesmú prebiť skrytie cez atribút hidden */
 [hidden]{display:none!important}
 html{background:var(--bg)}
@@ -361,7 +363,7 @@ html,body{background:var(--bg)}
 /* čiara života je jednofarebná — úseky nesú len text, nie vlastný odtieň */
 .seg,.seg.past,.seg.build,.seg.rent{height:100%;background:transparent!important}
 #lp.perp .seg.rent{-webkit-mask-image:none;mask-image:none}
-.tick{top:17px;color:rgba(43,33,24,.62);font-size:18px;font-weight:500;z-index:1}
+.tick{top:17px;color:#5b4630;font-size:18px;font-weight:500;z-index:1}
 .tick::before{display:none}
 .axis-cap{display:none}
 .longevity{top:59px;color:var(--gold-strong)}
@@ -505,7 +507,8 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
 </article>
 
 <div class="calculator-divider" aria-hidden="true"></div>
-<div id="lp"><span id="kalkulacka" aria-hidden="true"></span>
+<main id="lp"><span id="kalkulacka" aria-hidden="true"></span>
+  <h1 class="sr-only">Kalkulačka privátnej renty</h1>
 
   <header class="head" aria-hidden="true"></header>
 
@@ -690,7 +693,7 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
     investičné odporúčanie ani o ponuku či návrh na uzavretie zmluvy.</b> Zhodnotenie nie je garantované,
     hodnota investície môže v čase kolísať a nie je zaručená návratnosť investovanej sumy.
   </footer>
-</div>
+</main>
 
 <script>
 (()=>{
