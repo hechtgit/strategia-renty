@@ -13,8 +13,11 @@
       /* Prvú vetu preberáme z už vypočítaného cieľa. Tak ostane pravdivá aj pri
          hotovom majetku, okamžitom čerpaní, rente bez konca a odvodenom horizonte. */
       const ciel=document.getElementById("ciel")?.textContent.trim()||"Váš plán privátnej renty je pripravený.";
+      const historickyDovetok=q.get("sit")==="have"
+        ? "Nižšie uvidíte hlavné čísla plánu a ako obstál v modelovaných simuláciách založených na historických dátach."
+        : "Nižšie uvidíte, aký kapitál si tento plán vyžaduje a ako obstál v modelovaných simuláciách založených na historických dátach.";
       lead.textContent=maHistorickyTest
-        ? `${ciel} Nižšie uvidíte, aký kapitál si tento plán vyžaduje a ako obstál v modelovaných simuláciách založených na historických dátach.`
+        ? `${ciel} ${historickyDovetok}`
         : `${ciel} Nižšie uvidíte hlavné čísla plánu a predpoklady, z ktorých výpočet vychádza.`;
     }
     const consult=document.querySelector(".next"),title=consult?.querySelector("h2"),paragraphs=consult?.querySelectorAll("p");
