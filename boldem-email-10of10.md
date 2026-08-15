@@ -10,11 +10,11 @@ Dobrý deň,
 
 Vaša modelácia je pripravená. Zachytáva hlavné čísla scenára, ktorý ste si nastavili, použité predpoklady a orientačný prepočet kapitálu potrebného na plánovanú rentu.
 
+[Otvoriť moju modeláciu]
+
 Ak má váš scenár obdobie budovania a vopred zvolený koniec čerpania, výstup navyše ukazuje, ako plán obstál v 800 modelovaných simuláciách založených na historických výnosoch indexu MSCI World. Kolísanie trhov modelujeme iba počas budovania majetku; čerpanie pracuje s jednotným plánovacím výnosom 4 % ročne po investičných nákladoch, pred infláciou.
 
 Výsledok vyjadruje podiel úspešných simulácií v tomto modeli. Nie je odhadom pravdepodobnosti ani predpoveďou budúceho výsledku.
-
-[Otvoriť moju modeláciu]
 
 ## Čo môže váš plán znamenať pre váš skutočný majetok?
 

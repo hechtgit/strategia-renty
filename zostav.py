@@ -106,7 +106,11 @@ SKRIPT_EMBED = """
     try{ history.scrollRestoration='manual' }catch(e){}
     if(window.scrollX!==0||window.scrollY!==0) window.scrollTo(0,0);
   };
-  const notify=()=>requestAnimationFrame(()=>{
+  let notifyFrame=0,lastHeight=0,stableChecks=0;
+  const notify=()=>{
+    if(notifyFrame)return;
+    notifyFrame=requestAnimationFrame(()=>{
+    notifyFrame=0;
     lockScroll();
     /* Výška sa meria na <body>, nie na dokumente. Dokument sa vždy roztiahne aspoň
        na výšku rámu, takže by hlásená hodnota vedela len rásť — po prechode
@@ -114,9 +118,20 @@ SKRIPT_EMBED = """
        zívala diera. Body má výšku svojho obsahu. */
     const b=document.body;
     const h=Math.max(b.getBoundingClientRect().height, b.scrollHeight, b.offsetHeight);
-    window.parent.postMessage({type:'ph-renta-height',height:Math.ceil(h),
+    const vyska=Math.ceil(h);
+    if(vyska===lastHeight){stableChecks++;return}
+    lastHeight=vyska;stableChecks=0;
+    window.parent.postMessage({type:'ph-renta-height',height:vyska,
       scrollY:Math.round(window.scrollY),h1Top:null},'*');
-  });
+    });
+  };
+  /* Krátka poistka zachytí oneskorené fonty a widgety, potom sa sama ukončí.
+     Bežné zmeny ďalej pokrýva ResizeObserver bez trvalého budenia stránky. */
+  const fallback=()=>{
+    notify();
+    if(stableChecks>=3)return;
+    setTimeout(fallback,500);
+  };
   document.documentElement.classList.add('embedded');
   document.body.classList.add('embedded');
   lockScroll();
@@ -126,7 +141,7 @@ SKRIPT_EMBED = """
   addEventListener('resize',()=>{window.scrollTo(0,0);notify()});
   if('ResizeObserver' in window) new ResizeObserver(notify).observe(document.body);
   [0,100,500,1500,3000].forEach(ms=>setTimeout(notify,ms));
-  setInterval(notify,1500);
+  setTimeout(fallback,500);
 })();
 </script>
 """

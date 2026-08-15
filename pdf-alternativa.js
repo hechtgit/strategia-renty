@@ -110,7 +110,7 @@
     d.riadky.forEach(function (r, index) {
       if (index === 1 && d.citlivostNadpis) {
         medzera(2);
-        napis(d.citlivostNadpis, OKRAJ, 11.5, "bold", TMAVA, SIRKA, 1.3);
+        napis(d.citlivostNadpis, OKRAJ, 9.5, "bold", SEDA, SIRKA, 1.3);
         if (d.citlivostUvod) {
           medzera(1);
           napis(d.citlivostUvod, OKRAJ, 8.2, "normal", SEDA, SIRKA, 1.4);
@@ -128,7 +128,7 @@
       if (index) {
         var pomer = (r.hodnota.match(/([0-9]+)\s*z\s*800/) || [])[1];
         var percento = pomer === "600" ? "75 %" : pomer === "720" ? "90 %" : "";
-        napis((pomer ? pomer + " z 800 simulácií" : r.hodnota) + (percento ? " (" + percento + " simulácií v tomto modeli)" : ""), OKRAJ + lava + 8, 9.2, "bold", ZLATA, prava, 1.25);
+        napis((pomer ? pomer + " z 800 simulácií" : r.hodnota) + (percento ? " (" + percento + " simulácií v tomto modeli)" : ""), OKRAJ + lava + 8, 8.2, "bold", SEDA, prava, 1.3);
         napis("Všetky plánované výplaty boli pokryté.", OKRAJ + lava + 8, 7.8, "normal", SEDA, prava, 1.3);
       } else {
         var uspesne = (r.hodnota.match(/([0-9]+)\s*z\s*800/) || [])[1];

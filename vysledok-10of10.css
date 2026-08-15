@@ -26,6 +26,7 @@ p,.lead,.co,.kolko,.mail-note,.disclaimer{word-break:normal;overflow-wrap:normal
 .odolnost-tab .vysledok-label{margin-bottom:7px;color:#fff;font-size:15px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
 .odolnost-citlivost,.odolnost-metodika{margin:18px 0 0;border-top:1px solid var(--line)}
 .odolnost-citlivost>summary,.odolnost-metodika>summary{padding:17px 0;cursor:pointer;color:#fff;font-family:var(--page-serif);font-size:20px;line-height:1.3;font-weight:700;list-style:none}
+.odolnost-citlivost>summary{color:var(--muted);font-family:var(--page-sans);font-size:17px;font-weight:600}
 .odolnost-citlivost>summary::-webkit-details-marker,.odolnost-metodika>summary::-webkit-details-marker{display:none}
 .odolnost-citlivost>summary::before,.odolnost-metodika>summary::before{content:"\25B6";display:inline-block;margin-right:11px;color:var(--gold-strong);font-size:.72em;transform-origin:50% 55%;animation:summary-heartbeat 2.6s ease-in-out infinite}
 .odolnost-citlivost[open]>summary::before,.odolnost-metodika[open]>summary::before{transform:rotate(90deg)}
@@ -34,7 +35,7 @@ p,.lead,.co,.kolko,.mail-note,.disclaimer{word-break:normal;overflow-wrap:normal
 .odolnost-citlivost .uvod{margin:0 0 8px;color:var(--muted);font-size:16px;line-height:1.5}
 .citlivost-rad{display:grid;grid-template-columns:minmax(280px,.72fr) minmax(0,1.28fr);gap:0;padding:18px 0;border-top:1px solid var(--line)}
 .citlivost-rad .co{padding-right:32px}.citlivost-rad .kolko{padding-left:36px;border-left:1px solid var(--line);min-width:0}
-.citlivost-rad .co strong{display:block;margin-bottom:3px;color:#fff;font-size:18px}.citlivost-rad .co small{display:block;color:var(--muted);font-size:16px;line-height:1.5}.citlivost-rad .kolko strong{display:block;color:var(--gold-strong);font-family:var(--page-serif);font-size:23px;line-height:1.25;margin-bottom:3px}.citlivost-rad .kolko span{color:var(--muted);font-size:16px;line-height:1.5}
+.citlivost-rad .co strong{display:block;margin-bottom:3px;color:var(--muted);font-size:16px}.citlivost-rad .co small{display:block;color:var(--muted);font-size:15px;line-height:1.5}.citlivost-rad .kolko strong{display:block;color:#d8c9b4;font-family:var(--page-sans);font-size:18px;line-height:1.3;margin-bottom:3px}.citlivost-rad .kolko span{color:var(--muted);font-size:15px;line-height:1.5}
 .odolnost-zaver{margin:22px 0 0;padding:16px 18px;background:rgba(255,255,255,.035);border-radius:4px;color:var(--ink);font-size:17px;line-height:1.55}.odolnost-zaver strong{color:#fff}
 .assumptions{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(320px,.55fr);gap:0;padding:0;margin:0 0 28px;background:var(--panel);border:1px solid var(--line);border-radius:6px;box-shadow:0 18px 44px rgba(0,0,0,.16);overflow:hidden}
 .predpoklady-detail{margin:0 0 28px}.predpoklady-detail>summary{display:none;padding:18px 20px;background:var(--panel);border:1px solid var(--line);color:#fff;font-family:var(--page-serif);font-size:20px;font-weight:700;cursor:pointer}.predpoklady-detail>.assumptions{margin:0}
@@ -42,8 +43,15 @@ p,.lead,.co,.kolko,.mail-note,.disclaimer{word-break:normal;overflow-wrap:normal
 .blok h2,.recap h3{color:var(--ink)}.blok p,.recap ul{color:var(--muted)}.blok .vystraha{color:#d8c9b4}.recap li::before{background:var(--gold)}
 .next{margin-top:0}.disclaimer{margin-top:24px}
 @media(max-width:900px){
+  /* Mobil nesmie zdediť min-content šírku z tabuliek, CTA ani značky. Text sa
+     radšej zalomí; horizontálne orezanie sa tým nemaskuje. */
+  .site-top,.site-brand,.shell,.hero,.hero-copy,.section,.line-wrap,.track,
+  .milestone,.card,.suhrn,.odolnost,.odolnost-tab,.assumptions,.next,
+  .next-grid,.next-copy,.next-action{min-width:0;max-width:100%}
+  .lead,.mail-note,.section-head p,.card .sub,.odolnost-tab td,.next p,
+  .disclaimer{overflow-wrap:anywhere}
   .site-top{padding:16px 18px}.shell{padding:0 18px 28px}.hero-copy{padding:30px 0 32px}.hero h1{font-size:32px}.section{margin:0 0 20px;padding:32px 18px 38px}.line-wrap{padding-top:40px;padding-bottom:40px}.suhrn,.odolnost,.blok,.recap,.next{padding:24px 20px}
   .predpoklady-detail>summary{display:block}.predpoklady-detail:not([open])>.assumptions{display:none}.assumptions{grid-template-columns:1fr}.recap{border-left:0;border-top:1px solid var(--line)}
   .odolnost-tab tr,.citlivost-rad{grid-template-columns:1fr;gap:12px;padding:18px 0}.odolnost-tab tr.vas{padding:18px 16px}.odolnost-tab .co,.citlivost-rad .co{padding-right:0}.odolnost-tab .kolko,.citlivost-rad .kolko{padding:14px 0 0;border-left:0;border-top:1px solid var(--line)}.odolnost-tab tr.vas .kolko{padding:0;border-top:0}.odolnost-tab .kolko strong,.citlivost-rad .kolko strong{font-size:22px}.odolnost-testuje{padding:16px}.odolnost-citlivost>summary,.odolnost-metodika>summary{font-size:18px}
-  .next-grid{grid-template-columns:1fr;gap:20px}.next-action{border-left:0;border-top:1px solid rgba(52,36,21,.3);padding:20px 0 0}.actions{display:grid;grid-template-columns:1fr}.btn-primary,.btn-ghost{width:100%}.next .btn-primary{white-space:nowrap;font-size:16px;letter-spacing:.7px}
+  .next-grid{grid-template-columns:1fr;gap:20px}.next-action{border-left:0;border-top:1px solid rgba(52,36,21,.3);padding:20px 0 0}.actions{display:grid;grid-template-columns:1fr}.btn-primary,.btn-ghost{width:100%}.next .btn-primary{white-space:normal;font-size:16px;letter-spacing:.7px}
 }

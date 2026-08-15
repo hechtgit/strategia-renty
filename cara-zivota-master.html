@@ -2,6 +2,7 @@
 <html lang="sk" data-anim="1">
 <head>
 <meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%232b2118'/%3E%3Cpath d='M32 12 52 50H12Z' fill='%23ae8753'/%3E%3C/svg%3E">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Čiara života — Codex 2.1</title>
@@ -181,14 +182,19 @@ input[type=range]:disabled{opacity:.35;cursor:not-allowed}
 .flow-lead{margin:30px 0 0;text-align:center}
 .flow-lead .lead-h{font-family:var(--serif);font-size:27px;line-height:1.25;margin:0;color:#fff}
 .flow-lead .lead-p{max-width:62ch;margin:9px auto 0;font-size:17px;line-height:1.55;color:#b7afa5}
-.bottom-flow{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);gap:18px;margin:18px 0 20px}
+.flow-options{max-width:780px;margin:18px auto 0;text-align:center}
+.flow-options h3{font-family:var(--serif);font-size:22px;line-height:1.3;margin:0;color:#fff}
+.flow-options p{margin:7px 0 0;color:#b7afa5;font-size:16px;line-height:1.5}
+.bottom-flow{display:grid;grid-template-columns:1fr;gap:12px;margin:18px 0 20px}
 .client-panel{background:var(--surface);padding:24px 26px;border-radius:6px;color:var(--on-gold)}
 .client-panel.consult-panel{background:#242424;border:1px solid var(--line);color:#fff}
 .client-panel h3{font-family:var(--serif);font-size:26px;line-height:1.2;margin:0 0 9px;color:var(--on-gold)}
 .client-panel p{font-size:17px;line-height:1.55;margin:0;color:var(--on-gold-soft)}
 .client-panel p+p{margin-top:11px}
+.path-label{display:block;margin:0 0 8px;font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--on-gold)}
 .consult-panel h3{color:#fff}
 .consult-panel p{color:#b7afa5}
+.consult-panel .path-label{color:var(--gold-strong)}
 .gate-label{margin-top:11px!important}
 .gate-names{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:18px}
 .gate-names+.email-row{margin-top:9px}
@@ -406,6 +412,7 @@ html,body{background:var(--bg)}
 .card.lead .out .v{color:var(--on-gold)}
 .set{border-top-color:var(--on-gold-line)}
 .set .cap{color:var(--on-gold)}
+.assumption-note{margin:7px 0 0!important;color:var(--on-gold)!important;font-size:14px!important;line-height:1.4!important;font-weight:600}
 .sw{color:var(--on-gold-soft)}
 .sw b{color:var(--on-gold)}
 .card .sw input,.delivery-panel .sw input{accent-color:#2b2118}
@@ -571,6 +578,7 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
         <input type="range" id="sl-vynos" min="0" max="50" step="0.1" value="8.3"
                aria-label="Ročné zhodnotenie majetku">
         <p class="when" id="vynos-v" style="margin:8px 0 0">8,3 % ročne</p>
+        <p class="assumption-note">Je to váš predpoklad, nie očakávaný ani odporúčaný výnos.</p>
         <p class="when" style="margin:10px 0 6px">Historické údaje na porovnanie, nie návrh predpokladu:</p>
         <div class="tg c2" id="tg-tipy" style="margin:0">
           <button type="button" data-vynos="8.3">56 rokov · 8,3 %</button>
@@ -629,11 +637,17 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
     <p class="lead-p">Váš prepočet pracuje s rovnakým zhodnotením každý rok. Trhy sa však každý rok vyvíjajú inak.</p>
   </div>
 
+  <div class="flow-options" data-e style="--d:1.58s">
+    <h3>Ako chcete pokračovať?</h3>
+    <p>Môžete si modeláciu najprv otvoriť a uložiť v PDF, alebo prejsť rovno na osobnú konzultáciu.</p>
+  </div>
+
   <div class="bottom-flow" data-e style="--d:1.6s">
     <section class="client-panel delivery-panel" aria-labelledby="delivery-title">
       <div id="gate-form">
+        <span class="path-label">Modelácia a PDF</span>
         <h3 id="delivery-title">Vezmite si svoj plán so sebou</h3>
-        <p id="gate-uvod">Modeláciu vám spracujeme do prehľadného PDF, aby ste sa k nej mohli kedykoľvek vrátiť.</p>
+        <p id="gate-uvod">Modeláciu vám spracujeme do prehľadného PDF, aby ste sa k nej mohli kedykoľvek vrátiť. Na otvorenej modelácii si PDF stiahnete jedným kliknutím.</p>
         <p id="gate-bonus">Ak má váš scenár obdobie budovania a vopred zvolený koniec čerpania, plán navyše preveríme v 800 modelovaných simuláciách založených na historických výnosoch indexu MSCI World z rokov 1970 až 2025.</p>
         <p class="gate-label">Kam vám máme poslať odkaz na modeláciu? Modelácia sa vám otvorí okamžite a odkaz vám zároveň pošleme e-mailom.</p>
         <div class="gate-names">
@@ -655,6 +669,7 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
       </div>
     </section>
     <section class="client-panel consult-panel" aria-labelledby="consult-title">
+      <span class="path-label">Priama konzultácia</span>
       <h3 id="consult-title">Čo môže váš plán znamenať pre váš skutočný majetok?</h3>
       <p>Na osobnej konzultácii — online alebo osobne — zasadíme váš plán do kontextu skutočného majetku a doplníme pohľad založený na aktuálnych dlhodobých očakávaniach popredných svetových investičných inštitúcií.</p>
       <p>Výsledná stratégia sa stane meradlom pre vaše súčasné portfólio. Jednotlivé investičné produkty tak prestanú byť samotným cieľom a stanú sa nástrojmi vašej stratégie.</p>
@@ -959,8 +974,8 @@ function render(){
   if(lead)lead.hidden=bezOdolnosti;
   const gateLabel=document.querySelector('.gate-label');
   if(gateLabel)gateLabel.innerHTML=bezOdolnosti
-    ? 'Modeláciu vám spracujeme do <strong>prehľadného PDF</strong>, aby ste sa k nej mohli kedykoľvek vrátiť.'
-    : 'Modeláciu vám spracujeme do <strong>prehľadného PDF</strong>, aby ste sa k nej mohli kedykoľvek vrátiť.<br><br>Ak má váš scenár obdobie budovania a <strong>vopred zvolený koniec čerpania</strong>, plán navyše preveríme v 800 modelovaných simuláciách založených na historických výnosoch indexu MSCI World z rokov 1970 až 2025. Uvidíte, v koľkých simuláciách kapitál pokryl všetky zvolené výplaty renty. Ide o podiel úspešných simulácií v tomto modeli, nie odhad pravdepodobnosti ani predpoveď budúceho vývoja.';
+    ? 'Modeláciu vám spracujeme do <strong>prehľadného PDF</strong>, aby ste sa k nej mohli kedykoľvek vrátiť. Na otvorenej modelácii si PDF stiahnete jedným kliknutím.'
+    : 'Modeláciu vám spracujeme do <strong>prehľadného PDF</strong>, aby ste sa k nej mohli kedykoľvek vrátiť. Na otvorenej modelácii si PDF stiahnete jedným kliknutím.<br><br>Ak má váš scenár obdobie budovania a <strong>vopred zvolený koniec čerpania</strong>, plán navyše preveríme v 800 modelovaných simuláciách založených na historických výnosoch indexu MSCI World z rokov 1970 až 2025. Uvidíte, v koľkých simuláciách kapitál pokryl všetky zvolené výplaty renty. Ide o podiel úspešných simulácií v tomto modeli, nie odhad pravdepodobnosti ani predpoveď budúceho vývoja.';
 
   txt($('vynos-v'),pctTxt(S.vynos)+' % ročne');
   $('sl-vynos').value=S.vynos;
@@ -1056,7 +1071,9 @@ function layout(o,endEff,openEnd){
     cE.style.setProperty('--cx',Math.max(30,Math.min(wE-30,pad+anch.e-lE))+'px');
     cS.style.setProperty('--cx',Math.max(30,Math.min(wS-30,pad+anch.s-lS))+'px');
 
-    const STEM=34,AX=46,BOT=52;
+    /* Kompaktnejší desktopový rytmus: spojenie s osou ostáva zreteľné, ale
+       po poslednej karte už nevzniká zbytočne vysoký prázdny pás. */
+    const STEM=28,AX=46,BOT=32;
     const hAbove=Math.max(cT.offsetHeight,openEnd?0:cE.offsetHeight);
     const top=hAbove+STEM;
     stage.style.setProperty('--axis-top',top+'px');
@@ -1230,13 +1247,50 @@ let turnstileId=null;
    Kontajner sa zámerne nevolá „turnstile": prehliadač z každého id urobí
    globálnu premennú, takže <div id="turnstile"> pretieni window.turnstile
    a knižnica ohlási „už načítané" a nepripojí sa. */
-const turnstileNacitane=new Promise((ok,zle)=>{
-  window.onloadTurnstileCallback=()=>ok();
-  setTimeout(()=>zle(new Error('turnstile-nenacitane')),10000);
-});
+let turnstileNacitavanie=null;
+function nacitajTurnstile(){
+  if(window.turnstile&&typeof window.turnstile.render==='function')return Promise.resolve();
+  if(turnstileNacitavanie)return turnstileNacitavanie;
+  turnstileNacitavanie=new Promise((ok,zle)=>{
+    let hotovo=false;
+    const timer=setTimeout(()=>{
+      if(hotovo)return;hotovo=true;turnstileNacitavanie=null;
+      zle(new Error('turnstile-nenacitane'));
+    },10000);
+    window.onloadTurnstileCallback=()=>{
+      if(hotovo)return;hotovo=true;clearTimeout(timer);ok();
+    };
+    const s=document.createElement('script');
+    s.src='https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit';
+    s.async=true;s.defer=true;
+    s.onerror=()=>{
+      if(hotovo)return;hotovo=true;clearTimeout(timer);turnstileNacitavanie=null;
+      zle(new Error('turnstile-nenacitane'));
+    };
+    document.head.appendChild(s);
+  });
+  return turnstileNacitavanie;
+}
+
+/* Overenie pripravíme až pri priblížení k formuláru alebo prvom kontakte s ním.
+   Kliknutie ho vždy doistí cez overenieCloveka(), takže bez IntersectionObservera
+   ani pri ovládaní klávesnicou nevznikne slepá vetva. */
+const gateForm=document.getElementById('gate-form');
+if(gateForm){
+  const priprav=()=>{nacitajTurnstile().catch(()=>{});};
+  gateForm.addEventListener('focusin',priprav,{once:true});
+  gateForm.addEventListener('pointerenter',priprav,{once:true,passive:true});
+  if('IntersectionObserver' in window){
+    const io=new IntersectionObserver(entries=>{
+      if(!entries.some(e=>e.isIntersecting))return;
+      io.disconnect();priprav();
+    },{rootMargin:'500px 0px'});
+    io.observe(gateForm);
+  }
+}
 
 async function overenieCloveka(){
-  await turnstileNacitane;
+  await nacitajTurnstile();
   return new Promise((ok,zle)=>{
     let hotovo=false;
     const raz=(f)=>(v)=>{if(hotovo)return;hotovo=true;f(v)};
@@ -1263,19 +1317,28 @@ async function overenieCloveka(){
    Navyše sa konečne dozvieme pravdu: verejný formulár vracal „prijaté" aj vtedy,
    keď polovicu údajov zahodil. */
 const RELAY_URL='https://renta-boldem.renta-relay.workers.dev/';
+const RELAY_TIMEOUT_MS=15000;
 
 async function submitToBoldem({first,last,email,scenarioUrl,summary,overenie}){
-  const res=await fetch(RELAY_URL,{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({meno:first,priezvisko:last,email,scenar:scenarioUrl,
-                         zhrnutie:summary,overenie})
-  });
-  const body=await res.text().catch(()=>'');
-  if(!res.ok)throw new Error('relay-failed:'+res.status+':'+body.slice(0,160));
-  let d=null;
-  try{d=JSON.parse(body)}catch(e){}
-  if(!d||d.ok!==true)throw new Error('relay-rejected:'+body.slice(0,160));
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),RELAY_TIMEOUT_MS);
+  try{
+    const res=await fetch(RELAY_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({meno:first,priezvisko:last,email,scenar:scenarioUrl,
+                           zhrnutie:summary,overenie}),
+      signal:controller.signal
+    });
+    const body=await res.text().catch(()=>'');
+    if(!res.ok)throw new Error('relay-failed:'+res.status+':'+body.slice(0,160));
+    let d=null;
+    try{d=JSON.parse(body)}catch(e){}
+    if(!d||d.ok!==true)throw new Error('relay-rejected:'+body.slice(0,160));
+  }catch(e){
+    if(e&&e.name==='AbortError')throw new Error('relay-timeout');
+    throw e;
+  }finally{clearTimeout(timer)}
 }
 
 /* Krátke zhrnutie scenára pre CRM — rovnaké čísla, aké klient videl na obrazovke. */
@@ -1352,6 +1415,14 @@ ponukniNavrat();
 
 const sendModel=$('send-model');
 if(sendModel){
+  const stavModelovehoOkna=(win,nadpis,text,chyba=false)=>{
+    try{
+      const d=win.document;
+      d.open();
+      d.write('<!doctype html><html lang="sk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+nadpis+'</title><style>body{margin:0;background:#f6f3ed;color:#2b2118;font:18px/1.55 Arial,sans-serif;display:grid;min-height:100vh;place-items:center}.stav{width:min(560px,calc(100% - 40px));padding:34px;border:1px solid #d8cbb9;background:#fff;box-sizing:border-box}h1{font:600 28px/1.2 Georgia,serif;margin:0 0 14px;color:'+(chyba?'#7a2f2f':'#2b2118')+'}p{margin:0}button{margin-top:22px;padding:11px 18px;border:0;background:#2b2118;color:#fff;font-weight:700;cursor:pointer}</style></head><body><main class="stav"><h1>'+nadpis+'</h1><p>'+text+'</p>'+(chyba?'<button onclick="window.close()">Zavrieť okno</button>':'')+'</main></bo'+'dy></html>');
+      d.close();
+    }catch(e){}
+  };
   const mark=(el,bad)=>{el.classList.toggle('bad',bad);return bad};
   ['gate-first','gate-last','model-email'].forEach(id=>
     $(id).addEventListener('input',()=>$(id).classList.remove('bad')));
@@ -1376,6 +1447,7 @@ if(sendModel){
       status.textContent='Povoľte, prosím, otváranie nových okien a skúste to znova.';
       return;
     }
+    stavModelovehoOkna(modelWindow,'Pripravujeme vašu modeláciu','Overujeme odoslanie a pripravujeme odkaz. Toto okno môžete nechať otvorené.');
     const label=sendModel.textContent;
     sendModel.disabled=true;sendModel.textContent='Odosielam…';
     status.textContent='';
@@ -1384,7 +1456,7 @@ if(sendModel){
       overenie=await overenieCloveka();
     }catch(e){
       console.warn('Turnstile',e);
-      try{modelWindow.close()}catch(_e){}
+      stavModelovehoOkna(modelWindow,'Modeláciu sa nepodarilo pripraviť','Prehliadač sa nepodarilo overiť. Vráťte sa, prosím, do formulára a skúste to ešte raz.',true);
       status.textContent='Nepodarilo sa overiť prehliadač. Skúste to prosím ešte raz, '
         +'prípadne vypnite blokovanie skriptov.';
       sendModel.disabled=false;sendModel.textContent=label;
@@ -1395,8 +1467,13 @@ if(sendModel){
                             summary:scenarioSummary(),overenie});
     }catch(e){
       console.warn('Boldem submit failed',e);
-      try{modelWindow.close()}catch(_e){}
-      status.textContent='Nepodarilo sa odoslať modeláciu emailom. Skúste to prosím ešte raz.';
+      const timeout=e&&e.message==='relay-timeout';
+      stavModelovehoOkna(modelWindow,'Modeláciu sa nepodarilo odoslať',timeout
+        ?'Odoslanie trvalo príliš dlho. Vráťte sa, prosím, do formulára a skúste to ešte raz.'
+        :'Služba na odoslanie momentálne neodpovedá. Vráťte sa, prosím, do formulára a skúste to ešte raz.',true);
+      status.textContent=timeout
+        ?'Odoslanie trvalo príliš dlho. Skúste to prosím ešte raz.'
+        :'Nepodarilo sa odoslať modeláciu e-mailom. Skúste to prosím ešte raz.';
       sendModel.disabled=false;sendModel.textContent=label;
       return;
     }
@@ -1484,6 +1561,5 @@ if(ANIM&&!REDUCED){
 })();
 </script>
 <script src="renta-flow-10of10.js?v=20260815-3"></script>
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit" async defer></script>
 </body>
 </html>

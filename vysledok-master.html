@@ -2,6 +2,7 @@
 <html lang="sk">
 <head>
 <meta charset="utf-8">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%232b2118'/%3E%3Cpath d='M32 12 52 50H12Z' fill='%23ae8753'/%3E%3C/svg%3E">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>Modelácia privátnej renty</title>
@@ -372,7 +373,7 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
         <p>Použijeme pritom CMA (Capital Market Assumptions), teda dlhodobé očakávania výnosov a rizík.</p>
       </div>
       <div class="next-action">
-        <p>Vďaka tomuto komplexnému pohľadu získate realistický pohľad na svoje súčasné portfólio, jeho výnosový potenciál, riziko, likviditu a schopnosť financovať plánovanú rentu a jednotlivé investičné produkty prestanú byť samotným cieľom a stanú sa nástrojmi vašej stratégie.</p>
+        <p>Vďaka tomuto komplexnému pohľadu získate ucelenejší rozhodovací rámec pre svoje súčasné portfólio — jeho výnosový potenciál, riziko, likviditu a schopnosť financovať plánovanú rentu. Jednotlivé investičné produkty tak prestanú byť samotným cieľom a stanú sa nástrojmi vašej stratégie.</p>
         <a class="btn-primary" href="https://hechtberger.com/rezervacia" target="_blank" rel="noopener">Rezervovať konzultáciu</a>
       </div>
     </div>
@@ -759,8 +760,10 @@ function prisposobOsi(){
   const vyska=strana=>Math.max(0,...[...document.querySelectorAll('.card.'+strana)]
     .filter(c=>!c.closest('.milestone').hidden)
     .map(c=>c.getBoundingClientRect().height));
-  wrap.style.paddingTop=Math.round(113+vyska('up')+28)+'px';
-  wrap.style.paddingBottom=Math.round(113+vyska('down')+28)+'px';
+  /* Karty ostávajú bezpečne oddelené od susedných sekcií, ale bez nadmerného
+     prázdneho pásu nad a pod osou na bežnom desktopovom viewporte. */
+  wrap.style.paddingTop=Math.round(113+vyska('up')+18)+'px';
+  wrap.style.paddingBottom=Math.round(113+vyska('down')+18)+'px';
   rozostup();
 }
 
