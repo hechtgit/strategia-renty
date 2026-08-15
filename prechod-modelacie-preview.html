@@ -13,33 +13,28 @@
   html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink)}
   body{min-height:100vh;display:grid;place-items:center;padding:32px;font:16px/1.55 Asap,Arial,sans-serif}
   main{width:min(780px,100%);text-align:center}
-  .brand{margin:0 0 20px;color:#c9a66f;font-size:12px;font-weight:700;letter-spacing:.2em;text-transform:uppercase}
-  h1{margin:0;font:400 clamp(30px,4.2vw,46px)/1.15 "PT Serif",Georgia,serif}
-  .lead{max-width:620px;margin:18px auto 0;color:#d8d2c9;font-size:17px}
-  .journey{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:56px auto 0;max-width:640px}
-  .track,.progress{position:absolute;left:16.66%;right:16.66%;top:9px;height:1px}
-  .track{background:rgba(174,135,83,.28)}
-  .progress{right:auto;width:0;background:linear-gradient(90deg,var(--gold),var(--gold-hi));box-shadow:0 0 8px rgba(208,171,115,.18);transition:width .65s cubic-bezier(.22,.61,.36,1)}
-  .spark{position:absolute;z-index:3;top:5px;left:16.66%;width:9px;height:9px;margin-left:-4.5px;border-radius:50%;background:#f1cd91;box-shadow:0 0 8px 2px rgba(208,171,115,.42),0 0 22px 7px rgba(174,135,83,.16);opacity:0;transition:left .65s cubic-bezier(.22,.61,.36,1),opacity .18s ease}
-  .step{position:relative;padding-top:31px;color:#817b73;font-size:13px;transition:color .4s ease}
-  .dot{position:absolute;z-index:2;top:4px;left:50%;width:11px;height:11px;margin-left:-5.5px;border:1px solid var(--gold);border-radius:50%;background:var(--bg);transition:background .35s ease,box-shadow .35s ease,transform .35s ease}
+  .brand{margin:0;color:var(--gold-hi);font:400 clamp(31px,4vw,45px)/1.15 "PT Serif",Georgia,serif;letter-spacing:.01em}
+  .journey{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:70px auto 0;max-width:680px}
+  .track,.progress{position:absolute;left:16.66%;right:16.66%;top:10px;height:2px}
+  .track{background:rgba(174,135,83,.36);box-shadow:0 0 8px rgba(174,135,83,.09)}
+  .progress{right:auto;width:0;background:linear-gradient(90deg,#9c7139,var(--gold-hi),#ebc889);box-shadow:0 0 8px rgba(208,171,115,.4),0 0 20px rgba(174,135,83,.16);transition:width .68s cubic-bezier(.22,.61,.36,1)}
+  .spark{position:absolute;z-index:3;top:4px;left:16.66%;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:#f3d59f;box-shadow:0 0 8px 3px rgba(238,197,135,.72),0 0 25px 10px rgba(174,135,83,.28),0 0 46px 16px rgba(174,135,83,.10);opacity:0;transition:left .68s cubic-bezier(.22,.61,.36,1),opacity .18s ease}
+  .step{position:relative;padding-top:38px;color:#817b73;font-size:15px;font-weight:500;transition:color .4s ease,text-shadow .4s ease}
+  .dot{position:absolute;z-index:2;top:3px;left:50%;width:16px;height:16px;margin-left:-8px;border:1.5px solid var(--gold);border-radius:50%;background:var(--bg);transition:background .35s ease,box-shadow .35s ease,transform .35s ease}
   .step.done,.step.active{color:#ddd6cd}
   .step.done .dot,.step.active .dot{background:var(--gold-hi)}
-  .step.active .dot{transform:scale(1.08);animation:breathe 1.6s ease-in-out infinite}
-  .secondary{margin:36px 0 0;color:#aaa39a;font-size:14px}
-  .journey.finish .progress{box-shadow:0 0 13px rgba(208,171,115,.55)}
-  .journey.finish .dot{box-shadow:0 0 10px rgba(208,171,115,.36)}
-  .preview-note{position:fixed;right:20px;bottom:18px;margin:0;color:#777168;font-size:12px}
-  @keyframes breathe{0%,100%{box-shadow:0 0 0 0 rgba(208,171,115,0)}50%{box-shadow:0 0 0 8px rgba(208,171,115,.16)}}
-  @media(max-width:560px){body{padding:24px}.journey{margin-top:44px;gap:5px}.step{font-size:12px}.lead{font-size:16px}.preview-note{position:static;margin-top:48px}}
+  .step.done{color:#c7bcae}.step.active{color:#f0dfc5;text-shadow:0 0 14px rgba(208,171,115,.26)}
+  .step.active .dot{transform:scale(1.12);animation:breathe 1.45s ease-in-out infinite}
+  .journey.finish .progress{box-shadow:0 0 13px rgba(208,171,115,.75),0 0 32px rgba(174,135,83,.22)}
+  .journey.finish .dot{box-shadow:0 0 12px rgba(208,171,115,.55)}
+  @keyframes breathe{0%,100%{box-shadow:0 0 0 0 rgba(208,171,115,0),0 0 8px rgba(208,171,115,.2)}50%{box-shadow:0 0 0 10px rgba(208,171,115,.18),0 0 18px rgba(208,171,115,.5)}}
+  @media(max-width:560px){body{padding:24px}.journey{margin-top:54px;gap:5px}.step{font-size:12px}}
   @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}.progress{width:66.68%!important}.spark{display:none}.step{color:#ddd6cd}.dot{background:var(--gold-hi)}}
 </style>
 </head>
 <body>
 <main>
-  <p class="brand">Stratégia privátnej renty</p>
-  <h1>Pripravujeme vašu modeláciu</h1>
-  <p class="lead">Overujeme odoslanie a pripravujeme výsledok v tejto karte.</p>
+  <h1 class="brand">Stratégia privátnej renty</h1>
   <div class="journey" id="journey" aria-label="Priebeh prípravy modelácie">
     <span class="track" aria-hidden="true"></span>
     <span class="progress" aria-hidden="true"></span>
@@ -48,8 +43,6 @@
     <div class="step"><span class="dot"></span>Prebieha overenie</div>
     <div class="step"><span class="dot"></span>Otvárame výsledok</div>
   </div>
-  <p class="secondary" id="status" role="status" aria-live="polite">Výsledok sa otvorí automaticky. Toto okno nechajte otvorené.</p>
-  <p class="preview-note">Náhľad sa automaticky opakuje.</p>
 </main>
 <script>
   const journey=document.getElementById('journey');
