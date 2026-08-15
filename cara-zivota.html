@@ -196,7 +196,7 @@ input[type=range]:disabled{opacity:.35;cursor:not-allowed}
 .lead-img{margin:0;min-width:0;position:relative;overflow:hidden;border-radius:5px;
   aspect-ratio:16/10;background:#242424}
 .lead-img img{display:block;width:100%;height:100%;object-fit:cover}
-@media(max-width:640px){
+@media(max-width:480px){
   .intro-lead{grid-template-columns:1fr;gap:26px;padding:34px 16px 4px}
   .lead-text h1{font-size:clamp(27px,8vw,38px);margin-bottom:18px}
   .lead-text h2{margin-top:30px}
@@ -260,7 +260,7 @@ body.vystup .flow-lead{display:none}
 
 /* ===== mobil ===== */
 .mob{display:none}
-@media (max-width:640px){
+@media (max-width:480px){
   #lp{padding:20px 16px 26px}
   .stage{height:auto!important}
   .axis-wrap{position:relative;inset:auto;top:0!important;height:26px;margin:12px 0 0}
@@ -456,7 +456,7 @@ html[data-anim] #lp.in .axis::after{animation:lpSweep 4.6s cubic-bezier(.25,.1,.
   background:linear-gradient(100deg,transparent 39%,rgba(255,255,255,.2) 50%,transparent 61%)}
 html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px 60px rgba(0,0,0,.3)}
 
-@media(max-width:640px){
+@media(max-width:480px){
   #lp{padding:16px 13px 24px}
   .axis-wrap{height:36px;margin:6px 0 12px}
   .axis{height:36px}
@@ -874,7 +874,7 @@ let AXMAX=110;
 const FA=40,FS=14;
 const pct=v=>v<=FA?v/FA*FS:FS+(v-FA)/(AXMAX-FA)*(100-FS);
 const ageAt=p=>p<=FS?p/FS*FA:FA+(p-FS)/(100-FS)*(AXMAX-FA);
-const isMob=()=>matchMedia('(max-width:640px)').matches;
+const isMob=()=>matchMedia('(max-width:480px)').matches;
 
 const tw=new Map(),twSafe=new Map();
 function money(el,val,unit){

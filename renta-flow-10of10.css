@@ -27,7 +27,7 @@
 .flow-consult .btn,.delivery-panel #send-model{display:inline-flex!important;align-items:center;justify-content:center;background:var(--btn-gold)!important;color:#fff!important;border:0!important;border-radius:0!important;min-height:50px;padding:14px 24px;box-shadow:0 10px 24px rgba(50,31,14,.2);font-family:var(--serif);font-size:17px;font-weight:700;letter-spacing:1.1px;line-height:1.2}
 .flow-consult .btn:hover,.delivery-panel #send-model:hover{background:var(--gold)!important;transform:translateY(-1px)}
 @media(min-width:641px){.flow-lead .lead-p{white-space:nowrap}}
-@media(max-width:640px){
+@media(max-width:480px){
   /* Obrana proti min-content pretečeniu pri úzkych scenároch a dlhších
      lokalizovaných hodnotách. Nezakrýva overflow; prvky sa môžu zalomiť. */
   #lp,.stage,.card,.tg,.sl,.sl .row,.out,.bottom-flow,.client-panel,
