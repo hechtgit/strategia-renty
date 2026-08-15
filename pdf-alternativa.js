@@ -118,8 +118,16 @@
         medzera(2);
       }
       if (index) ciara();
+      var panelTop = y;
+      if (!index) {
+        doc.setFillColor(250, 246, 238);
+        doc.setDrawColor.apply(doc, ZLATA);
+        doc.setLineWidth(0.35);
+        doc.roundedRect(OKRAJ, panelTop, SIRKA, 37, 1.8, 1.8, "FD");
+        y += 6;
+      }
       var vrch = y;
-      var lava = 112;
+      var lava = index ? 112 : 104;
       var prava = SIRKA - lava - 8;
       napis(r.nadpis, OKRAJ, index ? 9.2 : 10, "bold", TMAVA, lava, 1.3);
       napis(r.vysvetlenie, OKRAJ, index ? 7.8 : 8.5, "normal", SEDA, lava, 1.35);
@@ -132,11 +140,11 @@
         napis("Všetky plánované výplaty boli pokryté.", OKRAJ + lava + 8, 7.8, "normal", SEDA, prava, 1.3);
       } else {
         var uspesne = (r.hodnota.match(/([0-9]+)\s*z\s*800/) || [])[1];
-        napis(uspesne ? "Kapitál pokryl všetky výplaty v " + uspesne + " z 800 simulácií" : r.hodnota,
-          OKRAJ + lava + 8, 10.8, "bold", ZLATA, prava, 1.28);
+        napis(uspesne ? uspesne + " z 800 simulácií" : r.hodnota,
+          OKRAJ + lava + 8, 12.2, "bold", ZLATA, prava, 1.24);
         napis(r.doplnenie, OKRAJ + lava + 8, 8.3, "normal", SEDA, prava, 1.4);
       }
-      y = Math.max(y, yL) + (index ? 2.5 : 4);
+      y = index ? Math.max(y, yL) + 2.5 : Math.max(panelTop + 37, y, yL) + 8;
     });
 
     if (d.zaver) {
@@ -157,14 +165,25 @@
     napis(d.metodika, OKRAJ, 7.8, "normal", SEDA, SIRKA, 1.46);
 
     if (d.konzultaciaNadpis) {
+      medzera(6);
+      var konzTop = y;
+      doc.setFillColor(250, 246, 238);
+      doc.setDrawColor.apply(doc, ZLATA);
+      doc.setLineWidth(0.3);
+      doc.roundedRect(OKRAJ, konzTop, SIRKA, 43, 1.8, 1.8, "FD");
+      y += 6;
+      napis(d.konzultaciaNadpis, OKRAJ + 7, 12.5, "bold", TMAVA, SIRKA - 14, 1.3);
+      medzera(2);
+      napis("Na osobnej konzultácii zasadíme výsledok do kontextu vášho skutočného majetku a doplníme pohľad založený na aktuálnych dlhodobých očakávaniach popredných svetových investičných inštitúcií.", OKRAJ + 7, 8.5, "normal", SEDA, SIRKA - 14, 1.38);
       medzera(4);
-      ciara();
-      napis(d.konzultaciaNadpis, OKRAJ, 12.5, "bold", TMAVA, SIRKA, 1.3);
-      medzera(2);
-      napis("Na osobnej konzultácii zasadíme výsledok do kontextu vášho skutočného majetku a doplníme pohľad založený na aktuálnych dlhodobých očakávaniach popredných svetových investičných inštitúcií.", OKRAJ, 8.5, "normal", SEDA, SIRKA, 1.38);
-      medzera(2);
-      napis("Rezervovať konzultáciu · hechtberger.com/rezervacia", OKRAJ, 8.5, "bold", ZLATA, SIRKA, 1.3);
-      doc.link(OKRAJ, y - 4, 56, 6, { url: "https://hechtberger.com/rezervacia" });
+      doc.setFillColor.apply(doc, ZLATA);
+      doc.rect(OKRAJ + 7, y, 64, 10, "F");
+      doc.setFont("Asap", "bold");
+      doc.setFontSize(8.5);
+      doc.setTextColor(255, 255, 255);
+      doc.text("Rezervovať konzultáciu", OKRAJ + 39, y + 6.3, { align: "center" });
+      doc.link(OKRAJ + 7, y, 64, 10, { url: "https://hechtberger.com/rezervacia" });
+      y = konzTop + 43;
     }
 
     doc.setDrawColor.apply(doc, LINKA);
