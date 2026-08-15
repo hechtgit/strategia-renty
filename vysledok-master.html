@@ -926,12 +926,26 @@ function zalozneTlacenie(){
   else window.print();
 }
 
+async function cakajNaFinalnuCopyVysledku(){
+  const od=$('odolnost'), tbody=$('odolnost-riadky');
+  if(!od||od.hidden||!tbody)return;
+  const koniec=performance.now()+4000;
+  while(tbody.dataset.vysvetlene!=='1'){
+    if(performance.now()>=koniec)throw new Error('result-copy-not-ready');
+    await new Promise(ok=>setTimeout(ok,50));
+  }
+}
+
 $('btn-pdf').addEventListener('click',async()=>{
   const b=$('btn-pdf'), popis=b.textContent;
   b.disabled=true; b.textContent='Pripravujem PDF…';
   try{
     /* Test odolnosti dobieha na pozadí — bez neho by v PDF chýbala celá druhá strana. */
     if(window.PH_ODOLNOST)await window.PH_ODOLNOST;
+    /* Externá prezentačná vrstva prepisuje základnú tabuľku na klientsky
+       zrozumiteľný výsledok. Pri veľmi rýchlom kliknutí musí PDF počkať aj na ňu,
+       inak by mohlo vzniknúť bez hlavného výsledku 268/800. */
+    await cakajNaFinalnuCopyVysledku();
     if(!pdfNacitanie)pdfNacitanie=(async()=>{
       await Promise.all([nacitaj('jspdf.min.js'),nacitaj('pdf-font.js')]);
       await nacitaj('pdf.js');
