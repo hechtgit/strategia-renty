@@ -95,16 +95,34 @@
   function jeModelacia(src) {
     return !!src && src.indexOf("vysledok.html") > -1;
   }
+  function jeAplikacia(src) {
+    return src === APP || (!!src && src.indexOf(APP + "&frame=") === 0);
+  }
   function oprav() {
     var m = mount(); if (!m) return false;
     var f = m.querySelector("iframe"); if (!f) return false;
     var src = f.getAttribute("src");
-    if (!jeModelacia(src) && src !== APP) f.setAttribute("src", APP);
+    if (!jeModelacia(src) && !jeAplikacia(src)) f.setAttribute("src", APP);
     return true;
   }
   function prepniRam() {
     var m = mount(); if (!m) return false;
     if (!oprav()) return false;
+    var f = m.querySelector("iframe");
+    /* Squarespace vytvára rám s loading=lazy. Pri rýchlom prepise src môže
+       prehliadač dokončiť pôvodnú odloženú navigáciu na koreň repozitára,
+       hoci atribút src už ukazuje na novú aplikáciu. Po prvom load preto rám
+       raz vedome navigujeme na unikátnu adresu novej aplikácie. */
+    if (f && !f.__czVynutenaAplikacia) {
+      f.__czVynutenaAplikacia = true;
+      f.removeAttribute("loading");
+      f.addEventListener("load", function vynutAplikaciu() {
+        f.removeEventListener("load", vynutAplikaciu);
+        if (!jeModelacia(f.getAttribute("src"))) {
+          f.setAttribute("src", APP + "&frame=1");
+        }
+      });
+    }
     /* Sledujeme celý kontajner, nie samotný rám: legacy skript vie rám nahradiť
        novým prvkom a strážca pripnutý na starý uzol by potom strážil odpojený
        kus DOM. Takto zachytíme aj výmenu prvku, aj prepis atribútu. */
