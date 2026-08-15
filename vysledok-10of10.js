@@ -91,7 +91,7 @@
 
   function assumptions(){
     const block=document.querySelector(".assumptions");if(!block||block.closest(".predpoklady-detail"))return;
-    const detail=document.createElement("details"),summaryEl=document.createElement("summary");detail.className="predpoklady-detail";detail.open=matchMedia("(min-width:901px)").matches;summaryEl.textContent="Použité predpoklady a metodika";block.before(detail);detail.append(summaryEl,block);
+    const detail=document.createElement("details"),summaryEl=document.createElement("summary");detail.className="predpoklady-detail";detail.open=matchMedia("(min-width:641px)").matches;summaryEl.textContent="Použité predpoklady a metodika";block.before(detail);detail.append(summaryEl,block);
   }
   function apply(){staticCopy();exceptions();explainHistory();summary();assumptions();}
   document.addEventListener("odolnost-hotova",apply);

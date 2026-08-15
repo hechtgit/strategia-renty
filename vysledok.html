@@ -179,7 +179,7 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
 .embedded .shell{padding:0 0 8px}
 
 
-@media(max-width:900px){
+@media(max-width:640px){
   .shell{padding:14px}
   .site-top{padding:16px 14px}
   .hero-copy{padding:35px 26px}
@@ -918,7 +918,7 @@ function vykresli(){
    Zároveň sa dorovná odsadenie okolo čiary, aby karty nezasahovali do sekcií
    nad ňou a pod ňou — ich výška závisí od toho, koľko riadkov scenár vypíše. */
 function prisposobOsi(){
-  const siroko=matchMedia('(min-width:901px)').matches;
+  const siroko=matchMedia('(min-width:641px)').matches;
   const wrap=document.querySelector('.line-wrap');
   const fazy=[
     {el:$('ph-build'),od:S.now,po:S.start,zap:!o.immediate},
@@ -959,7 +959,7 @@ function prisposobOsi(){
    sa nerozostupuje. */
 function rozostup(){
   const wrap=document.querySelector('.line-wrap');
-  const siroko=matchMedia('(min-width:901px)').matches;
+  const siroko=matchMedia('(min-width:641px)').matches;
   const karty=[...document.querySelectorAll('.milestone')].map(m=>({
     m,karta:m.querySelector('.card'),hore:!!m.querySelector('.card.up')
   })).filter(k=>!k.m.hidden);

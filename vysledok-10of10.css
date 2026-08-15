@@ -42,7 +42,7 @@ p,.lead,.co,.kolko,.mail-note,.disclaimer{word-break:normal;overflow-wrap:normal
 .blok,.recap{background:transparent;border:0;border-radius:0;color:var(--ink);box-shadow:none;height:100%}.recap{border-left:1px solid var(--line)}
 .blok h2,.recap h3{color:var(--ink)}.blok p,.recap ul{color:var(--muted)}.blok .vystraha{color:#d8c9b4}.recap li::before{background:var(--gold)}
 .next{margin-top:0}.disclaimer{margin-top:24px}
-@media(max-width:900px){
+@media(max-width:640px){
   /* Mobil nesmie zdediť min-content šírku z tabuliek, CTA ani značky. Text sa
      radšej zalomí; horizontálne orezanie sa tým nemaskuje. */
   .site-top,.site-brand,.shell,.hero,.hero-copy,.section,.line-wrap,.track,
