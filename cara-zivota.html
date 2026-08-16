@@ -302,10 +302,11 @@ body.vystup .flow-lead{display:none}
   body.mobile-editor-open .mobile-life-map,body.mobile-editor-open .mob,body.mobile-editor-open #msg,body.mobile-editor-open .bottom-flow,body.mobile-editor-open .assumptions-block{display:none!important}
   body.mobile-editor-open .stage{display:block!important;height:auto!important;margin:0!important}
   body.mobile-editor-open .stage>.card{display:none!important}
-  body.mobile-editor-open .stage>.card.mobile-editing{position:relative!important;inset:auto!important;z-index:200;display:block!important;width:100%!important;height:auto!important;max-height:100dvh!important;margin:0!important;padding:64px 18px 28px!important;border:0!important;border-radius:0!important;overflow-y:auto;background:#b58b52;box-shadow:none}
-  .mobile-editor-done{display:none}
-  body.mobile-editor-open .mobile-editing>.mobile-editor-done{position:sticky;top:10px;z-index:210;display:block;width:auto;min-height:40px;margin:-54px 0 14px auto;padding:10px 24px;border:1px solid rgba(47,31,15,.48);border-radius:3px;background:#171717;color:#f2d6aa;box-shadow:0 7px 18px rgba(0,0,0,.28);font:800 15px/1 var(--sans);cursor:pointer}
-  body.mobile-editor-open .mobile-editing>.mobile-editor-done:hover,body.mobile-editor-open .mobile-editing>.mobile-editor-done:focus-visible{background:#2a2118;outline:2px solid #fff;outline-offset:2px}
+  body.mobile-editor-open .stage>.card.mobile-editing{position:relative!important;inset:auto!important;z-index:200;display:block!important;width:100%!important;height:auto!important;max-height:100dvh!important;margin:0!important;padding:0 18px 28px!important;border:0!important;border-radius:0!important;overflow-y:auto;background:#b58b52;box-shadow:none}
+  .mobile-editor-toolbar{display:none}
+  body.mobile-editor-open .mobile-editing>.mobile-editor-toolbar{position:sticky;top:0;z-index:210;display:flex;justify-content:flex-end;margin:0 -18px 16px;padding:10px 14px;background:#b58b52;border-bottom:1px solid rgba(47,31,15,.22)}
+  .mobile-editor-done{display:block;width:auto;min-height:40px;padding:10px 24px;border:1px solid rgba(47,31,15,.48);border-radius:3px;background:#171717;color:#f2d6aa;box-shadow:0 7px 18px rgba(0,0,0,.28);font:800 15px/1 var(--sans);cursor:pointer}
+  .mobile-editor-done:hover,.mobile-editor-done:focus-visible{background:#2a2118;outline:2px solid #fff;outline-offset:2px}
   .mobile-life-track{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
   .mobile-life-track::before{content:"";position:absolute;left:16.66%;right:16.66%;top:10px;height:2px;background:rgba(174,135,83,.42)}
   .mobile-life-step{position:relative;z-index:1;min-width:0;padding:0 2px 3px;border:0;background:transparent;color:#b7afa5;font:600 12px/1.2 var(--sans);text-align:center;cursor:pointer}
@@ -1405,12 +1406,14 @@ function closeMobileEditor(card){
 function openMobileEditor(cardId){
   if(!isMob())return;
   const card=document.getElementById(cardId);if(!card)return;
+  let toolbar=card.querySelector('.mobile-editor-toolbar');
   let done=card.querySelector('.mobile-editor-done');
   if(!done){
+    toolbar=document.createElement('div');toolbar.className='mobile-editor-toolbar';
     done=document.createElement('button');done.type='button';done.className='mobile-editor-done';
     done.textContent='Hotovo';
     done.addEventListener('click',()=>closeMobileEditor(card));
-    card.prepend(done);
+    toolbar.appendChild(done);card.prepend(toolbar);
   }
   card.classList.add('mobile-editing');document.body.classList.add('mobile-editor-open');
   requestAnimationFrame(()=>parent.postMessage({type:'ph-renta-editor',open:true,height:card.scrollHeight},'*'));
