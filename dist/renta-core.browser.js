@@ -1,4 +1,4 @@
-/* GENERATED from shared/renta-core.js sha256:001a305bc17a8901458cbe3cee81f16796535dcda00bc87150121f7f42b0dab9. Do not edit. */
+/* GENERATED from shared/renta-core.js sha256:0f1727658c4e832709445904acfb82ac9d87c7b5f6f383e5e0298ec82437dde1. Do not edit. */
 (() => {
 "use strict";
 const MONTHS = 12;
@@ -12,6 +12,17 @@ const PUBLIC_HISTORICAL_PROFILE = Object.freeze({
   seedStride: 7919,
   drawReturnNet: 4,
   thresholds: [600, 720],
+});
+
+const ADVISER_SIMULATION_PROFILE = Object.freeze({
+  id: "adviser-circular-bootstrap-v1",
+  version: 1,
+  runs: 800,
+  blockYears: 5,
+  seed: 1234,
+  seedStride: 7919,
+  circularBlocks: true,
+  coverageQuantile: 0.90,
 });
 
 function monthlyInflationRate(pa = 0) {
@@ -298,6 +309,7 @@ function blockBootstrapPaths({
   blockYears = 5,
   seed = 1234,
   seedStride = 7919,
+  circular = false,
 }) {
   const entries = Object.entries(seriesByAsset);
   if (!entries.length) throw new Error("Chýbajú historické série.");
@@ -306,7 +318,7 @@ function blockBootstrapPaths({
     throw new Error("Historické série musia mať rovnakú neprázdnu dĺžku.");
   }
   if (blockYears < 1 || blockYears > length) throw new Error("Neplatná dĺžka bloku.");
-  const starts = length - blockYears + 1;
+  const starts = circular ? length : length - blockYears + 1;
   const paths = [];
   for (let run = 0; run < runs; run += 1) {
     const random = mulberry32(seed + run * seedStride);
@@ -315,12 +327,117 @@ function blockBootstrapPaths({
       const start = Math.floor(random() * starts);
       for (let offset = 0; offset < blockYears &&
           path[entries[0][0]].length < years; offset += 1) {
-        for (const [asset, values] of entries) path[asset].push(values[start + offset]);
+        const index = circular ? (start + offset) % length : start + offset;
+        for (const [asset, values] of entries) path[asset].push(values[index]);
       }
     }
     paths.push(path);
   }
   return paths;
+}
+
+function adviserSimulation(plan, {
+  accumulationFactors,
+  drawdownFactors = accumulationFactors,
+  runs = ADVISER_SIMULATION_PROFILE.runs,
+  blockYears = ADVISER_SIMULATION_PROFILE.blockYears,
+  seed = ADVISER_SIMULATION_PROFILE.seed,
+  seedStride = ADVISER_SIMULATION_PROFILE.seedStride,
+  circularBlocks = ADVISER_SIMULATION_PROFILE.circularBlocks,
+  coverageQuantile = ADVISER_SIMULATION_PROFILE.coverageQuantile,
+} = {}) {
+  if (!plan || plan.warn) return null;
+  if (!Array.isArray(accumulationFactors) || !accumulationFactors.length ||
+      !Array.isArray(drawdownFactors) ||
+      drawdownFactors.length !== accumulationFactors.length) {
+    throw new Error("Poradenská simulácia potrebuje zarovnané historické faktory.");
+  }
+  const yearsBuild = Math.ceil(plan.Nm / MONTHS);
+  const yearsDraw = Math.ceil(plan.payM / MONTHS);
+  const years = yearsBuild + yearsDraw;
+  const paths = blockBootstrapPaths({
+    seriesByAsset: {
+      accumulation: accumulationFactors,
+      drawdown: drawdownFactors,
+    },
+    years,
+    runs,
+    blockYears,
+    seed,
+    seedStride,
+    circular: circularBlocks,
+  });
+  const total = plan.Nm + plan.payM;
+  const byMonth = Array.from({ length: total + 1 }, () => new Float64Array(runs));
+  const depletion = new Float64Array(runs);
+  const feeMonthly = plan.feeM / 100 / MONTHS;
+  for (let run = 0; run < runs; run += 1) {
+    const path = paths[run];
+    let balance = plan.startMC;
+    byMonth[0][run] = balance;
+    let month = 0;
+    for (let year = 0; year < yearsBuild; year += 1) {
+      const factor = Math.pow(path.accumulation[year], 1 / MONTHS) * (1 - feeMonthly);
+      for (let within = 0; within < MONTHS && month < plan.Nm; within += 1, month += 1) {
+        balance = balance * factor + plan.MnetMC;
+        byMonth[month + 1][run] = balance;
+      }
+    }
+    balance *= plan.transferF;
+    let payment = plan.R;
+    let depletedAt = Infinity;
+    let drawMonth = 0;
+    for (let year = 0; year < yearsDraw; year += 1) {
+      const factor = Math.pow(path.drawdown[yearsBuild + year], 1 / MONTHS) *
+        (1 - feeMonthly);
+      for (let within = 0; within < MONTHS && drawMonth < plan.payM;
+          within += 1, drawMonth += 1) {
+        if (depletedAt === Infinity) {
+          balance = balance * factor - payment;
+          if (balance <= 0) {
+            depletedAt = plan.Nm + drawMonth + 1;
+            balance = 0;
+          } else {
+            payment *= 1 + plan.g;
+          }
+        }
+        byMonth[plan.Nm + drawMonth + 1][run] = Math.max(0, balance);
+      }
+    }
+    depletion[run] = depletedAt;
+  }
+  const percentile = (values, quantile) => {
+    const sorted = Array.from(values).sort((a, b) => a - b);
+    return sorted[Math.min(sorted.length - 1, Math.floor(quantile * sorted.length))];
+  };
+  const p10 = [];
+  const p50 = [];
+  const p90 = [];
+  for (let index = 0; index <= total; index += 1) {
+    p10.push(percentile(byMonth[index], 0.10));
+    p50.push(percentile(byMonth[index], 0.50));
+    p90.push(percentile(byMonth[index], 0.90));
+  }
+  const sortedDepletion = Array.from(depletion).sort((a, b) => a - b);
+  // coverageCount nie je počet platných behov. Je to počet behov, ktoré musia
+  // podľa zvoleného kvantilu vydržať aspoň po hranicu dep10 (90 % = 720/800).
+  const lowerTailIndex = Math.round((1 - coverageQuantile) * runs);
+  return {
+    profileId: ADVISER_SIMULATION_PROFILE.id,
+    profileVersion: ADVISER_SIMULATION_PROFILE.version,
+    p10,
+    p50,
+    p90,
+    dep10: sortedDepletion[lowerTailIndex],
+    survivalShare: sortedDepletion.filter(value => value === Infinity).length / runs,
+    total,
+    runs,
+    blockYears,
+    seed,
+    circularBlocks,
+    coverageQuantile,
+    coverageCount: runs - lowerTailIndex,
+  };
 }
 
 function survivesHistoricalPath(path, plan, multiplier, drawReturnNet) {
@@ -422,21 +539,46 @@ function stressTest(rawScenario, {
     path.push(balance);
   }
   const capitalAtDraw = balance;
+  const runDrawdown = (startCapital, rentFactor = 1, adjustMonth = null) => {
+    let current = startCapital;
+    let paymentNow = plan.R;
+    let depleted = null;
+    const values = [];
+    for (let month = 0; month < plan.payM; month += 1) {
+      const globalMonth = plan.Nm + month;
+      const rate = inShock(globalMonth) ? shockRate : plan.i;
+      const effectivePayment = adjustMonth !== null && month >= adjustMonth
+        ? paymentNow * rentFactor : paymentNow;
+      if (depleted === null) {
+        current = current * (1 + rate) - effectivePayment;
+        if (current <= 0) {
+          depleted = month + 1;
+          current = 0;
+        } else {
+          paymentNow *= 1 + plan.g;
+        }
+      }
+      values.push(Math.max(0, current));
+    }
+    return { path: values, endingCapital: current, depletedAt: depleted };
+  };
   let payment = plan.R;
   let depletedAt = null;
   for (let month = 0; month < plan.payM; month += 1) {
     const globalMonth = plan.Nm + month;
     const rate = inShock(globalMonth) ? shockRate : plan.i;
-    balance = balance * (1 + rate) - payment;
-    if (balance <= 0 && depletedAt === null) {
-      depletedAt = globalMonth + 1;
-      balance = 0;
-    } else if (depletedAt === null) {
-      payment *= 1 + plan.g;
+    if (depletedAt === null) {
+      balance = balance * (1 + rate) - payment;
+      if (balance <= 0) {
+        depletedAt = globalMonth + 1;
+        balance = 0;
+      } else {
+        payment *= 1 + plan.g;
+      }
     }
     path.push(balance);
   }
-  return {
+  const result = {
     phase: shockStart < plan.Nm ? "accumulation" : "drawdown",
     dropPct: Number(dropPct ?? 0),
     yearsFromNow: Math.round(Number(yearsFromNow ?? 0)),
@@ -445,7 +587,45 @@ function stressTest(rawScenario, {
     depletedAt,
     path,
   };
+  if (result.phase === "accumulation" &&
+      !(s.situation === "have" && s.goal === "duration")) {
+    result.rentStressed = plan.nek
+      ? Math.max(0, capitalAtDraw * (plan.i - plan.g))
+      : rentFromCapital(capitalAtDraw, plan.payM, plan.i, plan.g, s.residualCapital);
+  }
+  if (result.phase === "drawdown") {
+    const adjustMonth = Math.max(0, shockStart - plan.Nm);
+    if (plan.nek) {
+      const endShock = Math.min(plan.payM, adjustMonth + MONTHS);
+      let current = capitalAtDraw;
+      let currentPayment = plan.R;
+      for (let month = 0; month < endShock; month += 1) {
+        const globalMonth = plan.Nm + month;
+        const rate = inShock(globalMonth) ? shockRate : plan.i;
+        current = Math.max(0, current * (1 + rate) - currentPayment);
+        currentPayment *= 1 + plan.g;
+      }
+      const sustainable = Math.max(0, current * (plan.i - plan.g));
+      result.cutPct = Math.max(0, 1 - sustainable / currentPayment) * 100;
+      result.newRent = sustainable;
+    } else if (depletedAt !== null && depletedAt - plan.Nm < plan.payM) {
+      const fails = factor => {
+        const run = runDrawdown(capitalAtDraw, factor, adjustMonth);
+        return run.depletedAt !== null || run.endingCapital < s.residualCapital;
+      };
+      let low = 0;
+      let high = 1;
+      for (let iteration = 0; iteration < 40; iteration += 1) {
+        const middle = (low + high) / 2;
+        if (fails(middle)) high = middle;
+        else low = middle;
+      }
+      result.cutPct = (1 - low) * 100;
+      result.newRent = plan.R * low;
+    }
+  }
+  return result;
 }
 
-globalThis.RentaCore = Object.freeze({MONTHS,PUBLIC_HISTORICAL_PROFILE,monthlyInflationRate,monthlyNetRate,paymentEnd,capitalForRent,rentFromCapital,monthsUntilDepleted,accumulationPath,drawdownPath,normalizeScenario,computePlan,summarizePlan,mulberry32,blockBootstrapPaths,survivesHistoricalPath,historicalResilience,stressTest});
+globalThis.RentaCore = Object.freeze({MONTHS,PUBLIC_HISTORICAL_PROFILE,ADVISER_SIMULATION_PROFILE,monthlyInflationRate,monthlyNetRate,paymentEnd,capitalForRent,rentFromCapital,monthsUntilDepleted,accumulationPath,drawdownPath,normalizeScenario,computePlan,summarizePlan,mulberry32,blockBootstrapPaths,adviserSimulation,survivesHistoricalPath,historicalResilience,stressTest});
 })();

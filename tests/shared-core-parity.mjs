@@ -2,7 +2,9 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import vm from "node:vm";
 import {
+  ADVISER_SIMULATION_PROFILE,
   PUBLIC_HISTORICAL_PROFILE,
+  adviserSimulation,
   blockBootstrapPaths,
   computePlan,
   historicalResilience,
@@ -161,4 +163,37 @@ const repeatedB = blockBootstrapPaths({
 });
 assert.deepEqual(repeatedA, repeatedB, "Bootstrap musí byť deterministický.");
 
-console.log("PASS shared core: public parity 8/8, all 800 historical paths and verdicts, aligned blocks, deterministic seed.");
+const adviserFactors = dataset.vynosy.map(value => 1 + value);
+const adviserA = adviserSimulation(newPlan, {
+  accumulationFactors: adviserFactors,
+  drawdownFactors: adviserFactors,
+});
+const adviserB = adviserSimulation(newPlan, {
+  accumulationFactors: adviserFactors,
+  drawdownFactors: adviserFactors,
+});
+assert.deepEqual(adviserA, adviserB,
+  "Poradenská simulácia musí byť deterministická pri rovnakom profile.");
+assert.equal(adviserA.runs, 800);
+assert.equal(adviserA.blockYears, 5);
+assert.equal(adviserA.circularBlocks, true);
+assert.equal(adviserA.profileId, ADVISER_SIMULATION_PROFILE.id);
+assert.equal(adviserA.profileVersion, ADVISER_SIMULATION_PROFILE.version);
+assert.equal(adviserA.coverageQuantile, 0.90);
+assert.equal(adviserA.coverageCount, 720,
+  "90 % hranica znamená 720 z 800 simulácií, nie počet platných behov.");
+assert.equal(adviserA.p10.length, newPlan.Nm + newPlan.payM + 1);
+assert.ok(adviserA.p90.at(-1) >= adviserA.p50.at(-1));
+assert.ok(adviserA.p50.at(-1) >= adviserA.p10.at(-1));
+const circularProbe = blockBootstrapPaths({
+  seriesByAsset: { a: [0, 1, 2, 3, 4, 5] },
+  years: 5,
+  runs: 50,
+  blockYears: 3,
+  circular: true,
+});
+assert.ok(circularProbe.some(path => path.a.some((value, index) =>
+  index > 0 && path.a[index - 1] === 5 && value === 0)),
+"Kruhový bootstrap musí vedieť plynulo prejsť cez hranicu datasetu.");
+
+console.log("PASS shared core: public parity 8/8, all 800 historical paths and verdicts, aligned blocks, deterministic adviser simulation.");
