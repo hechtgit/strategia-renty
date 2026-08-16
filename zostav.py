@@ -91,7 +91,13 @@ ODSTRAN = [
     (r'<div class="calculator-divider"[^>]*></div>\n', 'oddeľovač nad aplikáciou'),
 ]
 
-CSS_EMBED = 'html.embedded,body.embedded{overflow:hidden;background:transparent}\n'
+CSS_EMBED = (
+    '/* Vložený dokument nesmie mať vlastné posúvanie. Používame `hidden`, nie\n'
+    '   `clip`: Chrome vie pri pointer capture vizuálne posunúť vnorený dokument aj\n'
+    '   bez scrollbara, ale `clip` potom zakáže nášmu lockScroll() návrat na 0,0.\n'
+    '   `hidden` rám drží bez scrollbarov a zároveň dovolí okamžitú nápravu. */\n'
+    'html.embedded,body.embedded{overflow:hidden;overflow-anchor:none;background:transparent}\n'
+)
 CSS_KOTVA = '[hidden]{display:none!important}\n'
 
 SKRIPT_EMBED = """

@@ -36,7 +36,11 @@
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-html.embedded,body.embedded{overflow:hidden;background:transparent}
+/* Vložený dokument nesmie mať vlastné posúvanie. Používame `hidden`, nie
+   `clip`: Chrome vie pri pointer capture vizuálne posunúť vnorený dokument aj
+   bez scrollbara, ale `clip` potom zakáže nášmu lockScroll() návrat na 0,0.
+   `hidden` rám drží bez scrollbarov a zároveň dovolí okamžitú nápravu. */
+html.embedded,body.embedded{overflow:hidden;overflow-anchor:none;background:transparent}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:19px;
   line-height:1.5;letter-spacing:.2px;-webkit-font-smoothing:antialiased}
 .shell{max-width:1480px;margin:0 auto;padding:28px 0 42px}
@@ -515,7 +519,7 @@ function applyScenarioFromUrl(){
   const medzi=(v,min,max)=>Math.min(max,Math.max(min,v));
   S.now=Math.round(medzi(S.now,18,99));
   S.start=Math.round(medzi(S.start,S.now,120));
-  S.end=Math.round(medzi(S.end,S.start+1,150));
+  S.end=Math.round(medzi(S.end,S.start+1,110));
   S.infl=medzi(S.infl,0,10);
   S.vynos=Math.round(medzi(S.vynos,VYNOS_MIN,VYNOS_MAX)*10)/10;
   S.rent=Math.round(medzi(S.rent,500,50000));

@@ -153,7 +153,9 @@ const clamped = production({
   ...defaults, now: -10, start: 999, end: 0, rent: 999999, existing: -1,
   combo: 999999999, monthlyKnown: 999999, infl: 99, vynos: 999
 });
-const expectedClamp = { now: 18, start: 120, end: 121, rent: 50000, existing: 50000, combo: 10000000, monthlyKnown: 100000, infl: 10, vynos: 50 };
+/* `end` je zastropovaný na 110 — rovnaký horizont, aký kreslí časová os.
+   Modelácia dostáva jadro z mastera aplikácie, takže obe strany kapú rovnako. */
+const expectedClamp = { now: 18, start: 120, end: 110, rent: 50000, existing: 50000, combo: 10000000, monthlyKnown: 100000, infl: 10, vynos: 50 };
 Object.entries(expectedClamp).forEach(([key, expected]) => {
   if (clamped.S[key] !== expected) throw new Error(`Ochrana vstupu ${key}: ${clamped.S[key]} != ${expected}`);
 });
