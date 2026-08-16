@@ -683,7 +683,7 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
       </div>
       <div class="node" id="n-end" style="--d:1.05s">
         <button class="handle" id="h-end" data-key="end" role="slider" aria-label="Vek konca čerpania renty"
-          aria-valuemin="19" aria-valuemax="110" aria-valuenow="90"><span id="v-end">90</span><small id="lbl-end">koniec čerpania</small></button>
+          aria-valuemin="19" aria-valuemax="120" aria-valuenow="90"><span id="v-end">90</span><small id="lbl-end">koniec čerpania</small></button>
       </div>
     </div>
     <section class="mob" id="mob" aria-live="polite" aria-label="Súhrn vášho plánu"></section>
@@ -992,8 +992,8 @@ function applyScenarioFromUrl(){
   /* Horná hranica je o rok nižšia než koniec osi: koniec čerpania musí mať
      kam nasadnúť. Bez toho vyrobil ručne upravený odkaz záporné obdobie
      čerpania a dôveryhodne vyzerajúci nezmysel („renta za 0 €"). */
-  S.start=Math.round(medzi(S.start,S.now,109));
-  S.end=Math.round(medzi(S.end,S.start+1,110));
+  S.start=Math.round(medzi(S.start,S.now,119));
+  S.end=Math.round(medzi(S.end,S.start+1,120));
   S.infl=medzi(S.infl,0,10);
   S.vynos=Math.round(medzi(S.vynos,VYNOS_MIN,VYNOS_MAX)*10)/10;
   S.rent=Math.round(medzi(S.rent,500,50000));
@@ -1019,8 +1019,10 @@ const SC={rent:mkScale(500,50000,2.1,v=>v<10000?100:500),
   c0:mkScale(50000,30000000,2.6,v=>v<1000000?10000:100000),
   /* Investičné sumy sa hýbu po celých tisícoch, mesačné po stovkách. Pevný
      krok drží čísla okrúhle a zároveň zjemňuje posun na hornom konci osi,
-     kde predtým jazdec skákal po 50 000 € (resp. 500 € pri mesačnej). */
-  combo:mkScale(0,10000000,2.4,()=>1000),
+     kde predtým jazdec skákal po 50 000 € (resp. 500 € pri mesačnej). Nad pol
+     miliónom sa drží násobkov piatich tisíc — vtedy je okrúhlejšie číslo
+     čitateľnejšie než presnosť na tisíc. */
+  combo:mkScale(0,10000000,2.4,v=>v<500000?1000:5000),
   monthly:mkScale(0,100000,2.1,()=>100)};
 
 /* ===== finančné jadro (zhodné s ostrou kalkulačkou) ===== */
@@ -1114,10 +1116,10 @@ if(QS.has('preview'))window.__previewScenarioURL=scenarioURL;
    konkrétny scenár sa na nich overuje až na osobnej konzultácii. */
 
 /* ===== os ===== */
-/* Desktopová os má pevný horizont do 110 rokov. Dynamické rozširovanie pri
+/* Desktopová os má pevný horizont do 120 rokov — najvyšší doložený ľudský vek. Dynamické rozširovanie pri
    pravom okraji menilo geometriu priamo počas pointer gesta a v kombinácii so
    Squarespace dokázalo znovu načítať celú rodičovskú stránku. */
-const AXMAX=110;
+const AXMAX=120;
 const FA=40,FS=14;
 const pct=v=>v<=FA?v/FA*FS:FS+(v-FA)/(AXMAX-FA)*(100-FS);
 const ageAt=p=>p<=FS?p/FS*FA:FA+(p-FS)/(100-FS)*(AXMAX-FA);
@@ -1170,7 +1172,7 @@ function render(){
   const derived=S.sit==='have'&&S.goal==='duration';
   let endEff=S.end;
   if(derived&&!o.warn)endEff=o.forever?Math.max(S.start+1,100)
-    :Math.min(110,Math.max(S.start+1,Math.round(S.now+o.N+(o.months||0)/12)));
+    :Math.min(120,Math.max(S.start+1,Math.round(S.now+o.N+(o.months||0)/12)));
   const openEnd=!!(o.nek||o.forever);
   lp.classList.toggle('perp',openEnd);
   lp.classList.toggle('longevity-on',endEff>=100&&!openEnd);
@@ -1394,7 +1396,7 @@ function setAge(k,v){
   v=Math.round(v);
   if(k==='now')S.now=Math.max(18,Math.min(v,S.start));
   if(k==='start')S.start=Math.max(S.now,Math.min(v,S.end-1));
-  if(k==='end')S.end=Math.min(110,Math.max(S.start+1,v));
+  if(k==='end')S.end=Math.min(120,Math.max(S.start+1,v));
   render();
 }
 /* Uchopiť sa dá milník na čiare aj celá karta — obe posúvajú ten istý bod v čase. */
@@ -1629,7 +1631,7 @@ function syncSteps(endEff,openEnd,derived){
   const medze={
     now:[S.now>18,S.now<S.start],
     start:[S.start>S.now,S.start<S.end-1],
-    end:[!(derived||openEnd)&&S.end>S.start+1,!(derived||openEnd)&&S.end<110]
+    end:[!(derived||openEnd)&&S.end>S.start+1,!(derived||openEnd)&&S.end<120]
   };
   document.querySelectorAll('.step').forEach(b=>{
     const m=medze[b.dataset.step];

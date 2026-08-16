@@ -153,25 +153,25 @@ const clamped = production({
   ...defaults, now: -10, start: 999, end: 0, rent: 999999, existing: -1,
   combo: 999999999, monthlyKnown: 999999, infl: 99, vynos: 999
 });
-/* `end` je zastropovaný na 110 — rovnaký horizont, aký kreslí časová os —
+/* `end` je zastropovaný na 120 — rovnaký horizont, aký kreslí časová os —
    a `start` o rok nižšie, aby koniec čerpania mal kam nasadnúť.
    Modelácia dostáva jadro z mastera aplikácie, takže obe strany kapú rovnako. */
-const expectedClamp = { now: 18, start: 109, end: 110, rent: 50000, existing: 50000, combo: 10000000, monthlyKnown: 100000, infl: 10, vynos: 50 };
+const expectedClamp = { now: 18, start: 119, end: 120, rent: 50000, existing: 50000, combo: 10000000, monthlyKnown: 100000, infl: 10, vynos: 50 };
 Object.entries(expectedClamp).forEach(([key, expected]) => {
   if (clamped.S[key] !== expected) throw new Error(`Ochrana vstupu ${key}: ${clamped.S[key]} != ${expected}`);
 });
 
 /* Ručne upravený odkaz nesmie vyrobiť záporné obdobie čerpania. Predtým prešiel
-   `start` až na 120 pri osi končiacej na 110, takže vznikol scenár s rentou
+   `start` za koniec osi, takže vznikol scenár s rentou
    „za 0 €", ktorý vyzeral ako náš oficiálny výstup. */
 [
-  { now: 35, start: 120, end: 110 },
+  { now: 35, start: 130, end: 120 },
   { now: 35, start: 999, end: 0 },
   { now: 99, start: 99, end: 99 },
 ].forEach(params => {
   const api = production({ ...defaults, ...params });
   const s = api.S;
-  if (!(s.now <= s.start && s.start < s.end && s.end <= 110)) {
+  if (!(s.now <= s.start && s.start < s.end && s.end <= 120)) {
     throw new Error(`Neplatný odkaz prešiel: now=${s.now} start=${s.start} end=${s.end}`);
   }
   const o = api.compute();
@@ -201,12 +201,12 @@ if (durationSummary.vyplatene > durationCore.avail * 3) {
   throw new Error("Objem vyplatenej renty je neprimeraný voči dostupnému kapitálu.");
 }
 
-/* Strop veku 110 musí platiť rovnako v aplikácii aj v modelácii — inak sa
+/* Strop veku 120 musí platiť rovnako v aplikácii aj v modelácii — inak sa
    kanály v krajnom scenári rozídu na štítku „Plánovaný horizont". */
 const appSource = fs.readFileSync(new URL("./cara-zivota.html", import.meta.url), "utf8");
 [["aplikácia", appSource], ["modelácia", result]].forEach(([name, text]) => {
-  if (!text.includes(":Math.min(110,Math.max(S.start+1,Math.round(S.now+o.N+(o.months||0)/12)));")) {
-    throw new Error(`Odvodený horizont v kanáli „${name}" nie je zastropovaný na 110.`);
+  if (!text.includes(":Math.min(120,Math.max(S.start+1,Math.round(S.now+o.N+(o.months||0)/12)));")) {
+    throw new Error(`Odvodený horizont v kanáli „${name}" nie je zastropovaný na 120.`);
   }
 });
 
