@@ -63,9 +63,9 @@ details.adv[open] summary::after{content:"–"}
 details.adv .inner{padding:6px 17px 18px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .chips{display:flex;flex-direction:column;gap:10px;margin-top:12px}
 .chip{border:1px solid var(--line);background:var(--inset);border-radius:0;padding:14px 18px;font-size:17px;cursor:pointer;font:inherit;color:var(--ink);text-align:left;width:100%}
-.chip.active{background:var(--gold);border-color:var(--gold);color:#1a1a1a;font-weight:600}
+.chip.active{background:var(--gold-strong);border-color:var(--gold-strong);color:#15120e;font-weight:600}
 .chip small{display:block;font-size:14.5px;color:var(--muted);font-weight:400;margin-top:3px}
-.chip.active small{color:rgba(26,26,26,.78)}
+.chip.active small{color:#2c241b}
 .hint{font-size:15px;color:var(--muted);margin-top:10px}
 
 /* ---------- result ---------- */
@@ -157,6 +157,9 @@ body.vystup .grid{grid-template-columns:1fr}
 .disclaimer b{color:#a29c93}
 :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
+/* Poradenský režim nemá používať skenovací ani pulzujúci lúč. Verejný režim
+   zostáva nedotknutý; bežné prechody ovládacích prvkov ostávajú zachované. */
+body.poradca *,body.poradca *::before,body.poradca *::after{animation:none!important}
 
 /* ---------- zvýraznenie boxov (variant D: svetlejšia výplň + jemná zlatá linka) ---------- */
 .panel{background:#232323}
@@ -491,6 +494,7 @@ let stressOn=false;
 const PUBLIC_HOST=/(^|\.)hechtberger\.com$|^hechtgit\.github\.io$/i.test(location.hostname);
 const qs=location.search+location.hash;
 const PUBLIC = /poradca/i.test(qs) ? false : (PUBLIC_HOST || /verejna/i.test(qs));
+document.body.classList.toggle('poradca',!PUBLIC);
 /* súkromný výstup: scenár zakódovaný v URL (?vystup&...) — čisté zobrazenie bez formulára */
 const OUTPUT_MODE=/[?&#]vystup/.test(qs);
 
@@ -1096,13 +1100,24 @@ document.querySelectorAll('#pills-mode .pill').forEach(b=>b.addEventListener('cl
 document.querySelectorAll('#pills-typ .pill').forEach(b=>b.addEventListener('click',()=>{typ=b.dataset.typ;syncUI();render()}));
 document.querySelectorAll('#pills-goal .pill').forEach(b=>b.addEventListener('click',()=>{goal=b.dataset.goal;syncUI();render()}));
 document.querySelectorAll('#pills-fund .pill').forEach(b=>b.addEventListener('click',()=>{fund=b.dataset.fund;syncUI();render()}));
-document.querySelectorAll('#chips-scenar .chip').forEach(b=>b.addEventListener('click',()=>{
-  document.querySelectorAll('#chips-scenar .chip').forEach(p=>p.classList.toggle('active',p===b));
-  scen=SCENARIOS[b.dataset.sc];
+function selectScenario(button){
+  const next=SCENARIOS[button.dataset.sc];
+  if(!next) return;
+  document.querySelectorAll('#chips-scenar .chip').forEach(p=>{
+    const selected=p===button;
+    p.classList.toggle('active',selected);
+    p.setAttribute('aria-pressed',String(selected));
+  });
+  scen=next;
   const r=Math.round(scenReturn(scen)*10)/10;
   $('in-rinv').value=pct(r); $('in-rrent').value=pct(r);
+  syncUI();
   render();
-}));
+}
+document.querySelectorAll('#chips-scenar .chip').forEach(b=>{
+  b.setAttribute('aria-pressed',String(b.classList.contains('active')));
+  b.addEventListener('click',()=>selectScenario(b));
+});
 /* profilové labely aj predvyplnené polia z JEDNÉHO zdroja (scenReturn) — žiadny hardcode, žiadny dvojzdroj */
 document.querySelectorAll('#chips-scenar .chip').forEach(b=>{ const s=SCENARIOS[b.dataset.sc];
   b.querySelector('small').textContent=`${pct(Math.round(scenReturn(s)*10)/10)} % p.a. (~${Math.round(s.eq*100)} % akcií)`; });
