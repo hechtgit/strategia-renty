@@ -52,7 +52,10 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font
 .tick::before{content:"";position:absolute;left:50%;top:-7px;width:1px;height:5px;background:rgba(183,175,165,.3)}
 .axis-cap{position:absolute;right:-2px;top:52px;color:rgba(183,175,165,.55);font-size:15px;pointer-events:none}
 .longevity{position:absolute;right:0;top:76px;color:var(--gold);font-size:15px;opacity:0;transition:opacity .3s;pointer-events:none}
-#lp.longevity .longevity{opacity:1}
+/* Stav sa na koreni volá inak než popisok. Rovnaké meno by `.longevity`
+   nechalo dopadnúť aj na samotné #lp — celá aplikácia by po prekročení
+   veku 100 dostala opacity:0 a position:absolute, teda by zmizla. */
+#lp.longevity-on .longevity{opacity:1}
 
 /* ===== milník: úchyt vyrastá z čiary a nesie kartu ===== */
 .node{position:absolute;top:23px;left:0;transform:translate(-50%,-50%);z-index:7}
@@ -1119,7 +1122,7 @@ function render(){
   AXMAX=endEff<=100?110:Math.min(150,Math.max(110,Math.ceil((endEff+2)/10)*10));
 
   lp.classList.toggle('perp',openEnd);
-  lp.classList.toggle('longevity',endEff>=100&&!openEnd);
+  lp.classList.toggle('longevity-on',endEff>=100&&!openEnd);
 
   $('blk-build').hidden=S.sit!=='build';
   $('blk-have').hidden=S.sit!=='have';
