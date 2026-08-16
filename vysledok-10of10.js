@@ -49,8 +49,8 @@
     const target=document.getElementById("s-value1")?.textContent.trim()||"—";
     const success=(value(0).match(/[0-9]+/)||["—"])[0],meta600=value(1),meta720=value(2);
     const približne=v=>{const n=Number(String(v).replace(/[^0-9-]/g,""));return Number.isFinite(n)?fmt(Math.round(n/1000)*1000):v;};
-    const sentence=sit==="have"?"Váš dnešný majetok":mode==="lump"?"Váš dnešný vklad":"Všetky vaše vklady počas budovania";
-    const label=document.getElementById("s1-k");if(label)label.textContent=sit==="have"?"Váš majetok dnes":mode==="lump"?"Koľko vložíte dnes":"Koľko vložíte spolu";
+    const sentence=sit==="have"?"Váš dnešný majetok":mode==="lump"?"Vaša dnešná investícia":"Všetky vaše investície počas budovania";
+    const label=document.getElementById("s1-k");if(label)label.textContent=sit==="have"?"Váš majetok dnes":mode==="lump"?"Koľko investujete dnes":"Koľko investujete spolu";
     odolnost.querySelector("h2").textContent="Obstál by váš plán aj pri rozdielnom vývoji trhov?";
     const intro=document.getElementById("odolnost-uvod");
     if(intro)intro.textContent="Základný prepočet počíta každý rok s rovnakým zhodnotením, ktoré ste zadali. V 800 modelovaných simuláciách meníme vývoj iba počas budovania majetku. Po začatí renty všetky simulácie používajú rovnaký plánovací výnos 4 % ročne po investičných nákladoch, pred infláciou.";
@@ -79,7 +79,7 @@
     if(q.get("pension")==="perpetuity")return;
     const s1=document.getElementById("s1-v"),s2=document.getElementById("s2-v"),s3=document.getElementById("s3-v"),k2=document.getElementById("s2-k"),k3=document.getElementById("s3-k"),pod=document.getElementById("suhrn-pod");
     const num=el=>Number((el?.textContent||"").replace(/[^0-9-]/g,""));
-    if(k2)k2.textContent="Nominálny súčet vyplatenej renty";if(k3)k3.textContent="Rozdiel medzi nominálnou rentou a vkladmi";
+    if(k2)k2.textContent="Nominálny súčet vyplatenej renty";if(k3)k3.textContent="Rozdiel medzi nominálnou rentou a investíciami";
     if(s1&&s2&&s3&&Number.isFinite(num(s1))&&Number.isFinite(num(s2)))s3.textContent=fmt(num(s2)-num(s1));
     if(pod)pod.textContent="Ide o nominálny súčet mesačných rent, ktoré počas čerpania rastú so zadanou infláciou. Nie je to suma v dnešnej kúpnej sile; údaje sú pred zdanením.";
   }

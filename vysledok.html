@@ -602,7 +602,7 @@ function compute(){
 }
 
 /* Súhrn, ktorý v samotnej simulácii nie je: koľko sa za celé obdobie vyplatí,
-   koľko z toho klient vloží a koľko pridá výnos. Sú to čísla, ktoré scenáru dajú
+   koľko z toho klient investuje a koľko pridá výnos. Sú to čísla, ktoré scenáru dajú
    mieru — mesačná renta sama osebe nepovie, o akých sumách sa rozhodujeme.
    Pri rente bez konca sa celková výplata nedá sčítať, vtedy sa neuvádza. */
 function prehladCiastok(){
@@ -653,7 +653,7 @@ function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;
   return((t^t>>>14)>>>0)/4294967296}}
 
 /* Dráhy sa generujú RAZ a všetky varianty kapitálu sa testujú nad tou istou
-   maticou. Inak by „koľko obstálo" kolísalo aj pri nezmenenom vklade a pôlenie
+   maticou. Inak by „koľko obstálo" kolísalo aj pri nezmenenej investícii a pôlenie
    by hľadalo hranicu v šume. */
 function refDrahy(rokovA,rokovC){
   const fA=REF_FAKTORY_A;
@@ -677,7 +677,7 @@ function refDrahy(rokovA,rokovC){
    vydržala celé plánované obdobie. */
 function prezilo(d,o,nasobok){
   const mFee=FEE_M/100/12, e=1-FEE_IN/100;
-  /* Kto majetok už má, nič nevkladá — jeho kapitál rovno vstupuje do priebehu
+  /* Kto majetok už má, nič neinvestuje — jeho kapitál rovno vstupuje do priebehu
      a vstupný poplatok sa naň nevzťahuje. */
   let bal=S.sit==='have' ? S.existing*nasobok : (o.P0||0)*nasobok*e;
   const mes=S.sit==='have' ? 0 : (o.M||0)*nasobok*e;
@@ -705,7 +705,7 @@ const obstalo=(D,o,nasobok)=>D.reduce((n,d)=>n+(prezilo(d,o,nasobok)?1:0),0);
    takže pôlenie má zmysel. */
 function nasobokPreMetu(D,o,meta){
   if(obstalo(D,o,1)>=meta)return 1;
-  /* Pri veľmi optimistickom zadaní je vklad drobný a potrebný násobok veľký —
+  /* Pri veľmi optimistickom zadaní je investícia drobná a potrebný násobok veľký —
      strop musí byť ďaleko, inak by sme namiesto sumy ukázali pomlčku. */
   let lo=1,hi=2;
   while(obstalo(D,o,hi)<meta){hi*=2;if(hi>1e6)return null}
@@ -804,7 +804,7 @@ function vykresli(){
       $('t-value').textContent=fmtEur(o.P0);
       $('t-sub').textContent='Renta sa začína čerpať hneď.';
     }else if(S.mode==='lump'){
-      $('t-label').textContent='Jednorazový vklad';
+      $('t-label').textContent='Jednorazová investícia';
       $('t-value').textContent=fmtEur(o.P0);
       $('t-sub').textContent=`Obdobie budovania kapitálu: ${yrs(o.N)}.`;
     }else if(S.mode==='monthly'){
@@ -812,12 +812,12 @@ function vykresli(){
       $('t-value').textContent=fmtEur(o.M);
       $('t-sub').textContent=`Pravidelne počas ${yrs(o.N)}.`;
     }else{
-      $('t-label').textContent='Jednorazový vklad';
+      $('t-label').textContent='Jednorazová investícia';
       $('t-value').textContent=fmtEur(S.combo);
       if(o.calculatesRent){
         $('t-sub').innerHTML=`a mesačne <strong>${fmtEur(o.M)}</strong> počas ${o.N} rokov.`;
       }else if(o.covers){
-        $('t-sub').textContent=`Vklad na rentu stačí, mesačne už netreba dopĺňať.`;
+        $('t-sub').textContent=`Investícia na rentu stačí, mesačne už netreba dopĺňať.`;
       }else{
         $('t-sub').innerHTML=`a mesačne <strong>${fmtEur(o.M)}</strong> počas ${o.N} rokov.`;
       }
@@ -852,17 +852,17 @@ function vykresli(){
   if(c){
     $('suhrn').hidden=false;
     if(c.nekonecne){
-      $('s1-k').textContent='Vložený kapitál';    $('s1-v').textContent=fmtEur(c.vklady);
+      $('s1-k').textContent='Investovaný kapitál';    $('s1-v').textContent=fmtEur(c.vklady);
       $('s2-k').textContent='Kapitál pri štarte';  $('s2-v').textContent=fmtEur(c.kapital);
       $('s3-k').textContent='Čerpanie';            $('s3-v').textContent='bez konca';
       $('suhrn-pod').textContent='Renta beží z výnosov, takže samotný kapitál sa nemíňa — '
         +'zostáva vám aj tým, ktorým ho raz odovzdáte.';
     }else{
-      $('s1-k').textContent='Vložený kapitál';           $('s1-v').textContent=fmtEur(c.vklady);
+      $('s1-k').textContent='Investovaný kapitál';           $('s1-v').textContent=fmtEur(c.vklady);
       $('s2-k').textContent='Objem vyplatenej renty';    $('s2-v').textContent=fmtEur(c.vyplatene);
       $('s3-k').textContent='Modelovaný rozdiel';  $('s3-v').textContent=fmtEur(c.vynos);
       $('suhrn-pod').textContent='Renta v objeme '+fmtEur(c.vyplatene)+' je počas čerpania krytá '
-        +'vloženým kapitálom a modelovaným výnosom portfólia. Sumy sú nominálne, pred zdanením.';
+        +'investovaným kapitálom a modelovaným výnosom portfólia. Sumy sú nominálne, pred zdanením.';
     }
   }
 
@@ -904,7 +904,7 @@ function vykresli(){
       +'počíta s konštantným čistým nominálnym výnosom '+pctTxt(REF_CERPANIE)+' % ročne '
       +'a so zadanou infláciou. Skutočné výnosy kolíšu a najmä slabé výsledky na '
       +'začiatku čerpania môžu skrátiť obdobie, počas ktorého renta vydrží. Sumy sú '
-      +'súčtom vkladov za celé obdobie budovania majetku.';
+      +'súčtom investícií za celé obdobie budovania majetku.';
   }
   document.dispatchEvent(new Event('odolnost-hotova'));
   };
@@ -945,9 +945,9 @@ function vykresli(){
 
   /* ===== východiská a metodika ===== */
   const sposob=S.sit==='have'?'existujúci majetok'
-    :(S.mode==='lump'?'jednorazový vklad'
+    :(S.mode==='lump'?'jednorazová investícia'
       :S.mode==='monthly'?'pravidelné mesačné investovanie'
-      :'jednorazový vklad a pravidelné investovanie');
+      :'jednorazová investícia a pravidelné investovanie');
   const body=[
     `Spôsob tvorby kapitálu: ${sposob}`,
     `Zhodnotenie: ${pctTxt(o.rPct)} % ročne (váš predpoklad)`,

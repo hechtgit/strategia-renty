@@ -12,7 +12,7 @@ await import("./pdf-font.js");
 
 const el = textContent => ({ textContent });
 const testItems = [
-  el("Váš dnešný vklad: 306 384 €."),
+  el("Vaša dnešná investícia: 306 384 €."),
   el("Cieľ: renta 3 000 € mesačne od 65 do 90 rokov."),
   el("Základný prepočet: pri rovnakom zhodnotení každý rok má táto suma do veku 65 rokov vyrásť na 871 922 €. V modelovaných simuláciách sa zhodnotenie počas budovania každý rok mení.")
 ];
@@ -26,9 +26,9 @@ function row(nadpis, vysvetlenie, hodnota, doplnenie) {
 }
 
 const rows = [
-  row("Váš dnešný vklad: 306 384 €", "Testujeme, či tento vstup dokáže financovať všetky zvolené renty.", "Všetky renty vyplatil v 268 z 800 simulácií", "3 000 € mesačne od 65 do 90 rokov. Ide o podiel v tomto modeli, nie odhad budúcej pravdepodobnosti."),
-  row("Váš dnešný vklad: 735 305 €", "Ilustračný vyšší vstup namiesto 306 384 €; nejde o odporúčanie.", "Všetky renty by vyplatil aspoň v 600 z 800 simulácií", "75 % simulácií v tomto modeli, nie odhad 75 % budúcej pravdepodobnosti."),
-  row("Váš dnešný vklad: 1 115 116 €", "Ďalšia ilustrácia citlivosti; nejde o odporúčanie.", "Všetky renty by vyplatil aspoň v 720 z 800 simulácií", "90 % simulácií v tomto modeli, nie odhad 90 % budúcej pravdepodobnosti.")
+  row("Vaša dnešná investícia: 306 384 €", "Testujeme, či tento vstup dokáže financovať všetky zvolené renty.", "Všetky renty vyplatil v 268 z 800 simulácií", "3 000 € mesačne od 65 do 90 rokov. Ide o podiel v tomto modeli, nie odhad budúcej pravdepodobnosti."),
+  row("Vaša dnešná investícia: 735 305 €", "Ilustračný vyšší vstup namiesto 306 384 €; nejde o odporúčanie.", "Všetky renty by vyplatil aspoň v 600 z 800 simulácií", "75 % simulácií v tomto modeli, nie odhad 75 % budúcej pravdepodobnosti."),
+  row("Vaša dnešná investícia: 1 115 116 €", "Ďalšia ilustrácia citlivosti; nejde o odporúčanie.", "Všetky renty by vyplatil aspoň v 720 z 800 simulácií", "90 % simulácií v tomto modeli, nie odhad 90 % budúcej pravdepodobnosti.")
 ];
 
 function value(textContent) {
@@ -44,14 +44,14 @@ function card(nadpis, pairs, pod) {
   };
 }
 const cards = {
-  "m-today": card("Dnes", [["Jednorazový vklad", "306 384 €"]], "Obdobie budovania kapitálu: 15 rokov."),
+  "m-today": card("Dnes", [["Jednorazová investícia", "306 384 €"]], "Obdobie budovania kapitálu: 15 rokov."),
   "m-start": card("Začiatok čerpania", [["Potrebný kapitál", "871 922 €"], ["Mesačná renta pri začiatku", "4 674 €"]], "Mesačne, pri zohľadnení inflácie."),
   "m-end": card("Koniec čerpania", [["Plánovaný horizont", "90 rokov"]], "25 rokov pravidelného čerpania.")
 };
 const summaryItems = [
-  ["Koľko vložíte dnes", "306 384 €"],
+  ["Koľko investujete dnes", "306 384 €"],
   ["Objem vyplatenej renty", "2 072 852 €"],
-  ["Rozdiel medzi nominálnou rentou a vkladmi", "1 766 468 €"]
+  ["Rozdiel medzi nominálnou rentou a investíciami", "1 766 468 €"]
 ].map(([k, v]) => ({ querySelector: selector => selector === ".k" ? el(k) : selector === ".v" ? el(v) : null }));
 
 const byId = {
@@ -100,7 +100,7 @@ globalThis.document = {
       el("Výpočet zohľadňuje vstupný poplatok 1,5 %, správu 0,9 % ročne a infláciu 3 % ročne.")
     ];
     if (selector === ".recap li") return [
-      el("Spôsob tvorby kapitálu: jednorazový vklad"), el("Zhodnotenie: 8,3 % ročne"), el("Inflácia: 3 % ročne")
+      el("Spôsob tvorby kapitálu: jednorazová investícia"), el("Zhodnotenie: 8,3 % ročne"), el("Inflácia: 3 % ročne")
     ];
     return [];
   }

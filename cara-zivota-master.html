@@ -100,6 +100,9 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font
 .sl{display:block;margin:12px 0 0}
 .sl .row{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
 .sl .k{font-size:16px;color:var(--muted)}
+/* Spresnenie „v dnešných cenách" patrí na vlastný riadok pod popis a nesmie sa
+   lámať — v úzkej karte by sa inak roztrieštilo na štyri riadky. */
+.sl .k-note{display:block;white-space:nowrap;font-size:13px;line-height:1.35;margin-top:1px;color:var(--muted)}
 .sl .v{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
 input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:22px;margin:6px 0 0;background:transparent;cursor:pointer}
 input[type=range]::-webkit-slider-runnable-track{height:3px;background:rgba(255,255,255,.2)}
@@ -483,7 +486,7 @@ html,body{background:var(--bg)}
 .tg button.on{background:#2b2118;border-color:#2b2118;color:#fff;font-weight:600}
 .tg button:hover{border-color:rgba(255,255,255,.7)}
 .tg button.on:hover{border-color:#2b2118}
-.sl .k,.out .k{color:var(--on-gold-soft)}
+.sl .k,.sl .k-note,.out .k{color:var(--on-gold-soft)}
 .sl .v,.out .v{color:var(--on-gold)}
 .out .v small{color:var(--on-gold-soft)}
 .out{border-top-color:var(--on-gold-line)}
@@ -725,7 +728,7 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
             <input type="range" id="sl-monthly-known" min="0" max="1000" value="0" aria-label="Pravidelná mesačná investícia">
           </label>
         </div>
-        <div class="out" id="fund-out"><div class="k" id="fund-k">Vložím dnes</div><div class="v" id="fund-v">—</div></div>
+        <div class="out" id="fund-out"><div class="k" id="fund-k">Investujem dnes</div><div class="v" id="fund-v">—</div></div>
       </div>
 
       <div id="blk-have" hidden>
@@ -765,7 +768,8 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
       </div>
 
       <label class="sl" id="sl-rent-wrap">
-        <span class="row"><span class="k" id="rent-k">Chcem mesačne (v dnešných cenách)</span><span class="v" id="rent-v">3 000 €</span></span>
+        <span class="row"><span class="k" id="rent-k">Chcem mesačne</span><span class="v" id="rent-v">3 000 €</span></span>
+        <small class="k-note" id="rent-note">(v dnešných cenách)</small>
         <input type="range" id="sl-rent" min="0" max="1000" value="0" aria-label="Koľko chcem mesačne">
       </label>
 
@@ -1073,7 +1077,7 @@ function compute(){
 }
 
 /* Súhrn, ktorý v samotnej simulácii nie je: koľko sa za celé obdobie vyplatí,
-   koľko z toho klient vloží a koľko pridá výnos. Sú to čísla, ktoré scenáru dajú
+   koľko z toho klient investuje a koľko pridá výnos. Sú to čísla, ktoré scenáru dajú
    mieru — mesačná renta sama osebe nepovie, o akých sumách sa rozhodujeme.
    Pri rente bez konca sa celková výplata nedá sčítať, vtedy sa neuvádza. */
 function prehladCiastok(){
@@ -1213,7 +1217,7 @@ function render(){
   if(o.warn){txt($('fund-v'),'—');txt($('have-v'),'—')}
   else if(S.sit==='build'){
     if(o.immediate){txt($('fund-k'),'Musím mať pripravené');money($('fund-v'),o.P0)}
-    else if(S.mode==='lump'){txt($('fund-k'),'Vložím dnes');money($('fund-v'),o.P0)}
+    else if(S.mode==='lump'){txt($('fund-k'),'Investujem dnes');money($('fund-v'),o.P0)}
     else if(o.calculatesRent){txt($('fund-k'),'Dosiahnuteľná renta');money($('fund-v'),o.Rtoday,'/ mes.')}
     else if(o.covers){txt($('fund-k'),'Jednorazová investícia');txt($('fund-v'),'Postačuje')}
     else{txt($('fund-k'),'Odkladám mesačne');money($('fund-v'),o.M,'/ mes.')}
@@ -1255,7 +1259,7 @@ function render(){
     $('out-fut').hidden=!showFut;
     if(showFut){txt($('fut-k'),'Vtedy mi to vyplatí');money($('fut-v'),o.R,'/ mes.')}
   }
-  txt($('rent-k'),o.rast?'Chcem mesačne (v dnešných cenách)':'Chcem mesačne');
+  $('rent-note').hidden=!o.rast;
 
   /* karta POSLEDNÁ RENTA */
   const leg=$('leg');
