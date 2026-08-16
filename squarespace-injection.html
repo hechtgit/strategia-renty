@@ -237,8 +237,16 @@
        najprv narástla nad hero sekciou a o chvíľu sa presunula, čo spôsobuje CLS. */
     var povodnaAudioKotva = document.getElementById("adam-audio-mount");
     var cielAudio = document.getElementById("cz-audio");
-    if (povodnaAudioKotva && cielAudio && povodnaAudioKotva.parentNode !== cielAudio)
-      cielAudio.appendChild(povodnaAudioKotva);
+    if (povodnaAudioKotva) {
+      /* Globálny prehrávač sa môže na stránke vykresliť skôr než tento page
+         injection. Kotve preto priradíme správny responzívny slug ešte pred
+         presunom a prípadný prehrávač s nesprávnym zdrojom necháme znovu
+         vytvoriť nižšie. */
+      povodnaAudioKotva.setAttribute("data-adam-audio-slug", audioSlug);
+      povodnaAudioKotva.setAttribute("data-adam-audio-wrap", "false");
+      if (cielAudio && povodnaAudioKotva.parentNode !== cielAudio)
+        cielAudio.appendChild(povodnaAudioKotva);
+    }
   }
 
   /* 3. Audio: prehrávač beží skôr, než vznikne kotva vyššie, a nemá vlastný retry.
@@ -248,6 +256,16 @@
     var mount = document.getElementById("cz-audio");
     if (!mount) return;                                         // kotva ešte nie je
     var existujuci = document.getElementById("adam-player");
+    if (existujuci) {
+      var zvolenySlug = mount.getAttribute("data-adam-audio-slug") || "";
+      var existujuceAudio = existujuci.querySelector("audio");
+      var existujuciZdroj = existujuceAudio ? (existujuceAudio.currentSrc || existujuceAudio.src || "") : "";
+      if (zvolenySlug && existujuciZdroj && existujuciZdroj.indexOf("/" + zvolenySlug + ".mp3") === -1) {
+        existujuci.remove();
+        window.__czPrehravacNacitany = false;
+        existujuci = null;
+      }
+    }
     if (existujuci) {
       if (existujuci.parentNode !== mount) mount.appendChild(existujuci);
       return;
