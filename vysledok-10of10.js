@@ -20,11 +20,6 @@
         ? `${ciel} ${historickyDovetok}`
         : `${ciel} Nižšie uvidíte hlavné čísla plánu a predpoklady, z ktorých výpočet vychádza.`;
     }
-    const consult=document.querySelector(".next"),title=consult?.querySelector("h2"),paragraphs=consult?.querySelectorAll("p");
-    if(title)title.textContent="Váš plán v dnešnom kontexte";
-    if(paragraphs?.[0])paragraphs[0].textContent="Na osobnej konzultácii zasadíme váš plán do kontextu skutočného majetku a doplníme pohľad založený na aktuálnych dlhodobých očakávaniach popredných svetových investičných inštitúcií.";
-    if(paragraphs?.[1])paragraphs[1].textContent="Vychádzame pritom z aktuálnych dlhodobých očakávaní výnosov a rizík popredných svetových investičných inštitúcií (Capital Market Assumptions, CMA). Nejde o predpoveď ani garanciu.";
-    if(paragraphs?.[2])paragraphs[2].textContent="Váš scenár zasadíme do štruktúry skutočného majetku, jeho likvidity, rizika a účelu. Spoločne posúdime, čo z dostupných údajov pre váš plán vyplýva a či potrebuje rezervu alebo úpravu.";
   }
 
   function exceptions(){

@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Asap:wght@400;500;600;700&family=Lora:wght@400;600;700&family=PT+Serif:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="vysledok-10of10.css?v=20260815-6">
+<link rel="stylesheet" href="vysledok-10of10.css?v=20260816-1">
 <style>
 :root{
   --bg:#292929;--panel:#242424;--inset:#2b2b2b;--surface:#ae8753;--ink:#fff;
@@ -145,14 +145,20 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
   border-radius:50%;background:var(--gold)}
 
 /* ===== ďalší krok ===== */
-.next{background:linear-gradient(135deg,#bd965f 0%,#b1874d 100%);border:1px solid rgba(72,48,23,.42);
-  border-radius:6px;padding:38px;margin-top:8px;box-shadow:0 18px 44px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.22)}
-.next-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:76px;align-items:start}
-.next-copy,.next-action{min-width:0}
-.next-action{border-left:1px solid rgba(52,36,21,.3);padding-left:58px}
-.next h2{font-family:var(--serif);font-size:34px;font-weight:700;line-height:1.12;margin:0;color:var(--on-gold)}
-.next p{color:var(--on-gold);font-size:17px;line-height:1.55;margin:11px 0 0}
-.next p+p{margin-top:12px}
+.next{position:relative;overflow:visible;background:linear-gradient(135deg,#bd965f 0%,#b1874d 100%);border:1px solid rgba(72,48,23,.42);
+  border-radius:6px;padding:58px;margin-top:8px;box-shadow:0 18px 44px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.22)}
+.next-head{position:relative;padding-right:226px}
+.next-portrait{display:block;position:absolute;top:-28px;right:0;width:198px;height:198px;border-radius:50%;overflow:hidden;border:2px solid rgba(154,105,41,.78);box-shadow:0 12px 28px rgba(50,31,14,.2);background:#171c22 url("portrait-petr-consultation.jpg") 50% 50%/cover no-repeat}
+.next-kicker{display:block;margin:0 0 14px;color:var(--on-gold);font-size:16px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.next h2{font-family:var(--serif);font-size:42px;font-weight:700;line-height:1.13;margin:0;color:var(--on-gold)}
+.next-intro{max-width:1000px;margin:16px 0 0!important;color:var(--on-gold)!important;font-size:18px!important;line-height:1.58!important}
+.next-gain{display:block;margin-top:7px;font-size:18px;line-height:1.45;font-weight:700}
+.next-benefits{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;margin:12px 0 0;background:rgba(52,36,21,.3);border-top:1px solid rgba(52,36,21,.3);border-bottom:1px solid rgba(52,36,21,.3)}
+.next-benefit{min-width:0;padding:25px 30px;background:rgba(255,255,255,.055)}
+.next-benefit h3{margin:0 0 10px;color:var(--on-gold);font-family:var(--serif);font-size:23px;line-height:1.25}
+.next-benefit p{margin:0;color:var(--on-gold);font-size:16px;line-height:1.55}
+.next-benefit .next-note{margin-top:11px;font-size:12px;line-height:1.4;opacity:.82}
+.next-closing{margin:27px 0 0!important;color:var(--on-gold)!important;font-size:17px!important;line-height:1.58!important;white-space:nowrap}
 .next .btn-primary{margin-top:28px;box-shadow:0 10px 24px rgba(50,31,14,.2)}
 .disclaimer{margin-top:28px;padding:18px 0 4px;border-top:1px solid var(--line);color:#9d968c;font-size:15px;line-height:1.6}
 
@@ -201,9 +207,12 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
   .phase{display:none}
   .suhrn-mriezka{grid-template-columns:1fr;gap:16px}
   .assumptions{grid-template-columns:1fr;padding:0 0 38px}
-  .next{padding:22px 18px}
-  .next-grid{grid-template-columns:1fr;gap:20px}
-  .next-action{border-left:0;border-top:1px solid rgba(52,36,21,.3);padding:22px 0 0}
+  .next{padding:28px 22px;overflow:hidden}
+  .next-head{padding-right:0}
+  .next-portrait{position:relative;top:auto;right:auto;width:108px;height:108px;margin:0 0 18px auto}
+  .next-benefits{grid-template-columns:1fr}
+  .next-benefit{padding:20px 0;background:transparent}
+  .next-closing{white-space:normal}
   .next h2{font-size:28px}
   .section{padding:32px 20px 34px}
   /* 11 px je na telefóne na hranici čitateľnosti, obzvlášť pre klienta 50+ */
@@ -393,17 +402,19 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
   </section>
 
   <section class="next">
-    <div class="next-grid">
-      <div class="next-copy">
-        <h2>Čo môže váš plán znamenať pre váš skutočný majetok?</h2>
-        <p>Na osobnej konzultácii zasadíme váš plán do kontextu skutočného majetku a doplníme pohľad založený na aktuálnych dlhodobých očakávaniach popredných svetových investičných inštitúcií.</p>
-        <p>Použijeme pritom CMA (Capital Market Assumptions), teda dlhodobé očakávania výnosov a rizík.</p>
-      </div>
-      <div class="next-action">
-        <p>Vďaka tomuto komplexnému pohľadu získate ucelenejší rozhodovací rámec pre svoje súčasné portfólio — jeho výnosový potenciál, riziko, likviditu a schopnosť financovať plánovanú rentu. Jednotlivé investičné produkty tak prestanú byť samotným cieľom a stanú sa nástrojmi vašej stratégie.</p>
-        <a class="btn-primary" href="https://hechtberger.com/rezervacia" target="_blank" rel="noopener">Rezervovať konzultáciu</a>
-      </div>
+    <div class="next-head">
+      <span class="next-portrait" role="img" aria-label="Petr Hechtberger"></span>
+      <span class="next-kicker">Osobná konzultácia</span>
+      <h2>Od modelácie k premyslenej stratégii</h2>
+      <p class="next-intro">Modelácia ukazuje, aký kapitál si váš plán vyžaduje a ako obstál v simuláciách založených na historických dátach.<br>Na osobnej konzultácii ho prepojíme s vaším celkovým majetkom a rozhodnutiami, ktoré máte pred sebou.<strong class="next-gain">Čo tým získate:</strong></p>
     </div>
+    <div class="next-benefits">
+      <section class="next-benefit"><h3>Pohľad dopredu</h3><p>K historickému testu pridáme modelový pohľad založený na aktuálnych CMA<sup>*</sup> a spoločne posúdime, čo z nich môže vyplývať pre váš plán.</p><p class="next-note">* CMA znamená Capital Market Assumptions — dlhodobé očakávania výnosov a rizík popredných svetových investičných inštitúcií.</p></section>
+      <section class="next-benefit"><h3>Audit portfólia</h3><p>Pozrieme sa na výnosový potenciál, riziko, náklady, likviditu a na to, ako jednotlivé investície spolu fungujú v kontexte vášho celkového majetku.</p></section>
+      <section class="next-benefit"><h3>Stratégia na mieru</h3><p>Ak nájdeme priestor na zlepšenie, navrhneme konkrétny ďalší postup podľa vašich cieľov, časového horizontu a potrebnej likvidity.</p></section>
+    </div>
+    <p class="next-closing">Cieľom je, aby každá investícia plnila jasnú úlohu v jednej majetkovej stratégii, namiesto toho, aby zostala izolovaným produktom.</p>
+    <a class="btn-primary" href="https://hechtberger.com/rezervacia" target="_blank" rel="noopener">Rezervovať konzultáciu</a>
   </section>
 
   <div class="disclaimer">Tento modelový výpočet slúži výhradne na ilustračné a vzdelávacie účely. Nejde o investičné poradenstvo, investičné odporúčanie ani o ponuku či návrh na uzavretie zmluvy. Zhodnotenie nie je garantované, hodnota investície môže v čase kolísať a nie je zaručená návratnosť investovanej sumy.</div>
@@ -991,6 +1002,6 @@ if(window.parent!==window)
   addEventListener('load',()=>window.parent.postMessage({type:'ph-renta-na-zaciatok'},'*'));
 })();
 </script>
-<script src="vysledok-10of10.js?v=20260815-7"></script>
+<script src="vysledok-10of10.js?v=20260816-1"></script>
 </body>
 </html>

@@ -50,19 +50,20 @@
     const consult=document.querySelector(".consult-panel");
     if(consult){
       consult.classList.add("flow-consult");
-      const title=consult.querySelector("h3"),button=consult.querySelector(".btn");
-      [...consult.querySelectorAll(":scope > p")].forEach(p=>p.remove());
-      if(title){title.textContent="Čo môže váš plán znamenať pre váš skutočný majetok?";title.className="flow-title";}
-      const intro=document.createElement("p");intro.className="flow-copy";
-      intro.innerHTML="Na osobnej konzultácii — online alebo osobne — zasadíme váš plán do kontextu skutočného majetku a doplníme pohľad do budúcnosti. <strong>Ako to urobíme?</strong><br><br>Použijeme aktuálne dlhodobé očakávania výnosov a rizík popredných svetových investičných inštitúcií — <strong>CMA (Capital Market Assumptions)</strong>.";
-      const body=document.createElement("p");body.className="flow-copy";
-      body.innerHTML="Vďaka tomuto komplexnému pohľadu získate ucelenejší rozhodovací rámec pre svoje súčasné portfólio — jeho výnosový potenciál, riziko, likviditu a schopnosť financovať plánovanú rentu. Jednotlivé investičné produkty tak <strong>prestanú byť samotným cieľom a stanú sa nástrojmi vašej stratégie</strong>.";
-      if(title)title.after(intro);
-      const layout=document.createElement("div"),left=document.createElement("div"),right=document.createElement("div");
-      layout.className="flow-consult-layout";left.className="flow-consult-copy";right.className="flow-consult-action";
-      consult.append(layout);layout.append(left,right);
-      const pathLabel=consult.querySelector(":scope > .path-label");if(pathLabel)left.append(pathLabel);
-      if(title)left.append(title);left.append(intro);right.append(body);if(button)right.append(button);
+      consult.innerHTML=`
+        <div class="consult-head">
+          <span class="consult-portrait" role="img" aria-label="Petr Hechtberger"></span>
+          <span class="path-label">Osobná konzultácia</span>
+          <h3 id="consult-title" class="flow-title">Od modelácie k premyslenej stratégii</h3>
+          <p class="consult-intro">Modelácia ukazuje, aký kapitál si váš plán vyžaduje a ako obstál v simuláciách založených na historických dátach.<br>Na osobnej konzultácii ho prepojíme s vaším celkovým majetkom a rozhodnutiami, ktoré máte pred sebou.<strong class="consult-gain">Čo tým získate:</strong></p>
+        </div>
+        <div class="consult-benefits">
+          <section class="consult-benefit"><h4>Pohľad dopredu</h4><p>K historickému testu pridáme modelový pohľad založený na aktuálnych CMA<sup>*</sup> a spoločne posúdime, čo z nich môže vyplývať pre váš plán.</p><p class="consult-note">* CMA znamená Capital Market Assumptions — dlhodobé očakávania výnosov a rizík popredných svetových investičných inštitúcií.</p></section>
+          <section class="consult-benefit"><h4>Audit portfólia</h4><p>Pozrieme sa na výnosový potenciál, riziko, náklady, likviditu a na to, ako jednotlivé investície spolu fungujú v kontexte vášho celkového majetku.</p></section>
+          <section class="consult-benefit"><h4>Stratégia na mieru</h4><p>Ak nájdeme priestor na zlepšenie, navrhneme konkrétny ďalší postup podľa vašich cieľov, časového horizontu a potrebnej likvidity.</p></section>
+        </div>
+        <p class="consult-closing">Cieľom je, aby každá investícia plnila jasnú úlohu v jednej majetkovej stratégii, namiesto toho, aby zostala izolovaným produktom.</p>
+        <a class="btn" href="https://hechtberger.com/rezervacia" target="_blank" rel="noopener">Rezervovať konzultáciu</a>`;
     }
     document.dispatchEvent(new Event("flow10of10-ready"));
   };

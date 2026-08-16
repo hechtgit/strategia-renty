@@ -18,12 +18,21 @@
 .flow-delivery-form .email-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 .flow-delivery-form strong,.flow-consult-action strong{color:var(--text);font-weight:700}
 .privacy-note a{color:#111!important;text-decoration:underline!important;text-underline-offset:2px}
-.consult-panel.flow-consult{position:relative;overflow:hidden;background:linear-gradient(135deg,#bd965f 0%,#b1874d 100%)!important;border:1px solid rgba(72,48,23,.42)!important;box-shadow:0 18px 44px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.22)}
+.consult-panel.flow-consult{position:relative;overflow:visible;padding:clamp(32px,4vw,58px)!important;background:linear-gradient(135deg,#bd965f 0%,#b1874d 100%)!important;border:1px solid rgba(72,48,23,.42)!important;box-shadow:0 18px 44px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.22)}
 .consult-panel.flow-consult:before{display:none}
 .consult-panel.flow-consult .path-label{color:#2b2118}
-.flow-consult .flow-copy{color:#2b2118}
+.consult-panel.flow-consult .flow-title{color:#2b2118}
+.consult-head{position:relative;padding-right:226px}
+.consult-portrait{display:block;position:absolute;top:-28px;right:0;width:198px;height:198px;border-radius:50%;overflow:hidden;border:2px solid rgba(154,105,41,.78);box-shadow:0 12px 28px rgba(50,31,14,.2);background:#171c22 url("portrait-petr-consultation.jpg") 50% 50%/cover no-repeat}
+.consult-intro{max-width:1000px;margin:16px 0 0!important;color:#2b2118!important;font-size:18px!important;line-height:1.58!important}
+.consult-gain{display:block;margin-top:7px;font-size:18px;line-height:1.45;font-weight:700}
+.consult-benefits{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;margin:12px 0 0;background:rgba(52,36,21,.3);border-top:1px solid rgba(52,36,21,.3);border-bottom:1px solid rgba(52,36,21,.3)}
+.consult-benefit{min-width:0;padding:25px 30px;background:rgba(255,255,255,.055)}
+.consult-benefit h4{margin:0 0 10px;color:#2b2118;font-family:var(--serif);font-size:23px;line-height:1.25}
+.consult-benefit p{margin:0!important;color:#2b2118!important;font-size:16px!important;line-height:1.55!important}
+.consult-benefit .consult-note{margin-top:11px!important;font-size:12px!important;line-height:1.4!important;opacity:.82}
+.consult-closing{margin:27px 0 0!important;color:#2b2118!important;font-size:17px!important;line-height:1.58!important;white-space:nowrap}
 .flow-consult strong{color:#2b2118!important;font-weight:800}
-.flow-consult-action .flow-copy{margin:0 0 28px}
 .flow-consult .btn,.delivery-panel #send-model{display:inline-flex!important;align-items:center;justify-content:center;background:var(--btn-gold)!important;color:#fff!important;border:0!important;border-radius:0!important;min-height:50px;padding:14px 24px;box-shadow:0 10px 24px rgba(50,31,14,.2);font-family:var(--serif);font-size:17px;font-weight:700;letter-spacing:1.1px;line-height:1.2}
 .flow-consult .btn:hover,.delivery-panel #send-model:hover{background:var(--gold)!important;transform:translateY(-1px)}
 @media(min-width:900px){.flow-lead .lead-p{white-space:nowrap}}
@@ -42,5 +51,11 @@
   .flow-delivery-form,.flow-consult-action{border-left:0;border-top:1px solid rgba(52,36,21,.3);padding:22px 0 0}
   .flow-delivery-form .email-row{grid-template-columns:1fr}
   .flow-title{font-size:28px}
+  .consult-panel.flow-consult{padding:28px 22px!important;overflow:hidden}
+  .consult-head{padding-right:0}
+  .consult-portrait{position:relative;top:auto;right:auto;width:108px;height:108px;margin:0 0 18px auto}
+  .consult-benefits{grid-template-columns:1fr}
+  .consult-benefit{padding:20px 0;background:transparent}
+  .consult-closing{white-space:normal}
   .flow-consult .btn,.delivery-panel #send-model{width:100%;justify-content:center}
 }
