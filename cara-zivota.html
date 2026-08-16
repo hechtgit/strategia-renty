@@ -681,9 +681,20 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
           <button type="button" data-mode="combo">Kombinácia</button>
         </div>
         <label class="sl" id="sl-combo-wrap" hidden>
-          <span class="row"><span class="k">Vložím dnes</span><span class="v" id="combo-v">100 000 €</span></span>
-          <input type="range" id="sl-combo" min="0" max="1000" value="0" aria-label="Suma, ktorú vložím dnes">
+          <span class="row"><span class="k">Investujem jednorazovo</span><span class="v" id="combo-v">100 000 €</span></span>
+          <input type="range" id="sl-combo" min="0" max="1000" value="0" aria-label="Jednorazová investícia">
         </label>
+        <div id="combo-direction" hidden>
+          <span class="cap" style="display:block;margin-top:12px">Pravidelná investícia</span>
+          <div class="tg c2" id="tg-combo-direction">
+            <button type="button" data-combo-dir="known">Investujem pravidelne</button>
+            <button type="button" class="on" data-combo-dir="needed">Koľko mám investovať?</button>
+          </div>
+          <label class="sl" id="sl-monthly-known-wrap" hidden>
+            <span class="row"><span class="k">Investujem mesačne</span><span class="v" id="monthly-known-v">5 000 €</span></span>
+            <input type="range" id="sl-monthly-known" min="0" max="1000" value="0" aria-label="Pravidelná mesačná investícia">
+          </label>
+        </div>
         <div class="out"><div class="k" id="fund-k">Vložím dnes</div><div class="v" id="fund-v">—</div></div>
       </div>
 
@@ -878,8 +889,8 @@ if(window.parent===window&&'IntersectionObserver' in window){
    prenáša aj do výsledkovej stránky. Je zámerne bez akéhokoľvek dotyku DOM, aby
    obe stránky počítali to isté z toho istého zdroja. Čokoľvek sem pridané musí
    platiť pre aplikáciu aj pre modeláciu. */
-const S={now:35,start:55,end:90,rent:3000,existing:600000,combo:100000,
-  sit:'build',mode:'lump',goal:'rent',pension:'temporary',vynos:8.3,inflOn:true,infl:3};
+const S={now:35,start:55,end:90,rent:3000,existing:600000,combo:100000,monthlyKnown:5000,
+  sit:'build',mode:'lump',comboDir:'needed',goal:'rent',pension:'temporary',vynos:8.3,inflOn:true,infl:3};
 /* Aplikácia už nemá investičné profily. Zhodnotenie si zadáva klient sám a je
    výhradne jeho predpokladom — nič netvrdíme o tom, čím ho dosiahne. Tlačidlá
    pod jazdcom ponúkajú historické fakty o svetovom akciovom indexe, nie naše
@@ -897,9 +908,9 @@ const FEE_IN=1.5,FEE_M=0.9;
    ktorú klient dostane e-mailom — odkaz nesie presne ten scenár, ktorý si prepočítal.
    Názvy kľúčov sú preto zmluva navonok: po premenovaní by staršie rozposlané odkazy
    prestali sedieť, takže sa menia len vedome a s prechodom pre staré tvary. */
-const NUM_KEYS=['now','start','end','rent','existing','combo','infl','vynos'];
+const NUM_KEYS=['now','start','end','rent','existing','combo','monthlyKnown','infl','vynos'];
 const ENUM_KEYS={sit:['build','have'],mode:['lump','monthly','combo'],goal:['rent','duration'],
-  pension:['temporary','perpetuity']};
+  comboDir:['needed','known'],pension:['temporary','perpetuity']};
 const QS=new URLSearchParams(location.search);
 const OUTPUT_MODE=QS.has('vystup');
 
@@ -955,6 +966,7 @@ function applyScenarioFromUrl(){
   S.rent=Math.round(medzi(S.rent,500,50000));
   S.existing=Math.round(medzi(S.existing,50000,30000000));
   S.combo=Math.round(medzi(S.combo,0,10000000));
+  S.monthlyKnown=Math.round(medzi(S.monthlyKnown,0,100000));
 }
 applyScenarioFromUrl();
 
@@ -972,7 +984,8 @@ function mkScale(min,max,pow,round){
 }
 const SC={rent:mkScale(500,50000,2.1,v=>v<10000?100:500),
   c0:mkScale(50000,30000000,2.6,v=>v<1000000?10000:100000),
-  combo:mkScale(0,10000000,2.4,v=>v<500000?5000:50000)};
+  combo:mkScale(0,10000000,2.4,v=>v<500000?5000:50000),
+  monthly:mkScale(0,100000,2.1,v=>v<10000?100:500)};
 
 /* ===== finančné jadro (zhodné s ostrou kalkulačkou) ===== */
 const mRate=pa=>Math.pow(1+pa/100,1/12)*(1-FEE_M/1200)-1;
@@ -996,20 +1009,30 @@ function compute(){
       :'Výnos portfólia po poplatkoch je nulový alebo záporný — renta navždy potrebuje kladný výnos.';
     return o;
   }
-  o.R=o.rast?S.rent*Math.pow(1+infl/100,N):S.rent;
-
   if(S.sit==='build'){
-    o.Rtoday=S.rent;
-    o.cap=nek?o.R/(i-g):capForRent(o.R,Tm,i,g);
-    if(o.cap===null){o.warn='Takto vysokú rentu by ste na tento čas nedokázali pokryť — skúste nižšiu sumu alebo kratšie obdobie.';return o}
     const grow=Math.pow(1+i,Nm);
-    if(o.immediate){o.P0=o.cap/e;o.M=0}
-    else if(S.mode==='lump'){o.P0=o.cap/grow/e;o.M=0}
-    else if(S.mode==='monthly'){o.M=o.cap/(((Math.pow(1+i,Nm)-1)/i)*e);o.P0=0}
-    else{const from=S.combo*e*grow,an=(Math.pow(1+i,Nm)-1)/i;
-      o.M=Math.max(0,(o.cap-from)/(an*e));o.P0=S.combo;o.covers=from>=o.cap}
+    const knownCombo=S.mode==='combo'&&S.comboDir==='known'&&!o.immediate;
+    if(knownCombo){
+      o.P0=S.combo;o.M=S.monthlyKnown;
+      const an=i===0?Nm:(Math.pow(1+i,Nm)-1)/i;
+      o.cap=o.P0*e*grow+o.M*e*an;
+      o.R=nek?o.cap*(i-g):rentFromCap(o.cap,Tm,i,g);
+      o.Rtoday=o.rast?o.R/Math.pow(1+infl/100,N):o.R;
+      o.calculatesRent=true;
+    }else{
+      o.Rtoday=S.rent;
+      o.R=o.rast?S.rent*Math.pow(1+infl/100,N):S.rent;
+      o.cap=nek?o.R/(i-g):capForRent(o.R,Tm,i,g);
+      if(o.cap===null){o.warn='Takto vysokú rentu by ste na tento čas nedokázali pokryť — skúste nižšiu sumu alebo kratšie obdobie.';return o}
+      if(o.immediate){o.P0=o.cap/e;o.M=0}
+      else if(S.mode==='lump'){o.P0=o.cap/grow/e;o.M=0}
+      else if(S.mode==='monthly'){o.M=o.cap/(((Math.pow(1+i,Nm)-1)/i)*e);o.P0=0}
+      else{const from=S.combo*e*grow,an=(Math.pow(1+i,Nm)-1)/i;
+        o.M=Math.max(0,(o.cap-from)/(an*e));o.P0=S.combo;o.covers=from>=o.cap}
+    }
     o.payM=nek?360:Tm;
   }else{
+    o.R=o.rast?S.rent*Math.pow(1+infl/100,N):S.rent;
     o.C0=S.existing;
     o.avail=o.C0*Math.pow(1+i,Nm);o.cap=o.avail;
     if(S.goal==='rent'){o.R=nek?o.avail*(i-g):rentFromCap(o.avail,Tm,i,g);o.payM=nek?360:Tm}
@@ -1078,6 +1101,7 @@ const txt=(el,t)=>{if(el.textContent!==t)el.textContent=t;el._v=undefined};
 /* ===== render ===== */
 function render(){
   const o=compute();
+  const rentaDnes=o.calculatesRent?o.Rtoday:S.rent;
   const derived=S.sit==='have'&&S.goal==='duration';
   let endEff=S.end;
   if(derived&&!o.warn)endEff=o.forever?Math.max(S.start+1,100)
@@ -1090,9 +1114,11 @@ function render(){
 
   $('blk-build').hidden=S.sit!=='build';
   $('blk-have').hidden=S.sit!=='have';
-  $('sl-combo-wrap').hidden=!(S.sit==='build'&&S.mode==='combo');
+  $('sl-combo-wrap').hidden=!(S.sit==='build'&&S.mode==='combo'&&!o.immediate);
+  $('combo-direction').hidden=!(S.sit==='build'&&S.mode==='combo'&&!o.immediate);
+  $('sl-monthly-known-wrap').hidden=!(S.sit==='build'&&S.mode==='combo'&&S.comboDir==='known'&&!o.immediate);
   $('tg-mode').classList.toggle('off',o.immediate);
-  $('sl-rent-wrap').style.display=(S.sit==='have'&&S.goal==='rent')?'none':'';
+  $('sl-rent-wrap').style.display=(S.sit==='have'&&S.goal==='rent')||(S.sit==='build'&&S.mode==='combo'&&S.comboDir==='known'&&!o.immediate)?'none':'';
   $('tg-pension').style.display=derived?'none':'';
 
   /* milníky */
@@ -1132,7 +1158,8 @@ function render(){
   else if(S.sit==='build'){
     if(o.immediate){txt($('fund-k'),'Musím mať pripravené');money($('fund-v'),o.P0)}
     else if(S.mode==='lump'){txt($('fund-k'),'Vložím dnes');money($('fund-v'),o.P0)}
-    else if(o.covers){txt($('fund-k'),'Mesačne už nemusím nič');txt($('fund-v'),'Vklad stačí')}
+    else if(o.calculatesRent){txt($('fund-k'),'Dosiahnuteľná renta');money($('fund-v'),o.Rtoday,'/ mes.')}
+    else if(o.covers){txt($('fund-k'),'Mesačne už nemusím nič');txt($('fund-v'),'Investícia stačí')}
     else{txt($('fund-k'),'Odkladám mesačne');money($('fund-v'),o.M,'/ mes.')}
   }else{
     if(S.goal==='rent'){txt($('have-k'),'Môžem si vyplácať');money($('have-v'),o.R,'/ mes.')}
@@ -1184,7 +1211,7 @@ function render(){
     `<h2 class="mobile-plan-title">Súhrn vášho plánu</h2>
      <div class="mobile-plan-grid">
        <div class="mobile-plan-row"><span class="mobile-plan-label">Dnes</span><span class="mobile-plan-value">${S.now} rokov<span class="mobile-plan-detail">${S.sit==='build'?'Majetok budujem':'Majetok už mám'}</span></span></div>
-       <div class="mobile-plan-row"><span class="mobile-plan-label">Renta</span><span class="mobile-plan-value">${fmtEur(S.rent)} mesačne<span class="mobile-plan-detail">${o.immediate?'Začína hneď':'Začína v '+S.start+' rokoch'}</span></span></div>
+       <div class="mobile-plan-row"><span class="mobile-plan-label">Renta</span><span class="mobile-plan-value">${fmtEur(rentaDnes)} mesačne<span class="mobile-plan-detail">${o.immediate?'Začína hneď':'Začína v '+S.start+' rokoch'}</span></span></div>
        <div class="mobile-plan-row"><span class="mobile-plan-label">Horizont</span><span class="mobile-plan-value">${openEnd?'Bez konca':yrs(Math.max(0,endEff-S.start))}<span class="mobile-plan-detail">${openEnd?'Majetok sa nemíňa':'Do '+endEff+' rokov'}</span></span></div>
      </div>`;
   syncMobileLifeNav();
@@ -1351,6 +1378,7 @@ const mobileLifeSteps=[...document.querySelectorAll('.mobile-life-step')];
 const mobileLifeMap=document.getElementById('mobile-life-map');
 const mobileMapCards=[...document.querySelectorAll('.mobile-map-card')];
 function syncMobileLifeNav(){
+  const o=compute(),rentaDnes=o.calculatesRent?o.Rtoday:S.rent;
   const vals={'mobile-life-now':S.now,'mobile-life-start':S.start,
     'mobile-life-end':S.pension==='perpetuity'?'∞':S.end};
   Object.entries(vals).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.textContent=v==='∞'?'Bez konca':v+' r.'});
@@ -1361,7 +1389,7 @@ function syncMobileLifeNav(){
   const capSummary=document.getElementById('cap-v')?.textContent||'—';
   const mapVals={
     today:[S.now,todayValues],
-    start:[S.start,[fmtEur(S.rent)+' / mes.',S.inflOn?'Inflácia '+pctTxt(S.infl)+' %':'Bez inflácie','Potrebujem '+capSummary]],
+    start:[S.start,[fmtEur(rentaDnes)+' / mes.',S.inflOn?'Inflácia '+pctTxt(S.infl)+' %':'Bez inflácie','Potrebujem '+capSummary]],
     end:[S.pension==='perpetuity'?100:S.end,S.pension==='perpetuity'?['Bez konca']:['Do '+S.end+' rokov','Renta '+Math.max(0,S.end-S.start)+' rokov']]
   };
   Object.entries(mapVals).forEach(([key,val])=>{
@@ -1478,6 +1506,7 @@ function bindSlider(slId,valId,scale,get,set,unit){
 bindSlider('sl-rent','rent-v',SC.rent,()=>S.rent,v=>S.rent=v,' / mes.');
 bindSlider('sl-c0','c0-v',SC.c0,()=>S.existing,v=>S.existing=v);
 bindSlider('sl-combo','combo-v',SC.combo,()=>S.combo,v=>S.combo=v);
+bindSlider('sl-monthly-known','monthly-known-v',SC.monthly,()=>S.monthlyKnown,v=>S.monthlyKnown=v);
 
 $('sl-infl').addEventListener('input',e=>{S.infl=+e.target.value;$('infl-v').textContent=pctTxt(S.infl)+' % ročne';render()});
 $('in-inflon').addEventListener('change',e=>{S.inflOn=e.target.checked;$('sl-infl').disabled=!S.inflOn;
@@ -1492,6 +1521,7 @@ function bindTg(box,attr,fn){
 }
 bindTg('tg-sit','sit',v=>S.sit=v);
 bindTg('tg-mode','mode',v=>S.mode=v);
+bindTg('tg-combo-direction','comboDir',v=>S.comboDir=v);
 bindTg('tg-goal','goal',v=>S.goal=v);
 bindTg('tg-pension','pension',v=>S.pension=v);
 $('sl-vynos').addEventListener('input',e=>{S.vynos=+e.target.value;render()});
@@ -1499,7 +1529,7 @@ document.querySelectorAll('#tg-tipy button').forEach(b=>
   b.addEventListener('click',()=>{S.vynos=Number(b.dataset.vynos);render()}));
 
 /* prepínače musia sedieť so stavom, keď scenár prišiel v odkaze */
-[['tg-sit','sit','sit'],['tg-mode','mode','mode'],['tg-goal','goal','goal'],
+[['tg-sit','sit','sit'],['tg-mode','mode','mode'],['tg-combo-direction','comboDir','comboDir'],['tg-goal','goal','goal'],
  ['tg-pension','pension','pension']]
   .forEach(([box,attr,key])=>{
     const b=$(box);if(!b)return;
@@ -1634,7 +1664,7 @@ function scenarioSummary(){
   bits.push(o.immediate?'renta hneď':`začiatok v ${S.start}`);
   bits.push(o.nek||o.forever?'renta bez konca':`renta ${yrs(Math.max(0,S.end-S.start))}`);
   if(S.sit==='build'){
-    bits.push(`chce ${fmtEur(S.rent)} / mes.`);
+    bits.push(`${o.calculatesRent?'dosiahne':'chce'} ${fmtEur(o.calculatesRent?o.Rtoday:S.rent)} / mes.`);
     bits.push(`potrebný kapitál ${fmtEur(o.cap)}`);
     if(o.M>0)bits.push(`mesačne ${fmtEur(o.M)}`);
     if(o.P0>0)bits.push(`jednorazovo ${fmtEur(o.P0)}`);

@@ -62,8 +62,8 @@ function simulateMonths(C, R, i, g, limit = 1200) {
 }
 
 const defaults = {
-  now: 50, start: 65, end: 90, rent: 3000, existing: 600000, combo: 100000,
-  sit: "build", mode: "lump", goal: "rent", pension: "temporary",
+  now: 50, start: 65, end: 90, rent: 3000, existing: 600000, combo: 100000, monthlyKnown: 5000,
+  sit: "build", mode: "lump", comboDir: "needed", goal: "rent", pension: "temporary",
   vynos: 8.3, infl: 3, infl_on: 1,
 };
 
@@ -71,6 +71,7 @@ const cases = [
   ["štandardný jednorazový vklad", {}],
   ["pravidelné investovanie", { now: 35, start: 65, rent: 5000, mode: "monthly", vynos: 7 }],
   ["kombinovaný vklad", { now: 45, start: 60, end: 85, rent: 4200, mode: "combo", combo: 250000 }],
+  ["kombinácia so známou pravidelnou investíciou", { now: 35, start: 38, end: 90, mode: "combo", comboDir: "known", combo: 750000, monthlyKnown: 5000 }],
   ["hotový majetok a výška renty", { now: 60, start: 65, existing: 1000000, sit: "have" }],
   ["hotový majetok a dĺžka čerpania", { now: 60, start: 65, existing: 1000000, sit: "have", goal: "duration", rent: 4000 }],
   ["renta bez časového obmedzenia", { now: 45, start: 65, vynos: 8, infl: 2, pension: "perpetuity" }],
@@ -120,11 +121,39 @@ for (const [name, override] of cases) {
 
 console.log(`\nFinančné jadro: ${cases.length}/${cases.length} scenárov prešlo.`);
 
+const knownComboApi = production({
+  ...defaults, now: 35, start: 38, end: 90, mode: "combo",
+  comboDir: "known", combo: 750000, monthlyKnown: 5000,
+});
+const knownCombo = knownComboApi.compute();
+close(knownCombo.cap, 1110315.8919389392, "známa kombinácia: kapitál");
+close(knownCombo.Rtoday, 3967.1939554147643, "známa kombinácia: renta v dnešnej hodnote");
+if (!knownCombo.calculatesRent) throw new Error("Známa kombinácia neprepla smer výpočtu na rentu.");
+
+let transitionCapital = 750000 * knownCombo.e;
+for (let month = 0; month < knownCombo.Nm; month++) {
+  transitionCapital = transitionCapital * (1 + knownCombo.i) + 5000 * knownCombo.e;
+}
+close(transitionCapital, knownCombo.cap,
+  "známa kombinácia: posledný mesiac budovania bez posunu");
+const firstDrawBalance = knownCombo.cap * (1 + knownCombo.i) - knownCombo.R;
+close(knownComboApi.payEnd(knownCombo.cap, knownCombo.R, 1, knownCombo.i, knownCombo.g), firstDrawBalance,
+  "známa kombinácia: prvý mesiac čerpania", 1e-12);
+
+const legacyCombo = production({
+  now: 45, start: 60, end: 85, rent: 4200, existing: 600000, combo: 250000,
+  sit: "build", mode: "combo", goal: "rent", pension: "temporary",
+  vynos: 8.3, infl: 3, infl_on: 1,
+}).compute();
+if (legacyCombo.calculatesRent || legacyCombo.M <= 0) {
+  throw new Error("Starý kombinovaný odkaz bez nových parametrov nezachoval pôvodný smer výpočtu.");
+}
+
 const clamped = production({
   ...defaults, now: -10, start: 999, end: 0, rent: 999999, existing: -1,
-  combo: 999999999, infl: 99, vynos: 999
+  combo: 999999999, monthlyKnown: 999999, infl: 99, vynos: 999
 });
-const expectedClamp = { now: 18, start: 120, end: 121, rent: 50000, existing: 50000, combo: 10000000, infl: 10, vynos: 50 };
+const expectedClamp = { now: 18, start: 120, end: 121, rent: 50000, existing: 50000, combo: 10000000, monthlyKnown: 100000, infl: 10, vynos: 50 };
 Object.entries(expectedClamp).forEach(([key, expected]) => {
   if (clamped.S[key] !== expected) throw new Error(`Ochrana vstupu ${key}: ${clamped.S[key]} != ${expected}`);
 });
