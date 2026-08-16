@@ -1385,7 +1385,10 @@ function beginDrag(e,key,focusEl){
   if(r0.width<1)return;
   e.preventDefault();
   e.stopPropagation();
-  const captureEl=e.currentTarget;
+  /* Pointer capture nesmie zostať na kruhu, ktorý sa pri každom renderi
+     premiestňuje. Stabilný koreň aplikácie drží gesto bez toho, aby sa ho
+     Chrome pokúšal automaticky odscrollovať do zorného poľa. */
+  const captureEl=window.parent!==window?document.documentElement:e.currentTarget;
   if(captureEl&&captureEl.setPointerCapture){
     try{captureEl.setPointerCapture(e.pointerId)}catch(err){}
   }
@@ -1393,13 +1396,28 @@ function beginDrag(e,key,focusEl){
      premiestňuje. Chrome sa ho inak pokúsi udržať v zábere a odscrolluje celý
      dokument — pri reálnom ťahaní myšou aj zvislo, hoci syntetický test to
      nevyvolá. Klávesnicové ovládanie fokusu sa tým nemení. */
-  if(focusEl&&window.parent===window)focusEl.focus({preventScroll:true});
+  if(window.parent!==window){
+    const zrusFokus=()=>{
+      if(document.activeElement&&document.activeElement!==document.body&&document.activeElement.blur)
+        document.activeElement.blur();
+      if(focusEl&&focusEl.blur)focusEl.blur();
+      document.documentElement.scrollLeft=document.body.scrollLeft=0;
+      document.documentElement.scrollTop=document.body.scrollTop=0;
+      window.scrollTo(0,0);
+    };
+    zrusFokus();
+    requestAnimationFrame(zrusFokus);
+  }else if(focusEl)focusEl.focus({preventScroll:true});
   lp.classList.add('drag');
   if(window.parent!==window)parent.postMessage({type:'ph-renta-drag',active:true},'*');
   /* uchopenie je relatívne: bod, za ktorý ťaháme, si drží odstup od milníka,
      takže karta pod kurzorom nepodskočí na jeho pozíciu */
   const grab=e.clientX-(r0.left+pct(S[key])/100*r0.width);
-  const drzPociatok=()=>{if(window.parent!==window&&(window.scrollX||window.scrollY))window.scrollTo(0,0)};
+  const drzPociatok=()=>{if(window.parent!==window){
+    document.documentElement.scrollLeft=document.body.scrollLeft=0;
+    document.documentElement.scrollTop=document.body.scrollTop=0;
+    if(window.scrollX||window.scrollY)window.scrollTo(0,0);
+  }};
   const move=ev=>{const r=wrap.getBoundingClientRect();if(r.width<1)return;
     setAge(key,ageAt(Math.max(0,Math.min(1,(ev.clientX-grab-r.left)/r.width))*100));
     drzPociatok();requestAnimationFrame(drzPociatok)};
