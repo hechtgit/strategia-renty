@@ -38,8 +38,12 @@
   .Mobile-overlay-nav-item[href=""]{display:none!important}
   /* Kalkulačka má na desktope a tablete používať celú obsahovú šírku webu.
      Squarespace code block ju inak zúži približne na dve tretiny stránky. */
+  /* Rám s aplikáciou je zámerne priehľadný, takže pozadie pod ňou maľuje
+     stránka. Pás s kalkulačkou preto držíme svetlejší než zvyšok webu —
+     nástroj sa tým opticky oddelí od článku. */
   #ph-renta-calculator{position:relative;left:50%;transform:translateX(-50%);
     width:min(1480px,calc(100vw - 32px))!important;max-width:none!important;margin:0!important;
+    background:#333333!important;
     visibility:hidden;animation:cz-renta-fallback-reveal 0s 1500ms forwards}
   html.cz-renta-ready #ph-renta-calculator{visibility:visible;animation:none}
   @keyframes cz-renta-fallback-reveal{to{visibility:visible}}

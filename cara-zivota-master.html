@@ -13,7 +13,7 @@
 <style>
 /* ===== paleta hechtberger.com ===== */
 :root{
-  --bg:#1a1a1a; --surface:#242424; --inset:#2b2b2b; --ink:#fff; --muted:#b7afa5;
+  --bg:#333333; --surface:#242424; --inset:#2b2b2b; --ink:#fff; --muted:#b7afa5;
   --gold:#ae8753; --gold-strong:#c49a63; --btn-gold:#9a6929;
   --line:rgba(174,135,83,.34); --line-hi:rgba(196,154,99,.62);
   --red:#d92036; --green:#a9cdb4; --green-bg:#233129; --green-line:#3c5a48;
@@ -140,7 +140,9 @@ input[type=range]:disabled{opacity:.35;cursor:not-allowed}
 .btn:hover{background:var(--gold)}
 .btn:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 .cta p{font-size:17px;color:var(--muted);max-width:470px;margin:0;line-height:1.5}
-.disclaimer{font-size:15px;color:#9d968c;line-height:1.6;padding-top:13px}
+/* Na svetlejšom pozadí musí tlmený text zosvetlieť tiež, inak spadne pod
+   kontrastnú normu (na #333 mal pomer 4,32; teraz 5,0). */
+.disclaimer{font-size:15px;color:#a9a298;line-height:1.6;padding-top:13px}
 .disclaimer b{color:#a29c93}
 /* ===== úvodná časť nad aplikáciou ===== */
 .site-top{max-width:1480px;margin:0 auto;padding:22px 28px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
@@ -249,7 +251,7 @@ body.vystup .flow-lead{display:none}
 .metodika summary::after{content:"+";font-size:18px;line-height:1}
 .metodika[open] summary::after{content:"–"}
 .metodika summary:hover{color:#fff}
-.metodika p{margin:9px 0 0;font-size:15px;line-height:1.65;color:#9d968c}
+.metodika p{margin:9px 0 0;font-size:15px;line-height:1.65;color:#a9a298}
 .navrat{display:inline-flex;align-items:center;gap:8px;margin:0 0 14px;
   color:var(--gold-strong);font-size:17px;text-decoration:none;
   border-bottom:1px solid var(--line)}
@@ -422,7 +424,7 @@ html[data-anim]
   /* Hierarchia podľa webu: #ae8753 = aktívna plocha (Dynamický, Jednorazovo) → karty,
      #9a6929 zostáva len pre tlačidlo Rezervovať. Čiara je svetlejší tón zlatej,
      aby sa od kariet zreteľne oddelila. */
-  --bg:#1a1a1a;--surface:#ae8753;--inset:#2b2b2b;--ink:#fff;
+  --bg:#333333;--surface:#ae8753;--inset:#2b2b2b;--ink:#fff;
   --muted:rgba(255,255,255,.82);--gold:#ae8753;--gold-strong:#c49a63;
   --line:rgba(255,255,255,.24);--line-hi:rgba(255,255,255,.5);
   --axis:#dcc09b;--axis-ink:#2b2118;--stem:38px;
