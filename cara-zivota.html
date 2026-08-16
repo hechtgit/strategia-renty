@@ -1419,7 +1419,14 @@ function beginDrag(e,key,focusEl){
     if(window.scrollX||window.scrollY)window.scrollTo(0,0);
   }};
   const move=ev=>{const r=wrap.getBoundingClientRect();if(r.width<1)return;
-    setAge(key,ageAt(Math.max(0,Math.min(1,(ev.clientX-grab-r.left)/r.width))*100));
+    /* Skutočnú pointer súradnicu obmedzíme ešte pred akýmkoľvek prepočtom.
+       Nestačí clampnúť až výsledný vek: Chrome pri reálnom ťahaní môže poslať
+       clientX za hranou osi a táto surová hodnota sa nesmie dostať do
+       geometrie prvkov ani do merania výšky vloženého rámu. */
+    const minX=r.left+grab,maxX=r.right+grab;
+    const pointerX=Math.max(minX,Math.min(maxX,ev.clientX));
+    const position=(pointerX-grab-r.left)/r.width;
+    setAge(key,ageAt(position*100));
     drzPociatok();requestAnimationFrame(drzPociatok)};
   const up=()=>{lp.classList.remove('drag');render();drzPociatok();requestAnimationFrame(drzPociatok);
     if(window.parent!==window)parent.postMessage({type:'ph-renta-drag',active:false},'*');
