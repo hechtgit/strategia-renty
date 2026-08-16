@@ -677,7 +677,7 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
       </div>
       <div class="node" id="n-end" style="--d:1.05s">
         <button class="handle" id="h-end" data-key="end" role="slider" aria-label="Vek konca čerpania renty"
-          aria-valuemin="19" aria-valuemax="150" aria-valuenow="90"><span id="v-end">90</span><small id="lbl-end">koniec čerpania</small></button>
+          aria-valuemin="19" aria-valuemax="110" aria-valuenow="90"><span id="v-end">90</span><small id="lbl-end">koniec čerpania</small></button>
       </div>
     </div>
     <section class="mob" id="mob" aria-live="polite" aria-label="Súhrn vášho plánu"></section>
@@ -982,7 +982,7 @@ function applyScenarioFromUrl(){
   const medzi=(v,min,max)=>Math.min(max,Math.max(min,v));
   S.now=Math.round(medzi(S.now,18,99));
   S.start=Math.round(medzi(S.start,S.now,120));
-  S.end=Math.round(medzi(S.end,S.start+1,150));
+  S.end=Math.round(medzi(S.end,S.start+1,110));
   S.infl=medzi(S.infl,0,10);
   S.vynos=Math.round(medzi(S.vynos,VYNOS_MIN,VYNOS_MAX)*10)/10;
   S.rent=Math.round(medzi(S.rent,500,50000));
@@ -1098,10 +1098,10 @@ if(QS.has('preview'))window.__previewScenarioURL=scenarioURL;
    konkrétny scenár sa na nich overuje až na osobnej konzultácii. */
 
 /* ===== os ===== */
-/* Desktopová os má pevný horizont do 150 rokov. Dynamické rozširovanie pri
+/* Desktopová os má pevný horizont do 110 rokov. Dynamické rozširovanie pri
    pravom okraji menilo geometriu priamo počas pointer gesta a v kombinácii so
    Squarespace dokázalo znovu načítať celú rodičovskú stránku. */
-const AXMAX=150;
+const AXMAX=110;
 const FA=40,FS=14;
 const pct=v=>v<=FA?v/FA*FS:FS+(v-FA)/(AXMAX-FA)*(100-FS);
 const ageAt=p=>p<=FS?p/FS*FA:FA+(p-FS)/(100-FS)*(AXMAX-FA);
@@ -1154,7 +1154,7 @@ function render(){
   const derived=S.sit==='have'&&S.goal==='duration';
   let endEff=S.end;
   if(derived&&!o.warn)endEff=o.forever?Math.max(S.start+1,100)
-    :Math.min(150,Math.max(S.start+1,Math.round(S.now+o.N+(o.months||0)/12)));
+    :Math.min(110,Math.max(S.start+1,Math.round(S.now+o.N+(o.months||0)/12)));
   const openEnd=!!(o.nek||o.forever);
   lp.classList.toggle('perp',openEnd);
   lp.classList.toggle('longevity',endEff>=100&&!openEnd);
@@ -1372,7 +1372,7 @@ function setAge(k,v){
   v=Math.round(v);
   if(k==='now')S.now=Math.max(18,Math.min(v,S.start));
   if(k==='start')S.start=Math.max(S.now,Math.min(v,S.end-1));
-  if(k==='end')S.end=Math.min(150,Math.max(S.start+1,v));
+  if(k==='end')S.end=Math.min(110,Math.max(S.start+1,v));
   render();
 }
 /* Uchopiť sa dá milník na čiare aj celá karta — obe posúvajú ten istý bod v čase. */
@@ -1582,7 +1582,7 @@ function syncSteps(endEff,openEnd,derived){
   const medze={
     now:[S.now>18,S.now<S.start],
     start:[S.start>S.now,S.start<S.end-1],
-    end:[!(derived||openEnd)&&S.end>S.start+1,!(derived||openEnd)&&S.end<150]
+    end:[!(derived||openEnd)&&S.end>S.start+1,!(derived||openEnd)&&S.end<110]
   };
   document.querySelectorAll('.step').forEach(b=>{
     const m=medze[b.dataset.step];
