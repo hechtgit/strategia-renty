@@ -171,7 +171,6 @@ input[type=range]:disabled{opacity:.35;cursor:not-allowed}
 .btn:hover{background:var(--gold)}
 .btn:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 .cta p{font-size:17px;color:var(--muted);max-width:470px;margin:0;line-height:1.5}
-.assump{font-size:16px;color:var(--muted);line-height:1.6;margin:0 0 12px}
 .disclaimer{font-size:15px;color:#9d968c;line-height:1.6;padding-top:13px}
 .disclaimer b{color:#a29c93}
 /* ===== úvodná časť nad aplikáciou ===== */
@@ -273,9 +272,8 @@ input[type=range]:disabled{opacity:.35;cursor:not-allowed}
 body.vystup .bottom-flow{grid-template-columns:1fr}
 body.vystup .flow-lead{display:none}
 .assumptions-block{margin:0 0 18px;padding:17px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.assumptions-block h3{font-family:var(--serif);font-size:20px;font-weight:700;margin:0 0 6px;color:#fff}
-.assumptions-block .assump{margin:0;color:#b7afa5}
 .metodika{margin-top:12px}
+.metodika:first-child{margin-top:0}
 .metodika summary{cursor:pointer;font-size:16px;color:var(--gold-strong);list-style:none;
   display:inline-flex;align-items:center;gap:7px;padding:3px 0}
 .metodika summary::-webkit-details-marker{display:none}
@@ -551,7 +549,7 @@ input[type=range]::-moz-range-thumb{background:#2b2118;box-shadow:0 0 0 2px rgba
   html.viewport-compact .set .cap{margin-bottom:4px}
   html.viewport-compact .assumption-note{margin-top:4px!important;font-size:12px!important;line-height:1.3!important}
 }
-.cta{margin-top:12px}.assump{margin-top:8px}
+.cta{margin-top:12px}
 
 /* klidná choreografie: čára se složí, milníky dosednou, výsledek dýchne */
 html[data-anim] #lp.in .axis{animation-duration:1.2s}
@@ -871,8 +869,10 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
   </div>
 
   <section class="assumptions-block" data-e style="--d:1.68s">
-    <h3>Použité predpoklady</h3>
-    <p class="assump" id="assump"></p>
+    <details class="metodika">
+      <summary>Použité predpoklady</summary>
+      <p id="assump"></p>
+    </details>
     <details class="metodika">
       <summary>Technické detaily výpočtu</summary>
       <p id="assump-detail"></p>
@@ -1211,10 +1211,13 @@ function render(){
 
   /* ticky bez kolízie s milníkmi */
   const wrapW=document.querySelector('.axis-wrap').getBoundingClientRect().width;
-  const near=wrapW>200?64/wrapW*100:0;
+  /* Značka sa skryje, len keď by naozaj ležala pod milníkom: polovica chipu
+     (31 px) + polovica najširšieho popisu (13 px) + medzera. Prísnejší odstup
+     zbytočne vymazával aj značky, ktoré sa vedľa milníka pohodlne zmestia. */
+  const near=wrapW>200?50/wrapW*100:0;
   const hp=[pct(S.now)];if(!o.immediate)hp.push(pct(S.start));if(!openEnd)hp.push(pct(endEff));
   let th='';
-  for(let a=40;a<AXMAX;a+=10){const p=pct(a);
+  for(let a=20;a<AXMAX;a+=10){const p=pct(a);
     if(hp.some(h=>Math.abs(h-p)<near))continue;
     th+=`<span class="tick" aria-hidden="true" style="left:${p}%">${a}</span>`}
   $('ticks').innerHTML=th;
