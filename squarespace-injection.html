@@ -94,7 +94,7 @@
   if (window.__czNovaVerzia) return;
   window.__czNovaVerzia = true;
 
-  var APP = "https://hechtgit.github.io/strategia-renty/cara-zivota.html?v=30";
+  var APP = "https://hechtgit.github.io/strategia-renty/cara-zivota.html?v=31";
 
   function mount() { return document.getElementById("ph-renta-calculator"); }
 
@@ -196,6 +196,16 @@
       poslednaVyskaAplikacie = h;
       if (editorOtvoreny) return;
       if (c.ram.style.height !== h + "px") c.ram.style.height = h + "px";
+      return;
+    }
+
+    /* Počas ťahania míľnika Chrome nesmie gesto odovzdať koreňovej stránke.
+       Na Macu sa pri prekročení pravého okraja osi inak vie aktivovať navigačné
+       gesto a Squarespace sa celý znovu načíta. */
+    if (e.data.type === "ph-renta-drag") {
+      var aktivne = !!e.data.active;
+      document.documentElement.style.overscrollBehavior = aktivne ? "none" : "";
+      document.body.style.overscrollBehavior = aktivne ? "none" : "";
       return;
     }
 
