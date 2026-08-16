@@ -69,7 +69,7 @@
     .cz-hero-card{display:flex;flex-direction:column;min-height:0;background:#f9f6ee}
     .cz-hero-image{position:relative;order:2;flex:0 0 auto;width:100%;height:auto;aspect-ratio:16/9;background-image:url("https://hechtgit.github.io/strategia-renty/hero-geese-final-v2.png?v=1");background-image:image-set(url("https://hechtgit.github.io/strategia-renty/hero-geese-final-v2-mobile.avif?v=1") type("image/avif"),url("https://hechtgit.github.io/strategia-renty/hero-geese-final-v2-mobile.webp?v=1") type("image/webp"),url("https://hechtgit.github.io/strategia-renty/hero-geese-final-v2.png?v=1") type("image/png"));background-position:center;background-size:cover}
     .cz-hero-card:after{display:none}
-    .cz-hero-copy{position:relative;order:1;width:100%;padding:30px 24px 28px;background:#f9f6ee}
+    .cz-hero-copy{position:relative;order:1;box-sizing:border-box;width:100%;padding:30px 24px 28px;background:#f9f6ee;overflow-wrap:anywhere}
     .cz-hero-copy h1{font-size:clamp(25px,7.2vw,31px);margin-bottom:20px}
     .cz-hero-copy p{font-size:16px;line-height:1.55}
     .cz-hero-copy p span{white-space:normal}
@@ -92,7 +92,7 @@
   if (window.__czNovaVerzia) return;
   window.__czNovaVerzia = true;
 
-  var APP = "https://hechtgit.github.io/strategia-renty/cara-zivota.html?v=21";
+  var APP = "https://hechtgit.github.io/strategia-renty/cara-zivota.html?v=22";
 
   function mount() { return document.getElementById("ph-renta-calculator"); }
 
@@ -107,6 +107,8 @@
      Strážiť sa ale smie iba dovtedy, kým je v ráme aplikácia. Po odoslaní kontaktu
      si rám sám prejde na modeláciu — tú by sme inak okamžite prepísali späť. */
   var straz = null;
+  var editorOtvoreny = false;
+  var poslednaVyskaAplikacie = 0;
   /* Legacy skript stránky mieri na koreň repozitára — teda na pôvodnú kalkulačku —
      s vlastnou zamrznutou verziou. Nestačí preto strážiť len adresu aplikácie:
      do rámu patrí aplikácia vždy, s jedinou výnimkou modelácie, na ktorú si rám
@@ -178,7 +180,22 @@
     if (e.data.type === "ph-renta-height") {
       var h = Number(e.data.height) || 0;
       if (h < 400 || h > 8000) return;              /* zjavný nezmysel ignorujeme */
+      poslednaVyskaAplikacie = h;
+      if (editorOtvoreny) return;
       if (c.ram.style.height !== h + "px") c.ram.style.height = h + "px";
+      return;
+    }
+
+    /* Mobilný editor má mať výšku obrazovky, nie výšku celej vloženej stránky. */
+    if (e.data.type === "ph-renta-editor") {
+      editorOtvoreny = !!e.data.open;
+      if (editorOtvoreny) {
+        c.ram.style.height = Math.max(560, window.innerHeight) + "px";
+        var top = c.mount.getBoundingClientRect().top + window.pageYOffset - 12;
+        window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+      } else if (poslednaVyskaAplikacie) {
+        c.ram.style.height = poslednaVyskaAplikacie + "px";
+      }
       return;
     }
 
