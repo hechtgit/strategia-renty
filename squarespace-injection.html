@@ -94,7 +94,7 @@
   if (window.__czNovaVerzia) return;
   window.__czNovaVerzia = true;
 
-  var APP = "https://hechtgit.github.io/strategia-renty/cara-zivota.html?v=23";
+  var APP = "https://hechtgit.github.io/strategia-renty/cara-zivota.html?v=24";
 
   function mount() { return document.getElementById("ph-renta-calculator"); }
 
@@ -194,8 +194,10 @@
       if (editorOtvoreny) {
         var obsah = Number(e.data.height) || window.innerHeight;
         c.ram.style.height = Math.min(Math.max(360, obsah), window.innerHeight) + "px";
-        var top = c.mount.getBoundingClientRect().top + window.pageYOffset - 12;
-        window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+        var hlavicka = document.querySelector("header, #header, .Header");
+        var odsadenie = hlavicka ? Math.ceil(hlavicka.getBoundingClientRect().height) + 12 : 92;
+        var top = c.mount.getBoundingClientRect().top + window.pageYOffset - odsadenie;
+        window.scrollTo({ top: Math.max(0, top), behavior: "auto" });
       } else if (poslednaVyskaAplikacie) {
         c.ram.style.height = poslednaVyskaAplikacie + "px";
       }
