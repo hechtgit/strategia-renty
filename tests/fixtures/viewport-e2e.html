@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="sk">
+<meta charset="utf-8">
+<title>Viewport bridge E2E</title>
+<iframe id="app" title="Test aplikácie"></iframe>
+<script>
+  const q=new URLSearchParams(location.search);
+  const frame=document.getElementById('app');
+  frame.src=(q.get('cross')==='1'?'http://127.0.0.1:8899':'')+'/cara-zivota.html?preview=1';
+  frame.addEventListener('load',()=>{
+    frame.contentWindow.postMessage({type:'ph-renta-host-viewport',
+      width:Number(q.get('w')),height:Number(q.get('h'))},'*');
+  });
+</script>
+</html>

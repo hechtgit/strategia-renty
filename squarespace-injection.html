@@ -94,7 +94,7 @@
   if (window.__czNovaVerzia) return;
   window.__czNovaVerzia = true;
 
-  var APP = "https://hechtgit.github.io/strategia-renty/cara-zivota.html?v=27";
+  var APP = "https://hechtgit.github.io/strategia-renty/cara-zivota.html?v=28";
 
   function mount() { return document.getElementById("ph-renta-calculator"); }
 
@@ -111,6 +111,14 @@
   var straz = null;
   var editorOtvoreny = false;
   var poslednaVyskaAplikacie = 0;
+  var viewportFrame = 0;
+  function posliVelkostOkna() {
+    viewportFrame = 0;
+    var m = mount(); if (!m) return;
+    var f = m.querySelector("iframe"); if (!f || !f.contentWindow) return;
+    f.contentWindow.postMessage({type:"ph-renta-host-viewport",
+      width:window.innerWidth,height:window.innerHeight}, "https://hechtgit.github.io");
+  }
   /* Legacy skript stránky mieri na koreň repozitára — teda na pôvodnú kalkulačku —
      s vlastnou zamrznutou verziou. Nestačí preto strážiť len adresu aplikácie:
      do rámu patrí aplikácia vždy, s jedinou výnimkou modelácie, na ktorú si rám
@@ -139,6 +147,7 @@
     if (f && !f.__czVynutenaAplikacia) {
       f.__czVynutenaAplikacia = true;
       f.removeAttribute("loading");
+      f.addEventListener("load", posliVelkostOkna);
       f.addEventListener("load", function vynutAplikaciu() {
         f.removeEventListener("load", vynutAplikaciu);
         if (!jeModelacia(f.getAttribute("src"))) {
@@ -146,6 +155,8 @@
         }
       });
     }
+    setTimeout(posliVelkostOkna, 0);
+    setTimeout(posliVelkostOkna, 500);
     /* Sledujeme celý kontajner, nie samotný rám: legacy skript vie rám nahradiť
        novým prvkom a strážca pripnutý na starý uzol by potom strážil odpojený
        kus DOM. Takto zachytíme aj výmenu prvku, aj prepis atribútu. */
@@ -211,6 +222,10 @@
       window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
     }
   });
+
+  window.addEventListener("resize", function () {
+    if (!viewportFrame) viewportFrame = requestAnimationFrame(posliVelkostOkna);
+  }, {passive:true});
 
   /* 2. Úvod: schválené texty vľavo, obraz vpravo; audio sa zachytí o značku nižšie */
   function vlozUvod() {
