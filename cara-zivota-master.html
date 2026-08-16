@@ -774,6 +774,7 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
       </label>
 
       <div class="out" id="out-cap"><div class="k" id="cap-k">Budem na to potrebovať</div><div class="v" id="cap-v">—</div></div>
+      <p class="k-note" id="calculated-rent-note" hidden></p>
       <div class="out sec" id="out-fut"><div class="k" id="fut-k">Vtedy mi to vyplatí</div><div class="v" id="fut-v">—</div></div>
 
       <div class="set">
@@ -1244,15 +1245,21 @@ function render(){
     b.classList.toggle('on', Math.abs(Number(b.dataset.vynos)-S.vynos)<0.05));
 
   /* karta PRVÁ RENTA */
-  if(o.warn){txt($('cap-v'),'—');$('out-fut').hidden=true}
+  const calculatedRentNote=$('calculated-rent-note');
+  if(o.warn){txt($('cap-v'),'—');$('out-fut').hidden=true;calculatedRentNote.hidden=true}
   else if(o.calculatesRent){
-    txt($('cap-k'),'Dosiahnuteľná renta v dnešných cenách');
-    money($('cap-v'),o.Rtoday,'/ mes.');
+    txt($('cap-k'),o.rast?'Renta v dnešných cenách':'Pevná nominálna renta');
+    money($('cap-v'),o.rast?o.Rtoday:o.R,'/ mes.');
+    calculatedRentNote.hidden=false;
+    calculatedRentNote.textContent=o.rast
+      ?`Prvá výplata vo veku ${S.start} rokov: ${fmtEur(o.R)} / mes. Renta sa ďalej zvyšuje o ${pctTxt(o.infl)} % ročne.`
+      :'Bez úpravy o infláciu; jej kúpna sila bude časom klesať.';
     $('out-fut').hidden=false;
     txt($('fut-k'),`Vytvorený kapitál vo veku ${S.start} rokov`);
     money($('fut-v'),o.cap);
   }
   else{
+    calculatedRentNote.hidden=true;
     txt($('cap-k'),S.sit==='have'?'Môj majetok vtedy':'Budem na to potrebovať');
     money($('cap-v'),o.cap);
     const showFut=o.rast&&o.N>0&&!(S.sit==='have'&&S.goal==='rent');
@@ -1521,7 +1528,7 @@ function syncMobileLifeNav(){
   const capSummary=fmtEur(o.cap);
   const mapVals={
     today:[S.now,todayValues],
-    start:[S.start,[fmtEur(rentaDnes)+' / mes.',S.inflOn?'Inflácia '+pctTxt(S.infl)+' %':'Bez inflácie',(o.calculatesRent?'Vytvorím ':'Potrebujem ')+capSummary]],
+    start:[S.start,[(o.rast?fmtEur(rentaDnes)+' / mes. v dnešných cenách':fmtEur(rentaDnes)+' / mes. nominálne'),o.rast?'Inflácia '+pctTxt(o.infl)+' %':'Bez inflácie',(o.calculatesRent?'Vytvorím ':'Potrebujem ')+capSummary]],
     end:[S.pension==='perpetuity'?100:S.end,S.pension==='perpetuity'?['Bez konca']:['Do '+S.end+' rokov','Renta '+Math.max(0,S.end-S.start)+' rokov']]
   };
   Object.entries(mapVals).forEach(([key,val])=>{

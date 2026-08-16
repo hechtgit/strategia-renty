@@ -12,8 +12,10 @@ function has(text, fragment, label) {
 has(app, 'id="fund-out"', "samostatný výstup karty Dnes");
 has(app, "$('fund-out').hidden=S.sit==='build'&&S.mode==='combo'&&S.comboDir==='known'&&!o.immediate;",
   "skrytie výsledku v karte Dnes pri známej kombinácii");
-has(app, "txt($('cap-k'),'Dosiahnuteľná renta v dnešných cenách');",
-  "výsledok renty v karte Začiatok čerpania");
+has(app, "txt($('cap-k'),o.rast?'Renta v dnešných cenách':'Pevná nominálna renta');",
+  "rozlíšenie reálnej a pevnej nominálnej renty v karte Začiatok čerpania");
+has(app, 'Prvá výplata vo veku ${S.start} rokov:',
+  "prvú nominálnu výplatu pri zapnutej inflácii");
 has(app, "txt($('fut-k'),`Vytvorený kapitál vo veku ${S.start} rokov`);",
   "vytvorený kapitál v karte Začiatok čerpania");
 has(app, 'const zrusFokus=()=>{',
