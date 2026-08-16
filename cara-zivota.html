@@ -1098,7 +1098,7 @@ if(QS.has('preview'))window.__previewScenarioURL=scenarioURL;
    konkrétny scenár sa na nich overuje až na osobnej konzultácii. */
 
 /* ===== os ===== */
-let AXMAX=110;
+let AXMAX=110,draggingKey=null;
 const FA=40,FS=14;
 const pct=v=>v<=FA?v/FA*FS:FS+(v-FA)/(AXMAX-FA)*(100-FS);
 const ageAt=p=>p<=FS?p/FS*FA:FA+(p-FS)/(100-FS)*(AXMAX-FA);
@@ -1153,7 +1153,11 @@ function render(){
   if(derived&&!o.warn)endEff=o.forever?Math.max(S.start+1,100)
     :Math.min(150,Math.max(S.start+1,Math.round(S.now+o.N+(o.months||0)/12)));
   const openEnd=!!(o.nek||o.forever);
-  AXMAX=endEff<=100?110:Math.min(150,Math.max(110,Math.ceil((endEff+2)/10)*10));
+  const desiredAxisMax=endEff<=100?110:Math.min(150,Math.max(110,Math.ceil((endEff+2)/10)*10));
+  /* Počas ťahania konca držíme už raz rozšírenú os stabilnú. Pôvodne ju
+     setAge() pri pravom okraji rozšíril na 120 a render() ju v tom istom
+     pohybe vrátil na 110. Opakované pointermove potom rozkmitalo celý layout. */
+  AXMAX=draggingKey==='end'?Math.max(AXMAX,desiredAxisMax):desiredAxisMax;
 
   lp.classList.toggle('perp',openEnd);
   lp.classList.toggle('longevity',endEff>=100&&!openEnd);
@@ -1371,7 +1375,7 @@ function setAge(k,v){
   v=Math.round(v);
   if(k==='now')S.now=Math.max(18,Math.min(v,S.start));
   if(k==='start')S.start=Math.max(S.now,Math.min(v,S.end-1));
-  if(k==='end'){if(v>=AXMAX-2&&AXMAX<150)AXMAX=Math.min(150,AXMAX+10);S.end=Math.min(150,Math.max(S.start+1,v))}
+  if(k==='end')S.end=Math.min(150,Math.max(S.start+1,v));
   render();
 }
 /* Uchopiť sa dá milník na čiare aj celá karta — obe posúvajú ten istý bod v čase. */
@@ -1394,15 +1398,20 @@ function beginDrag(e,key,focusEl){
      nevyvolá. Klávesnicové ovládanie fokusu sa tým nemení. */
   if(focusEl&&window.parent===window)focusEl.focus({preventScroll:true});
   lp.classList.add('drag');
+  draggingKey=key;
   if(window.parent!==window)parent.postMessage({type:'ph-renta-drag',active:true},'*');
   /* uchopenie je relatívne: bod, za ktorý ťaháme, si drží odstup od milníka,
      takže karta pod kurzorom nepodskočí na jeho pozíciu */
   const grab=e.clientX-(r0.left+pct(S[key])/100*r0.width);
+  let lastAxisExpandX=r0.right-14;
   const drzPociatok=()=>{if(window.parent!==window&&(window.scrollX||window.scrollY))window.scrollTo(0,0)};
   const move=ev=>{const r=wrap.getBoundingClientRect();if(r.width<1)return;
+    if(key==='end'&&ev.clientX>=r.right-2&&ev.clientX>=lastAxisExpandX+12&&AXMAX<150){
+      AXMAX=Math.min(150,AXMAX+10);lastAxisExpandX=ev.clientX;render();
+    }
     setAge(key,ageAt(Math.max(0,Math.min(1,(ev.clientX-grab-r.left)/r.width))*100));
     drzPociatok();requestAnimationFrame(drzPociatok)};
-  const up=()=>{lp.classList.remove('drag');drzPociatok();requestAnimationFrame(drzPociatok);
+  const up=()=>{lp.classList.remove('drag');draggingKey=null;render();drzPociatok();requestAnimationFrame(drzPociatok);
     if(window.parent!==window)parent.postMessage({type:'ph-renta-drag',active:false},'*');
     if(captureEl&&captureEl.releasePointerCapture){
       try{captureEl.releasePointerCapture(e.pointerId)}catch(err){}
