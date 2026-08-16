@@ -46,9 +46,9 @@
   .cz-hero{position:relative;left:50%;transform:translateX(-50%);
     width:min(1480px,calc(100vw - 32px));max-width:none;margin:0;padding:34px 0 24px}
   .cz-hero-card{position:relative;min-height:500px;overflow:hidden;border:1px solid rgba(174,135,83,.34);border-radius:7px;background:#dfe8ed}
-  .cz-hero-card:before{content:"";position:absolute;left:0;top:0;width:100%;height:620px;background-image:url("https://hechtgit.github.io/strategia-renty/hero-geese-final-v2.png?v=1");background-image:image-set(url("https://hechtgit.github.io/strategia-renty/hero-geese-final-v2-desktop.avif?v=1") type("image/avif"),url("https://hechtgit.github.io/strategia-renty/hero-geese-final-v2-desktop.webp?v=1") type("image/webp"),url("https://hechtgit.github.io/strategia-renty/hero-geese-final-v2.png?v=1") type("image/png"));background-position:center;background-size:cover;background-repeat:no-repeat}
-  .cz-hero-card:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(249,246,238,.97) 0%,rgba(249,246,238,.9) 34%,rgba(249,246,238,.22) 58%,rgba(174,135,83,.04) 100%)}
-  .cz-hero-copy{position:relative;z-index:1;width:min(650px,60%);padding:58px 54px 46px;color:#1b1a18}
+  .cz-hero-image{position:absolute;z-index:0;left:0;top:0;width:100%;height:620px;background-image:url("https://hechtgit.github.io/strategia-renty/hero-geese-final-v2.png?v=1");background-image:image-set(url("https://hechtgit.github.io/strategia-renty/hero-geese-final-v2-desktop.avif?v=1") type("image/avif"),url("https://hechtgit.github.io/strategia-renty/hero-geese-final-v2-desktop.webp?v=1") type("image/webp"),url("https://hechtgit.github.io/strategia-renty/hero-geese-final-v2.png?v=1") type("image/png"));background-position:center;background-size:cover;background-repeat:no-repeat}
+  .cz-hero-card:after{content:"";position:absolute;z-index:1;inset:0;background:linear-gradient(90deg,rgba(249,246,238,.97) 0%,rgba(249,246,238,.9) 34%,rgba(249,246,238,.22) 58%,rgba(174,135,83,.04) 100%)}
+  .cz-hero-copy{position:relative;z-index:2;width:min(650px,60%);padding:58px 54px 46px;color:#1b1a18}
   .cz-hero-copy h1{font-family:Lora,"PT Serif",Georgia,serif;font-size:clamp(38px,3.8vw,58px);font-weight:400;line-height:1.02;letter-spacing:-.025em;margin:0 0 42px;white-space:nowrap;color:#1b1a18}
   .cz-hero-copy p{font-family:Asap,Arial,Helvetica,sans-serif;font-size:clamp(16px,1.25vw,18px);line-height:1.6;margin:0 0 28px;color:#34312d}
   .cz-hero-copy p span{display:block;white-space:nowrap}
@@ -67,7 +67,7 @@
   @media(max-width:480px){
     .cz-hero{width:calc(100vw - 32px);padding:24px 0 16px}
     .cz-hero-card{display:flex;flex-direction:column;min-height:0;background:#f9f6ee}
-    .cz-hero-card:before{position:relative;order:2;flex:0 0 auto;width:100%;height:auto;aspect-ratio:16/9;background-image:url("https://hechtgit.github.io/strategia-renty/hero-geese-final-v2.png?v=1");background-image:image-set(url("https://hechtgit.github.io/strategia-renty/hero-geese-final-v2-mobile.avif?v=1") type("image/avif"),url("https://hechtgit.github.io/strategia-renty/hero-geese-final-v2-mobile.webp?v=1") type("image/webp"),url("https://hechtgit.github.io/strategia-renty/hero-geese-final-v2.png?v=1") type("image/png"));background-position:center;background-size:cover}
+    .cz-hero-image{position:relative;order:2;flex:0 0 auto;width:100%;height:auto;aspect-ratio:16/9;background-image:url("https://hechtgit.github.io/strategia-renty/hero-geese-final-v2.png?v=1");background-image:image-set(url("https://hechtgit.github.io/strategia-renty/hero-geese-final-v2-mobile.avif?v=1") type("image/avif"),url("https://hechtgit.github.io/strategia-renty/hero-geese-final-v2-mobile.webp?v=1") type("image/webp"),url("https://hechtgit.github.io/strategia-renty/hero-geese-final-v2.png?v=1") type("image/png"));background-position:center;background-size:cover}
     .cz-hero-card:after{display:none}
     .cz-hero-copy{position:relative;order:1;width:100%;padding:30px 24px 28px;background:#f9f6ee}
     .cz-hero-copy h1{font-size:clamp(25px,7.2vw,31px);margin-bottom:20px}
@@ -205,6 +205,7 @@
           '<p><span>Majetok sám osebe nie je príjem.</span><span>Aj majitelia hodnotných portfólií často nevedia,</span><span>koľko si z majetku môžu mesačne vyplácať,</span><span>aby ho nevyčerpali skôr, než plánovali.</span></p>' +
           '<a class="cz-jump" href="#ph-renta-calculator">Prejsť priamo k aplikácii <span aria-hidden="true">↓</span></a>' +
         '</div>' +
+        '<div class="cz-hero-image" aria-hidden="true"></div>' +
       '</article>';
 
     var telo = document.createElement("section");
