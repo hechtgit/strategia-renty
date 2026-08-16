@@ -238,7 +238,10 @@ input[type=range]:disabled{opacity:.35;cursor:not-allowed}
 .consult-benefit p{margin:0!important;color:#2b2118!important;font-size:16px!important;line-height:1.55!important}
 .consult-benefit .consult-note{opacity:.82;margin-top:11px!important;font-size:12px!important;line-height:1.4!important}
 .consult-closing{white-space:nowrap;margin:27px 0 0!important;color:#2b2118!important;font-size:17px!important;line-height:1.58!important}
-.gate-label{margin-top:11px!important}
+.delivery-panel #gate-form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:34px;align-items:start}
+.gate-copy,.gate-fields{min-width:0}
+.gate-label{margin:0!important}
+.gate-label span{display:block}
 .gate-names{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:18px}
 .gate-names+.email-row{margin-top:9px}
 .gate-names input,.email-row input{min-width:0;background:#fff;color:#1a1a1a;border:0;border-radius:3px;
@@ -334,6 +337,8 @@ body.vystup .flow-lead{display:none}
   .bottom-flow,.assumptions-block,.legal{opacity:1!important;transform:none!important}
   .btn{width:100%;text-align:center}
   .gate-names,.email-row{grid-template-columns:1fr}
+  .delivery-panel #gate-form{display:block}
+  .gate-fields{margin-top:22px}
   .gate-view{display:block;text-align:center}
   .consult-panel.flow-consult{overflow:hidden;padding:28px 22px!important}
   .consult-head{padding-right:0}
@@ -767,11 +772,14 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
       </button>
       <div class="mobile-expand-content">
       <div id="gate-form">
+        <div class="gate-copy">
         <span class="path-label">Modelácia v PDF</span>
         <h3 id="delivery-title">Vezmite si svoj plán so sebou</h3>
         <p id="gate-uvod">Modeláciu vám spracujeme do prehľadného PDF, aby ste sa k nej mohli kedykoľvek vrátiť. Na otvorenej modelácii si PDF stiahnete jedným kliknutím.</p>
         <p id="gate-bonus">Ak majetok najprv budujete a rentu chcete čerpať do konkrétneho veku, získate aj historický pohľad na to, ako by váš plán obstál, ak by bol majetok počas budovania investovaný do najväčších svetových spoločností zastúpených v globálnom akciovom indexe MSCI World. Pomocou metódy Monte Carlo vytvoríme 800 simulovaných priebehov založených na historických výnosoch indexu. Uvidíte, v koľkých z nich kapitál pokryl všetky zvolené výplaty renty. Výsledok nie je predpoveďou budúceho vývoja.</p>
-        <p class="gate-label">Kam vám máme poslať odkaz na modeláciu? Modelácia sa vám otvorí okamžite a odkaz vám zároveň pošleme e-mailom.</p>
+        </div>
+        <div class="gate-fields">
+        <p class="gate-label"><span>Kam vám máme poslať odkaz na modeláciu?</span><span>Modelácia sa vám otvorí okamžite a odkaz vám zároveň pošleme e-mailom.</span></p>
         <div class="gate-names">
           <input id="gate-first" type="text" autocomplete="given-name" placeholder="Meno" aria-label="Meno">
           <input id="gate-last" type="text" autocomplete="family-name" placeholder="Priezvisko" aria-label="Priezvisko">
@@ -783,6 +791,7 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
         <div id="overenie-box" aria-hidden="true"></div>
         <small class="privacy-note">Odoslaním formulára beriete na vedomie spracovanie osobných údajov na účely vytvorenia a doručenia modelácie podľa Pravidiel ochrany osobných údajov.</small>
         <p class="send-status" id="send-status" aria-live="polite"></p>
+        </div>
       </div>
       <div id="gate-done" hidden>
         <h3>Modelácia privátnej renty je pripravená</h3>
