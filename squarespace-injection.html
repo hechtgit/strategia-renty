@@ -72,7 +72,9 @@
     .cz-hero-copy{position:relative;order:1;box-sizing:border-box;width:100%;padding:30px 24px 28px;background:#f9f6ee;overflow-wrap:anywhere}
     .cz-hero-copy h1{font-size:clamp(25px,7.2vw,31px);margin-bottom:20px}
     .cz-hero-copy p{font-size:16px;line-height:1.55}
-    .cz-hero-copy p span{white-space:normal}
+    .cz-hero-copy p span{display:inline;white-space:normal}
+    .cz-hero-copy p span:first-child{display:block}
+    .cz-hero-copy p span:not(:last-child)::after{content:" "}
     .cz-body{width:calc(100vw - 32px);padding:4px 0 16px}
     .cz-info{display:none}
     .mobile-how-box{display:block;margin:28px 0 12px;padding:22px 20px;border:1px solid rgba(174,135,83,.42);border-radius:5px;background:#22201d}
@@ -92,7 +94,7 @@
   if (window.__czNovaVerzia) return;
   window.__czNovaVerzia = true;
 
-  var APP = "https://hechtgit.github.io/strategia-renty/cara-zivota.html?v=22";
+  var APP = "https://hechtgit.github.io/strategia-renty/cara-zivota.html?v=23";
 
   function mount() { return document.getElementById("ph-renta-calculator"); }
 
@@ -190,7 +192,8 @@
     if (e.data.type === "ph-renta-editor") {
       editorOtvoreny = !!e.data.open;
       if (editorOtvoreny) {
-        c.ram.style.height = Math.max(560, window.innerHeight) + "px";
+        var obsah = Number(e.data.height) || window.innerHeight;
+        c.ram.style.height = Math.min(Math.max(360, obsah), window.innerHeight) + "px";
         var top = c.mount.getBoundingClientRect().top + window.pageYOffset - 12;
         window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
       } else if (poslednaVyskaAplikacie) {
