@@ -153,11 +153,61 @@ const clamped = production({
   ...defaults, now: -10, start: 999, end: 0, rent: 999999, existing: -1,
   combo: 999999999, monthlyKnown: 999999, infl: 99, vynos: 999
 });
-/* `end` je zastropovaný na 110 — rovnaký horizont, aký kreslí časová os.
+/* `end` je zastropovaný na 110 — rovnaký horizont, aký kreslí časová os —
+   a `start` o rok nižšie, aby koniec čerpania mal kam nasadnúť.
    Modelácia dostáva jadro z mastera aplikácie, takže obe strany kapú rovnako. */
-const expectedClamp = { now: 18, start: 120, end: 110, rent: 50000, existing: 50000, combo: 10000000, monthlyKnown: 100000, infl: 10, vynos: 50 };
+const expectedClamp = { now: 18, start: 109, end: 110, rent: 50000, existing: 50000, combo: 10000000, monthlyKnown: 100000, infl: 10, vynos: 50 };
 Object.entries(expectedClamp).forEach(([key, expected]) => {
   if (clamped.S[key] !== expected) throw new Error(`Ochrana vstupu ${key}: ${clamped.S[key]} != ${expected}`);
+});
+
+/* Ručne upravený odkaz nesmie vyrobiť záporné obdobie čerpania. Predtým prešiel
+   `start` až na 120 pri osi končiacej na 110, takže vznikol scenár s rentou
+   „za 0 €", ktorý vyzeral ako náš oficiálny výstup. */
+[
+  { now: 35, start: 120, end: 110 },
+  { now: 35, start: 999, end: 0 },
+  { now: 99, start: 99, end: 99 },
+].forEach(params => {
+  const api = production({ ...defaults, ...params });
+  const s = api.S;
+  if (!(s.now <= s.start && s.start < s.end && s.end <= 110)) {
+    throw new Error(`Neplatný odkaz prešiel: now=${s.now} start=${s.start} end=${s.end}`);
+  }
+  const o = api.compute();
+  if (!(o.T > 0)) throw new Error(`Odkaz vyrobil nekladné obdobie čerpania: T=${o.T}`);
+});
+
+/* Súčet vyplatenej renty pri otázke „ako dlho vydrží". Dĺžku čerpania tam určuje
+   výpočet, nie jazdec — predtým sa sčítal horizont jazdca a suma bola násobne
+   vyššia než skutočnosť, a to isté číslo išlo do modelácie aj do PDF. */
+const duration = production({
+  ...defaults, sit: "have", goal: "duration", existing: 400000, now: 50, start: 55,
+  end: 90, rent: 4000, vynos: 5, infl: 3, infl_on: "1",
+});
+const durationCore = duration.compute();
+const durationSummary = duration.prehladCiastok();
+if (!Number.isFinite(durationCore.months)) throw new Error("Scenár „ako dlho vydrží\" nedopočítal mesiace.");
+if (durationSummary.mesiacov !== durationCore.months) {
+  throw new Error(`Súčet renty použil zlý horizont: ${durationSummary.mesiacov} != ${durationCore.months}`);
+}
+const g = durationCore.g;
+const expectedPaid = Math.abs(g) < 1e-12
+  ? durationCore.R * durationCore.months
+  : durationCore.R * (Math.pow(1 + g, durationCore.months) - 1) / g;
+close(durationSummary.vyplatene, expectedPaid, "objem vyplatenej renty pri odvodenej dĺžke", 1e-9);
+/* Vyplatiť sa nedá násobne viac, než koľko kapitál uniesol. */
+if (durationSummary.vyplatene > durationCore.avail * 3) {
+  throw new Error("Objem vyplatenej renty je neprimeraný voči dostupnému kapitálu.");
+}
+
+/* Strop veku 110 musí platiť rovnako v aplikácii aj v modelácii — inak sa
+   kanály v krajnom scenári rozídu na štítku „Plánovaný horizont". */
+const appSource = fs.readFileSync(new URL("./cara-zivota.html", import.meta.url), "utf8");
+[["aplikácia", appSource], ["modelácia", result]].forEach(([name, text]) => {
+  if (!text.includes(":Math.min(110,Math.max(S.start+1,Math.round(S.now+o.N+(o.months||0)/12)));")) {
+    throw new Error(`Odvodený horizont v kanáli „${name}" nie je zastropovaný na 110.`);
+  }
 });
 
 const impossiblePerpetuity = production({ ...defaults, pension: "perpetuity", vynos: 3, infl: 5 }).compute();

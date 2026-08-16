@@ -543,7 +543,7 @@ const o=compute();
 const derived=S.sit==='have'&&S.goal==='duration';
 let endEff=S.end;
 if(derived&&!o.warn)endEff=o.forever?Math.max(S.start+1,100)
-  :Math.min(150,Math.max(S.start+1,Math.round(S.now+o.N+(o.months||0)/12)));
+  :Math.min(110,Math.max(S.start+1,Math.round(S.now+o.N+(o.months||0)/12)));
 const openEnd=!!(o.nek||o.forever);
 const AXMAX=endEff<=100?110:Math.min(150,Math.max(110,Math.ceil((endEff+2)/10)*10));
 

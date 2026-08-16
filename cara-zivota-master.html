@@ -994,7 +994,10 @@ function applyScenarioFromUrl(){
      s nezmyselnou sumou, ktorá vyzerá ako náš výstup. */
   const medzi=(v,min,max)=>Math.min(max,Math.max(min,v));
   S.now=Math.round(medzi(S.now,18,99));
-  S.start=Math.round(medzi(S.start,S.now,120));
+  /* Horná hranica je o rok nižšia než koniec osi: koniec čerpania musí mať
+     kam nasadnúť. Bez toho vyrobil ručne upravený odkaz záporné obdobie
+     čerpania a dôveryhodne vyzerajúci nezmysel („renta za 0 €"). */
+  S.start=Math.round(medzi(S.start,S.now,109));
   S.end=Math.round(medzi(S.end,S.start+1,110));
   S.infl=medzi(S.infl,0,10);
   S.vynos=Math.round(medzi(S.vynos,VYNOS_MIN,VYNOS_MAX)*10)/10;
@@ -1019,8 +1022,11 @@ function mkScale(min,max,pow,round){
 }
 const SC={rent:mkScale(500,50000,2.1,v=>v<10000?100:500),
   c0:mkScale(50000,30000000,2.6,v=>v<1000000?10000:100000),
-  combo:mkScale(0,10000000,2.4,v=>v<500000?5000:50000),
-  monthly:mkScale(0,100000,2.1,v=>v<10000?100:500)};
+  /* Investičné sumy sa hýbu po celých tisícoch, mesačné po stovkách. Pevný
+     krok drží čísla okrúhle a zároveň zjemňuje posun na hornom konci osi,
+     kde predtým jazdec skákal po 50 000 € (resp. 500 € pri mesačnej). */
+  combo:mkScale(0,10000000,2.4,()=>1000),
+  monthly:mkScale(0,100000,2.1,()=>100)};
 
 /* ===== finančné jadro (zhodné s ostrou kalkulačkou) ===== */
 const mRate=pa=>Math.pow(1+pa/100,1/12)*(1-FEE_M/1200)-1;
@@ -1095,8 +1101,10 @@ function prehladCiastok(){
 
   if(nekonecne)return {nekonecne:true, vklady, kapital:o.cap};
 
-  /* rastúca renta je geometrický rad; pri nulovom raste stačí súčin */
-  const m=o.Tm, R=o.R, g=o.g;
+  /* Pri otázke „ako dlho vydrží" je dĺžka čerpania výsledkom výpočtu, nie
+     nastavením jazdca. Sčítať sa preto musia skutočne vyplatené mesiace —
+     inak si výsledok protirečí a nafúknutá suma ide aj do PDF. */
+  const m=Number.isFinite(o.months)?o.months:o.Tm, R=o.R, g=o.g;
   const vyplatene=Math.abs(g)<1e-12 ? R*m : R*(Math.pow(1+g,m)-1)/g;
   return {nekonecne:false, vklady, vyplatene, vynos:Math.max(0,vyplatene-vklady), mesiacov:m};
 }
