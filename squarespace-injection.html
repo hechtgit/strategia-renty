@@ -57,21 +57,33 @@
     width:min(1480px,calc(100vw - 32px));max-width:none;margin:0;padding:8px 0 20px}
   #cz-audio{width:min(910px,100%);min-height:190px;margin:0 auto}
   .cz-info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 52px}
+  .mobile-how-box{display:none}
+  .mobile-how-box details summary{list-style:none}
+  .mobile-how-box details summary::-webkit-details-marker{display:none}
   .cz-body h2{font-family:Lora,"PT Serif",Georgia,serif;
     font-size:clamp(27px,3vw,36px);font-weight:400;line-height:1.15;margin:40px 0 16px;color:#fff}
   .cz-body p{font-size:17px;line-height:1.75;color:rgba(255,255,255,.86);margin:0 0 18px}
   .cz-body p strong{color:#fff;font-weight:600}
   @media(max-width:480px){
     .cz-hero{width:calc(100vw - 32px);padding:24px 0 16px}
-    .cz-hero-card{min-height:670px}
-    .cz-hero-card:before{height:670px;background-image:url("https://hechtgit.github.io/strategia-renty/hero-geese-final-v2.png?v=1");background-image:image-set(url("https://hechtgit.github.io/strategia-renty/hero-geese-final-v2-mobile.avif?v=1") type("image/avif"),url("https://hechtgit.github.io/strategia-renty/hero-geese-final-v2-mobile.webp?v=1") type("image/webp"),url("https://hechtgit.github.io/strategia-renty/hero-geese-final-v2.png?v=1") type("image/png"));background-position:62% center}
-    .cz-hero-card:after{background:linear-gradient(180deg,rgba(250,247,239,.68) 0%,rgba(250,247,239,.9) 43%,rgba(250,247,239,.98) 100%)}
-    .cz-hero-copy{position:absolute;left:0;bottom:0;width:100%;padding:34px 24px}
-    .cz-hero-copy h1{font-size:clamp(27px,8vw,38px);margin-bottom:26px}
+    .cz-hero-card{display:flex;flex-direction:column;min-height:0;background:#f9f6ee}
+    .cz-hero-card:before{position:relative;order:2;flex:0 0 auto;width:100%;height:auto;aspect-ratio:16/9;background-image:url("https://hechtgit.github.io/strategia-renty/hero-geese-final-v2.png?v=1");background-image:image-set(url("https://hechtgit.github.io/strategia-renty/hero-geese-final-v2-mobile.avif?v=1") type("image/avif"),url("https://hechtgit.github.io/strategia-renty/hero-geese-final-v2-mobile.webp?v=1") type("image/webp"),url("https://hechtgit.github.io/strategia-renty/hero-geese-final-v2.png?v=1") type("image/png"));background-position:center;background-size:cover}
+    .cz-hero-card:after{display:none}
+    .cz-hero-copy{position:relative;order:1;width:100%;padding:30px 24px 28px;background:#f9f6ee}
+    .cz-hero-copy h1{font-size:clamp(25px,7.2vw,31px);margin-bottom:20px}
     .cz-hero-copy p{font-size:16px;line-height:1.55}
     .cz-hero-copy p span{white-space:normal}
     .cz-body{width:calc(100vw - 32px);padding:4px 0 16px}
-    .cz-info-grid{grid-template-columns:1fr;gap:0}
+    .cz-info{display:none}
+    .mobile-how-box{display:block;margin:28px 0 12px;padding:22px 20px;border:1px solid rgba(174,135,83,.42);border-radius:5px;background:#22201d}
+    .mobile-how-box h2{margin:0 0 14px;font-size:29px}
+    .mobile-how-box p{font-size:16px;line-height:1.65}
+    .mobile-how-box .mobile-how-teaser{margin-bottom:14px}
+    .mobile-how-box details summary{display:inline-flex;align-items:center;gap:8px;padding:8px 0 5px;color:#ae8753;font-size:14px;font-weight:700;cursor:pointer;border-bottom:1px solid #ae8753}
+    .mobile-how-box details summary::after{content:"+";font-size:18px;line-height:1}
+    .mobile-how-box details[open] summary::after{content:"−"}
+    .mobile-how-box .mobile-how-more{padding-top:18px}
+    .mobile-how-box .mobile-how-more p:last-child{margin-bottom:0}
   }
   @media(max-width:350px){.cz-hero-copy h1{font-size:23px}.cz-hero-copy{padding-inline:20px}}
 </style>
@@ -80,7 +92,7 @@
   if (window.__czNovaVerzia) return;
   window.__czNovaVerzia = true;
 
-  var APP = "https://hechtgit.github.io/strategia-renty/cara-zivota.html?v=17";
+  var APP = "https://hechtgit.github.io/strategia-renty/cara-zivota.html?v=18";
 
   function mount() { return document.getElementById("ph-renta-calculator"); }
 
@@ -190,21 +202,32 @@
       '<article class="cz-hero-card">' +
         '<div class="cz-hero-copy">' +
           '<h1>Stratégia privátnej renty</h1>' +
-          '<p><span>Majetok sám osebe nie je príjem.</span><span>Aj majitelia hodnotných portfólií často nevedia,</span><span>koľko si z majetku môžu mesačne vyplácať,</span><span>aby ho nevyčerpali skôr, než plánovali.</span></p>' +
-          '<a class="cz-jump" href="#ph-renta-calculator">Prejsť priamo k aplikácii <span aria-hidden="true">↓</span></a>' +
+          '<p><span>Majetok sám osebe nie je príjem.</span><span>Aj majitelia hodnotných portfólií často nevedia,</span><span>koľko si z majetku môžu mesačne vyplácať,</span><span>aby ho nevyčerpali skôr, než plánovali.</span></p>' +
+          '<a class="cz-jump" href="#ph-renta-calculator">Prejsť priamo k aplikácii <span aria-hidden="true">↓</span></a>' +
         '</div>' +
       '</article>';
 
     var telo = document.createElement("section");
     telo.className = "cz-body";
+    var audioSlug = window.matchMedia("(max-width:480px)").matches
+      ? "strategia-privatnej-renty-mobile"
+      : "strategia-privatnej-renty";
     telo.innerHTML =
-      '<div id="cz-audio" data-adam-audio-slug="strategia-privatnej-renty" data-adam-audio-wrap="false"></div>' +
+      '<div id="cz-audio" data-adam-audio-slug="' + audioSlug + '" data-adam-audio-wrap="false"></div>' +
       '<section class="cz-info"><h2>Ako aplikácia funguje?</h2><div class="cz-info-grid">' +
-        '<p>Základom aplikácie je <strong>Čiara života</strong> a <strong>tri pohyblivé míľniky</strong>. Prvý predstavuje dnešok, druhý vek, od ktorého chcete začať čerpať privátnu rentu, a tretí obdobie, dokedy má renta pokračovať. Keď ktorýkoľvek míľnik posuniete, aplikácia celý scenár okamžite prepočíta.</p>' +
-        '<p>V karte <strong>Dnes</strong> si zvolíte, či <strong>majetok ešte len budujete, alebo ho už máte</strong>. Pri budovaní môžete kombinovať jednorazovú investíciu s pravidelným investovaním a zistiť, aký kapitál potrebujete pripraviť. Ak už majetok máte, aplikácia ukáže, akú mesačnú rentu môže prinášať alebo ako dlho by pri zvolenom čerpaní mohol vydržať.</p>' +
-        '<p>Následne nastavíte <strong>začiatok výplaty</strong>, mesačnú rentu v dnešnej hodnote a <strong>koniec čerpania</strong>. Zvoliť môžete aj rentu bez časového obmedzenia. Zhodnotenie si určujete sami a inflácia je vo výpočte započítaná tak, aby výsledok pracoval s dnešnou kúpnou silou.</p>' +
-        '<p><strong>Základný orientačný prepočet</strong> nevyžaduje meno, e-mail ani telefón. <strong>Rozšírená modelácia</strong>, ktorú si môžete nechať poslať a stiahnuť ako PDF, pridáva historický pohľad na budovanie majetku cez MSCI World. Počas čerpania používa jednotný plánovací predpoklad štyri percentá ročne po investičných nákladoch, pred infláciou. Nejde o predpoveď ani garanciu, ale o pohľad na citlivosť vášho plánu.</p>' +
-      '</div></section>';
+        '<p>Základom aplikácie je <strong>Čiara života</strong> a <strong>tri pohyblivé míľniky</strong>. Prvý predstavuje dnešok, druhý vek, od ktorého chcete začať čerpať privátnu rentu, a tretí obdobie, dokedy má renta pokračovať. Keď ktorýkoľvek míľnik posuniete, aplikácia celý scenár okamžite prepočíta.</p>' +
+        '<p>V karte <strong>Dnes</strong> si zvolíte, či <strong>majetok ešte len budujete, alebo ho už máte</strong>. Pri budovaní môžete kombinovať jednorazovú investíciu s pravidelným investovaním a zistiť, aký kapitál potrebujete pripraviť. Ak už majetok máte, aplikácia ukáže, akú mesačnú rentu môže prinášať alebo ako dlho by pri zvolenom čerpaní mohol vydržať.</p>' +
+        '<p>Následne nastavíte <strong>začiatok výplaty</strong>, mesačnú rentu v dnešnej hodnote a <strong>koniec čerpania</strong>. Zvoliť môžete aj rentu bez časového obmedzenia. Zhodnotenie si určujete sami a inflácia je vo výpočte započítaná tak, aby výsledok pracoval s dnešnou kúpnou silou.</p>' +
+        '<p><strong>Základný orientačný prepočet</strong> nevyžaduje meno, e-mail ani telefón. <strong>Rozšírená modelácia</strong>, ktorú si môžete nechať poslať a stiahnuť ako PDF, pridáva historický pohľad na budovanie majetku cez MSCI World. Počas čerpania používa jednotný plánovací predpoklad štyri percentá ročne po investičných nákladoch, pred infláciou. Nejde o predpoveď ani garanciu, ale o pohľad na citlivosť vášho plánu.</p>' +
+      '</div></section>' +
+      '<section class="mobile-how-box"><h2>Ako aplikácia funguje?</h2>' +
+        '<p class="mobile-how-teaser">Základom aplikácie je <strong>Čiara života</strong> a <strong>tri pohyblivé míľniky</strong>. Ťuknutím na kartu otvoríte jej nastavenie a potiahnutím zmeníte vek.</p>' +
+        '<details><summary>Viac</summary><div class="mobile-how-more">' +
+          '<p>Prvý míľnik predstavuje dnešok, druhý vek, od ktorého chcete začať čerpať privátnu rentu, a tretí obdobie, dokedy má renta pokračovať. Po každej zmene sa celý scenár okamžite prepočíta a súhrn zvoleného plánu sa zobrazí pod Čiarou života.</p>' +
+          '<p>V karte <strong>Dnes</strong> si zvolíte, či majetok ešte len budujete, alebo ho už máte. Pri budovaní môžete kombinovať jednorazovú investíciu s pravidelným investovaním. Ak už majetok máte, aplikácia ukáže, akú mesačnú rentu môže prinášať alebo ako dlho by pri zvolenom čerpaní mohol vydržať.</p>' +
+          '<p>Následne nastavíte začiatok výplaty, mesačnú rentu v dnešnej hodnote a koniec čerpania. Zvoliť môžete aj rentu bez časového obmedzenia. Zhodnotenie si určujete sami a inflácia je vo výpočte započítaná automaticky.</p>' +
+          '<p>Základný orientačný prepočet nevyžaduje meno, e-mail ani telefón. Rozšírenú modeláciu si môžete nechať poslať a stiahnuť ako PDF.</p>' +
+        '</div></details></section>';
 
     m.parentNode.insertBefore(lead, m);
     m.parentNode.insertBefore(telo, m);

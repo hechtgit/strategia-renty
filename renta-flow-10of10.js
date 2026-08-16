@@ -6,6 +6,13 @@
     const lp=document.getElementById("lp"),msg=document.getElementById("msg");
     if(!lp||!msg||lp.dataset.flow10of10==="1")return;
     lp.dataset.flow10of10="1";
+    /* Nová kanonická stránka už obsahuje celý schválený desktopový aj mobilný
+       tok. Staršia transformačná vrstva by z nej odstránila rozbaľovacie
+       mobilné karty a vrátila prechodový text, ktorý bol zámerne zrušený. */
+    if(document.querySelector(".mobile-life-map")){
+      document.dispatchEvent(new Event("flow10of10-ready"));
+      return;
+    }
 
     let zone=document.querySelector(".calculator-preview-zone");
     if(!zone){
@@ -32,7 +39,7 @@
       oldIntro?.remove();oldBonus?.remove();
       if(title){title.textContent="Vezmite si svoj plán so sebou";title.className="flow-title";}
       const label=delivery.querySelector(".gate-label");
-      if(label)label.innerHTML="Modeláciu vám spracujeme do <strong>prehľadného PDF</strong>, aby ste sa k nej mohli kedykoľvek vrátiť. Na otvorenej modelácii si PDF stiahnete jedným kliknutím.<br><br>Ak má váš scenár obdobie budovania a <strong>vopred zvolený koniec čerpania</strong>, plán navyše preveríme v 800 modelovaných simuláciách založených na historických výnosoch indexu MSCI World z rokov 1970 až 2025. Uvidíte, v koľkých simuláciách kapitál pokryl všetky zvolené výplaty renty. Ide o podiel úspešných simulácií v tomto modeli, nie odhad pravdepodobnosti ani predpoveď budúceho vývoja.";
+      if(label)label.innerHTML="Modeláciu vám spracujeme do <strong>prehľadného PDF</strong>, aby ste sa k nej mohli kedykoľvek vrátiť. Na otvorenej modelácii si PDF stiahnete jedným kliknutím.<br><br>Ak majetok najprv budujete a rentu chcete čerpať do konkrétneho veku, získate aj historický pohľad na to, ako by váš plán obstál, ak by bol majetok počas budovania investovaný do najväčších svetových spoločností zastúpených v globálnom akciovom indexe MSCI World. Pomocou metódy Monte Carlo vytvoríme 800 simulovaných priebehov založených na historických výnosoch indexu. Uvidíte, v koľkých z nich kapitál pokryl všetky zvolené výplaty renty. Výsledok nie je predpoveďou budúceho vývoja.";
       const names=delivery.querySelector(".gate-names");
       const prompt=document.createElement("p");prompt.className="flow-form-prompt";prompt.textContent="Kam vám máme poslať odkaz na modeláciu?";
       const note=document.createElement("p");note.className="flow-copy";note.textContent="Modelácia sa vám otvorí okamžite. Odkaz vám zároveň pošleme e-mailom, aby ste sa k nej mohli kedykoľvek vrátiť.";
@@ -55,7 +62,7 @@
           <span class="consult-portrait" role="img" aria-label="Petr Hechtberger"></span>
           <span class="path-label">Osobná konzultácia</span>
           <h3 id="consult-title" class="flow-title">Od modelácie k premyslenej stratégii</h3>
-          <p class="consult-intro">Modelácia ukazuje, aký kapitál si váš plán vyžaduje a ako obstál v simuláciách založených na historických dátach.<br>Na osobnej konzultácii ho prepojíme s vaším celkovým majetkom a rozhodnutiami, ktoré máte pred sebou.<strong class="consult-gain">Čo tým získate:</strong></p>
+          <p class="consult-intro">Modelácia ukazuje, aký kapitál si váš plán vyžaduje a ako obstál v simuláciách založených na historických dátach.<br>Ak budete mať záujem, na osobnej konzultácii vieme modeláciu prepojiť s vaším celkovým majetkom a rozhodnutiami, ktoré máte pred sebou.<strong class="consult-gain">Čo tým získate:</strong></p>
         </div>
         <div class="consult-benefits">
           <section class="consult-benefit"><h4>Pohľad dopredu</h4><p>K historickému testu pridáme modelový pohľad založený na aktuálnych CMA<sup>*</sup> a spoločne posúdime, čo z nich môže vyplývať pre váš plán.</p><p class="consult-note">* CMA znamená Capital Market Assumptions — dlhodobé očakávania výnosov a rizík popredných svetových investičných inštitúcií.</p></section>

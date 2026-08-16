@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Mobilný náhľad — Stratégia privátnej renty</title>
+  <style>
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:#111;color:#eee;font-family:Arial,sans-serif;overflow:hidden}
+    body{display:grid;grid-template-rows:auto minmax(0,1fr)}
+    .preview-bar{padding:9px 16px;text-align:center;border-bottom:1px solid #3c342a;background:#191919;color:#bba98f;font-size:13px}
+    .phone-stage{min-height:0;display:flex;justify-content:center;align-items:stretch;padding:0 14px}
+    iframe{display:block;width:435px;max-width:100%;height:100%;border:0;background:#171717;box-shadow:0 0 0 1px #343434,0 20px 70px rgba(0,0,0,.45)}
+  </style>
+</head>
+<body>
+  <div class="preview-bar">Mobilný prototyp · pevná šírka 435 px · scrollujte vo vnútri náhľadu</div>
+  <main class="phone-stage">
+    <iframe src="preview-local.html?prototype=lifeMap43" title="Celá mobilná stránka Stratégia privátnej renty" onload="this.contentWindow.scrollTo(0,0)"></iframe>
+  </main>
+</body>
+</html>

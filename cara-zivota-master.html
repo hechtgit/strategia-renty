@@ -183,6 +183,7 @@ input[type=range]:disabled{opacity:.35;cursor:not-allowed}
    bez neho pôsobia oba panely ako formulár bez dôvodu. */
 .flow-lead{margin:30px 0 0;text-align:center}
 .flow-lead .lead-h{font-family:var(--serif);font-size:27px;line-height:1.25;margin:0;color:#fff}
+.flow-lead .lead-h .lead-line{margin:0;color:inherit;font:inherit;line-height:inherit}
 .flow-lead .lead-p{max-width:62ch;margin:9px auto 0;font-size:17px;line-height:1.55;color:#b7afa5}
 .flow-options{max-width:780px;margin:18px auto 0;text-align:center}
 .flow-options h3{font-family:var(--serif);font-size:22px;line-height:1.3;margin:0;color:#fff}
@@ -197,6 +198,19 @@ input[type=range]:disabled{opacity:.35;cursor:not-allowed}
 .consult-panel h3{color:#fff}
 .consult-panel p{color:#b7afa5}
 .consult-panel .path-label{color:var(--gold-strong)}
+.consult-panel.flow-consult{position:relative;overflow:visible;padding:clamp(32px,4vw,58px)!important;background:linear-gradient(135deg,#bd965f 0%,#b1874d 100%)!important;border:1px solid rgba(72,48,23,.42)!important;box-shadow:0 18px 44px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.22)}
+.consult-panel.flow-consult::before{display:none}
+.consult-panel.flow-consult .path-label,.consult-panel.flow-consult .flow-title{color:#2b2118}
+.consult-head{position:relative;padding-right:226px}
+.consult-portrait{display:block;position:absolute;top:-28px;right:0;width:198px;height:198px;border-radius:50%;overflow:hidden;border:2px solid rgba(154,105,41,.78);box-shadow:0 12px 28px rgba(50,31,14,.2);background:#171c22 url("https://hechtgit.github.io/strategia-renty/portrait-petr-consultation.jpg") center/cover no-repeat}
+.consult-intro{max-width:1000px;margin:16px 0 0!important;color:#2b2118!important;font-size:18px!important;line-height:1.58!important}
+.consult-gain{display:block;margin-top:7px;font-size:18px;line-height:1.45;font-weight:700}
+.consult-benefits{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;margin:12px 0 0;background:rgba(52,36,21,.3);border-top:1px solid rgba(52,36,21,.3);border-bottom:1px solid rgba(52,36,21,.3)}
+.consult-benefit{min-width:0;padding:25px 30px;background:rgba(255,255,255,.055)}
+.consult-benefit h4{margin:0 0 10px;color:#2b2118;font-family:var(--serif);font-size:23px;line-height:1.25}
+.consult-benefit p{margin:0!important;color:#2b2118!important;font-size:16px!important;line-height:1.55!important}
+.consult-benefit .consult-note{opacity:.82;margin-top:11px!important;font-size:12px!important;line-height:1.4!important}
+.consult-closing{white-space:nowrap;margin:27px 0 0!important;color:#2b2118!important;font-size:17px!important;line-height:1.58!important}
 .gate-label{margin-top:11px!important}
 .gate-names{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:18px}
 .gate-names+.email-row{margin-top:9px}
@@ -235,20 +249,72 @@ body.vystup .flow-lead{display:none}
 
 /* ===== mobil ===== */
 .mob{display:none}
+.mobile-life-nav{display:none}
+.mobile-life-map{display:none}
 @media (max-width:480px){
   #lp{padding:20px 16px 26px}
+  .mobile-life-nav{display:none}
+  .mobile-life-map{position:relative;display:block;height:620px;margin:0 -2px 22px;padding:20px 0 20px 66px;border:1px solid rgba(174,135,83,.34);background:linear-gradient(180deg,#24211d,#171717);overflow:hidden}
+  .mobile-map-axis{position:absolute;left:31px;top:70px;bottom:32px;width:2px;background:linear-gradient(180deg,#8d785f,#c39a63)}
+  .mobile-map-axis-label{position:absolute;left:50%;top:-56px;transform:translateX(-50%);color:#cdbb9f;font:800 11px/1 var(--sans);letter-spacing:.16em;white-space:nowrap}
+  .mobile-map-endpoint{position:absolute;left:50%;display:grid;place-items:center;width:38px;height:38px;transform:translate(-50%,-50%);border:2px solid #d7b47d;border-radius:50%;background:#1c1a17;color:#f3dfc0;font:800 13px/1 var(--sans);font-variant-numeric:tabular-nums;box-shadow:0 0 0 3px rgba(174,135,83,.12)}
+  .mobile-map-endpoint.start{top:0}.mobile-map-endpoint.end{top:100%}
+  .mobile-map-card{position:absolute;left:66px;right:14px;display:grid;grid-template-columns:minmax(0,.85fr) 1px minmax(0,1.15fr);gap:10px;align-items:center;min-height:88px;padding:11px 12px;border:1px solid rgba(174,135,83,.56);border-radius:4px;background:#b58b52;color:#211a13;text-align:left;box-shadow:0 10px 24px rgba(0,0,0,.26);cursor:grab;transform:translateY(-50%);touch-action:none;user-select:none}
+  .mobile-map-card.dragging{cursor:grabbing;box-shadow:0 14px 32px rgba(0,0,0,.4),0 0 0 2px #e1bd86;transition:none}
+  .mobile-map-card::before{content:"";position:absolute;right:100%;top:50%;width:15px;height:1px;background:#ae8753}
+  .mobile-map-card::after{content:attr(data-age);position:absolute;right:calc(100% + 15px);top:50%;display:grid;place-items:center;width:38px;height:38px;transform:translateY(-50%);border:2px solid #d7b47d;border-radius:50%;background:#1c1a17;color:#f3dfc0;font:800 13px/1 var(--sans);font-variant-numeric:tabular-nums;box-shadow:0 0 0 3px rgba(174,135,83,.12)}
+  .mobile-map-left,.mobile-map-values{min-width:0}.mobile-map-card strong,.mobile-map-card span{display:block}.mobile-map-card strong{font:700 20px/1.05 var(--serif)}.mobile-map-card small{display:block;margin-top:7px;color:#4b3520;font-size:10px;font-weight:700;line-height:1.2}.mobile-map-divider{align-self:stretch;width:1px;background:rgba(32,23,15,.48)}.mobile-map-values{display:grid;gap:4px;color:#2b2118;font-size:11px;font-weight:700;line-height:1.18}.mobile-map-values span{margin:0;overflow:hidden;text-overflow:ellipsis}
+  .mobile-map-hint{position:absolute;left:66px;right:14px;top:14px;margin:0;color:#c5b9aa;font-size:12px;line-height:1;white-space:nowrap}
+  .mobile-map-hint strong{color:#f2d6aa;font-weight:800}
+  body.mobile-editor-open{overflow:hidden}
+  body.mobile-editor-open #lp{padding:0}
+  body.mobile-editor-open .mobile-life-map,body.mobile-editor-open .mob,body.mobile-editor-open #msg,body.mobile-editor-open .bottom-flow,body.mobile-editor-open .assumptions-block{display:none!important}
+  body.mobile-editor-open .stage{display:block!important;height:100dvh!important;margin:0!important}
+  body.mobile-editor-open .stage>.card{display:none!important}
+  body.mobile-editor-open .stage>.card.mobile-editing{position:fixed!important;inset:0!important;z-index:200;display:block!important;width:100%!important;height:100dvh!important;margin:0!important;padding:64px 18px 28px!important;border:0!important;border-radius:0!important;overflow-y:auto;background:#b58b52;box-shadow:none}
+  .mobile-editor-done{display:none}
+  body.mobile-editor-open .mobile-editing>.mobile-editor-done{position:fixed;left:auto;right:14px;top:10px;z-index:210;display:block;width:auto;min-height:40px;padding:10px 24px;border:1px solid rgba(47,31,15,.48);border-radius:3px;background:#171717;color:#f2d6aa;box-shadow:0 7px 18px rgba(0,0,0,.28);font:800 15px/1 var(--sans);cursor:pointer}
+  body.mobile-editor-open .mobile-editing>.mobile-editor-done:hover,body.mobile-editor-open .mobile-editing>.mobile-editor-done:focus-visible{background:#2a2118;outline:2px solid #fff;outline-offset:2px}
+  .mobile-life-track{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+  .mobile-life-track::before{content:"";position:absolute;left:16.66%;right:16.66%;top:10px;height:2px;background:rgba(174,135,83,.42)}
+  .mobile-life-step{position:relative;z-index:1;min-width:0;padding:0 2px 3px;border:0;background:transparent;color:#b7afa5;font:600 12px/1.2 var(--sans);text-align:center;cursor:pointer}
+  .mobile-life-step::before{content:"";display:block;width:16px;height:16px;margin:3px auto 6px;border:2px solid var(--gold);border-radius:50%;background:#1f1f1f;transition:background .2s ease,box-shadow .2s ease,transform .2s ease}
+  .mobile-life-step span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mobile-life-step strong{display:block;margin-top:2px;color:#d9c4a5;font-size:13px;font-variant-numeric:tabular-nums}
+  .mobile-life-step[aria-current="step"]{color:#fff}
+  .mobile-life-step[aria-current="step"]::before{background:var(--gold-strong);box-shadow:0 0 0 4px rgba(174,135,83,.2);transform:scale(1.08)}
+  .mobile-life-step:focus-visible{outline:2px solid #fff;outline-offset:2px;border-radius:3px}
+  .mobile-life-hint{margin:7px 0 0;padding:0 8px;text-align:center;color:#a9a198;font-size:12px;line-height:1.3}
   .stage{height:auto!important}
-  .axis-wrap{position:relative;inset:auto;top:0!important;height:26px;margin:12px 0 0}
+  .axis-wrap{display:none}
   .axis{height:26px}
   .tick,.axis-cap,.longevity,.handle small{display:none}
   .node{top:13px;pointer-events:none}
   .handle{width:38px;height:26px;font-size:17px}
-  .mob{display:block;text-align:center;font-size:16px;color:var(--muted);margin:10px 0 0}
-  .card{position:static;width:100%;margin:12px 0 0;padding:17px;top:auto!important}
+  .mob{display:block;margin:10px 0 0;padding:18px 16px;border:1px solid rgba(174,135,83,.5);border-radius:4px;background:linear-gradient(145deg,#27231e,#191817);color:#eee7dd;box-shadow:0 10px 25px rgba(0,0,0,.2);text-align:left}
+  .mobile-plan-title{margin:0 0 14px;color:#b58b52;font:700 22px/1.1 var(--serif)}
+  .mobile-plan-grid{display:grid;gap:0}
+  .mobile-plan-row{display:grid;grid-template-columns:72px minmax(0,1fr);gap:10px;align-items:center;padding:10px 0;border-top:1px solid rgba(174,135,83,.28)}
+  .mobile-plan-row:first-child{border-top:0;padding-top:0}
+  .mobile-plan-row:last-child{padding-bottom:0}
+  .mobile-plan-label{color:#ad9f8d;font:700 10px/1.25 var(--sans);letter-spacing:.1em;text-transform:uppercase}
+  .mobile-plan-value{color:#fff;font:700 13px/1.3 var(--sans);white-space:nowrap}
+  .mobile-plan-detail{display:inline;margin-left:8px;color:#c8beb1;font-size:12px;font-weight:500}
+  .card{display:none;position:static;width:100%;margin:12px 0 0;padding:17px;top:auto!important}
+  .card{scroll-margin-top:112px}
   .card::after,.card-stem{display:none}
+  .bottom-flow,.bottom-flow *,.assumptions-block,.assumptions-block *,.legal,.legal *{animation:none!important;transition:none!important}
+  .bottom-flow,.assumptions-block,.legal{opacity:1!important;transform:none!important}
   .btn{width:100%;text-align:center}
   .gate-names,.email-row{grid-template-columns:1fr}
   .gate-view{display:block;text-align:center}
+  .consult-panel.flow-consult{overflow:hidden;padding:28px 22px!important}
+  .consult-head{padding-right:0}
+  .consult-portrait{position:relative;top:auto;right:auto;width:108px;height:108px;margin:0 0 18px auto}
+  .consult-benefits{grid-template-columns:1fr}
+  .consult-benefit{padding:20px 0;background:transparent}
+  .consult-closing{white-space:normal}
+  .flow-consult .btn{width:100%;justify-content:center}
 }
 </style>
 <style>
@@ -441,9 +507,6 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
   .card{min-height:0;width:100%;margin-top:14px;border-radius:5px;padding:18px;cursor:default;user-select:auto;-webkit-user-select:auto}
   .card::after{display:none}
   .tick{display:none}
-  .flow-lead{margin-top:24px;text-align:left}
-  .flow-lead .lead-h{font-size:23px}
-  .flow-lead .lead-p{font-size:16px}
   .bottom-flow{grid-template-columns:1fr;gap:12px;margin-top:14px}
   .client-panel{padding:20px 18px}
   .email-row{grid-template-columns:1fr}
@@ -463,7 +526,46 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
   .sw{min-height:44px}
   .sw input{width:22px;height:22px}
   input[type=range]{height:34px}
+  .flow-options{width:100%;padding:0 12px;text-align:center}
+  .flow-options>p{display:block;width:100%;margin:7px auto 0;text-align:center;font-size:0}
+  .flow-options>p::after{display:block;content:"Vyberte si modeláciu v PDF alebo osobnú konzultáciu. Podrobnosti otvoríte ťuknutím.";font-size:16px;line-height:1.5}
+  .bottom-flow{display:block}
+  .bottom-flow.preview-stacked{width:100%!important;margin:14px 0 16px!important}
+  .bottom-flow.preview-stacked>.mobile-continue-card,
+  .mobile-continue-card,.consult-panel.flow-consult.mobile-continue-card{width:100%!important;margin:10px 0 0!important;padding:0!important;overflow:hidden}
+  .mobile-continue-card+.mobile-continue-card{margin-top:10px}
+  .mobile-continue-summary{display:block;position:relative;width:100%;padding:17px;text-align:left;border:0;background:transparent;color:inherit;font-family:var(--sans);cursor:pointer}
+  .mobile-continue-summary .path-label{display:block}
+  .mobile-continue-summary h3{margin:6px 0 7px;font:700 22px/1.18 var(--serif)}
+  .mobile-continue-summary p{margin:0;font-size:14px;line-height:1.48}
+  .mobile-continue-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+  .mobile-continue-chip{border:1px solid #72502b;border-radius:99px;padding:5px 8px;color:#2b2118;background:#ffffff14;font-size:11px;line-height:1.2}
+  .mobile-continue-more{display:flex;justify-content:space-between;align-items:center;margin-top:13px;color:#2b2118;font-size:13px;font-weight:700}
+  .mobile-continue-more::after{content:"＋";font-size:19px}
+  .mobile-continue-summary[aria-expanded="true"] .mobile-continue-more::after{content:"−"}
+  .mobile-expand-content{padding:18px 18px 22px;border-top:1px solid rgba(174,135,83,.36)}
+  .mobile-continue-card:not(.is-open)>.mobile-expand-content{display:none}
+  .bottom-flow .mobile-continue-card.attention:not(.interacted){animation:mobile-card-invitation 1.15s ease-in-out 1!important;transform-origin:center}
+  .bottom-flow .mobile-continue-card.attention:nth-of-type(2):not(.interacted){animation-delay:1.05s!important}
+  .mobile-consult-card .mobile-continue-summary{padding:17px;color:#2b2118}
+  .mobile-consult-card .mobile-continue-summary>.path-label,.mobile-consult-card .mobile-continue-summary>h3,.mobile-consult-card .mobile-continue-summary>p{margin-right:87px}
+  .mobile-consult-card .mobile-continue-summary h3 span{display:block;white-space:nowrap}
+  .mobile-consult-card .mobile-continue-summary p,.mobile-consult-card .mobile-continue-summary .path-label,.mobile-consult-card .mobile-continue-more{color:#2b2118}
+  .mobile-consult-card .mobile-continue-chip{border-color:#72502b;color:#2b2118;background:#ffffff14}
+  .mobile-consult-card .mobile-continue-chips{flex-wrap:nowrap;gap:5px}
+  .mobile-consult-card .mobile-continue-chip{flex:1 1 auto;padding:5px 5px;text-align:center;font-size:10px;white-space:nowrap}
+  .mobile-consult-portrait{position:absolute;top:18px;right:16px;width:72px;height:72px;border-radius:50%;border:2px solid #986a32;background:#171c22 url("https://hechtgit.github.io/strategia-renty/portrait-petr-consultation.jpg") center/cover no-repeat}
+  .mobile-consult-card>.mobile-expand-content{border-color:#72502b}
+  .mobile-consult-card .mobile-expand-content .consult-benefit{padding:20px 14px}
+  .delivery-panel.mobile-continue-card .mobile-expand-content #delivery-title,
+  .delivery-panel.mobile-continue-card .mobile-expand-content .path-label,
+  .mobile-consult-card .mobile-expand-content .consult-portrait,
+  .mobile-consult-card .mobile-expand-content>.consult-head>.path-label,
+  .mobile-consult-card .mobile-expand-content>.consult-head>.flow-title{display:none}
+  @keyframes mobile-card-invitation{0%,100%{transform:scale(1);filter:brightness(1);box-shadow:0 0 0 0 rgba(241,207,158,0)}50%{transform:scale(1.012);filter:brightness(1.08);box-shadow:0 0 0 4px rgba(241,207,158,.62),0 14px 30px rgba(0,0,0,.28)}}
 }
+@media(min-width:481px){.mobile-continue-summary{display:none}.mobile-expand-content{display:contents}}
+@media(prefers-reduced-motion:reduce){.mobile-continue-card{animation:none!important}}
 </style>
 </head>
 <body>
@@ -480,11 +582,11 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
 <section class="intro-lead">
   <div class="lead-text" data-e style="--d:.05s">
     <h1>Stratégia privátnej renty</h1>
-    <a class="intro-jump" href="#kalkulacka">Prejsť priamo k aplikácii <span aria-hidden="true">↓</span></a>
+    <a class="intro-jump" href="#kalkulacka">Prejsť priamo k aplikácii <span aria-hidden="true">↓</span></a>
 
     <h2>Prečo privátna renta</h2>
-    <p>Majetok sám osebe nie je príjem. Ako Wealth manager senior sa v praxi opakovane stretávam s klientmi, ktorí majú hodnotné portfólio, no nevedia s istotou povedať, koľko si z neho môžu mesačne vyplácať bez rizika, že ho vyčerpajú skôr, než plánovali.</p>
-    <p><strong>Stratégia privátnej renty rieši práve toto:</strong> ako naakumulovaný majetok premeniť na pravidelný, infláciou chránený príjem, ktorý má vydržať aj desaťročia. Nie je to produkt. Je to architektúra na mieru vášmu majetku, veku a cieľom.</p>
+    <p>Majetok sám osebe nie je príjem. Ako Wealth manager senior sa v praxi opakovane stretávam s klientmi, ktorí majú hodnotné portfólio, no nevedia s istotou povedať, koľko si z neho môžu mesačne vyplácať bez rizika, že ho vyčerpajú skôr, než plánovali.</p>
+    <p><strong>Stratégia privátnej renty rieši práve toto:</strong> ako naakumulovaný majetok premeniť na pravidelný, infláciou chránený príjem, ktorý má vydržať aj desaťročia. Nie je to produkt. Je to architektúra na mieru vášmu majetku, veku a cieľom.</p>
   </div>
   <figure class="lead-img" data-e style="--d:.18s">
     <img src="hero-privatna-renta.jpg"
@@ -502,8 +604,8 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
   </div>
 
   <h2>Ako aplikácia funguje?</h2>
-  <p>Na začiatku si zvolíte jeden z dvoch prístupov. <strong>Majetok budujem</strong> ukáže, koľko treba naakumulovať a koľko investovať, aby bola želaná renta možná. <strong>Majetok už mám</strong> ukáže, ako dlho by majetok vydržal, prípadne akú rentu umožní.</p>
-  <p>Na samotný orientačný prepočet <strong>nezadávate meno, e-mail ani telefón</strong>. Pracuje sa iba so vstupmi potrebnými pre modelový výpočet.</p>
+  <p>Na začiatku si zvolíte jeden z dvoch prístupov. <strong>Majetok budujem</strong> ukáže, koľko treba naakumulovať a koľko investovať, aby bola želaná renta možná. <strong>Majetok už mám</strong> ukáže, ako dlho by majetok vydržal, prípadne akú rentu umožní.</p>
+  <p>Na samotný orientačný prepočet <strong>nezadávate meno, e-mail ani telefón</strong>. Pracuje sa iba so vstupmi potrebnými pre modelový výpočet.</p>
 </article>
 
 <div class="calculator-divider" aria-hidden="true"></div>
@@ -511,6 +613,29 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
   <h1 class="sr-only">Kalkulačka privátnej renty</h1>
 
   <header class="head" aria-hidden="true"></header>
+
+  <nav class="mobile-life-nav" id="mobile-life-nav" aria-label="Čára života — navigácia medzi tromi krokmi">
+    <div class="mobile-life-track">
+      <button type="button" class="mobile-life-step" data-card="c-today" aria-current="step"><span>Dnes</span><strong id="mobile-life-now">50 r.</strong></button>
+      <button type="button" class="mobile-life-step" data-card="c-start"><span>Začiatok</span><strong id="mobile-life-start">65 r.</strong></button>
+      <button type="button" class="mobile-life-step" data-card="c-end"><span>Koniec</span><strong id="mobile-life-end">90 r.</strong></button>
+    </div>
+    <p class="mobile-life-hint">Vek nastavíte priamo v kartách. Klepnutím na bod prejdete na krok.</p>
+  </nav>
+
+  <section class="mobile-life-map" id="mobile-life-map" aria-label="Prehľad životného plánu">
+    <div class="mobile-map-axis" aria-hidden="true"><span class="mobile-map-axis-label">VEK</span><span class="mobile-map-endpoint start">18</span><span class="mobile-map-endpoint end">100</span></div>
+    <button type="button" class="mobile-map-card" data-editor-card="c-today" data-age="50" id="map-today">
+      <span class="mobile-map-left"><strong>Dnes</strong><small>Potiahnite alebo ťuknite</small></span><span class="mobile-map-divider" aria-hidden="true"></span><span class="mobile-map-values" id="map-today-summary"><span>Majetok budujem</span><span>Jednorazovo</span><span>Výnos 8,3 %</span></span>
+    </button>
+    <button type="button" class="mobile-map-card" data-editor-card="c-start" data-age="65" id="map-start">
+      <span class="mobile-map-left"><strong>Začiatok renty</strong><small>Potiahnite alebo ťuknite</small></span><span class="mobile-map-divider" aria-hidden="true"></span><span class="mobile-map-values" id="map-start-summary"><span>3 000 € mesačne</span><span>Inflácia 3 %</span><span>Potrebujem 871 922 €</span></span>
+    </button>
+    <button type="button" class="mobile-map-card" data-editor-card="c-end" data-age="90" id="map-end">
+      <span class="mobile-map-left"><strong>Koniec renty</strong><small>Potiahnite alebo ťuknite</small></span><span class="mobile-map-divider" aria-hidden="true"></span><span class="mobile-map-values" id="map-end-summary"><span>Do 90 rokov</span><span>Renta 25 rokov</span></span>
+    </button>
+    <p class="mobile-map-hint"><strong>Ťuknutím</strong> otvoríte kartu, <strong>potiahnutím</strong> zmeníte vek.</p>
+  </section>
 
   <section class="stage">
     <div class="axis-wrap">
@@ -535,7 +660,7 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
           aria-valuemin="19" aria-valuemax="150" aria-valuenow="90"><span id="v-end">90</span><small id="lbl-end">koniec čerpania</small></button>
       </div>
     </div>
-    <p class="mob" id="mob"></p>
+    <section class="mob" id="mob" aria-live="polite" aria-label="Súhrn vášho plánu"></section>
 
     <!-- DNES -->
     <div class="card above lead" id="c-today" data-e style="--d:1.02s"><span class="card-stem" aria-hidden="true"></span>
@@ -635,23 +760,26 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
 
   <div id="msg" aria-live="polite" data-e style="--d:1.5s"></div>
 
-  <div class="flow-lead" data-e style="--d:1.55s">
-    <p class="lead-h">Svoj plán už vidíte v číslach. Obstál by však aj v skutočnom svete?</p>
-    <p class="lead-p">Váš prepočet pracuje s rovnakým zhodnotením každý rok. Trhy sa však každý rok vyvíjajú inak.</p>
-  </div>
-
   <div class="flow-options" data-e style="--d:1.58s">
     <h3>Ako chcete pokračovať?</h3>
     <p>Môžete si modeláciu najprv otvoriť a uložiť v PDF, alebo prejsť rovno na osobnú konzultáciu.</p>
   </div>
 
   <div class="bottom-flow" data-e style="--d:1.6s">
-    <section class="client-panel delivery-panel" aria-labelledby="delivery-title">
+    <section class="client-panel delivery-panel mobile-continue-card" aria-labelledby="delivery-title">
+      <button class="mobile-continue-summary" type="button" aria-expanded="false">
+        <span class="path-label">Modelácia v PDF</span>
+        <h3>Vezmite si svoj plán so sebou</h3>
+        <p>Uložte si výpočet v PDF a získajte historický pohľad na to, ako by váš plán obstál v skutočnom svete.</p>
+        <span class="mobile-continue-chips"><span class="mobile-continue-chip">PDF na stiahnutie</span><span class="mobile-continue-chip">800 historických simulácií</span></span>
+        <span class="mobile-continue-more">Zobraziť celý obsah</span>
+      </button>
+      <div class="mobile-expand-content">
       <div id="gate-form">
-        <span class="path-label">Modelácia a PDF</span>
+        <span class="path-label">Modelácia v PDF</span>
         <h3 id="delivery-title">Vezmite si svoj plán so sebou</h3>
         <p id="gate-uvod">Modeláciu vám spracujeme do prehľadného PDF, aby ste sa k nej mohli kedykoľvek vrátiť. Na otvorenej modelácii si PDF stiahnete jedným kliknutím.</p>
-        <p id="gate-bonus">Ak má váš scenár obdobie budovania a vopred zvolený koniec čerpania, plán navyše preveríme v 800 modelovaných simuláciách založených na historických výnosoch indexu MSCI World z rokov 1970 až 2025.</p>
+        <p id="gate-bonus">Ak majetok najprv budujete a rentu chcete čerpať do konkrétneho veku, získate aj historický pohľad na to, ako by váš plán obstál, ak by bol majetok počas budovania investovaný do najväčších svetových spoločností zastúpených v globálnom akciovom indexe MSCI World. Pomocou metódy Monte Carlo vytvoríme 800 simulovaných priebehov založených na historických výnosoch indexu. Uvidíte, v koľkých z nich kapitál pokryl všetky zvolené výplaty renty. Výsledok nie je predpoveďou budúceho vývoja.</p>
         <p class="gate-label">Kam vám máme poslať odkaz na modeláciu? Modelácia sa vám otvorí okamžite a odkaz vám zároveň pošleme e-mailom.</p>
         <div class="gate-names">
           <input id="gate-first" type="text" autocomplete="given-name" placeholder="Meno" aria-label="Meno">
@@ -670,12 +798,32 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
         <p id="gate-done-text">Nižšie nájdete modeláciu k scenáru privátnej renty, ktorý ste si práve prepočítali. Odkaz sme poslali aj emailom; ak by doručenie meškalo, otvoríte ho aj tlačidlom nižšie.</p>
         <a class="gate-view" id="gate-view" href="#" target="_blank" rel="noopener">Otvoriť modeláciu renty</a>
       </div>
+      </div>
     </section>
-    <section class="client-panel consult-panel" aria-labelledby="consult-title">
-      <span class="path-label">Osobná konzultácia</span>
-      <h3 id="consult-title">Od modelácie k premyslenej stratégii</h3>
-      <p>Modeláciu prepojíme s vaším celkovým majetkom, auditom portfólia, pohľadom dopredu a konkrétnou stratégiou na mieru.</p>
+    <section class="client-panel consult-panel flow-consult mobile-continue-card mobile-consult-card" aria-labelledby="consult-title">
+      <button class="mobile-continue-summary" type="button" aria-expanded="false">
+        <span class="mobile-consult-portrait" role="img" aria-label="Petr Hechtberger"></span>
+        <span class="path-label">Osobná konzultácia</span>
+        <h3><span>Od modelácie</span><span>k premyslenej stratégii</span></h3>
+        <p>Prepojte modeláciu s celkovým majetkom a rozhodnutiami, ktoré máte pred sebou.</p>
+        <span class="mobile-continue-chips"><span class="mobile-continue-chip">Pohľad dopredu</span><span class="mobile-continue-chip">Audit portfólia</span><span class="mobile-continue-chip">Stratégia na mieru</span></span>
+        <span class="mobile-continue-more">Zobraziť celý obsah</span>
+      </button>
+      <div class="mobile-expand-content">
+      <div class="consult-head">
+        <span class="consult-portrait" role="img" aria-label="Petr Hechtberger"></span>
+        <span class="path-label">Osobná konzultácia</span>
+        <h3 id="consult-title" class="flow-title">Od modelácie k premyslenej stratégii</h3>
+        <p class="consult-intro">Modelácia ukazuje, aký kapitál si váš plán vyžaduje a ako obstál v simuláciách založených na historických dátach.<br>Ak budete mať záujem, na osobnej konzultácii vieme modeláciu prepojiť s vaším celkovým majetkom a rozhodnutiami, ktoré máte pred sebou.<strong class="consult-gain">Čo tým získate:</strong></p>
+      </div>
+      <div class="consult-benefits">
+        <section class="consult-benefit"><h4>Pohľad dopredu</h4><p>K historickému testu pridáme modelový pohľad založený na aktuálnych CMA<sup>*</sup> a spoločne posúdime, čo z nich môže vyplývať pre váš plán.</p><p class="consult-note">* CMA znamená Capital Market Assumptions — dlhodobé očakávania výnosov a rizík popredných svetových investičných inštitúcií.</p></section>
+        <section class="consult-benefit"><h4>Audit portfólia</h4><p>Pozrieme sa na výnosový potenciál, riziko, náklady, likviditu a na to, ako jednotlivé investície spolu fungujú v kontexte vášho celkového majetku.</p></section>
+        <section class="consult-benefit"><h4>Stratégia na mieru</h4><p>Ak nájdeme priestor na zlepšenie, navrhneme konkrétny ďalší postup podľa vašich cieľov, časového horizontu a potrebnej likvidity.</p></section>
+      </div>
+      <p class="consult-closing">Cieľom je, aby každá investícia plnila jasnú úlohu v jednej majetkovej stratégii, namiesto toho, aby zostala izolovaným produktom.</p>
       <a class="btn" href="https://hechtberger.com/rezervacia" target="_blank" rel="noopener">Rezervovať konzultáciu</a>
+      </div>
     </section>
   </div>
 
@@ -701,12 +849,34 @@ const $=id=>document.getElementById(id);
 const lp=$('lp');
 const ANIM=document.documentElement.dataset.anim==='1';
 const REDUCED=matchMedia('(prefers-reduced-motion:reduce)').matches;
+document.querySelectorAll('.mobile-continue-summary').forEach(button=>{
+  button.addEventListener('click',()=>{
+    const card=button.closest('.mobile-continue-card');
+    const open=!card.classList.contains('is-open');
+    card.classList.add('interacted');
+    card.classList.toggle('is-open',open);
+    button.setAttribute('aria-expanded',String(open));
+    const more=button.querySelector('.mobile-continue-more');
+    if(more)more.textContent=open?'Skryť obsah':'Zobraziť celý obsah';
+    requestAnimationFrame(()=>window.parent.postMessage({type:'ph-renta-preview-expand-height',height:Math.max(3000,document.getElementById('lp').scrollHeight)},'*'));
+  });
+});
+if(window.parent===window&&'IntersectionObserver' in window){
+  const cards=[...document.querySelectorAll('.mobile-continue-card')];
+  const attentionObserver=new IntersectionObserver(entries=>{
+    if(entries.some(entry=>entry.isIntersecting)){
+      cards.forEach(card=>card.classList.add('attention'));
+      attentionObserver.disconnect();
+    }
+  },{threshold:.25});
+  cards.forEach(card=>attentionObserver.observe(card));
+}
 
 /* JADRO:ZAČIATOK — od tejto značky po JADRO:KONIEC je kód, ktorý si zostav.py
    prenáša aj do výsledkovej stránky. Je zámerne bez akéhokoľvek dotyku DOM, aby
    obe stránky počítali to isté z toho istého zdroja. Čokoľvek sem pridané musí
    platiť pre aplikáciu aj pre modeláciu. */
-const S={now:50,start:65,end:90,rent:3000,existing:600000,combo:100000,
+const S={now:35,start:55,end:90,rent:3000,existing:600000,combo:100000,
   sit:'build',mode:'lump',goal:'rent',pension:'temporary',vynos:8.3,inflOn:true,infl:3};
 /* Aplikácia už nemá investičné profily. Zhodnotenie si zadáva klient sám a je
    výhradne jeho predpokladom — nič netvrdíme o tom, čím ho dosiahne. Tlačidlá
@@ -974,11 +1144,6 @@ function render(){
   const bonus=$('gate-bonus'), lead=document.querySelector('.flow-lead');
   if(bonus)bonus.hidden=bezOdolnosti;
   if(lead)lead.hidden=bezOdolnosti;
-  const gateLabel=document.querySelector('.gate-label');
-  if(gateLabel)gateLabel.innerHTML=bezOdolnosti
-    ? 'Modeláciu vám spracujeme do <strong>prehľadného PDF</strong>, aby ste sa k nej mohli kedykoľvek vrátiť. Na otvorenej modelácii si PDF stiahnete jedným kliknutím.'
-    : 'Modeláciu vám spracujeme do <strong>prehľadného PDF</strong>, aby ste sa k nej mohli kedykoľvek vrátiť. Na otvorenej modelácii si PDF stiahnete jedným kliknutím.<br><br>Ak má váš scenár obdobie budovania a <strong>vopred zvolený koniec čerpania</strong>, plán navyše preveríme v 800 modelovaných simuláciách založených na historických výnosoch indexu MSCI World z rokov 1970 až 2025. Uvidíte, v koľkých simuláciách kapitál pokryl všetky zvolené výplaty renty. Ide o podiel úspešných simulácií v tomto modeli, nie odhad pravdepodobnosti ani predpoveď budúceho vývoja.';
-
   txt($('vynos-v'),pctTxt(S.vynos)+' % ročne');
   $('sl-vynos').value=S.vynos;
   /* Nad históriou indexu nič nezakazujeme — len vedľa čísla postavíme fakt. */
@@ -1013,8 +1178,14 @@ function render(){
   $('c-today').classList.toggle('lead',!derived);
   $('c-end').classList.toggle('lead',derived);
 
-  $('mob').textContent=o.warn?'':
-    `${S.now} r · ${o.immediate?'renta hneď':'budujem '+yrs(o.N)} · ${openEnd?'renta bez konca':'renta '+yrs(Math.max(0,endEff-S.start))}`;
+  $('mob').innerHTML=o.warn?'':
+    `<h2 class="mobile-plan-title">Súhrn vášho plánu</h2>
+     <div class="mobile-plan-grid">
+       <div class="mobile-plan-row"><span class="mobile-plan-label">Dnes</span><span class="mobile-plan-value">${S.now} rokov<span class="mobile-plan-detail">${S.sit==='build'?'Majetok budujem':'Majetok už mám'}</span></span></div>
+       <div class="mobile-plan-row"><span class="mobile-plan-label">Renta</span><span class="mobile-plan-value">${fmtEur(S.rent)} mesačne<span class="mobile-plan-detail">${o.immediate?'Začína hneď':'Začína v '+S.start+' rokoch'}</span></span></div>
+       <div class="mobile-plan-row"><span class="mobile-plan-label">Horizont</span><span class="mobile-plan-value">${openEnd?'Bez konca':yrs(Math.max(0,endEff-S.start))}<span class="mobile-plan-detail">${openEnd?'Majetok sa nemíňa':'Do '+endEff+' rokov'}</span></span></div>
+     </div>`;
+  syncMobileLifeNav();
 
   /* pod čiarou — modelované priebehy sa v aplikácii neukazujú, patria na konzultáciu */
   const msg=$('msg');
@@ -1172,6 +1343,112 @@ document.querySelectorAll('.step').forEach(b=>{
   });
 });
 
+/* Mobilná Čára života A+: navigácia a orientačný súhrn, nie posuvník. */
+const mobileLifeNav=document.getElementById('mobile-life-nav');
+const mobileLifeSteps=[...document.querySelectorAll('.mobile-life-step')];
+const mobileLifeMap=document.getElementById('mobile-life-map');
+const mobileMapCards=[...document.querySelectorAll('.mobile-map-card')];
+function syncMobileLifeNav(){
+  const vals={'mobile-life-now':S.now,'mobile-life-start':S.start,
+    'mobile-life-end':S.pension==='perpetuity'?'∞':S.end};
+  Object.entries(vals).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.textContent=v==='∞'?'Bez konca':v+' r.'});
+  const modeLabel={lump:'Jednorazovo',monthly:'Pravidelne',combo:'Kombinácia'};
+  const todayValues=S.sit==='build'
+    ?['Majetok budujem',modeLabel[S.mode],'Výnos '+pctTxt(S.vynos)+' %']
+    :['Majetok už mám',fmtEur(S.existing),S.goal==='rent'?'Výška renty':'Dĺžka renty'];
+  const capSummary=document.getElementById('cap-v')?.textContent||'—';
+  const mapVals={
+    today:[S.now,todayValues],
+    start:[S.start,[fmtEur(S.rent)+' / mes.',S.inflOn?'Inflácia '+pctTxt(S.infl)+' %':'Bez inflácie','Potrebujem '+capSummary]],
+    end:[S.pension==='perpetuity'?100:S.end,S.pension==='perpetuity'?['Bez konca']:['Do '+S.end+' rokov','Renta '+Math.max(0,S.end-S.start)+' rokov']]
+  };
+  Object.entries(mapVals).forEach(([key,val])=>{
+    const card=document.getElementById('map-'+key),summary=document.getElementById('map-'+key+'-summary');
+    if(card){
+      const age=Math.max(18,Math.min(100,val[0]));
+      card.style.top=(70+((age-18)/82)*518)+'px';card.dataset.age=val[0]===Infinity?'∞':val[0];
+      card.setAttribute('aria-label',val[0]+' rokov, '+val[1].join(', ')+'. Potiahnite po osi alebo ťuknite a upravte.');
+    }
+    if(summary)summary.innerHTML=val[1].map(x=>'<span>'+x+'</span>').join('');
+  });
+}
+function setMobileLifeCurrent(cardId){
+  mobileLifeSteps.forEach(b=>{
+    if(b.dataset.card===cardId)b.setAttribute('aria-current','step');
+    else b.removeAttribute('aria-current');
+  });
+}
+mobileLifeSteps.forEach(b=>b.addEventListener('click',()=>{
+  const card=document.getElementById(b.dataset.card);if(!card)return;
+  setMobileLifeCurrent(b.dataset.card);
+  card.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+}));
+let mobileLifeTick=0;
+function updateMobileLifeFromScroll(){
+  mobileLifeTick=0;if(!isMob()||!mobileLifeNav)return;
+  const anchor=mobileLifeNav.getBoundingClientRect().bottom+28;let current='c-today';
+  ['c-today','c-start','c-end'].forEach(id=>{const card=document.getElementById(id);if(card&&card.getBoundingClientRect().top<=anchor)current=id});
+  setMobileLifeCurrent(current);
+}
+addEventListener('scroll',()=>{if(!mobileLifeTick)mobileLifeTick=requestAnimationFrame(updateMobileLifeFromScroll)},{passive:true});
+addEventListener('resize',updateMobileLifeFromScroll,{passive:true});
+
+/* Mobilný koncept B: mapa celého života a samostatný editor každej karty. */
+function closeMobileEditor(card){
+  document.body.classList.remove('mobile-editor-open');
+  card.classList.remove('mobile-editing');
+  syncMobileLifeNav();
+  parent.postMessage({type:'ph-renta-editor',open:false},'*');
+  mobileLifeMap&&mobileLifeMap.scrollIntoView({block:'start'});
+}
+function openMobileEditor(cardId){
+  if(!isMob())return;
+  const card=document.getElementById(cardId);if(!card)return;
+  let done=card.querySelector('.mobile-editor-done');
+  if(!done){
+    done=document.createElement('button');done.type='button';done.className='mobile-editor-done';
+    done.textContent='Hotovo';
+    done.addEventListener('click',()=>closeMobileEditor(card));
+    card.prepend(done);
+  }
+  card.classList.add('mobile-editing');document.body.classList.add('mobile-editor-open');
+  parent.postMessage({type:'ph-renta-editor',open:true},'*');
+  card.scrollTop=0;done.focus({preventScroll:true});
+}
+mobileMapCards.forEach(mapCard=>{
+  const key=mapCard.dataset.editorCard==='c-today'?'now':mapCard.dataset.editorCard==='c-start'?'start':'end';
+  let drag=null;
+  mapCard.addEventListener('pointerdown',e=>{
+    if(!isMob()||e.button>0)return;
+    drag={id:e.pointerId,y:e.clientY,start:S[key],moved:false};
+    mapCard.setPointerCapture&&mapCard.setPointerCapture(e.pointerId);
+    mapCard.classList.add('dragging');e.preventDefault();
+  });
+  mapCard.addEventListener('pointermove',e=>{
+    if(!drag||drag.id!==e.pointerId)return;
+    const dy=e.clientY-drag.y;
+    if(Math.abs(dy)>6)drag.moved=true;
+    if(!drag.moved)return;
+    const next=drag.start+Math.round(dy/518*82);
+    if(key==='end'&&S.pension==='perpetuity')S.pension='temporary';
+    setAge(key,next);e.preventDefault();
+  });
+  function finishMapPointer(e){
+    if(!drag||drag.id!==e.pointerId)return;
+    const moved=drag.moved;drag=null;mapCard.classList.remove('dragging');
+    mapCard.releasePointerCapture&&mapCard.releasePointerCapture(e.pointerId);
+    if(!moved)openMobileEditor(mapCard.dataset.editorCard);
+  }
+  mapCard.addEventListener('pointerup',finishMapPointer);
+  mapCard.addEventListener('pointercancel',e=>{if(drag&&drag.id===e.pointerId){drag=null;mapCard.classList.remove('dragging')}});
+  mapCard.addEventListener('keydown',e=>{
+    if(e.key==='Enter'||e.key===' '){e.preventDefault();openMobileEditor(mapCard.dataset.editorCard)}
+    if(e.key==='ArrowUp'){e.preventDefault();setAge(key,S[key]-1)}
+    if(e.key==='ArrowDown'){e.preventDefault();setAge(key,S[key]+1)}
+  });
+});
+syncMobileLifeNav();updateMobileLifeFromScroll();
+
 /* Hranice krokovania sa musia zhodovať s tým, čo dovolí setAge — inak by tlačidlo
    zostalo aktívne, no ťuknutie by už nič nezmenilo. */
 function syncSteps(endEff,openEnd,derived){
@@ -1203,10 +1480,11 @@ $('in-inflon').addEventListener('change',e=>{S.inflOn=e.target.checked;$('sl-inf
   $('infl-v').style.opacity=S.inflOn?'':'.4';render()});
 
 function bindTg(box,attr,fn){
-  $(box).querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
-    $(box).querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
+  const group=$(box);group.setAttribute('role','radiogroup');
+  group.querySelectorAll('button').forEach(b=>{b.setAttribute('role','radio');b.setAttribute('aria-checked',b.classList.contains('on')?'true':'false');b.addEventListener('click',()=>{
+    group.querySelectorAll('button').forEach(x=>{x.classList.toggle('on',x===b);x.setAttribute('aria-checked',x===b?'true':'false')});
     fn(b.dataset[attr]);render();
-  }));
+  })});
 }
 bindTg('tg-sit','sit',v=>S.sit=v);
 bindTg('tg-mode','mode',v=>S.mode=v);
@@ -1221,7 +1499,7 @@ document.querySelectorAll('#tg-tipy button').forEach(b=>
  ['tg-pension','pension','pension']]
   .forEach(([box,attr,key])=>{
     const b=$(box);if(!b)return;
-    b.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset[attr]===S[key]));
+    b.querySelectorAll('button').forEach(x=>{const on=x.dataset[attr]===S[key];x.classList.toggle('on',on);x.setAttribute('aria-checked',on?'true':'false')});
   });
 $('in-inflon').checked=S.inflOn;
 $('sl-infl').value=S.infl;$('sl-infl').disabled=!S.inflOn;
@@ -1425,7 +1703,7 @@ if(sendModel){
         '<style>:root{--bg:#292929;--gold:#ae8753;--gold-hi:#d0ab73;--ink:#f6f1e9;--muted:#c4bdb4}*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink)}body{min-height:100vh;display:grid;place-items:center;padding:32px;font:16px/1.55 Asap,Arial,sans-serif}.stav{width:min(780px,100%);text-align:center;opacity:1;transition:opacity .3s ease}.brand{margin:0;color:var(--gold-hi);font:400 clamp(31px,4vw,45px)/1.15 "PT Serif",Georgia,serif;letter-spacing:.01em}.journey{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:70px auto 0;max-width:680px}.track,.progress{position:absolute;left:16.66%;right:16.66%;top:10px;height:2px}.track{background:rgba(174,135,83,.36);box-shadow:0 0 8px rgba(174,135,83,.09)}.progress{right:auto;width:0;background:linear-gradient(90deg,#9c7139,var(--gold-hi),#ebc889);box-shadow:0 0 8px rgba(208,171,115,.4),0 0 20px rgba(174,135,83,.16);transition:width 1.02s cubic-bezier(.22,.61,.36,1)}.spark{position:absolute;z-index:3;top:4px;left:16.66%;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:#f3d59f;box-shadow:0 0 8px 3px rgba(238,197,135,.72),0 0 25px 10px rgba(174,135,83,.28),0 0 46px 16px rgba(174,135,83,.10);opacity:0;transition:left 1.02s cubic-bezier(.22,.61,.36,1),opacity .27s ease}.step{position:relative;padding-top:38px;color:#817b73;font-size:15px;font-weight:500;transition:color .4s ease,text-shadow .4s ease,font-size .3s ease}.dot{position:absolute;z-index:2;top:3px;left:50%;width:16px;height:16px;margin-left:-8px;border:1.5px solid var(--gold);border-radius:50%;background:var(--bg);transition:background .35s ease,box-shadow .35s ease,transform .35s ease}.step.lit .dot{background:var(--gold-hi);box-shadow:0 0 12px rgba(208,171,115,.55)}.step.revealed{color:var(--gold-hi);font-size:18px;text-shadow:0 0 14px rgba(208,171,115,.24)}.step.active .dot{transform:scale(1.12);animation:breathe 2.175s ease-in-out infinite}.journey.finish .progress{box-shadow:0 0 13px rgba(208,171,115,.75),0 0 32px rgba(174,135,83,.22)}.journey.finish .dot{box-shadow:0 0 12px rgba(208,171,115,.55)}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.lead{max-width:620px;margin:18px auto 0;color:#d8d2c9;font-size:17px}.actions{margin-top:28px}button{min-height:48px;padding:12px 24px;border:0;background:#9a6929;color:#fff;font:700 16px/1.2 Asap,Arial,sans-serif;cursor:pointer}button:focus-visible{outline:3px solid #fff;outline-offset:4px}@keyframes breathe{0%,100%{box-shadow:0 0 0 0 rgba(208,171,115,0),0 0 8px rgba(208,171,115,.2)}50%{box-shadow:0 0 0 10px rgba(208,171,115,.18),0 0 18px rgba(208,171,115,.5)}}.stav.complete{opacity:0}@media(max-width:560px){body{padding:24px}.journey{margin-top:54px;gap:5px}.step{font-size:12px}.step.revealed{font-size:14px}}@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}.progress{width:66.68%!important}.spark{display:none}.step{color:#ddd6cd}.dot{background:var(--gold-hi)}}</style></head><body>'+
         '<style>.stav[role=alert] h1{margin:24px 0 0;font:400 clamp(28px,3.8vw,42px)/1.18 "PT Serif",Georgia,serif;color:#f0d8d2}</style>'+
         (chyba
-          ?'<main class="stav" role="alert"><p class="brand">Stratégia privátnej renty</p><h1>'+nadpis+'</h1><p class="lead">'+text+'</p><div class="actions"><button onclick="try{window.opener.focus()}catch(e){}window.close()">Vrátiť sa k formuláru</button></div></main>'
+          ?'<main class="stav" role="alert"><p class="brand">Stratégia privátnej renty</p><h1>'+nadpis+'</h1><p class="lead">'+text+'</p><div class="actions"><button onclick="try{window.opener.focus()}catch(e){}window.close()">Vrátiť sa k formuláru</button></div></main>'
           :'<main class="stav" id="model-state"><h1 class="brand">Stratégia privátnej renty</h1><div class="journey" id="journey" role="status" aria-live="polite" aria-label="Priebeh prípravy modelácie"><span class="track" aria-hidden="true"></span><span class="progress" aria-hidden="true"></span><span class="spark" aria-hidden="true"></span><div class="step"><span class="dot"></span>Scenár prijatý</div><div class="step"><span class="dot"></span>Prebieha overenie</div><div class="step"><span class="dot"></span>Otvárame výsledok</div></div></main>')+
         '</bo'+'dy></html>';
       d.write(page);
@@ -1599,6 +1877,6 @@ if(ANIM&&!REDUCED){
   glow();
 })();
 </script>
-<script src="renta-flow-10of10.js?v=20260816-1"></script>
+<script src="renta-flow-10of10.js?v=20260816-2"></script>
 </body>
 </html>
