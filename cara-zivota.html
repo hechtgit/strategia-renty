@@ -57,7 +57,7 @@
    posledného míľnika za 100 rokov sa prehliadač snažil udržať fokusovaný úchyt
    v zábere, odscrolloval celý iframe doprava a aplikácia navonok "zmizla".
    `clip` vnorený dokument skutočne uzamkne na ľavom hornom okraji. */
-html.embedded,body.embedded{overflow:hidden;overflow-x:clip;background:transparent}
+html.embedded,body.embedded{overflow:clip;overflow-anchor:none;background:transparent}
 html{background:var(--bg)}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:19px;line-height:1.5;letter-spacing:.2px}
 #lp{max-width:1340px;margin:0 auto;padding:26px 34px 34px}
@@ -1383,7 +1383,11 @@ function beginDrag(e,key,focusEl){
   const wrap=document.querySelector('.axis-wrap'),r0=wrap.getBoundingClientRect();
   if(r0.width<1)return;
   e.preventDefault();
-  if(focusEl)focusEl.focus({preventScroll:true});
+  /* Vo vloženom ráme nesmie zostať fokus na prvku, ktorý sa počas ťahania
+     premiestňuje. Chrome sa ho inak pokúsi udržať v zábere a odscrolluje celý
+     dokument — pri reálnom ťahaní myšou aj zvislo, hoci syntetický test to
+     nevyvolá. Klávesnicové ovládanie fokusu sa tým nemení. */
+  if(focusEl&&window.parent===window)focusEl.focus({preventScroll:true});
   lp.classList.add('drag');
   /* uchopenie je relatívne: bod, za ktorý ťaháme, si drží odstup od milníka,
      takže karta pod kurzorom nepodskočí na jeho pozíciu */

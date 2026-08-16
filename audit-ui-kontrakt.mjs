@@ -16,8 +16,10 @@ has(app, "txt($('cap-k'),'Dosiahnuteľná renta v dnešných cenách');",
   "výsledok renty v karte Začiatok čerpania");
 has(app, "txt($('fut-k'),`Vytvorený kapitál vo veku ${S.start} rokov`);",
   "vytvorený kapitál v karte Začiatok čerpania");
-has(app, 'focusEl.focus({preventScroll:true});',
-  "ochranu fokusu pred odscrollovaním vnoreného rámu");
+has(app, 'focusEl&&window.parent===window',
+  "vypnutie pohyblivého fokusu vo vnorenom ráme");
+has(app, 'overflow:clip;overflow-anchor:none',
+  "úplné uzamknutie vnoreného dokumentu proti automatickému posunu");
 has(app, 'requestAnimationFrame(drzPociatok)',
   "návrat vnoreného dokumentu na začiatok počas ťahania");
 has(app, "document.documentElement.classList.contains('viewport-compact')",
