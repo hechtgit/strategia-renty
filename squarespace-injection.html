@@ -45,6 +45,10 @@
     width:min(1480px,calc(100vw - 32px))!important;max-width:none!important;margin:0!important;
     background:#333333!important;
     visibility:hidden;animation:cz-renta-fallback-reveal 0s 1500ms forwards}
+  /* Rám má vlastné tmavé pozadie z pôvodného code blocku stránky a prekrýva
+     obal. Aplikácia vnútri je priehľadná, takže bez tohto by klient videl
+     starú tmavú plochu a zo svetlejšieho pásu len tenký okraj. */
+  #ph-renta-calculator iframe{background:#333333!important}
   html.cz-renta-ready #ph-renta-calculator{visibility:visible;animation:none}
   @keyframes cz-renta-fallback-reveal{to{visibility:visible}}
   .cz-hero{position:relative;left:50%;transform:translateX(-50%);
