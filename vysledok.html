@@ -459,7 +459,11 @@ const STARE_PROFILY={kons:5.3, vyv:7.9, dyn:10.5};
 const VYNOS_MIN=0, VYNOS_MAX=50;
 /* Výplatná fáza nie je o výnose, ale o udržaní kúpnej sily — preto úzke pásmo.
    Poradca ho v poradenskom režime rozšíri na plný rozsah. */
-const VYNOS_RENT_MIN=4, VYNOS_RENT_MAX=6;
+const VYNOS_RENT_MIN=4, VYNOS_RENT_MAX=10;
+/* Nad týmito hodnotami sa predpoklad zvýrazní a pribudne upozornenie. Nie je
+   to zákaz — klient si zadáva vlastný predpoklad. Ide o to, aby cenu videl
+   v okamihu, keď posuvník ťahá, nie až v modelácii. */
+const VYNOS_RENT_VAROVANIE=6, VYNOS_VAROVANIE=20;
 /* Nad týmto číslom už svetový akciový index za žiadne z oboch sledovaných
    období nebol — vtedy k jazdcu pribudne vecná poznámka. */
 const VYNOS_HISTORIA_10R=11.3, VYNOS_HISTORIA_56R=8.3, VYNOS_HISTORIA_10R_ROKOV=10;

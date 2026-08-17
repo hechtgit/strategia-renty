@@ -524,6 +524,10 @@ html,body{background:var(--bg)}
 .set{border-top-color:var(--on-gold-line)}
 .set .cap{color:var(--on-gold)}
 .assumption-note{margin:7px 0 0!important;color:var(--on-gold)!important;font-size:14px!important;line-height:1.4!important;font-weight:600}
+/* Zvýraznenie vysokého predpokladu. Tmavá červená drží kontrast na zlatej karte;
+   svetlejšia by na nej spadla pod čitateľnú mieru. */
+.assumption-warn{color:#450b10!important}
+.when.vysoky{color:#450b10;font-weight:700}
 .sw{color:var(--on-gold-soft)}
 .sw b{color:var(--on-gold)}
 .card .sw input,.delivery-panel .sw input{accent-color:#2b2118}
@@ -779,6 +783,7 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
                aria-label="Ročné zhodnotenie majetku">
         <p class="when" id="vynos-v" style="margin:8px 0 0">8,3 % ročne</p>
         <p class="assumption-note">Je to váš predpoklad, nie očakávaný ani odporúčaný výnos.</p>
+        <p class="assumption-note assumption-warn" id="vynos-warn" hidden></p>
         <p class="when" style="margin:10px 0 6px">Historické údaje na porovnanie, nie návrh predpokladu:</p>
         <div class="tg c2" id="tg-tipy" style="margin:0">
           <button type="button" data-vynos="8.3">56 rokov · 8,3 %</button>
@@ -814,9 +819,10 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
       </div>
       <div class="set">
         <span class="cap">Zhodnotenie počas čerpania</span>
-        <input type="range" id="sl-vynos-rent" min="4" max="6" step="0.1" value="4"
+        <input type="range" id="sl-vynos-rent" min="4" max="10" step="0.1" value="4"
                aria-label="Ročné zhodnotenie počas čerpania renty">
         <p class="when" id="vynos-rent-v" style="margin:8px 0 0">4 % ročne</p>
+        <p class="assumption-note assumption-warn" id="vynos-rent-warn" hidden></p>
         <p class="assumption-note">Kým majetok budujete, môžete si dovoliť výkyvy — máte čas počkať. Keď z neho žijete, čas nemáte, a preto sa počíta opatrne: portfólio má hlavne udržať kúpnu silu.</p>
       </div>
     </div>
@@ -1011,7 +1017,11 @@ const STARE_PROFILY={kons:5.3, vyv:7.9, dyn:10.5};
 const VYNOS_MIN=0, VYNOS_MAX=50;
 /* Výplatná fáza nie je o výnose, ale o udržaní kúpnej sily — preto úzke pásmo.
    Poradca ho v poradenskom režime rozšíri na plný rozsah. */
-const VYNOS_RENT_MIN=4, VYNOS_RENT_MAX=6;
+const VYNOS_RENT_MIN=4, VYNOS_RENT_MAX=10;
+/* Nad týmito hodnotami sa predpoklad zvýrazní a pribudne upozornenie. Nie je
+   to zákaz — klient si zadáva vlastný predpoklad. Ide o to, aby cenu videl
+   v okamihu, keď posuvník ťahá, nie až v modelácii. */
+const VYNOS_RENT_VAROVANIE=6, VYNOS_VAROVANIE=20;
 /* Nad týmto číslom už svetový akciový index za žiadne z oboch sledovaných
    období nebol — vtedy k jazdcu pribudne vecná poznámka. */
 const VYNOS_HISTORIA_10R=11.3, VYNOS_HISTORIA_56R=8.3, VYNOS_HISTORIA_10R_ROKOV=10;
@@ -1214,6 +1224,7 @@ const AXMAX=120;
 const FA=40,FS=14;
 const pct=v=>v<=FA?v/FA*FS:FS+(v-FA)/(AXMAX-FA)*(100-FS);
 const ageAt=p=>p<=FS?p/FS*FA:FA+(p-FS)/(100-FS)*(AXMAX-FA);
+const NBSP='\u00a0';
 const isMob=()=>matchMedia('(max-width:480px)').matches;
 
 /* Výšku skutočného okna pozná rodičovská stránka, nie vnorený iframe. Podľa
@@ -1255,6 +1266,73 @@ function money(el,val,unit){
   twSafe.set(el,setTimeout(()=>{if(el._v!==to){cancelAnimationFrame(tw.get(el));draw(to);el._v=to}},420));
 }
 const txt=(el,t)=>{if(el.textContent!==t)el.textContent=t;el._v=undefined};
+
+/* ===== upozornenia na vysoký predpoklad =====
+   Klient si zadáva vlastný predpoklad a nikto mu v tom nebráni. Ale nad istou
+   hranicou musí vidieť aj druhú stranu: o koľko si tým výsledok vylepšil a že
+   presne o toľko viac plán závisí od toho, či sa taký výnos naozaj dostaví.
+   Porovnanie sa počíta z toho istého deterministického jadra, takže nič
+   nespomaľuje — historický test zostáva až v modelácii. */
+function prepocitajPri(vynosRent){
+  const povodny=S.vynosRent;
+  S.vynosRent=vynosRent;
+  const vysledok=compute();
+  S.vynosRent=povodny;
+  return vysledok;
+}
+
+function varovania(o){
+  /* Budovanie majetku: bez čísla, lebo porovnávacia základňa neexistuje —
+     nula percent nie je zmysluplný referenčný bod. */
+  const vysokyVynos=S.vynos>VYNOS_VAROVANIE;
+  $('vynos-v').classList.toggle('vysoky',vysokyVynos);
+  const wv=$('vynos-warn');
+  wv.hidden=!vysokyVynos;
+  if(vysokyVynos)wv.textContent=
+    'Ide o mimoriadne vysoký predpoklad. Výsledok je preto výrazne citlivejší na to, '
+    +'či sa taký výnos naozaj dostaví.';
+
+  const vysokaRenta=S.vynosRent>VYNOS_RENT_VAROVANIE;
+  $('vynos-rent-v').classList.toggle('vysoky',vysokaRenta);
+  const wr=$('vynos-rent-warn');
+  wr.hidden=!vysokaRenta;
+  if(!vysokaRenta)return;
+
+  const zaklad=prepocitajPri(VYNOS_RENT_MIN);
+  const uvod='Pri '+pctTxt(S.vynosRent)+NBSP+'% ';
+  const koniec=' O to viac plán závisí od toho, že sa taký výnos počas čerpania naozaj '
+    +'dostaví — ako by obstál pri nepriaznivom vývoji, ukáže historický test v modelácii.';
+  let veta='';
+  const pomer=(teraz,pred)=>Math.abs(Math.round((teraz/pred-1)*100));
+
+  if(o.warn||zaklad.warn){
+    veta='Ide o vyšší predpoklad, než s akým sa počíta štandardne.';
+  }else if(S.sit==='have'&&S.goal==='duration'){
+    /* Otázka „ako dlho vydrží" — porovnávame mesiace, nie sumu. */
+    const teraz=o.forever?null:o.months, pred=zaklad.forever?null:zaklad.months;
+    if(teraz===null||pred===null){
+      veta=uvod+'vydrží majetok podstatne dlhšie než pri '+pctTxt(VYNOS_RENT_MIN)+NBSP+'%.';
+    }else{
+      const rozdiel=Math.round((teraz-pred)/12*10)/10;
+      /* Desatinné číslo si v slovenčine žiada „roka"; celé číslo vlastný tvar. */
+      const jednotka=Number.isInteger(rozdiel)?yrs(rozdiel).split(' ')[1]:'roka';
+      veta=uvod+'by majetok vydržal približne o '+pctTxt(rozdiel)+NBSP+jednotka+' dlhšie než pri '
+        +pctTxt(VYNOS_RENT_MIN)+NBSP+'%.';
+    }
+  }else if(o.calculatesRent||(S.sit==='have'&&S.goal==='rent')){
+    /* Výstupom je renta — vyššie zhodnotenie ju zdvihne. */
+    const teraz=o.calculatesRent?o.Rtoday:o.R, pred=zaklad.calculatesRent?zaklad.Rtoday:zaklad.R;
+    veta=uvod+'vychádza renta o '+pomer(teraz,pred)+NBSP+'% vyššia než pri '
+      +pctTxt(VYNOS_RENT_MIN)+NBSP+'%.';
+  }else{
+    /* Výstupom je potrebná investícia — vyššie zhodnotenie ju zníži. */
+    const mesacne=S.mode==='monthly';
+    const teraz=mesacne?o.M:o.P0, pred=mesacne?zaklad.M:zaklad.P0;
+    veta=uvod+'vychádza potrebná '+(mesacne?'mesačná investícia':'investícia')+' o '
+      +pomer(teraz,pred)+NBSP+'% nižšia než pri '+pctTxt(VYNOS_RENT_MIN)+NBSP+'%.';
+  }
+  wr.textContent=veta+koniec;
+}
 
 /* ===== render ===== */
 function render(){
@@ -1337,6 +1415,7 @@ function render(){
   $('sl-vynos').value=S.vynos;
   txt($('vynos-rent-v'),pctTxt(S.vynosRent)+'\u00a0% ročne');
   $('sl-vynos-rent').value=S.vynosRent;
+  varovania(o);
   /* Nad históriou indexu nič nezakazujeme — len vedľa čísla postavíme fakt. */
   txt($('vynos-note'), S.vynos>VYNOS_HISTORIA_10R
     ? 'Svetový akciový index (MSCI World, EUR) dosiahol za posledných 10 rokov '
