@@ -781,6 +781,14 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
         </div>
         <p class="when" id="vynos-note" style="margin:8px 0 0"></p>
       </div>
+
+      <div class="set">
+        <span class="cap">Zhodnotenie počas čerpania</span>
+        <input type="range" id="sl-vynos-rent" min="4" max="6" step="0.1" value="4"
+               aria-label="Ročné zhodnotenie počas čerpania renty">
+        <p class="when" id="vynos-rent-v" style="margin:8px 0 0">4 % ročne</p>
+        <p class="assumption-note">Kým majetok budujete, môžete si dovoliť výkyvy — máte čas počkať. Keď z neho žijete, čas nemáte, a preto sa počíta opatrne: portfólio má hlavne udržať kúpnu silu.</p>
+      </div>
     </div>
 
     <!-- PRVÁ RENTA -->
@@ -1322,6 +1330,8 @@ function render(){
   if(lead)lead.hidden=bezOdolnosti;
   txt($('vynos-v'),pctTxt(S.vynos)+' % ročne');
   $('sl-vynos').value=S.vynos;
+  txt($('vynos-rent-v'),pctTxt(S.vynosRent)+'\u00a0% ročne');
+  $('sl-vynos-rent').value=S.vynosRent;
   /* Nad históriou indexu nič nezakazujeme — len vedľa čísla postavíme fakt. */
   txt($('vynos-note'), S.vynos>VYNOS_HISTORIA_10R
     ? 'Svetový akciový index (MSCI World, EUR) dosiahol za posledných 10 rokov '
@@ -1418,6 +1428,10 @@ var cmaObnov=null;
      Nastaví sa aj vtedy, keď by CMA konfigurácia chýbala — poradenský režim
      nemá byť závislý na tom, či sa podarilo načítať predpoklady. */
   document.body.classList.add('poradca');
+  /* Poradcovi uvoľníme rozsah výnosu počas čerpania. Klient má úzke pásmo,
+     aby si plán nerozbil optimizmom; poradca pri tom sedí a vie ho zarámovať. */
+  const slRent=document.getElementById('sl-vynos-rent');
+  if(slRent){slRent.min=VYNOS_MIN;slRent.max=VYNOS_MAX}
   /* Predpoklady, technické detaily aj právne upozornenie splynú poradcovi do
      jednej pätičky drobným písmom na konci. Rozbaľovanie nemá zmysel — poradca
      tieto vety pozná a klientovi ich hovorí sám. Formálne tam ale byť musia. */
@@ -1986,6 +2000,7 @@ bindTg('tg-combo-direction','comboDir',v=>S.comboDir=v);
 bindTg('tg-goal','goal',v=>S.goal=v);
 bindTg('tg-pension','pension',v=>S.pension=v);
 $('sl-vynos').addEventListener('input',e=>{S.vynos=+e.target.value;render()});
+$('sl-vynos-rent').addEventListener('input',e=>{S.vynosRent=+e.target.value;render()});
 document.querySelectorAll('#tg-tipy button').forEach(b=>
   b.addEventListener('click',()=>{S.vynos=Number(b.dataset.vynos);render()}));
 
