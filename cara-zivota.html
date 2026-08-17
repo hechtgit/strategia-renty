@@ -283,6 +283,36 @@ body.vystup .flow-lead{display:none}
 .metodika[open] summary::after{content:"–"}
 .metodika summary:hover{color:#fff}
 .metodika p{margin:9px 0 0;font-size:15px;line-height:1.65;color:#a9a298}
+/* Poradenský CMA panel. Zámerne používa tie isté komponenty ako karty (.out,
+   .metodika), ale stojí na tmavom pozadí stránky. Globálne pravidlá nižšie
+   prefarbujú .out na zlatú kartu, kde je text tmavý — tu ho preto vraciame
+   späť na farby pre tmavý podklad, inak by čísla neboli vidieť. */
+/* Poradca nepotrebuje akvizičnú časť: odovzdanie modelácie e-mailom ani pozvánku
+   na konzultáciu. Sedí s klientom pri stole, takže tieto sekcie mu iba predlžujú
+   stránku. V klientskej verzii zostávajú nedotknuté. */
+body.poradca .flow-options,body.poradca .bottom-flow{display:none}
+.cma-title{font-family:var(--serif);font-size:20px;font-weight:700;margin:0 0 6px;color:#fff}
+.cma-lead{margin:0;font-size:15px;line-height:1.65;color:#a9a298}
+.cma-block .out{border-top-color:var(--line)}
+.cma-block .out .k{color:var(--muted)}
+.cma-block .out .v{color:var(--ink);font-size:26px}
+.cma-block .out .v small{color:var(--muted)}
+.krivka-wrap{margin:14px 0 0;padding:0}
+.krivka{display:block;width:100%;height:240px;overflow:visible}
+.krivka-popis{margin:7px 0 0;font-size:13px;line-height:1.5;color:var(--muted)}
+.krivka .os{stroke:var(--line);stroke-width:1;fill:none}
+.krivka .mriezka{stroke:var(--line);stroke-width:1;stroke-dasharray:3 4;fill:none;opacity:.55}
+.krivka .plocha{fill:var(--gold);opacity:.16}
+.krivka .ciara{stroke:var(--gold-strong);stroke-width:2.5;fill:none;stroke-linejoin:round}
+.krivka .start{stroke:var(--line-hi);stroke-width:1;stroke-dasharray:4 4}
+.krivka text{fill:var(--muted);font:12px var(--sans)}
+.krivka .cielova{fill:var(--ink);font-weight:700;font-size:15px}
+.krivka .varovanie{fill:var(--muted);font-size:12px}
+/* Poradenská pätička: predpoklady, technické detaily a právne upozornenie
+   v jednej nenápadnej sekcii drobným písmom. Kontrast zostáva nad normou. */
+.poradca-pata{font-size:12px;line-height:1.55;color:#a9a298}
+.poradca-pata .pata-riadok{margin:0 0 7px;font-size:12px;line-height:1.55;color:#a9a298}
+.poradca-pata b{font-weight:600}
 .navrat{display:inline-flex;align-items:center;gap:8px;margin:0 0 14px;
   color:var(--gold-strong);font-size:17px;text-decoration:none;
   border-bottom:1px solid var(--line)}
@@ -880,6 +910,42 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
       <p id="assump-detail"></p>
     </details>
   </section>
+
+  <!-- Poradenský CMA pohľad. Klient ho nikdy neuvidí: sekcia je `hidden` a odomkne
+       ju až poradenský režim. Vizuálne používa tie isté komponenty ako zvyšok
+       aplikácie, aby pôsobila ako jej rozšírenie, nie ako druhý nástroj. -->
+  <!-- Predpoklady sem vkladá zostav.py z data/cma-assumptions.json. V masteri je
+       značka prázdna zámerne: čísla nesmú existovať na dvoch miestach. -->
+  <script id="cma-config" type="application/json">{"version": "CMA-2026-v1", "asOf": "2025-09-30", "publishedEdition": "2026 Long-Term Capital Market Assumptions (30th Annual Edition)", "sourceName": "J.P. Morgan Asset Management", "sourceUrl": "https://am.jpmorgan.com/gb/en/asset-management/adv/insights/portfolio-insights/ltcma/", "sourceDocumentUrl": "https://am.jpmorgan.com/content/dam/jpm-am-aem/global/en/insights/portfolio-insights/ltcma/noindex/ltcma-full-report.pdf", "sourceLocation": "2026 estimates and correlations | Euro assumptions, riadok „Developed World Equity“", "assetClass": "Developed World Equity", "assetClassNote": "Vyspelé svetové akcie — metodicky najbližšie k indexu MSCI World, ktorý používa historický pohľad.", "currency": "EUR", "horizonYears": [10, 15], "nominalOrReal": "nominal", "grossOrNet": "gross", "grossOrNetNote": "Predpoklad je pasívny, na úrovni indexu a bez vplyvu aktívnej správy. Vstupný poplatok a poplatok za správu si aplikácia odpočítava sama, takže sa nesmú odpočítať druhýkrát.", "returnType": "compound", "accumulationReturn": 6.3, "accumulationReturnDetail": {"compound": 6.3, "arithmetic": 7.29, "annualisedVolatility": 14.69, "priorEditionCompound": 5.9}, "drawdownReturn": 4, "drawdownReturnNote": "Od začiatku čerpania sa CMA prestáva používať. Platí rovnaký plánovací predpoklad ako v historickom pohľade: 4 % ročne po investičných nákladoch, pred infláciou.", "methodology": "CMA sa vzťahuje výhradne na fázu budovania majetku. Od prvého mesiaca čerpania sa vždy počíta pevným výnosom 4 % ročne. Výnosy sa nemiešajú a neprechádzajú plynulo — v deň začiatku renty sa predpoklad tvrdo prepne.", "disclaimer": "Dlhodobé výhledové predpoklady nie sú predpoveď, garancia ani investičné odporúčanie. Skutočný vývoj sa od nich môže výrazne odlišovať."}</script>
+  <section class="assumptions-block cma-block" id="cma-block" data-e style="--d:1.8s" hidden>
+    <h3 class="cma-title">CMA pohľad</h3>
+    <p class="cma-lead" id="cma-lead"></p>
+    <div class="out" id="cma-out-cap"><div class="k">Potrebný kapitál pri štarte čerpania</div><div class="v" id="cma-cap">—</div></div>
+    <div class="out sec" id="cma-out-vklad"><div class="k" id="cma-vklad-k">Podľa CMA investujem dnes</div><div class="v" id="cma-vklad">—</div></div>
+    <div class="out sec" id="cma-out-rozdiel"><div class="k" id="cma-rozdiel-k">Oproti vášmu predpokladu</div><div class="v" id="cma-rozdiel">—</div></div>
+    <details class="metodika">
+      <summary>Odkiaľ predpoklad pochádza</summary>
+      <p id="cma-zdroj"></p>
+    </details>
+  </section>
+
+  <!-- Odolnosť plánu stojí zámerne v samostatnej sekcii. Historická simulácia
+       a výhľadové CMA predpoklady sú dva metodicky oddelené pohľady a nesmú
+       splynúť do jedného obrazu ani do jednej legendy. -->
+  <section class="assumptions-block cma-block" id="odolnost-block" data-e style="--d:1.86s" hidden>
+    <h3 class="cma-title">Odolnosť plánu</h3>
+    <p class="cma-lead" id="odolnost-lead"></p>
+    <figure class="krivka-wrap">
+      <svg id="krivka" class="krivka" viewBox="0 0 720 240" role="img" aria-labelledby="krivka-popis" preserveAspectRatio="none"></svg>
+      <figcaption id="krivka-popis" class="krivka-popis"></figcaption>
+    </figure>
+    <div class="out" id="odolnost-out"><div class="k" id="odolnost-k">Kapitál pokryl všetky plánované výplaty</div><div class="v" id="odolnost-v">—</div></div>
+    <div class="out sec" id="akcia-out" hidden><div class="k" id="akcia-k"></div><div class="v" id="akcia-v">—</div></div>
+    <details class="metodika">
+      <summary>Ako sa simulácia počíta</summary>
+      <p id="odolnost-metodika"></p>
+    </details>
+  </section>
   <footer class="disclaimer" data-e style="--d:1.74s">
     Tento modelový výpočet slúži výhradne na ilustračné a vzdelávacie účely. <b>Nejde o investičné poradenstvo,
     investičné odporúčanie ani o ponuku či návrh na uzavretie zmluvy.</b> Zhodnotenie nie je garantované,
@@ -922,7 +988,7 @@ if(window.parent===window&&'IntersectionObserver' in window){
    obe stránky počítali to isté z toho istého zdroja. Čokoľvek sem pridané musí
    platiť pre aplikáciu aj pre modeláciu. */
 const S={now:35,start:55,end:90,rent:3000,existing:600000,combo:100000,monthlyKnown:5000,
-  sit:'build',mode:'lump',comboDir:'needed',goal:'rent',pension:'temporary',vynos:8.3,inflOn:true,infl:3};
+  sit:'build',mode:'lump',comboDir:'needed',goal:'rent',pension:'temporary',vynos:8.3,vynosRent:4,inflOn:true,infl:3};
 /* Aplikácia už nemá investičné profily. Zhodnotenie si zadáva klient sám a je
    výhradne jeho predpokladom — nič netvrdíme o tom, čím ho dosiahne. Tlačidlá
    pod jazdcom ponúkajú historické fakty o svetovom akciovom indexe, nie naše
@@ -930,6 +996,9 @@ const S={now:35,start:55,end:90,rent:3000,existing:600000,combo:100000,monthlyKn
    nezostali visieť. */
 const STARE_PROFILY={kons:5.3, vyv:7.9, dyn:10.5};
 const VYNOS_MIN=0, VYNOS_MAX=50;
+/* Výplatná fáza nie je o výnose, ale o udržaní kúpnej sily — preto úzke pásmo.
+   Poradca ho v poradenskom režime rozšíri na plný rozsah. */
+const VYNOS_RENT_MIN=4, VYNOS_RENT_MAX=6;
 /* Nad týmto číslom už svetový akciový index za žiadne z oboch sledovaných
    období nebol — vtedy k jazdcu pribudne vecná poznámka. */
 const VYNOS_HISTORIA_10R=11.3, VYNOS_HISTORIA_56R=8.3, VYNOS_HISTORIA_10R_ROKOV=10;
@@ -940,7 +1009,7 @@ const FEE_IN=1.5,FEE_M=0.9;
    ktorú klient dostane e-mailom — odkaz nesie presne ten scenár, ktorý si prepočítal.
    Názvy kľúčov sú preto zmluva navonok: po premenovaní by staršie rozposlané odkazy
    prestali sedieť, takže sa menia len vedome a s prechodom pre staré tvary. */
-const NUM_KEYS=['now','start','end','rent','existing','combo','monthlyKnown','infl','vynos'];
+const NUM_KEYS=['now','start','end','rent','existing','combo','monthlyKnown','infl','vynos','vynosRent'];
 const ENUM_KEYS={sit:['build','have'],mode:['lump','monthly','combo'],goal:['rent','duration'],
   comboDir:['needed','known'],pension:['temporary','perpetuity']};
 const QS=new URLSearchParams(location.search);
@@ -998,6 +1067,9 @@ function applyScenarioFromUrl(){
   S.end=Math.round(medzi(S.end,S.start+1,120));
   S.infl=medzi(S.infl,0,10);
   S.vynos=Math.round(medzi(S.vynos,VYNOS_MIN,VYNOS_MAX)*10)/10;
+  /* Výnos počas čerpania: klientovi 4–6 %, poradcovi bez obmedzenia. Starý
+     odkaz ho nenesie, vtedy platí predvolené 4 %. */
+  S.vynosRent=Math.round(medzi(S.vynosRent,VYNOS_RENT_MIN,VYNOS_RENT_MAX)*10)/10;
   S.rent=Math.round(medzi(S.rent,500,50000));
   S.existing=Math.round(medzi(S.existing,50000,30000000));
   S.combo=Math.round(medzi(S.combo,0,10000000));
@@ -1039,9 +1111,13 @@ function monthsToZero(C,R0,i,g){if(R0<=C*(i-g))return Infinity;let b=C,R=R0,t=0;
 function compute(){
 
   const N=S.start-S.now,Nm=N*12,T=S.end-S.start,Tm=T*12;
-  const infl=S.inflOn?S.infl:0,i=mRate(S.vynos),g=mInfl(infl),e=1-FEE_IN/100;
+  /* Dve sadzby, nie jedna: budovanie beží na zadanom výnose, čerpanie na
+     vlastnom predpoklade. Zaradenie každého použitia kopíruje spoločné jadro
+     (rateBuild vs rateDraw) — zámena by tichu vyrobila zlé čísla. */
+  const infl=S.inflOn?S.infl:0,iA=mRate(S.vynos),i=mRate(S.vynosRent),
+        g=mInfl(infl),e=1-FEE_IN/100;
   const nek=S.pension==='perpetuity'&&!(S.sit==='have'&&S.goal==='duration');
-  const o={N,Nm,T,Tm,infl,rast:S.inflOn&&infl>0,i,g,e,nek,rPct:S.vynos,immediate:N===0,warn:null};
+  const o={N,Nm,T,Tm,infl,rast:S.inflOn&&infl>0,i,iA,g,e,nek,rPct:S.vynos,rPctRent:S.vynosRent,immediate:N===0,warn:null};
 
   if(nek&&i<=g){
     o.warn=infl>0
@@ -1050,11 +1126,11 @@ function compute(){
     return o;
   }
   if(S.sit==='build'){
-    const grow=Math.pow(1+i,Nm);
+    const grow=Math.pow(1+iA,Nm);
     const knownCombo=S.mode==='combo'&&S.comboDir==='known'&&!o.immediate;
     if(knownCombo){
       o.P0=S.combo;o.M=S.monthlyKnown;
-      const an=i===0?Nm:(Math.pow(1+i,Nm)-1)/i;
+      const an=iA===0?Nm:(Math.pow(1+iA,Nm)-1)/iA;
       o.cap=o.P0*e*grow+o.M*e*an;
       o.R=nek?o.cap*(i-g):rentFromCap(o.cap,Tm,i,g);
       o.Rtoday=o.rast?o.R/Math.pow(1+infl/100,N):o.R;
@@ -1066,15 +1142,15 @@ function compute(){
       if(o.cap===null){o.warn='Takto vysokú rentu by ste na tento čas nedokázali pokryť — skúste nižšiu sumu alebo kratšie obdobie.';return o}
       if(o.immediate){o.P0=o.cap/e;o.M=0}
       else if(S.mode==='lump'){o.P0=o.cap/grow/e;o.M=0}
-      else if(S.mode==='monthly'){o.M=o.cap/(((Math.pow(1+i,Nm)-1)/i)*e);o.P0=0}
-      else{const from=S.combo*e*grow,an=(Math.pow(1+i,Nm)-1)/i;
+      else if(S.mode==='monthly'){o.M=o.cap/(((Math.pow(1+iA,Nm)-1)/iA)*e);o.P0=0}
+      else{const from=S.combo*e*grow,an=(Math.pow(1+iA,Nm)-1)/iA;
         o.M=Math.max(0,(o.cap-from)/(an*e));o.P0=S.combo;o.covers=from>=o.cap}
     }
     o.payM=nek?360:Tm;
   }else{
     o.R=o.rast?S.rent*Math.pow(1+infl/100,N):S.rent;
     o.C0=S.existing;
-    o.avail=o.C0*Math.pow(1+i,Nm);o.cap=o.avail;
+    o.avail=o.C0*Math.pow(1+iA,Nm);o.cap=o.avail;
     if(S.goal==='rent'){o.R=nek?o.avail*(i-g):rentFromCap(o.avail,Tm,i,g);o.payM=nek?360:Tm}
     else{o.Rtoday=S.rent;const m=monthsToZero(o.avail,o.R,i,g);
       if(m===Infinity){o.forever=true;o.payM=360}else{o.months=m;o.payM=Math.min(1200,Math.max(360,m+120))}}
@@ -1313,12 +1389,248 @@ function render(){
 
   if(assumpDetail)assumpDetail.textContent=o.warn?''
     :`Výpočet vychádza zo zhodnotenia ${pctTxt(o.rPct)} % ročne, ktoré ste zadali vy. `
-     +`Uvedené sumy sú po odpočítaní vstupného poplatku ${pctTxt(FEE_IN)} % a poplatku za správu ${pctTxt(FEE_M)} % ročne. `
+     +`Uvedené sumy sú po odpočítaní predpokladaného vstupného poplatku ${pctTxt(FEE_IN)}\u00a0% a poplatku za správu ${pctTxt(FEE_M)}\u00a0% ročne; u vás môžu byť nižšie aj vyššie. `
      +(o.rast?`Výpočet zohľadňuje infláciu ${pctTxt(o.infl)} % ročne. `:'Výpočet nezohľadňuje infláciu. ')
      +'Dane z výnosov výpočet nezohľadňuje. Výpočet prebieha na mesačnej báze.';
 
   layout(o,endEff,openEnd);
+  /* Poradenský CMA pohľad sa prepočíta z toho istého scenára. V klientskej
+     verzii sa tento háčik nikdy nenaplní, takže render prebehne nezmenene. */
+  if(typeof cmaObnov==='function')cmaObnov();
 }
+
+/* ===== Poradenský CMA pohľad =====
+   Tretí metodicky samostatný pohľad vedľa klientskeho plánu a historického testu.
+   Výpočet nerobí táto stránka — deleguje ho na spoločné jadro (RentaCore.cmaPlan),
+   aby pravidlo „CMA iba v akumulácii, od renty pevné 4 %" existovalo na jednom
+   mieste. Predpoklady prichádzajú z jediného konfiguračného zdroja, ktorý sem
+   vkladá zostav.py z data/cma-assumptions.json.
+
+   V klientskej verzii sa nenačíta ani jadro, ani konfigurácia a sekcia zostane
+   `hidden` — pridanie CMA teda nemení klientske správanie ani jeden bajt výstupu. */
+var cmaObnov=null;
+(()=>{
+  const PUBLIC_HOST=/(^|\.)hechtberger\.com$|^hechtgit\.github\.io$/i.test(location.hostname);
+  const qs=location.search+location.hash;
+  const PORADCA=/poradca/i.test(qs)?true:!(PUBLIC_HOST||/verejna/i.test(qs));
+  if(!PORADCA)return;
+  /* Trieda odomkne poradenské zobrazenie a zároveň skryje akvizičnú časť.
+     Nastaví sa aj vtedy, keď by CMA konfigurácia chýbala — poradenský režim
+     nemá byť závislý na tom, či sa podarilo načítať predpoklady. */
+  document.body.classList.add('poradca');
+  /* Predpoklady, technické detaily aj právne upozornenie splynú poradcovi do
+     jednej pätičky drobným písmom na konci. Rozbaľovanie nemá zmysel — poradca
+     tieto vety pozná a klientovi ich hovorí sám. Formálne tam ale byť musia. */
+  const predpoklady=document.querySelector('.assumptions-block:not(.cma-block)');
+  const paticka=document.querySelector('.disclaimer');
+  if(predpoklady&&paticka){
+    paticka.classList.add('poradca-pata');
+    /* Presúvame samotné odseky, nie ich text — render() ich plní pri každom
+       prepočte, takže kópia by zamrzla na prázdnej hodnote. */
+    let kam=paticka.firstChild;
+    predpoklady.querySelectorAll('details p').forEach(p=>{
+      p.classList.add('pata-riadok');
+      paticka.insertBefore(p,kam);
+    });
+    predpoklady.remove();
+    /* Formálne upozornenie k simuláciám a výhľadovým predpokladom. Zámerne
+       drobným písmom v pätičke: poradca to s klientom rieši osobne, ale
+       napísané to byť musí. */
+    const upozornenie=document.createElement('p');
+    upozornenie.className='pata-riadok';
+    upozornenie.textContent='Historické simulácie ani dlhodobé výhľadové predpoklady nie sú '
+      +'predpoveďou ani zárukou budúceho vývoja a skutočný výsledok sa od nich môže podstatne '
+      +'líšiť. Minulá výkonnosť nie je spoľahlivým ukazovateľom budúcich výsledkov. '
+      +'Výpočet nezohľadňuje dane.';
+    paticka.appendChild(upozornenie);
+  }
+  const cfgEl=document.getElementById('cma-config');
+  const blok=document.getElementById('cma-block');
+  if(!cfgEl||!blok)return;
+  let CMA;
+  try{CMA=JSON.parse(cfgEl.textContent)}catch(e){return}
+
+  const NB=' ';
+  const cislo=v=>pctTxt(v)+NB+'%';
+  const scenar=()=>({
+    nowAge:S.now,startAge:S.start,endAge:S.end,rentToday:S.rent,
+    existingCapital:S.existing,initialCapital:S.combo,
+    situation:S.sit,funding:S.mode,goal:S.goal,pension:S.pension,
+    inflationOn:S.inflOn,inflationRate:S.infl,
+    entryFee:FEE_IN,managementFee:FEE_M
+  });
+
+  function vykresli(){
+    let p=null;
+    try{p=RentaCore.cmaPlan(scenar(),CMA)}catch(e){p=null}
+    const k=document.getElementById('cma-cap'),
+          vk=document.getElementById('cma-vklad'),
+          vkK=document.getElementById('cma-vklad-k'),
+          rz=document.getElementById('cma-rozdiel'),
+          rzK=document.getElementById('cma-rozdiel-k'),
+          riadokVklad=document.getElementById('cma-out-vklad'),
+          riadokRozdiel=document.getElementById('cma-out-rozdiel');
+    if(!p||p.warn){
+      k.textContent='—';vk.textContent='—';rz.textContent='—';
+      return;
+    }
+    k.textContent=fmtEur(p.cap);
+    const o=compute();
+    const maRentu=S.sit==='have'&&S.goal==='rent';
+    if(maRentu){
+      /* Klient majetok už má — CMA hovorí, akú rentu z neho vie čerpať. */
+      vkK.textContent='Podľa CMA si viem čerpať';
+      vk.innerHTML=fmtEur(p.R)+'<small> / mes.</small>';
+      riadokRozdiel.hidden=!!(o.warn||!Number.isFinite(o.R));
+      if(!riadokRozdiel.hidden){
+        rzK.textContent='Oproti vášmu predpokladu '+cislo(S.vynos);
+        rz.innerHTML=fmtEur(p.R-o.R)+'<small> / mes.</small>';
+      }
+    }else{
+      const cmaSuma=S.mode==='monthly'?p.M:p.P0;
+      const klientSuma=S.mode==='monthly'?o.M:o.P0;
+      vkK.textContent=S.mode==='monthly'
+        ?'Podľa CMA investujem mesačne':'Podľa CMA investujem dnes';
+      vk.innerHTML=fmtEur(cmaSuma)+(S.mode==='monthly'?'<small> / mes.</small>':'');
+      riadokRozdiel.hidden=!!(o.warn||!Number.isFinite(klientSuma));
+      if(!riadokRozdiel.hidden){
+        rzK.textContent='Oproti vášmu predpokladu '+cislo(S.vynos);
+        const rozdiel=cmaSuma-klientSuma;
+        rz.innerHTML=(rozdiel>0?'+':'')+fmtEur(Math.abs(rozdiel)).replace(/^/,rozdiel<0?'−':'')
+          +(S.mode==='monthly'?'<small> / mes.</small>':'');
+      }
+    }
+    riadokVklad.hidden=false;
+  }
+
+  document.getElementById('cma-lead').textContent=
+    'Budovanie majetku počíta s '+cislo(CMA.accumulationReturn)
+    +' ročne podľa dlhodobých výhľadových predpokladov. Od prvého mesiaca čerpania '
+    +'sa tento predpoklad prestáva používať a platí pevných '+cislo(CMA.drawdownReturn)
+    +' ročne po investičných nákladoch, pred infláciou. Nie je to predpoveď ani garancia.';
+  document.getElementById('cma-zdroj').textContent=
+    CMA.sourceName+', '+CMA.publishedEdition+'. Trieda aktív: '+CMA.assetClass
+    +' ('+CMA.assetClassNote+') Mena '+CMA.currency+', horizont '
+    +CMA.horizonYears[0]+'–'+CMA.horizonYears[1]+NB+'rokov, '
+    +(CMA.nominalOrReal==='nominal'?'nominálny':'reálny')+' '
+    +(CMA.returnType==='compound'?'zložený':'aritmetický')+' výnos, '
+    +(CMA.grossOrNet==='gross'?'pred poplatkami':'po poplatkoch')+'. '
+    +CMA.grossOrNetNote+' Predpoklady k '+CMA.asOf+', verzia '+CMA.version+'.';
+
+  /* ===== Odolnosť plánu: krivka prežitia =====
+     Odpovedá na otázku „vydrží mi renta?" podielom simulovaných priebehov,
+     v ktorých kapitál pokryl všetky plánované výplaty. Zámerne nekreslíme
+     pásmo percentilov: to by zakrylo práve najhoršie scenáre, kvôli ktorým sa
+     otázka kladie, a jeho stredná krivka nie je žiadny skutočný priebeh. */
+  const odolnostBlok=document.getElementById('odolnost-block');
+  const SVG='http://www.w3.org/2000/svg';
+  const el=(n,a)=>{const e=document.createElementNS(SVG,n);
+    for(const k in a)e.setAttribute(k,a[k]);return e};
+
+  function nakresliKrivku(v,plan){
+    const s=document.getElementById('krivka');
+    while(s.firstChild)s.removeChild(s.firstChild);
+    const L=44,R=708,T=16,B=212,W=R-L,H=B-T;
+    const n=v.survival.length-1;
+    const x=m=>L+(n?m/n*W:0);
+    const y=p=>B-p*H;
+    /* mriežka a popisy osi y */
+    [0,.25,.5,.75,1].forEach(p=>{
+      s.appendChild(el('line',{class:'mriezka',x1:L,x2:R,y1:y(p),y2:y(p)}));
+      const t=el('text',{x:L-8,y:y(p)+4,'text-anchor':'end'});
+      t.textContent=Math.round(p*100)+' %';s.appendChild(t);
+    });
+    /* plocha pod krivkou a samotná krivka */
+    let d='';for(let m=0;m<=n;m+=1)d+=(m?'L':'M')+x(m).toFixed(1)+' '+y(v.survival[m]).toFixed(1);
+    s.appendChild(el('path',{class:'plocha',d:d+`L${x(n).toFixed(1)} ${B}L${L} ${B}Z`}));
+    s.appendChild(el('path',{class:'ciara',d}));
+    /* zvislá čiara v momente, keď sa začína čerpať — dovtedy nie je čo minúť */
+    if(plan.Nm>0&&plan.Nm<=n){
+      s.appendChild(el('line',{class:'start',x1:x(plan.Nm),x2:x(plan.Nm),y1:T,y2:B}));
+      const t=el('text',{x:x(plan.Nm),y:T-3,'text-anchor':'middle'});
+      t.textContent='začiatok čerpania';s.appendChild(t);
+    }
+    s.appendChild(el('line',{class:'os',x1:L,x2:R,y1:B,y2:B}));
+    /* vek na osi x */
+    [[0,S.now],[plan.Nm,S.start],[n,S.now+Math.round(n/12)]].forEach(([m,vek],i)=>{
+      if(m<0||m>n)return;
+      const t=el('text',{x:x(m),y:B+18,'text-anchor':i===0?'start':i===2?'end':'middle'});
+      t.textContent=vek+' r';s.appendChild(t);
+    });
+    /* cieľová hodnota na konci krivky */
+    const kon=v.survival[n];
+    const c=el('text',{class:'cielova',x:R,y:Math.max(T+14,y(kon)-9),'text-anchor':'end'});
+    c.textContent=pctTxt(kon*100)+NB+'%';s.appendChild(c);
+    /* varovanie musí byť v grafe, nie schované v rozbaľovacom texte */
+    const w=el('text',{class:'varovanie',x:L,y:B+18});
+    w.textContent='Simulovaná minulosť, nie predpoveď ani garancia.';
+    s.appendChild(w);
+  }
+
+  let cakanie=0;
+  function prepocitajOdolnost(){
+    if(!window.RentaCore||!window.RentaHistoricalData)return;
+    const data=RentaHistoricalData.vynosy||RentaHistoricalData.returns;
+    if(!Array.isArray(data)||!data.length)return;
+    let plan,v;
+    try{
+      plan=RentaCore.computePlan(scenar());
+      if(plan.warn||!plan.Tm){odolnostBlok.hidden=true;return}
+      v=RentaCore.advisoryOutlook(plan,data);
+    }catch(e){odolnostBlok.hidden=true;return}
+    odolnostBlok.hidden=false;
+    nakresliKrivku(v,plan);
+    document.getElementById('odolnost-v').textContent=
+      Math.round(v.successRate*v.runs)+' z '+v.runs+' priebehov';
+    document.getElementById('odolnost-lead').textContent=
+      'Z '+v.runs+' simulovaných priebehov ukazuje krivka podiel tých, v ktorých kapitál '
+      +'ešte nebol vyčerpaný. Počas budovania majetku sa losujú skutočné ročné výnosy '
+      +'indexu, od začiatku čerpania platí pevných '+pctTxt(v.drawdownReturn)+NB+'% ročne.';
+    /* Akčný krok: koľko treba, aby plán obstál v cieľovom počte priebehov.
+       Bez neho graf iba konštatuje problém a poradca nemá čo klientovi ponúknuť. */
+    const akciaOut=document.getElementById('akcia-out');
+    let odolnost=null;
+    try{odolnost=RentaCore.historicalResilience(scenar(),data)}catch(e){}
+    const uroven=odolnost&&odolnost.levels.find(u=>!u.met&&u.multiplier);
+    if(!uroven||S.sit==='have'){akciaOut.hidden=true}
+    else{
+      const mesacne=S.mode==='monthly';
+      const teraz=mesacne?plan.M:plan.P0;
+      const treba=teraz*uroven.multiplier;
+      akciaOut.hidden=false;
+      document.getElementById('akcia-k').textContent=
+        'Aby plán vyšiel v '+uroven.target+' z '+odolnost.runs+' priebehov, treba '
+        +(mesacne?'mesačne':'dnes investovať');
+      document.getElementById('akcia-v').innerHTML=
+        fmtEur(treba)+(mesacne?'<small> / mes.</small>':'')
+        +'<small> namiesto '+fmtEur(teraz)+'</small>';
+    }
+    document.getElementById('odolnost-metodika').textContent=
+      'Blokový bootstrap, '+v.runs+' behov, bloky po '+v.blockYears+NB+'rokoch, seed '+v.seed
+      +'. Profil '+v.profileId+' (verzia '+v.profileVersion+'). Úspech znamená, že kapitál '
+      +'pokryl všetky plánované výplaty; krivka klesá pri každom neúspechu, takže '
+      +'nezakrýva ani najhoršie priebehy. Dane výpočet nezohľadňuje.';
+  }
+
+  const nacitaj=(src)=>new Promise(ok=>{
+    const t=document.createElement('script');t.src=src;t.onload=ok;t.onerror=ok;
+    document.head.appendChild(t);
+  });
+  Promise.all([nacitaj('dist/renta-core.browser.js'),nacitaj('dist/renta-data.browser.js')])
+    .then(()=>{
+      if(!window.RentaCore||typeof RentaCore.cmaPlan!=='function')return;
+      /* CMA je deterministické a lacné — počíta sa pri každom prekreslení.
+         Simulácia 800 behov trvá takmer sekundu, tá sa preto odloží, kým
+         Petr prestane ťahať milník, inak by sa stránka pri ťahaní zasekla. */
+      cmaObnov=()=>{
+        vykresli();
+        clearTimeout(cakanie);
+        cakanie=setTimeout(prepocitajOdolnost,300);
+      };
+      blok.hidden=false;
+      cmaObnov();
+    });
+})();
 
 /* ===== rozloženie ===== */
 function layout(o,endEff,openEnd){

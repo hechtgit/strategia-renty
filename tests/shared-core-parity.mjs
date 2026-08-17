@@ -29,7 +29,7 @@ const legacyHistoricalCore = resultHtml.slice(historicalStart, historicalEnd);
 const defaults = {
   now: 50, start: 65, end: 90, rent: 3000, existing: 600000, combo: 100000,
   sit: "build", mode: "lump", goal: "rent", pension: "temporary",
-  vynos: 8.3, infl: 3, infl_on: 1,
+  vynos: 8.3, vynosRent: 4, infl: 3, infl_on: 1,
 };
 const cases = [
   ["štandardný jednorazový vklad", {}],
@@ -78,7 +78,9 @@ function scenario(params) {
     goal: params.goal,
     pension: params.pension,
     buildReturn: params.vynos,
-    drawReturn: params.vynos,
+    /* Klientske jadro má od oddelenia fáz vlastný výnos pre čerpanie. Parita
+       ho musí preniesť, inak by porovnávala dva rôzne scenáre a tichu prešla. */
+    drawReturn: params.vynosRent,
     inflationRate: params.infl,
     inflationOn: Boolean(Number(params.infl_on)),
     entryFee: 1.5,
@@ -117,7 +119,7 @@ const dataset = JSON.parse(fs.readFileSync(
 const standard = scenario(defaults);
 const resilience = historicalResilience(standard, dataset.vynosy);
 assert.equal(resilience.runs, 800);
-assert.equal(resilience.base, 268);
+assert.equal(resilience.base, 460);
 close(resilience.levels[0].contribution, 735305, "600/800", 2e-6);
 const oldHistorical = legacyHistorical(defaults);
 const oldPlan = oldHistorical.compute();

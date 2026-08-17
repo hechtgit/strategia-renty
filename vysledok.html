@@ -449,7 +449,7 @@ const $=id=>document.getElementById(id);
    obe stránky počítali to isté z toho istého zdroja. Čokoľvek sem pridané musí
    platiť pre aplikáciu aj pre modeláciu. */
 const S={now:35,start:55,end:90,rent:3000,existing:600000,combo:100000,monthlyKnown:5000,
-  sit:'build',mode:'lump',comboDir:'needed',goal:'rent',pension:'temporary',vynos:8.3,inflOn:true,infl:3};
+  sit:'build',mode:'lump',comboDir:'needed',goal:'rent',pension:'temporary',vynos:8.3,vynosRent:4,inflOn:true,infl:3};
 /* Aplikácia už nemá investičné profily. Zhodnotenie si zadáva klient sám a je
    výhradne jeho predpokladom — nič netvrdíme o tom, čím ho dosiahne. Tlačidlá
    pod jazdcom ponúkajú historické fakty o svetovom akciovom indexe, nie naše
@@ -457,6 +457,9 @@ const S={now:35,start:55,end:90,rent:3000,existing:600000,combo:100000,monthlyKn
    nezostali visieť. */
 const STARE_PROFILY={kons:5.3, vyv:7.9, dyn:10.5};
 const VYNOS_MIN=0, VYNOS_MAX=50;
+/* Výplatná fáza nie je o výnose, ale o udržaní kúpnej sily — preto úzke pásmo.
+   Poradca ho v poradenskom režime rozšíri na plný rozsah. */
+const VYNOS_RENT_MIN=4, VYNOS_RENT_MAX=6;
 /* Nad týmto číslom už svetový akciový index za žiadne z oboch sledovaných
    období nebol — vtedy k jazdcu pribudne vecná poznámka. */
 const VYNOS_HISTORIA_10R=11.3, VYNOS_HISTORIA_56R=8.3, VYNOS_HISTORIA_10R_ROKOV=10;
@@ -467,7 +470,7 @@ const FEE_IN=1.5,FEE_M=0.9;
    ktorú klient dostane e-mailom — odkaz nesie presne ten scenár, ktorý si prepočítal.
    Názvy kľúčov sú preto zmluva navonok: po premenovaní by staršie rozposlané odkazy
    prestali sedieť, takže sa menia len vedome a s prechodom pre staré tvary. */
-const NUM_KEYS=['now','start','end','rent','existing','combo','monthlyKnown','infl','vynos'];
+const NUM_KEYS=['now','start','end','rent','existing','combo','monthlyKnown','infl','vynos','vynosRent'];
 const ENUM_KEYS={sit:['build','have'],mode:['lump','monthly','combo'],goal:['rent','duration'],
   comboDir:['needed','known'],pension:['temporary','perpetuity']};
 const QS=new URLSearchParams(location.search);
@@ -525,6 +528,9 @@ function applyScenarioFromUrl(){
   S.end=Math.round(medzi(S.end,S.start+1,120));
   S.infl=medzi(S.infl,0,10);
   S.vynos=Math.round(medzi(S.vynos,VYNOS_MIN,VYNOS_MAX)*10)/10;
+  /* Výnos počas čerpania: klientovi 4–6 %, poradcovi bez obmedzenia. Starý
+     odkaz ho nenesie, vtedy platí predvolené 4 %. */
+  S.vynosRent=Math.round(medzi(S.vynosRent,VYNOS_RENT_MIN,VYNOS_RENT_MAX)*10)/10;
   S.rent=Math.round(medzi(S.rent,500,50000));
   S.existing=Math.round(medzi(S.existing,50000,30000000));
   S.combo=Math.round(medzi(S.combo,0,10000000));
@@ -566,9 +572,13 @@ function monthsToZero(C,R0,i,g){if(R0<=C*(i-g))return Infinity;let b=C,R=R0,t=0;
 function compute(){
 
   const N=S.start-S.now,Nm=N*12,T=S.end-S.start,Tm=T*12;
-  const infl=S.inflOn?S.infl:0,i=mRate(S.vynos),g=mInfl(infl),e=1-FEE_IN/100;
+  /* Dve sadzby, nie jedna: budovanie beží na zadanom výnose, čerpanie na
+     vlastnom predpoklade. Zaradenie každého použitia kopíruje spoločné jadro
+     (rateBuild vs rateDraw) — zámena by tichu vyrobila zlé čísla. */
+  const infl=S.inflOn?S.infl:0,iA=mRate(S.vynos),i=mRate(S.vynosRent),
+        g=mInfl(infl),e=1-FEE_IN/100;
   const nek=S.pension==='perpetuity'&&!(S.sit==='have'&&S.goal==='duration');
-  const o={N,Nm,T,Tm,infl,rast:S.inflOn&&infl>0,i,g,e,nek,rPct:S.vynos,immediate:N===0,warn:null};
+  const o={N,Nm,T,Tm,infl,rast:S.inflOn&&infl>0,i,iA,g,e,nek,rPct:S.vynos,rPctRent:S.vynosRent,immediate:N===0,warn:null};
 
   if(nek&&i<=g){
     o.warn=infl>0
@@ -577,11 +587,11 @@ function compute(){
     return o;
   }
   if(S.sit==='build'){
-    const grow=Math.pow(1+i,Nm);
+    const grow=Math.pow(1+iA,Nm);
     const knownCombo=S.mode==='combo'&&S.comboDir==='known'&&!o.immediate;
     if(knownCombo){
       o.P0=S.combo;o.M=S.monthlyKnown;
-      const an=i===0?Nm:(Math.pow(1+i,Nm)-1)/i;
+      const an=iA===0?Nm:(Math.pow(1+iA,Nm)-1)/iA;
       o.cap=o.P0*e*grow+o.M*e*an;
       o.R=nek?o.cap*(i-g):rentFromCap(o.cap,Tm,i,g);
       o.Rtoday=o.rast?o.R/Math.pow(1+infl/100,N):o.R;
@@ -593,15 +603,15 @@ function compute(){
       if(o.cap===null){o.warn='Takto vysokú rentu by ste na tento čas nedokázali pokryť — skúste nižšiu sumu alebo kratšie obdobie.';return o}
       if(o.immediate){o.P0=o.cap/e;o.M=0}
       else if(S.mode==='lump'){o.P0=o.cap/grow/e;o.M=0}
-      else if(S.mode==='monthly'){o.M=o.cap/(((Math.pow(1+i,Nm)-1)/i)*e);o.P0=0}
-      else{const from=S.combo*e*grow,an=(Math.pow(1+i,Nm)-1)/i;
+      else if(S.mode==='monthly'){o.M=o.cap/(((Math.pow(1+iA,Nm)-1)/iA)*e);o.P0=0}
+      else{const from=S.combo*e*grow,an=(Math.pow(1+iA,Nm)-1)/iA;
         o.M=Math.max(0,(o.cap-from)/(an*e));o.P0=S.combo;o.covers=from>=o.cap}
     }
     o.payM=nek?360:Tm;
   }else{
     o.R=o.rast?S.rent*Math.pow(1+infl/100,N):S.rent;
     o.C0=S.existing;
-    o.avail=o.C0*Math.pow(1+i,Nm);o.cap=o.avail;
+    o.avail=o.C0*Math.pow(1+iA,Nm);o.cap=o.avail;
     if(S.goal==='rent'){o.R=nek?o.avail*(i-g):rentFromCap(o.avail,Tm,i,g);o.payM=nek?360:Tm}
     else{o.Rtoday=S.rent;const m=monthsToZero(o.avail,o.R,i,g);
       if(m===Infinity){o.forever=true;o.payM=360}else{o.months=m;o.payM=Math.min(1200,Math.max(360,m+120))}}

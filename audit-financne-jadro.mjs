@@ -91,12 +91,15 @@ for (const [name, override] of cases) {
 
   if (api.S.sit === "build") {
     let accumulated;
-    if (o.immediate || api.S.mode === "lump") accumulated = o.P0 * o.e * Math.pow(1 + o.i, o.Nm);
-    else if (api.S.mode === "monthly") accumulated = o.M * o.e * annuityFactor(o.Nm, o.i);
-    else accumulated = api.S.combo * o.e * Math.pow(1 + o.i, o.Nm) + o.M * o.e * annuityFactor(o.Nm, o.i);
+    /* Akumulácia beží na výnose počas budovania (iA), čerpanie na vlastnom (i).
+       Kým bola sadzba jedna, stačilo o.i; po rozdelení by to ticho meralo
+       budovanie predpokladom výplatnej fázy. */
+    if (o.immediate || api.S.mode === "lump") accumulated = o.P0 * o.e * Math.pow(1 + o.iA, o.Nm);
+    else if (api.S.mode === "monthly") accumulated = o.M * o.e * annuityFactor(o.Nm, o.iA);
+    else accumulated = api.S.combo * o.e * Math.pow(1 + o.iA, o.Nm) + o.M * o.e * annuityFactor(o.Nm, o.iA);
     close(accumulated, o.cap, `${name}: akumulácia`, 2e-8);
   } else {
-    close(o.avail, api.S.existing * Math.pow(1 + o.i, o.Nm), `${name}: zhodnotenie hotového majetku`);
+    close(o.avail, api.S.existing * Math.pow(1 + o.iA, o.Nm), `${name}: zhodnotenie hotového majetku`);
     if (api.S.goal === "duration" && !o.forever) {
       const independentMonths = simulateMonths(o.avail, o.R, o.i, o.g);
       if (independentMonths !== o.months) throw new Error(`${name}: počet mesiacov ${o.months} != ${independentMonths}`);
@@ -110,9 +113,12 @@ for (const [name, override] of cases) {
   const summary = api.prehladCiastok();
   if (!summary) throw new Error(`${name}: chýba súhrn`);
   if (!summary.nekonecne) {
+    /* Horizont berieme z toho, čo súhrn sám vykazuje: pri otázke „ako dlho
+       vydrží" je dĺžka čerpania výsledkom výpočtu, nie nastavením jazdca. */
+    const mesiacov = summary.mesiacov ?? o.Tm;
     const payout = Math.abs(o.g) < 1e-12
-      ? o.R * o.Tm
-      : o.R * (Math.pow(1 + o.g, o.Tm) - 1) / o.g;
+      ? o.R * mesiacov
+      : o.R * (Math.pow(1 + o.g, mesiacov) - 1) / o.g;
     close(summary.vyplatene, payout, `${name}: objem vyplatenej renty`);
   }
 
@@ -127,12 +133,16 @@ const knownComboApi = production({
 });
 const knownCombo = knownComboApi.compute();
 close(knownCombo.cap, 1110315.8919389392, "známa kombinácia: kapitál");
-close(knownCombo.Rtoday, 3967.1939554147643, "známa kombinácia: renta v dnešnej hodnote");
+/* Prepočítané po oddelení výnosu pre výplatnú fázu: z rovnakého kapitálu
+   (ten sa nezmenil, viď kontrolu vyššie) vychádza pri čerpaní na 4 % nižšia
+   renta než pri pôvodných 8,3 %. Zmena predpokladu, nie výpočtu. */
+close(knownCombo.Rtoday, 1660.529901267141, "známa kombinácia: renta v dnešnej hodnote");
 if (!knownCombo.calculatesRent) throw new Error("Známa kombinácia neprepla smer výpočtu na rentu.");
 
 let transitionCapital = 750000 * knownCombo.e;
 for (let month = 0; month < knownCombo.Nm; month++) {
-  transitionCapital = transitionCapital * (1 + knownCombo.i) + 5000 * knownCombo.e;
+  /* Budovanie majetku — teda sadzba akumulácie, nie čerpania. */
+  transitionCapital = transitionCapital * (1 + knownCombo.iA) + 5000 * knownCombo.e;
 }
 close(transitionCapital, knownCombo.cap,
   "známa kombinácia: posledný mesiac budovania bez posunu");
@@ -232,7 +242,9 @@ if (JSON.stringify([...historicalApi.HIST_VYNOSY]) !== JSON.stringify(historyDat
 }
 
 const resilience = historicalApi.testOdolnosti();
-if (!resilience || resilience.priebehov !== 800 || resilience.zaklad !== 268) {
+/* 268 → 460: plán je teraz dimenzovaný na tie isté 4 %, akými sa testuje,
+   takže prestal byť meraný prísnejším metrom, než na akom stojí. */
+if (!resilience || resilience.priebehov !== 800 || resilience.zaklad !== 460) {
   throw new Error(`Neočakávaný výsledok referenčného testu: ${JSON.stringify(resilience)}`);
 }
 const expectedThresholds = [735305, 1115116];

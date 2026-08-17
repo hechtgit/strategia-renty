@@ -1,5 +1,11 @@
 export const MONTHS = 12;
 
+/* Plánovací predpoklad pre fázu čerpania: 4 % ročne po investičných nákladoch,
+   pred infláciou. Používa ho historický pohľad aj CMA pohľad — obidva od prvého
+   mesiaca renty prepnú na toto číslo, aby sa výnosy nemiešali. Žije tu raz,
+   aby sa nedalo posunúť len v jednom z nich. */
+export const PLANNING_DRAWDOWN_RETURN = 4;
+
 export const PUBLIC_HISTORICAL_PROFILE = Object.freeze({
   id: "public-history-v1",
   version: 1,
@@ -7,7 +13,7 @@ export const PUBLIC_HISTORICAL_PROFILE = Object.freeze({
   blockYears: 5,
   seed: 1234,
   seedStride: 7919,
-  drawReturnNet: 4,
+  drawReturnNet: PLANNING_DRAWDOWN_RETURN,
   thresholds: [600, 720],
 });
 
@@ -276,9 +282,13 @@ export function summarizePlan(plan) {
   else if (s.funding === "monthly") contributions = plan.M * plan.Nm;
   else contributions = s.initialCapital + plan.M * plan.Nm;
   if (endless) return { endless: true, contributions, capital: plan.cap };
+  /* Pri otázke „ako dlho vydrží" je dĺžka čerpania výsledkom výpočtu, nie
+     nastavením jazdca — sčítať sa musia skutočne vyplatené mesiace. Klientske
+     jadro to už robí takto; bez tejto opravy by sa obe strany rozišli. */
+  const mesiacov = Number.isFinite(plan.months) ? plan.months : plan.Tm;
   const paid = Math.abs(plan.g) < 1e-12
-    ? plan.R * plan.Tm
-    : plan.R * (Math.pow(1 + plan.g, plan.Tm) - 1) / plan.g;
+    ? plan.R * mesiacov
+    : plan.R * (Math.pow(1 + plan.g, mesiacov) - 1) / plan.g;
   return {
     endless: false,
     contributions,
@@ -425,6 +435,10 @@ export function adviserSimulation(plan, {
     p10,
     p50,
     p90,
+    /* Surové mesiace vyčerpania (Infinity = kapitál vydržal celé plánované
+       čerpanie). Bez nich sa nedá zostaviť krivka prežitia a UI by muselo
+       simuláciu počítať druhýkrát. */
+    depletion: Array.from(depletion),
     dep10: sortedDepletion[lowerTailIndex],
     survivalShare: sortedDepletion.filter(value => value === Infinity).length / runs,
     total,
@@ -622,4 +636,125 @@ export function stressTest(rawScenario, {
     }
   }
   return result;
+}
+
+/* ===== CMA pohľad — dlhodobé výhľadové predpoklady =====
+   Tretí, metodicky samostatný pohľad vedľa klientskeho plánu a historického testu.
+   Platí jediné pravidlo a je vynútené konštrukciou, nie disciplínou volajúceho:
+   CMA výnos sa použije výhradne počas budovania majetku a od prvého mesiaca
+   čerpania ho vždy nahradí PLANNING_DRAWDOWN_RETURN. Preto sa `drawReturn`
+   nastavuje tu a vstupný scenár ho nemá ako prebiť. */
+export function cmaPlan(rawScenario, assumptions) {
+  if (!assumptions || typeof assumptions !== "object") {
+    throw new Error("cmaPlan: chýbajú CMA predpoklady.");
+  }
+  const accumulation = Number(assumptions.accumulationReturn);
+  if (!Number.isFinite(accumulation)) {
+    throw new Error("cmaPlan: accumulationReturn nie je číslo.");
+  }
+  /* Konfigurácia smie výnos pri čerpaní iba potvrdiť, nie zmeniť. Ak by sa
+     v nej objavilo iné číslo, je to chyba predpokladov, nie alternatíva. */
+  const drawdown = assumptions.drawdownReturn === undefined
+    ? PLANNING_DRAWDOWN_RETURN
+    : Number(assumptions.drawdownReturn);
+  if (drawdown !== PLANNING_DRAWDOWN_RETURN) {
+    throw new Error(
+      `cmaPlan: vo fáze čerpania sa smie použiť iba ${PLANNING_DRAWDOWN_RETURN} %, dostal som ${drawdown}.`);
+  }
+  /* Vo výplatnej fáze je plánovacích 4 % TVRDÝ ČISTÝ výnos po nákladoch: cieľom
+     portfólia je udržať kúpnu silu, nie zarábať. Poplatky sa preto riešia iba
+     v akumulácii. computePlan ale odpočítava správcovský poplatok z oboch fáz,
+     tak mu výnos pre čerpanie dopredu navýšime tak, aby po jeho odpočte vyšli
+     presne 4 %. Bez toho by sa poplatok zarátal dvakrát (3,07 % namiesto 4 %)
+     a potrebný kapitál by vyskočil o stovky tisíc eur. */
+  const fee = Number(rawScenario?.managementFee ?? 0.9);
+  const netMonthly = Math.pow(1 + drawdown / 100, 1 / MONTHS);
+  const grossMonthly = netMonthly / (1 - fee / (100 * MONTHS));
+  const drawGross = (Math.pow(grossMonthly, MONTHS) - 1) * 100;
+  const plan = computePlan({
+    ...rawScenario,
+    buildReturn: accumulation,
+    drawReturn: drawGross,
+  });
+  return {
+    ...plan,
+    cma: Object.freeze({
+      version: assumptions.version,
+      asOf: assumptions.asOf,
+      sourceName: assumptions.sourceName,
+      sourceUrl: assumptions.sourceUrl,
+      assetClass: assumptions.assetClass,
+      currency: assumptions.currency,
+      horizonYears: assumptions.horizonYears,
+      nominalOrReal: assumptions.nominalOrReal,
+      grossOrNet: assumptions.grossOrNet,
+      accumulationReturn: accumulation,
+      drawdownReturn: drawdown,
+    }),
+  };
+}
+
+/* ===== Krivka prežitia a poctivá úspešnosť =====
+   Odpoveď na otázku, kvôli ktorej sa celý nástroj otvára: „vydrží mi renta?"
+
+   Prečo samostatná funkcia a nie priame volanie adviserSimulation: metodika
+   žiada, aby sa vo fáze čerpania VŽDY počítalo pevným plánovacím predpokladom.
+   Keď si faktory skladá volajúci, dá sa to omylom porušiť — a výsledok potom
+   vyzerá dôveryhodne, hoci meria niečo iné. Tu sa faktory pre čerpanie zostavia
+   tu a parameter na ne neexistuje. */
+export function advisoryOutlook(plan, annualReturns, options = {}) {
+  if (!Array.isArray(annualReturns) || !annualReturns.length) {
+    throw new Error("advisoryOutlook: chýbajú historické ročné výnosy.");
+  }
+  const accumulationFactors = annualReturns.map(value => 1 + value);
+  /* Rovnako ako v cmaPlan: 4 % je tvrdý ČISTÝ výnos po nákladoch. Simulácia
+     ale z faktorov čerpania ešte odpočíta správcovský poplatok, tak ich
+     dopredu navýšime, aby po odpočte vyšli presne 4 %. Inak by poradenská
+     krivka merala 3,07 % a rozišla by sa s klientskou modeláciou. */
+  const fee = Number(plan.feeM ?? 0.9);
+  const netMonthly = Math.pow(1 + PLANNING_DRAWDOWN_RETURN / 100, 1 / MONTHS);
+  const grossDraw = Math.pow(netMonthly / (1 - fee / (100 * MONTHS)), MONTHS);
+  const drawdownFactors = accumulationFactors.map(() => grossDraw);
+  /* Predvolene bežíme na parametroch klientskeho historického profilu — vrátane
+     nekruhových blokov. Poradca musí vidieť to isté číslo, aké klientovi ukazuje
+     modelácia; dve rôzne úspešnosti pre ten istý plán sú na stretnutí neobhájiteľné. */
+  const simulation = adviserSimulation(plan, {
+    runs: PUBLIC_HISTORICAL_PROFILE.runs,
+    blockYears: PUBLIC_HISTORICAL_PROFILE.blockYears,
+    seed: PUBLIC_HISTORICAL_PROFILE.seed,
+    seedStride: PUBLIC_HISTORICAL_PROFILE.seedStride,
+    circularBlocks: false,
+    ...options,
+    accumulationFactors,
+    drawdownFactors,
+  });
+  return {
+    ...simulation,
+    survival: survivalCurve(simulation),
+    /* Podiel behov, v ktorých kapitál pokryl VŠETKY plánované výplaty.
+       Toto je jediné číslo, ktoré sa smie nazvať úspešnosťou. */
+    successRate: simulation.survivalShare,
+    drawdownReturn: PLANNING_DRAWDOWN_RETURN,
+  };
+}
+
+/* Podiel behov, ktoré sú v danom mesiaci ešte „nažive". Klesajúca krivka od 1
+   po successRate — a na rozdiel od pásma percentilov nezakrýva zlé scenáre,
+   lebo každý neúspech sa v nej prejaví ako pokles. */
+export function survivalCurve(simulation) {
+  const { depletion, runs, total } = simulation;
+  if (!Array.isArray(depletion)) {
+    throw new Error("survivalCurve: simulácia nevrátila mesiace vyčerpania.");
+  }
+  const zomrelo = new Array(total + 2).fill(0);
+  for (const mesiac of depletion) {
+    if (Number.isFinite(mesiac) && mesiac <= total) zomrelo[mesiac] += 1;
+  }
+  const krivka = [];
+  let mrtvych = 0;
+  for (let mesiac = 0; mesiac <= total; mesiac += 1) {
+    mrtvych += zomrelo[mesiac];
+    krivka.push((runs - mrtvych) / runs);
+  }
+  return krivka;
 }

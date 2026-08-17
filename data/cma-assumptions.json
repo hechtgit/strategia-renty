@@ -1,0 +1,28 @@
+{
+  "version": "CMA-2026-v1",
+  "asOf": "2025-09-30",
+  "publishedEdition": "2026 Long-Term Capital Market Assumptions (30th Annual Edition)",
+  "sourceName": "J.P. Morgan Asset Management",
+  "sourceUrl": "https://am.jpmorgan.com/gb/en/asset-management/adv/insights/portfolio-insights/ltcma/",
+  "sourceDocumentUrl": "https://am.jpmorgan.com/content/dam/jpm-am-aem/global/en/insights/portfolio-insights/ltcma/noindex/ltcma-full-report.pdf",
+  "sourceLocation": "2026 estimates and correlations | Euro assumptions, riadok „Developed World Equity“",
+  "assetClass": "Developed World Equity",
+  "assetClassNote": "Vyspelé svetové akcie — metodicky najbližšie k indexu MSCI World, ktorý používa historický pohľad.",
+  "currency": "EUR",
+  "horizonYears": [10, 15],
+  "nominalOrReal": "nominal",
+  "grossOrNet": "gross",
+  "grossOrNetNote": "Predpoklad je pasívny, na úrovni indexu a bez vplyvu aktívnej správy. Vstupný poplatok a poplatok za správu si aplikácia odpočítava sama, takže sa nesmú odpočítať druhýkrát.",
+  "returnType": "compound",
+  "accumulationReturn": 6.3,
+  "accumulationReturnDetail": {
+    "compound": 6.3,
+    "arithmetic": 7.29,
+    "annualisedVolatility": 14.69,
+    "priorEditionCompound": 5.9
+  },
+  "drawdownReturn": 4,
+  "drawdownReturnNote": "Od začiatku čerpania sa CMA prestáva používať. Platí rovnaký plánovací predpoklad ako v historickom pohľade: 4 % ročne po investičných nákladoch, pred infláciou.",
+  "methodology": "CMA sa vzťahuje výhradne na fázu budovania majetku. Od prvého mesiaca čerpania sa vždy počíta pevným výnosom 4 % ročne. Výnosy sa nemiešajú a neprechádzajú plynulo — v deň začiatku renty sa predpoklad tvrdo prepne.",
+  "disclaimer": "Dlhodobé výhledové predpoklady nie sú predpoveď, garancia ani investičné odporúčanie. Skutočný vývoj sa od nich môže výrazne odlišovať."
+}

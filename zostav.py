@@ -24,12 +24,18 @@ Bez argumentu berie cara-zivota-master.html vedľa seba. Po zostavení treba sú
 commitnúť a v code bloku stránky zvýšiť ?v=… (cache-buster), inak si prehliadače
 podržia starú verziu.
 """
+import json
 import re
 import sys
 from pathlib import Path
 
 MASTER = Path(__file__).with_name('cara-zivota-master.html')
 VYSTUP = Path(__file__).with_name('cara-zivota.html')
+
+# CMA predpoklady majú jediný zdroj. Do stránky sa vkladajú pri zostavení, aby
+# sa rovnaké čísla nikdy nepísali ručne na druhé miesto.
+CMA_JSON = Path(__file__).parent / 'data' / 'cma-assumptions.json'
+CMA_MIESTO = '/* CMA:KONFIGURACIA */'
 
 VYSLEDOK_MASTER = Path(__file__).with_name('vysledok-master.html')
 VYSLEDOK = Path(__file__).with_name('vysledok.html')
@@ -190,8 +196,40 @@ def zostav(master: Path) -> str:
         if zakazane in s:
             sys.exit(f'CHYBA: vo výstupe zostal „{popis}" ({zakazane}) — patrí do Squarespace.')
 
+    s = vloz_cma(s)
+
     prve = s.index('\n') + 1                      # za <!doctype html>
     return s[:prve] + HLAVICKA + s[prve:]
+
+
+def vloz_cma(s: str) -> str:
+    """Vloží CMA predpoklady zo samostatného konfiguračného zdroja.
+
+    Master obsahuje iba prázdnu značku. Keby sa čísla písali priamo do stránky,
+    vznikla by druhá kópia, ktorá sa časom rozíde s konfiguráciou — a modelácia
+    by potom tvrdila iné predpoklady, než akými počítala.
+    """
+    if s.count(CMA_MIESTO) != 1:
+        sys.exit(f'CHYBA: v masteri sa {CMA_MIESTO} našlo {s.count(CMA_MIESTO)}×, '
+                 'očakávalo sa práve raz.')
+    if not CMA_JSON.is_file():
+        sys.exit(f'CHYBA: chýba {CMA_JSON}')
+    try:
+        cma = json.loads(CMA_JSON.read_text(encoding='utf-8'))
+    except json.JSONDecodeError as e:
+        sys.exit(f'CHYBA: {CMA_JSON.name} nie je platný JSON — {e}')
+    for kluc in ('version', 'asOf', 'sourceName', 'assetClass', 'currency',
+                 'horizonYears', 'nominalOrReal', 'grossOrNet',
+                 'accumulationReturn', 'drawdownReturn'):
+        if kluc not in cma:
+            sys.exit(f'CHYBA: v {CMA_JSON.name} chýba povinný kľúč „{kluc}".')
+    # Čerpanie musí zostať na plánovacom predpoklade zhodnom s historickým
+    # pohľadom. Iné číslo by znamenalo, že sa CMA prelieva do výplatnej fázy.
+    if float(cma['drawdownReturn']) != 4:
+        sys.exit('CHYBA: drawdownReturn musí byť 4 — vo fáze čerpania sa CMA nepoužíva.')
+    # </script> vnútri JSON by predčasne ukončilo značku v HTML.
+    text = json.dumps(cma, ensure_ascii=False).replace('</', '<\\/')
+    return s.replace(CMA_MIESTO, text, 1)
 
 
 def vystrihni_jadro(s: str) -> str:
