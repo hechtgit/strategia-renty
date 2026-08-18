@@ -819,7 +819,7 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
       </div>
       <div class="set">
         <span class="cap">Zhodnotenie počas čerpania</span>
-        <input type="range" id="sl-vynos-rent" min="4" max="10" step="0.1" value="4"
+        <input type="range" id="sl-vynos-rent" min="4" max="10" step="0.1" value="5"
                aria-label="Ročné zhodnotenie počas čerpania renty">
         <p class="when" id="vynos-rent-v" style="margin:8px 0 0">4 % ročne</p>
         <p class="assumption-note assumption-warn" id="vynos-rent-warn" hidden></p>
@@ -1007,7 +1007,7 @@ if(window.parent===window&&'IntersectionObserver' in window){
    obe stránky počítali to isté z toho istého zdroja. Čokoľvek sem pridané musí
    platiť pre aplikáciu aj pre modeláciu. */
 const S={now:35,start:55,end:90,rent:3000,existing:600000,combo:100000,monthlyKnown:5000,
-  sit:'build',mode:'lump',comboDir:'needed',goal:'rent',pension:'temporary',vynos:8.3,vynosRent:4,inflOn:true,infl:3};
+  sit:'build',mode:'lump',comboDir:'needed',goal:'rent',pension:'temporary',vynos:8.3,vynosRent:5,inflOn:true,infl:3};
 /* Aplikácia už nemá investičné profily. Zhodnotenie si zadáva klient sám a je
    výhradne jeho predpokladom — nič netvrdíme o tom, čím ho dosiahne. Tlačidlá
    pod jazdcom ponúkajú historické fakty o svetovom akciovom indexe, nie naše
@@ -1022,6 +1022,9 @@ const VYNOS_RENT_MIN=4, VYNOS_RENT_MAX=10;
    to zákaz — klient si zadáva vlastný predpoklad. Ide o to, aby cenu videl
    v okamihu, keď posuvník ťahá, nie až v modelácii. */
 const VYNOS_RENT_VAROVANIE=6, VYNOS_VAROVANIE=20;
+/* Pod týmto odstupom výnosu od inflácie (v percentuálnych bodoch za rok)
+   prestáva byť renta bez časového obmedzenia spoľahlivo vyčísliteľná. */
+const ODSTUP_VAROVANIE=1;
 /* Nad týmto číslom už svetový akciový index za žiadne z oboch sledovaných
    období nebol — vtedy k jazdcu pribudne vecná poznámka. */
 const VYNOS_HISTORIA_10R=11.3, VYNOS_HISTORIA_56R=8.3, VYNOS_HISTORIA_10R_ROKOV=10;
@@ -1155,6 +1158,11 @@ function compute(){
       :'Výnos portfólia po poplatkoch je nulový alebo záporný — renta navždy potrebuje kladný výnos.';
     return o;
   }
+  /* Renta bez konca sa počíta delením odstupom výnosu od inflácie. Keď je ten
+     odstup tenký, výsledok prestáva niečo merať: pri desatine percentuálneho
+     bodu mení kapitál o desiatky miliónov aj to, či sa poplatok odráta raz
+     ročne alebo dvanásťkrát. Číslo preto ukážeme, ale s upozornením. */
+  o.tenkyOdstup=nek&&((i-g)*1200<ODSTUP_VAROVANIE);
   if(S.sit==='build'){
     const grow=Math.pow(1+rocnaCista(S.vynos),N);   /* jednorazový vklad: ročné úročenie */
     const knownCombo=S.mode==='combo'&&S.comboDir==='known'&&!o.immediate;
@@ -1302,6 +1310,17 @@ function varovania(o){
   const vysokaRenta=S.vynosRent>VYNOS_RENT_VAROVANIE;
   $('vynos-rent-v').classList.toggle('vysoky',vysokaRenta);
   const wr=$('vynos-rent-warn');
+  /* Tenký odstup od inflácie má prednosť: bez neho by klient videl desiatky
+     miliónov bez jediného slova o tom, prečo sú také veľké a citlivé. */
+  if(o.tenkyOdstup){
+    wr.hidden=false;
+    wr.textContent='Pri tomto zhodnotení vám po odpočítaní poplatkov a inflácie '
+      +'zostáva na rast renty menej než jeden percentuálny bod ročne. Renta bez '
+      +'časového obmedzenia sa preto počíta delením veľmi malým číslom a potrebný '
+      +'kapitál vychádza mimoriadne vysoko — už desatina percenta ním pohne o desiatky '
+      +'percent. Skúste vyššie zhodnotenie počas čerpania alebo rentu na určitý čas.';
+    return;
+  }
   wr.hidden=!vysokaRenta;
   if(!vysokaRenta)return;
 
