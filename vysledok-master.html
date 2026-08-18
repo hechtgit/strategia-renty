@@ -760,7 +760,13 @@ function vykresli(){
     `Výpočet vychádza zo zhodnotenia ${pctTxt(o.rPct)} % ročne, ktoré ste zadali vy. `
     +`Uvedené sumy sú po odpočítaní vstupného poplatku ${pctTxt(FEE_IN)} % a poplatku za správu ${pctTxt(FEE_M)} % ročne. `
     +(o.rast?`Výpočet zohľadňuje infláciu ${pctTxt(o.infl)} % ročne. `:'Výpočet nezohľadňuje infláciu. ')
-    +'Dane z výnosov výpočet nezohľadňuje. Výpočet prebieha na mesačnej báze.';
+    +'Dane z výnosov výpočet nezohľadňuje. Výpočet prebieha na mesačnej báze: '
+    +'zadané ročné zhodnotenie aj inflácia sa rozpočítavajú na dvanástiny, '
+    +'jednorazový vklad sa úročí raz ročne. '
+    /* Tá istá veta ako v kalkulačke — modelácia je miesto, kde si klient
+       výsledok reálne prepočítava, takže predpoklad musí byť aj tu. */
+    +`Mesačné zhodnotenia sa počas roka skladajú, takže zadaných ${pctTxt(o.rPct)} % `
+    +`zodpovedá približne ${pctTxt(efektivneRocne(o.rPct))} % ročne pred odpočítaním poplatkov.`;
 
   /* až teraz — odsadenie okolo čiary aj rozostup kariet vychádzajú z ich výšky,
      a tú karta dostane, až keď je v nej text */

@@ -577,6 +577,8 @@ const SC={rent:mkScale(500,50000,2.1,v=>v<10000?100:500),
 const rocnaCista=pa=>(pa-FEE_M)/100;
 const mRate=pa=>(pa-FEE_M)/1200;
 const mInfl=pa=>pa/1200;
+/* Efektívna ročná miera, ktorá zodpovedá mesačnému dvanástinovému kroku. */
+const efektivneRocne=pa=>(Math.pow(1+pa/1200,12)-1)*100;
 function payEnd(C,R0,m,i,g){let b=C,R=R0;for(let t=0;t<m;t++){b=b*(1+i)-R;R*=1+g}return b}
 function capForRent(R0,m,i,g){let hi=1e6;while(payEnd(hi,R0,m,i,g)<0){hi*=2;if(hi>1e15)return null}
   let lo=0;for(let k=0;k<60;k++){const x=(lo+hi)/2;if(payEnd(x,R0,m,i,g)<0)lo=x;else hi=x}return(lo+hi)/2}
@@ -999,7 +1001,13 @@ function vykresli(){
     `Výpočet vychádza zo zhodnotenia ${pctTxt(o.rPct)} % ročne, ktoré ste zadali vy. `
     +`Uvedené sumy sú po odpočítaní vstupného poplatku ${pctTxt(FEE_IN)} % a poplatku za správu ${pctTxt(FEE_M)} % ročne. `
     +(o.rast?`Výpočet zohľadňuje infláciu ${pctTxt(o.infl)} % ročne. `:'Výpočet nezohľadňuje infláciu. ')
-    +'Dane z výnosov výpočet nezohľadňuje. Výpočet prebieha na mesačnej báze.';
+    +'Dane z výnosov výpočet nezohľadňuje. Výpočet prebieha na mesačnej báze: '
+    +'zadané ročné zhodnotenie aj inflácia sa rozpočítavajú na dvanástiny, '
+    +'jednorazový vklad sa úročí raz ročne. '
+    /* Tá istá veta ako v kalkulačke — modelácia je miesto, kde si klient
+       výsledok reálne prepočítava, takže predpoklad musí byť aj tu. */
+    +`Mesačné zhodnotenia sa počas roka skladajú, takže zadaných ${pctTxt(o.rPct)} % `
+    +`zodpovedá približne ${pctTxt(efektivneRocne(o.rPct))} % ročne pred odpočítaním poplatkov.`;
 
   /* až teraz — odsadenie okolo čiary aj rozostup kariet vychádzajú z ich výšky,
      a tú karta dostane, až keď je v nej text */
