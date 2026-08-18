@@ -28,13 +28,22 @@ export const ADVISER_SIMULATION_PROFILE = Object.freeze({
   coverageQuantile: 0.90,
 });
 
+/* Konverzia sadzieb — Swiss Life metodika, zhodná s firemnou kalkulačkou
+   finAnalytics: mesačná sadzba je (výnos − manažment)/12, inflácia infl/12.
+   Jednorazový vklad sa úročí ročne (pozri `annualNetFactor`). Nie je to
+   dvanásta odmocnina: podľa firemného nástroja sa výsledky kontrolujú a pri
+   rente bez časového obmedzenia sa rozdiel v konvencii prejaví násobne. */
 export function monthlyInflationRate(pa = 0) {
-  return Math.pow(1 + pa / 100, 1 / MONTHS) - 1;
+  return pa / (100 * MONTHS);
 }
 
 export function monthlyNetRate(pa = 0, managementFee = 0) {
-  return Math.pow(1 + pa / 100, 1 / MONTHS) *
-    (1 - managementFee / (100 * MONTHS)) - 1;
+  return (pa - managementFee) / (100 * MONTHS);
+}
+
+/* Ročný čistý zhodnocovací faktor pre jednorazovú zložku. */
+export function annualNetRate(pa = 0, managementFee = 0) {
+  return (pa - managementFee) / 100;
 }
 
 export function paymentEnd(capital, rent, months, rate, growth) {
@@ -85,13 +94,18 @@ export function monthsUntilDepleted(capital, rent, rate, growth, limit = 1200) {
   }
   return months;
 }
+/* Jednorazová a pravidelná zložka rastú inak: vklad ročným úročením čistého
+   výnosu, pravidelná investícia mesačnou sadzbou. Preto sa vedú oddelene. */
 export function accumulationPath(initialNet, monthlyNet, months, annualReturn, managementFee) {
   const rate = monthlyNetRate(annualReturn, managementFee);
-  let balance = initialNet;
-  const path = [balance];
+  const lumpFactor = Math.pow(1 + annualNetRate(annualReturn, managementFee), 1 / MONTHS);
+  let lump = initialNet;
+  let regular = 0;
+  const path = [lump];
   for (let month = 0; month < months; month += 1) {
-    balance = balance * (1 + rate) + monthlyNet;
-    path.push(balance);
+    lump *= lumpFactor;
+    regular = regular * (1 + rate) + monthlyNet;
+    path.push(lump + regular);
   }
   return path;
 }
@@ -201,7 +215,9 @@ export function computePlan(rawScenario) {
       out.warn = "Zadanie vedie k nereálne vysokému potrebnému kapitálu.";
       return out;
     }
-    const accumulatedFactor = Math.pow(1 + rateBuild, monthsBuild);
+    /* Jednorazový vklad rastie ročným úročením, nie mesačnou sadzbou —
+       tak to počíta aj firemná kalkulačka. */
+    const accumulatedFactor = Math.pow(1 + annualNetRate(s.buildReturn, s.managementFee), yearsBuild);
     if (out.immediate) {
       out.P0 = out.cap / initialEntryFactor;
       out.M = 0;
@@ -668,9 +684,9 @@ export function cmaPlan(rawScenario, assumptions) {
      presne 4 %. Bez toho by sa poplatok zarátal dvakrát (3,07 % namiesto 4 %)
      a potrebný kapitál by vyskočil o stovky tisíc eur. */
   const fee = Number(rawScenario?.managementFee ?? 0.9);
-  const netMonthly = Math.pow(1 + drawdown / 100, 1 / MONTHS);
-  const grossMonthly = netMonthly / (1 - fee / (100 * MONTHS));
-  const drawGross = (Math.pow(grossMonthly, MONTHS) - 1) * 100;
+  /* Pri lineárnej konverzii ((výnos − poplatok)/12) stačí poplatok pripočítať:
+     po jeho odpočte v computePlan zostane presne plánovacích 4 %. */
+  const drawGross = drawdown + fee;
   const plan = computePlan({
     ...rawScenario,
     buildReturn: accumulation,
@@ -712,6 +728,10 @@ export function advisoryOutlook(plan, annualReturns, options = {}) {
      dopredu navýšime, aby po odpočte vyšli presne 4 %. Inak by poradenská
      krivka merala 3,07 % a rozišla by sa s klientskou modeláciou. */
   const fee = Number(plan.feeM ?? 0.9);
+  /* Simulácie bežia nad historickými ROČNÝMI výnosmi, preto si držia geometrický
+     prevod na mesiace — lineárny by z prepadu o 30 % za rok urobil nezmysel.
+     Deterministický plán používa Swiss Life konverziu; tieto dve vrstvy sa
+     zámerne líšia a každá je vo svojej doméne správna. */
   const netMonthly = Math.pow(1 + PLANNING_DRAWDOWN_RETURN / 100, 1 / MONTHS);
   const grossDraw = Math.pow(netMonthly / (1 - fee / (100 * MONTHS)), MONTHS);
   const drawdownFactors = accumulationFactors.map(() => grossDraw);

@@ -539,15 +539,19 @@ const CRISIS_REF=[
 ];
 
 /* ---------------- konverzia sadzieb — JEDINÉ MIESTO ----------------
-   Všetky vstupy "% p.a." sú EFEKTÍVNE ročné miery (profily = geometrický priemer
-   MSCI World). Na mesiac sa preto prevádzajú dvanástou odmocninou, nie delením
-   dvanástimi. Poplatok za manažovanie sa strháva mesačne z majetku.
-   Túto konverziu používa deterministický výpočet, stres-test aj Monte Carlo. */
+   Deterministický výpočet: mesačná sadzba je (výnos − manažment)/12, inflácia
+   infl/12, jednorazový vklad sa úročí raz ročne. Je to tá istá metodika, akú
+   používa klientska kalkulačka na webe — obe verzie musia dať na euro rovnaký
+   výsledok, inak sa poradca a klient pozerajú na dve rôzne čísla.
+   Simulácie (stres-test, Monte Carlo) pracujú s historickými ROČNÝMI výnosmi,
+   preto si držia geometrický prevod cez `mFactorAnnual` — lineárny by z prepadu
+   o 30 % za rok urobil nezmysel. */
 const MONTHS = 12;
-const mFactorPct    = (pa, feePA) => Math.pow(1 + pa/100, 1/MONTHS) * (1 - feePA/(100*MONTHS));
 const mFactorAnnual = (fac, feePA) => Math.pow(fac,      1/MONTHS) * (1 - feePA/(100*MONTHS));
-const mRate         = (pa, feePA) => mFactorPct(pa, feePA) - 1;
-const mInfl         = inflPA => Math.pow(1 + inflPA/100, 1/MONTHS) - 1;
+const rocnaCista    = (pa, feePA) => (pa - feePA)/100;
+const mRate         = (pa, feePA) => (pa - feePA)/(100*MONTHS);
+const mFactorPct    = (pa, feePA) => 1 + mRate(pa, feePA);
+const mInfl         = inflPA => inflPA/(100*MONTHS);
 
 /* ---------------- finančný model ----------------
    Jednorazový vklad aj pravidelná investícia rastú rovnakou mesačnou mierou
@@ -555,9 +559,12 @@ const mInfl         = inflPA => Math.pow(1 + inflPA/100, 1/MONTHS) - 1;
    zhodnotí, potom vyplatí; rastie o mInfl(inflácia) mesačne.
    Vo výplatnej fáze sa účtuje iba poplatok za manažovanie. */
 function accumPath(P0net, Mnet, months, r, feeM){
-  const i=mRate(r,feeM);             // jedna miera pre vklad aj pravidelnú investíciu
-  let bal=P0net; const path=[bal];
-  for(let t=0;t<months;t++){ bal=bal*(1+i)+Mnet; path.push(bal); }
+  /* Jednorazový vklad rastie ročným úročením, pravidelná investícia mesačnou
+     sadzbou — preto sa zložky vedú oddelene. */
+  const i=mRate(r,feeM);
+  const fL=Math.pow(1+rocnaCista(r,feeM), 1/MONTHS);
+  let lump=P0net, reg=0; const path=[lump];
+  for(let t=0;t<months;t++){ lump*=fL; reg=reg*(1+i)+Mnet; path.push(lump+reg); }
   return path;
 }
 function payoutPath(C, R0, months, rr, feeM, g){
@@ -621,11 +628,13 @@ function compute(){
     }
     o.capGross = o.capNet;  // pri prechode do výplaty sa vstupný poplatok neúčtuje — platí sa len z nových vkladov
     const iA=mRate(rinv,feeM);         // jedna miera pre vklad aj pravidelnú investíciu
+    /* Jednorazový vklad rastie ročným úročením, nie mesačnou sadzbou. */
+    const growLump=Math.pow(1+rocnaCista(rinv,feeM), N);
     if(Nm===0){ o.P0=o.capNet/eP0; o.M=0; }
-    else if(fund==='lump'){ o.P0=o.capNet/Math.pow(1+iA,Nm)/eP0; o.M=0; }
+    else if(fund==='lump'){ o.P0=o.capNet/growLump/eP0; o.M=0; }
     else{
       const P0=fund==='both'?num($('in-p0')):0;
-      const fromP0=P0*eP0*Math.pow(1+iA,Nm);
+      const fromP0=P0*eP0*growLump;
       const annu = iA===0 ? Nm : (Math.pow(1+iA,Nm)-1)/iA;  // nulový čistý výnos → bez úročenia
       o.M=Math.max(0,(o.capNet-fromP0)/(annu*e)); o.P0=P0;
       o.p0Covers=fromP0>=o.capNet;

@@ -1,5 +1,5 @@
 {
-  "coreSha256": "365eb80ef1cfd05bcdde6955b98d6ee8255e4d1a0e4f4969bcd8bb10a6f4ea53",
+  "coreSha256": "7c338645d88ff643c8a38af88c29d7c8e7ba91a0e59439c69f5d5584b623c729",
   "dataSha256": "f422cfa800d9e74b048f818ad134078e356a9e72869dda630be536d6f0a391bf",
   "exports": [
     "MONTHS",
@@ -8,6 +8,7 @@
     "ADVISER_SIMULATION_PROFILE",
     "monthlyInflationRate",
     "monthlyNetRate",
+    "annualNetRate",
     "paymentEnd",
     "capitalForRent",
     "rentFromCapital",

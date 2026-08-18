@@ -1123,8 +1123,15 @@ const SC={rent:mkScale(500,50000,2.1,v=>v<10000?100:500),
   monthly:mkScale(0,100000,2.1,()=>100)};
 
 /* ===== finančné jadro (zhodné s ostrou kalkulačkou) ===== */
-const mRate=pa=>Math.pow(1+pa/100,1/12)*(1-FEE_M/1200)-1;
-const mInfl=pa=>Math.pow(1+pa/100,1/12)-1;
+/* Konverzia sadzieb — Swiss Life metodika (zhodná s firemnou kalkulačkou
+   finAnalytics). Jednorazový vklad sa úročí ročne čistým výnosom; pravidelná
+   investícia a renta mesačne sadzbou (výnos − manažment)/12; renta rastie
+   o infláciu/12. Zámerne to nie je dvanásta odmocnina: firemný nástroj, podľa
+   ktorého sa výsledky kontrolujú, počíta takto a rozdiel v konvencii sa
+   pri rente bez časového obmedzenia prejaví násobne. */
+const rocnaCista=pa=>(pa-FEE_M)/100;
+const mRate=pa=>(pa-FEE_M)/1200;
+const mInfl=pa=>pa/1200;
 function payEnd(C,R0,m,i,g){let b=C,R=R0;for(let t=0;t<m;t++){b=b*(1+i)-R;R*=1+g}return b}
 function capForRent(R0,m,i,g){let hi=1e6;while(payEnd(hi,R0,m,i,g)<0){hi*=2;if(hi>1e15)return null}
   let lo=0;for(let k=0;k<60;k++){const x=(lo+hi)/2;if(payEnd(x,R0,m,i,g)<0)lo=x;else hi=x}return(lo+hi)/2}
@@ -1149,7 +1156,7 @@ function compute(){
     return o;
   }
   if(S.sit==='build'){
-    const grow=Math.pow(1+iA,Nm);
+    const grow=Math.pow(1+rocnaCista(S.vynos),N);   /* jednorazový vklad: ročné úročenie */
     const knownCombo=S.mode==='combo'&&S.comboDir==='known'&&!o.immediate;
     if(knownCombo){
       o.P0=S.combo;o.M=S.monthlyKnown;
@@ -1173,7 +1180,7 @@ function compute(){
   }else{
     o.R=o.rast?S.rent*Math.pow(1+infl/100,N):S.rent;
     o.C0=S.existing;
-    o.avail=o.C0*Math.pow(1+iA,Nm);o.cap=o.avail;
+    o.avail=o.C0*Math.pow(1+rocnaCista(S.vynos),N);o.cap=o.avail;
     if(S.goal==='rent'){o.R=nek?o.avail*(i-g):rentFromCap(o.avail,Tm,i,g);o.payM=nek?360:Tm}
     else{o.Rtoday=S.rent;const m=monthsToZero(o.avail,o.R,i,g);
       if(m===Infinity){o.forever=true;o.payM=360}else{o.months=m;o.payM=Math.min(1200,Math.max(360,m+120))}}
@@ -1485,7 +1492,9 @@ function render(){
     :`Výpočet vychádza zo zhodnotenia ${pctTxt(o.rPct)} % ročne, ktoré ste zadali vy. `
      +`Uvedené sumy sú po odpočítaní predpokladaného vstupného poplatku ${pctTxt(FEE_IN)}\u00a0% a poplatku za správu ${pctTxt(FEE_M)}\u00a0% ročne; u vás môžu byť nižšie aj vyššie. `
      +(o.rast?`Výpočet zohľadňuje infláciu ${pctTxt(o.infl)} % ročne. `:'Výpočet nezohľadňuje infláciu. ')
-     +'Dane z výnosov výpočet nezohľadňuje. Výpočet prebieha na mesačnej báze.';
+     +'Dane z výnosov výpočet nezohľadňuje. Výpočet prebieha na mesačnej báze: '
+     +'ročné zhodnotenie aj inflácia sa rozpočítavajú na jednotlivé mesiace, '
+     +'jednorazový vklad sa úročí raz ročne.';
 
   layout(o,endEff,openEnd);
   /* Poradenský CMA pohľad sa prepočíta z toho istého scenára. V klientskej

@@ -49,7 +49,7 @@ test("čerpanie vždy na pevnom predpoklade", () => {
     const p = cmaPlan(zaklad, { ...CMA, accumulationReturn: vynos });
     /* 4 % sú tvrdý ČISTÝ výnos: po odpočte poplatku musí vyjsť presne 4 %,
        nie menej. Preto sa porovnáva s čistou sadzbou, nie s monthlyNetRate. */
-    const ciste = Math.pow(1 + PLANNING_DRAWDOWN_RETURN / 100, 1 / 12) - 1;
+    const ciste = PLANNING_DRAWDOWN_RETURN / 1200;
     assert.ok(Math.abs(p.i - ciste) < 1e-15,
       `pri CMA ${vynos} % sa čerpanie odchýlilo od čistých ${PLANNING_DRAWDOWN_RETURN} %`);
   }
@@ -61,7 +61,7 @@ test("iný výnos pri čerpaní je odmietnutý", () => {
 });
 test("scenár nevie prebiť výnos pri čerpaní", () => {
   const p = cmaPlan({ ...zaklad, drawReturn: 11 }, CMA);
-  const ciste = Math.pow(1 + PLANNING_DRAWDOWN_RETURN / 100, 1 / 12) - 1;
+  const ciste = PLANNING_DRAWDOWN_RETURN / 1200;
   assert.ok(Math.abs(p.i - ciste) < 1e-15, "scenár prebil výnos pri čerpaní");
 });
 
@@ -276,7 +276,7 @@ test("obe metodiky hlásia rovnakú úspešnosť", () => {
 /* 4 % vo výplatnej fáze sú ČISTÉ — poplatok sa tam už neodpočítava. */
 test("poplatok sa vo výplatnej fáze neodpočítava druhýkrát", () => {
   const p = cmaPlan(zaklad, CMA);
-  const ciste = Math.pow(1 + PLANNING_DRAWDOWN_RETURN / 100, 1 / 12) - 1;
+  const ciste = PLANNING_DRAWDOWN_RETURN / 1200;
   assert.ok(Math.abs(p.i - ciste) < 1e-15,
     `čerpanie beží na ${((Math.pow(1 + p.i, 12) - 1) * 100).toFixed(2)} % namiesto čistých 4 %`);
 });

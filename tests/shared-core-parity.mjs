@@ -119,8 +119,11 @@ const dataset = JSON.parse(fs.readFileSync(
 const standard = scenario(defaults);
 const resilience = historicalResilience(standard, dataset.vynosy);
 assert.equal(resilience.runs, 800);
-assert.equal(resilience.base, 460);
-close(resilience.levels[0].contribution, 735305, "600/800", 2e-6);
+/* Referenčné hodnoty platia pre Swiss Life konverziu sadzieb ((výnos−poplatok)/12,
+   jednorazový vklad ročne). Pri prechode na dvanástu odmocninu boli 460 a 735 305 —
+   ak sa tieto čísla znovu pohnú, znamená to, že sa zmenila metodika, nie dáta. */
+assert.equal(resilience.base, 445);
+close(resilience.levels[0].contribution, 738866.2199395514, "600/800", 2e-6);
 const oldHistorical = legacyHistorical(defaults);
 const oldPlan = oldHistorical.compute();
 const oldPaths = oldHistorical.refDrahy(
@@ -144,7 +147,7 @@ for (let index = 0; index < oldPaths.length; index += 1) {
     newPaths[index], newPlan, 1, PUBLIC_HISTORICAL_PROFILE.drawReturnNet);
   assert.equal(after, before, "Verdikt dráhy " + index + " sa zmenil.");
 }
-close(resilience.levels[1].contribution, 1115116, "720/800", 2e-6);
+close(resilience.levels[1].contribution, 1120516.6151849062, "720/800", 2e-6);
 
 const identical = blockBootstrapPaths({
   seriesByAsset: { a: dataset.vynosy, b: dataset.vynosy },
