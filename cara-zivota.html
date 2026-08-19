@@ -308,6 +308,7 @@ body.poradca .flow-options,body.poradca .bottom-flow{display:none}
 .krivka text{fill:var(--muted);font:12px var(--sans)}
 .krivka .cielova{fill:var(--ink);font-weight:700;font-size:15px}
 .krivka .varovanie{fill:var(--muted);font-size:12px}
+.krivka-varovanie{margin:6px 0 0;color:var(--muted);font-size:12px}
 /* Poradenská pätička: predpoklady, technické detaily a právne upozornenie
    v jednej nenápadnej sekcii drobným písmom. Kontrast zostáva nad normou. */
 .poradca-pata{font-size:12px;line-height:1.55;color:#a9a298}
@@ -503,7 +504,10 @@ html,body{background:var(--bg)}
 /* čiara života je jednofarebná — úseky nesú len text, nie vlastný odtieň */
 .seg,.seg.past,.seg.build,.seg.rent{height:100%;background:transparent!important}
 #lp.perp .seg.rent{-webkit-mask-image:none;mask-image:none}
-.tick{top:17px;color:#5b4630;font-size:18px;font-weight:500;z-index:1}
+/* Čísla rokov sedia na strede pásu, nie kúsok pod ním. Pevný odstup zhora
+   sa pri zmene veľkosti písma vždy rozíde - stred pásu drží zarovnanie sám. */
+.tick{top:50%;transform:translate(-50%,-50%);color:#5b4630;font-size:18px;
+  font-weight:500;z-index:1;line-height:1}
 .tick::before{display:none}
 .axis-cap{display:none}
 .longevity{top:59px;color:var(--gold-strong)}
@@ -686,7 +690,7 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
   <section class="mobile-life-map" id="mobile-life-map" aria-label="Prehľad životného plánu">
     <div class="mobile-map-axis" aria-hidden="true"><span class="mobile-map-axis-label">VEK</span><span class="mobile-map-endpoint start">18</span><span class="mobile-map-endpoint end">100</span></div>
     <button type="button" class="mobile-map-card" data-editor-card="c-today" data-age="50" id="map-today">
-      <span class="mobile-map-left"><strong>Dnes</strong><small>Potiahnite alebo ťuknite</small></span><span class="mobile-map-divider" aria-hidden="true"></span><span class="mobile-map-values" id="map-today-summary"><span>Majetok budujem</span><span>Jednorazovo</span><span>Výnos 8,3 %</span></span>
+      <span class="mobile-map-left"><strong>Dnes</strong><small>Potiahnite alebo ťuknite</small></span><span class="mobile-map-divider" aria-hidden="true"></span><span class="mobile-map-values" id="map-today-summary"><span>Majetok budujem</span><span>Jednorazovo</span><span>Výnos 5 %</span></span>
     </button>
     <button type="button" class="mobile-map-card" data-editor-card="c-start" data-age="65" id="map-start">
       <span class="mobile-map-left"><strong>Začiatok renty</strong><small>Potiahnite alebo ťuknite</small></span><span class="mobile-map-divider" aria-hidden="true"></span><span class="mobile-map-values" id="map-start-summary"><span>3 000 € mesačne</span><span>Inflácia 3 %</span><span>Potrebujem 871 922 €</span></span>
@@ -774,9 +778,9 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
 
       <div class="set">
         <span class="cap">S akým zhodnotením počítať</span>
-        <input type="range" id="sl-vynos" min="0" max="50" step="0.1" value="8.3"
+        <input type="range" id="sl-vynos" min="0" max="50" step="0.1" value="5"
                aria-label="Ročné zhodnotenie majetku">
-        <p class="when" id="vynos-v" style="margin:8px 0 0">8,3 % ročne</p>
+        <p class="when" id="vynos-v" style="margin:8px 0 0">5 % ročne</p>
         <p class="assumption-note">Je to váš predpoklad, nie očakávaný ani odporúčaný výnos.</p>
         <p class="assumption-note assumption-warn" id="vynos-warn" hidden></p>
         <p class="when" style="margin:10px 0 6px">Historické údaje na porovnanie, nie návrh predpokladu:</p>
@@ -816,9 +820,9 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
         <span class="cap">Zhodnotenie počas čerpania</span>
         <input type="range" id="sl-vynos-rent" min="4" max="10" step="0.1" value="5"
                aria-label="Ročné zhodnotenie počas čerpania renty">
-        <p class="when" id="vynos-rent-v" style="margin:8px 0 0">4 % ročne</p>
+        <p class="when" id="vynos-rent-v" style="margin:8px 0 0">5 % ročne</p>
         <p class="assumption-note assumption-warn" id="vynos-rent-warn" hidden></p>
-        <p class="assumption-note">Kým majetok budujete, môžete si dovoliť výkyvy — máte čas počkať. Keď z neho žijete, čas nemáte, a preto sa počíta opatrne: portfólio má hlavne udržať kúpnu silu.</p>
+        <p class="assumption-note">Kým majetok budujete, môžete si dovoliť výkyvy — máte čas počkať. Keď z neho žijete, čas nemáte, a preto sa počíta opatrne: portfólio má hlavne udržať kúpnu silu.</p>
       </div>
     </div>
 
@@ -953,7 +957,7 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
       <svg id="krivka" class="krivka" viewBox="0 0 720 240" role="img" aria-labelledby="krivka-popis" preserveAspectRatio="none"></svg>
       <figcaption id="krivka-popis" class="krivka-popis"></figcaption>
     </figure>
-    <div class="out" id="odolnost-out"><div class="k" id="odolnost-k">Kapitál pokryl všetky plánované výplaty</div><div class="v" id="odolnost-v">—</div></div>
+    <div class="out" id="odolnost-out"><div class="k" id="odolnost-k">Majetok pokryl všetky plánované výplaty</div><div class="v" id="odolnost-v">—</div></div>
     <div class="out sec" id="akcia-out" hidden><div class="k" id="akcia-k"></div><div class="v" id="akcia-v">—</div></div>
     <details class="metodika">
       <summary>Ako sa simulácia počíta</summary>
@@ -1002,7 +1006,7 @@ if(window.parent===window&&'IntersectionObserver' in window){
    obe stránky počítali to isté z toho istého zdroja. Čokoľvek sem pridané musí
    platiť pre aplikáciu aj pre modeláciu. */
 const S={now:35,start:55,end:90,rent:3000,existing:600000,combo:100000,monthlyKnown:5000,
-  sit:'build',mode:'lump',comboDir:'needed',goal:'rent',pension:'temporary',vynos:8.3,vynosRent:5,inflOn:true,infl:3};
+  sit:'build',mode:'lump',comboDir:'needed',goal:'rent',pension:'temporary',vynos:5,vynosRent:5,inflOn:true,infl:3};
 /* Aplikácia už nemá investičné profily. Zhodnotenie si zadáva klient sám a je
    výhradne jeho predpokladom — nič netvrdíme o tom, čím ho dosiahne. Tlačidlá
    pod jazdcom ponúkajú historické fakty o svetovom akciovom indexe, nie naše
@@ -1509,13 +1513,8 @@ function render(){
      +`Uvedené sumy sú po odpočítaní predpokladaného vstupného poplatku ${pctTxt(FEE_IN)}\u00a0% a poplatku za správu ${pctTxt(FEE_M)}\u00a0% ročne; u vás môžu byť nižšie aj vyššie. `
      +(o.rast?`Výpočet zohľadňuje infláciu ${pctTxt(o.infl)} % ročne. `:'Výpočet nezohľadňuje infláciu. ')
      +'Dane z výnosov výpočet nezohľadňuje. Výpočet prebieha na mesačnej báze: '
-     +'zadané ročné zhodnotenie aj inflácia sa rozpočítavajú na dvanástiny, '
-     +'jednorazový vklad sa úročí raz ročne. '
-     /* Mesačné čiastky sa počas roka skladajú, takže zadaná miera zodpovedá
-        o niečo vyššej efektívnej. Číslo dopočítavame zo skutočne zadanej
-        hodnoty, aby veta platila pri každom vstupe, nielen pri predvolenom. */
-     +`Mesačné zhodnotenia sa počas roka skladajú, takže zadaných ${pctTxt(o.rPct)}\u00a0% `
-     +`zodpovedá približne ${pctTxt(efektivneRocne(o.rPct))}\u00a0% ročne pred odpočítaním poplatkov.`;
+     +'zadané ročné zhodnotenie aj inflácia sa rozpočítavajú na dvanástiny; '
+     +'jednorazový vklad sa úročí raz ročne.';
 
   layout(o,endEff,openEnd);
   /* Poradenský CMA pohľad sa prepočíta z toho istého scenára. V klientskej
@@ -1585,6 +1584,11 @@ var cmaObnov=null;
     existingCapital:S.existing,initialCapital:S.combo,
     situation:S.sit,funding:S.mode,goal:S.goal,pension:S.pension,
     inflationOn:S.inflOn,inflationRate:S.infl,
+    /* Bez týchto dvoch sadzieb si jadro doplní vlastné predvolené 8,3 % pre obe
+       fázy - teda aj pre vyplácanie, kde aplikácia počíta 5 %. Blok Odolnosti
+       potom porovnával s plánom, ktorý klient nikde nezadal, a na posuvník
+       zhodnotenia vôbec nereagoval. */
+    buildReturn:S.vynos,drawReturn:S.vynosRent,
     entryFee:FEE_IN,managementFee:FEE_M
   });
 
@@ -1604,31 +1608,49 @@ var cmaObnov=null;
     }
     k.textContent=fmtEur(p.cap);
     const o=compute();
+    /* Rozdiel voči CMA sa formátuje na jednom mieste. Formátovanie súm inak
+       orezáva záporné čísla na nulu, takže riadok tvrdil „žiadny rozdiel"
+       vždy, keď bol klientov predpoklad vyšší než CMA — teda pri predvolenom
+       nastavení vždy. A práve vtedy má klienta krotiť najviac. */
+    const rozdielHtml=(rozdiel,jednotka)=>{
+      const znak=rozdiel>0?'+':(rozdiel<0?'−':'');
+      return znak+fmtEur(Math.abs(rozdiel))+jednotka;
+    };
     const maRentu=S.sit==='have'&&S.goal==='rent';
     if(maRentu){
       /* Klient majetok už má — CMA hovorí, akú rentu z neho vie čerpať. */
+      riadokVklad.hidden=false;
       vkK.textContent='Podľa CMA si viem čerpať';
       vk.innerHTML=fmtEur(p.R)+'<small> / mes.</small>';
-      riadokRozdiel.hidden=!!(o.warn||!Number.isFinite(o.R));
+      riadokRozdiel.hidden=!!(o.warn||!Number.isFinite(o.R)||!Number.isFinite(p.R));
       if(!riadokRozdiel.hidden){
         rzK.textContent='Oproti vášmu predpokladu '+cislo(S.vynos);
-        rz.innerHTML=fmtEur(p.R-o.R)+'<small> / mes.</small>';
+        rz.innerHTML=rozdielHtml(p.R-o.R,'<small> / mes.</small>');
       }
     }else{
-      const cmaSuma=S.mode==='monthly'?p.M:p.P0;
-      const klientSuma=S.mode==='monthly'?o.M:o.P0;
-      vkK.textContent=S.mode==='monthly'
-        ?'Podľa CMA investujem mesačne':'Podľa CMA investujem dnes';
-      vk.innerHTML=fmtEur(cmaSuma)+(S.mode==='monthly'?'<small> / mes.</small>':'');
-      riadokRozdiel.hidden=!!(o.warn||!Number.isFinite(klientSuma));
+      /* Pri kombinácii si jednorazový vklad zadáva klient sám, takže sa nemá
+         ako líšiť - porovnávať ho so sebou dávalo vždy nulu a blok mlčky
+         tvrdil, že opatrnejší výhľad s klientom súhlasí. Premenná, o ktorú
+         v tejto vetve ide, je mesačná splátka. */
+      const mesacna=S.mode==='monthly'||S.mode==='combo';
+      const cmaSuma=mesacna?p.M:p.P0;
+      const klientSuma=mesacna?o.M:o.P0;
+      /* Kto sa pýta, ako dlho mu majetok vydrží, nič neinvestuje — taká suma
+         pre neho neexistuje. Riadok sa vtedy nezobrazí; predtým sa na jeho
+         mieste vypísalo „NaN €". */
+      riadokVklad.hidden=!Number.isFinite(cmaSuma);
+      if(!riadokVklad.hidden){
+        vkK.textContent=mesacna
+          ?'Podľa CMA investujem mesačne':'Podľa CMA investujem dnes';
+        vk.innerHTML=fmtEur(cmaSuma)+(mesacna?'<small> / mes.</small>':'');
+      }
+      riadokRozdiel.hidden=!!(o.warn||!Number.isFinite(klientSuma)||!Number.isFinite(cmaSuma));
       if(!riadokRozdiel.hidden){
         rzK.textContent='Oproti vášmu predpokladu '+cislo(S.vynos);
-        const rozdiel=cmaSuma-klientSuma;
-        rz.innerHTML=(rozdiel>0?'+':'')+fmtEur(Math.abs(rozdiel)).replace(/^/,rozdiel<0?'−':'')
-          +(S.mode==='monthly'?'<small> / mes.</small>':'');
+        rz.innerHTML=rozdielHtml(cmaSuma-klientSuma,
+          mesacna?'<small> / mes.</small>':'');
       }
     }
-    riadokVklad.hidden=false;
   }
 
   document.getElementById('cma-lead').textContent=
@@ -1690,9 +1712,19 @@ var cmaObnov=null;
     const c=el('text',{class:'cielova',x:R,y:Math.max(T+14,y(kon)-9),'text-anchor':'end'});
     c.textContent=pctTxt(kon*100)+NB+'%';s.appendChild(c);
     /* varovanie musí byť v grafe, nie schované v rozbaľovacom texte */
-    const w=el('text',{class:'varovanie',x:L,y:B+18});
+    /* Varovanie nepatrí do SVG. Graf má preserveAspectRatio="none", takže sa
+       vodorovne naťahuje takmer na dvojnásobok - písmo v ňom je deformované
+       oproti okolitému textu. V ploche grafu navyše niet miesta, kde by
+       nekolidovalo s popiskom veku alebo s popisom začiatku vyplácania.
+       Stojí preto pod grafom ako bežný odsek. */
+    let w=document.getElementById('krivka-varovanie');
+    if(!w){
+      w=document.createElement('p');
+      w.id='krivka-varovanie';
+      w.className='krivka-varovanie';
+      s.insertAdjacentElement('afterend',w);
+    }
     w.textContent='Simulovaná minulosť, nie predpoveď ani garancia.';
-    s.appendChild(w);
   }
 
   let cakanie=0;
@@ -1711,7 +1743,7 @@ var cmaObnov=null;
     document.getElementById('odolnost-v').textContent=
       Math.round(v.successRate*v.runs)+' z '+v.runs+' priebehov';
     document.getElementById('odolnost-lead').textContent=
-      'Z '+v.runs+' simulovaných priebehov ukazuje krivka podiel tých, v ktorých kapitál '
+      'Z '+v.runs+' simulovaných priebehov ukazuje krivka podiel tých, v ktorých majetok '
       +'ešte nebol vyčerpaný. Počas budovania majetku sa losujú skutočné ročné výnosy '
       +'indexu, od začiatku čerpania platí pevných '+pctTxt(v.drawdownReturn)+NB+'% ročne.';
     /* Akčný krok: koľko treba, aby plán obstál v cieľovom počte priebehov.
@@ -1735,7 +1767,7 @@ var cmaObnov=null;
     }
     document.getElementById('odolnost-metodika').textContent=
       'Blokový bootstrap, '+v.runs+' behov, bloky po '+v.blockYears+NB+'rokoch, seed '+v.seed
-      +'. Profil '+v.profileId+' (verzia '+v.profileVersion+'). Úspech znamená, že kapitál '
+      +'. Profil '+v.profileId+' (verzia '+v.profileVersion+'). Úspech znamená, že majetok '
       +'pokryl všetky plánované výplaty; krivka klesá pri každom neúspechu, takže '
       +'nezakrýva ani najhoršie priebehy. Dane výpočet nezohľadňuje.';
   }

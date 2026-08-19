@@ -449,7 +449,7 @@ const $=id=>document.getElementById(id);
    obe stránky počítali to isté z toho istého zdroja. Čokoľvek sem pridané musí
    platiť pre aplikáciu aj pre modeláciu. */
 const S={now:35,start:55,end:90,rent:3000,existing:600000,combo:100000,monthlyKnown:5000,
-  sit:'build',mode:'lump',comboDir:'needed',goal:'rent',pension:'temporary',vynos:8.3,vynosRent:5,inflOn:true,infl:3};
+  sit:'build',mode:'lump',comboDir:'needed',goal:'rent',pension:'temporary',vynos:5,vynosRent:5,inflOn:true,infl:3};
 /* Aplikácia už nemá investičné profily. Zhodnotenie si zadáva klient sám a je
    výhradne jeho predpokladom — nič netvrdíme o tom, čím ho dosiahne. Tlačidlá
    pod jazdcom ponúkajú historické fakty o svetovom akciovom indexe, nie naše
@@ -923,7 +923,7 @@ function vykresli(){
       +pctTxt(REF_CERPANIE)+' % ročne po investičných nákladoch, pred infláciou. '
       +'Nejde o odporúčanie ani o garantovaný výnos.';
     const riadky=[
-      {co:'Kapitál pokryl všetky plánované výplaty',
+      {co:'Majetok pokryl všetky plánované výplaty',
        kolko:od.zaklad+' z '+od.priebehov+' simulácií', vas:true}
     ];
     od.urovne.forEach(u=>{
@@ -939,9 +939,10 @@ function vykresli(){
       'Nejde o odporúčané výšky investície. Bez posúdenia celého vášho '
       +'majetku a rizikového profilu z nich nemožno robiť investičné rozhodnutie.';
     $('odolnost-pod').textContent=
-      'Počet úspešných simulácií nie je pravdepodobnosť ani predpoveď. Akumulačná fáza skladá '
-      +'súvislé úseky skutočných ročných výnosov MSCI World Net Total Return v EUR; '
-      +'nie jednotlivé náhodne premiešané roky. Výplatná fáza nie je historický test: '
+      'Počet úspešných simulácií nie je pravdepodobnosť ani predpoveď. Simulácie sme '
+      +'vytvorili metódou Monte Carlo, odborne blokovým bootstrapom: akumulačná fáza '
+      +'skladá súvislé úseky skutočných ročných výnosov MSCI World Net Total Return '
+      +'v EUR, nie jednotlivé náhodne premiešané roky. Výplatná fáza nie je historický test: '
       +'počíta s konštantným čistým nominálnym výnosom '+pctTxt(REF_CERPANIE)+' % ročne '
       +'a so zadanou infláciou. Skutočné výnosy kolíšu a najmä slabé výsledky na '
       +'začiatku čerpania môžu skrátiť obdobie, počas ktorého renta vydrží. Sumy sú '
