@@ -99,8 +99,8 @@
     {
       id: 'situacia',
       nadpis: 'Majetok budujete, alebo ho už máte?',
-      popis: 'Od tejto jednej voľby sa odvíja všetko ďalšie - aplikácia sa '
-           + 'potom pýta na celkom iné veci.',
+      popis: 'Podľa tejto voľby sa mení niekoľko ďalších otázok aj to, čo vám '
+           + 'aplikácia nakoniec vypočíta.',
       ciel: () => $('tg-sit'),
       hodnota: () => zvolene('tg-sit', 'sit'),
       klikNa: () => $('tg-sit'),
@@ -191,7 +191,11 @@
     {
       id: 'zaciatok',
       nadpis: 'Kedy chcete začať s vyplácaním?',
-      popis: 'Posuňte druhý míľnik. Uvidíte hneď, koľko vás taký začiatok stojí.',
+      /* Kto majetok už má, nič neodkladá - „koľko vás to stojí" by mu
+         nesedelo. Jemu sa posunom mení výsledok, nie náklad. */
+      popis: () => zvolene('tg-sit', 'sit') === 'have'
+        ? 'Posuňte druhý míľnik. Uvidíte hneď, ako sa tým mení výsledok.'
+        : 'Posuňte druhý míľnik. Uvidíte hneď, koľko vás taký začiatok stojí.',
       ciel: () => prvyViditelny(() => $('n-start'),
                                 () => document.querySelector('#c-start .when-row')),
       hodnota: () => vek('h-start'),
@@ -208,7 +212,7 @@
       id: 'inflacia',
       nadpis: 'Rátate s ročnou infláciou?',
       popis: 'Prepínač ju vypne alebo zapne, posuvník mení jej výšku. Práve ona '
-           + 'rozhoduje, čo vaša renta reálne kúpi o dvadsať rokov.',
+           + 'rozhoduje, čo vaša renta reálne kúpi v čase, keď ju začnete čerpať.',
       ciel: () => blok('in-inflon'),
       hodnota: () => ($('in-inflon') ? $('in-inflon').checked : '') + '|' + poloha('sl-infl'),
     },
@@ -226,7 +230,9 @@
          skryje - dĺžku si vtedy dopočítava sama. */
       ked: () => vidno($('tg-pension')),
       nadpis: 'Chcete rentu na určitý čas, alebo nekonečnú?',
-      popis: 'Pri nekonečnej rente sa vypláca len výnos a kapitál zostáva zachovaný.',
+      popis: 'Pri rente bez časového obmedzenia sa vypláca len výnos, takže '
+           + 'majetok by mal zostať zachovaný. Predpokladá to, že sa zvolené '
+           + 'zhodnotenie naozaj dostaví.',
       ciel: () => $('tg-pension'),
       hodnota: () => zvolene('tg-pension', 'pension'),
       klikNa: () => $('tg-pension'),
@@ -242,8 +248,8 @@
           && zvolene('tg-pension', 'pension') !== 'perpetuity';
       },
       nadpis: 'V akom veku má vyplácanie skončiť?',
-      popis: 'Posledný míľnik. Toto je jediné číslo, ktoré sa nedá odhadnúť - '
-           + 'preto sa dá kedykoľvek zmeniť.',
+      popis: 'Posledný míľnik. Presný vek sa vopred vedieť nedá - preto sa dá '
+           + 'kedykoľvek zmeniť a plán sa okamžite prepočíta.',
       ciel: () => prvyViditelny(() => $('n-end'),
                                 () => document.querySelector('#c-end .when-row')),
       hodnota: () => vek('h-end'),
@@ -641,6 +647,9 @@
   /* Aplikácia zostáva presne v stave, ktorý si klient sám nastavil - vrstva
      na konci nič neprepisuje ani neresetuje. */
   function hotovo() {
+    /* Kto prešiel sprievodcu a všetko iba potvrdil, nezmenil ani jeden vstup -
+       pás by mu preto zostal skrytý, hoci si plán prešiel celý. */
+    if (window.odomkniPas) window.odomkniPas();
     const t = document.createElement('div');
     t.className = 'za-hotovo';
     t.setAttribute('role', 'status');
@@ -668,7 +677,34 @@
 
     /* Karty sa po načítaní ešte dosúvajú - sprievodca počká, nech prstenec
        nesadne na miesto, z ktorého sa prvok o chvíľu odsunie. */
-    setTimeout(start, QS.has('uvod') ? 200 : 1400);
+    const odklad = QS.has('uvod') ? 200 : 1400;
+
+    /* Aplikácia nemusí byť pri načítaní na obrazovke - na webe pod ňou stojí
+       článok a človek k nej doscrolluje. Spustiť sprievodcu do prázdna by
+       znamenalo, že ho minie: kým doscrolluje, prstenec už ukazuje na krok,
+       ktorý nevidel začať. Preto čakáme, kým je aplikácia naozaj v zábere. */
+    const app = document.getElementById('lp');
+    if (!app || !('IntersectionObserver' in window)) {
+      setTimeout(start, odklad);
+      return;
+    }
+    let spustene = false;
+    const spusti = () => {
+      if (spustene) return;
+      spustene = true;
+      setTimeout(start, odklad);
+    };
+    /* Prah sa NESMIE počítať z podielu aplikácie - tá je vyššia než obrazovka
+       (na telefóne 2845 px proti 844 px), takže podiel 0,4 sa nedosiahne nikdy
+       a sprievodca by sa nespustil. Namiesto toho sa sleduje, či aplikácia
+       zasiahne do stredného pásu obrazovky; to platí pri každej výške. */
+    const sledovac = new IntersectionObserver((zaznamy) => {
+      if (zaznamy.some(z => z.isIntersecting)) {
+        sledovac.disconnect();
+        spusti();
+      }
+    }, { threshold: 0, rootMargin: '-25% 0px -25% 0px' });
+    sledovac.observe(app);
   }
 
   if (document.readyState === 'loading')

@@ -226,6 +226,100 @@ input[type=range]:disabled{opacity:.35;cursor:not-allowed}
 .flow-options{max-width:780px;margin:18px auto 0;text-align:center}
 .flow-options h3{font-family:var(--serif);font-size:22px;line-height:1.3;margin:0;color:#fff}
 .flow-options p{margin:7px 0 0;color:#b7afa5;font-size:16px;line-height:1.5}
+/* Pás je rozhodovací bod stránky: klient už videl svoj výsledok a tu sa
+   rozhoduje, čo ďalej. Preto nie je ani tabuľka, ani ďalšia ponuka - je to
+   jeden výrok s číslom vnútri, dve rovnocenné cesty a metodika stlmená na
+   koniec. Tint je 10 % farby Čiary života (--axis, teda pozadie pásu osi -
+   nie zlatá z milníkov), takže pás patrí k plánu nad sebou
+   a linka na hornej hrane to spojenie priznáva. Plnou sýtou farbou by sa
+   z neho stal tretí objekt v rade so zlatými kartami pod ním. */
+/* Plná farba, nie priehľadná vrstva. Výsledná farba je tá istá (10 % osi
+   nad #333333), ale Chrome vykresľuje text na priehľadnom pozadí sivým
+   vyhladzovaním namiesto subpixelového - písmo potom pôsobí mäkšie než na
+   zlatých kartách, ktoré plné pozadie majú. */
+.vysledok-pas{background:#eae7e0;
+  /* Lem musí byť po celom obvode rovnaký. Nestačí rovnaká hrúbka: horná hrana
+     v plnej farbe osi opticky hrubla oproti bokom na 34 %, takže farba je
+     jednotná tiež. 2px preto, aby bol rám čitateľný ako zámer, nie ako vlások. */
+  border:2px solid #cfccc5;border-radius:5px;
+  padding:30px 34px 26px;margin:14px 0 44px;color:#4a4038}
+.vysledok-pas[hidden]{display:none}
+.pas-nazov{margin:0;font-family:inherit;font-size:13px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;color:#6f5228}
+/* Číslo zostáva vo vete ako inline prvok, nie vo vlastnom stĺpci. Keď stálo
+   vpravo, klient si ho s vetou nemusel spojiť. Nezalomiteľné je celé
+   „604 z 800“ vrátane predložky - rozdelené na dva riadky prestáva byť údajom.
+   Žiadny max-width: veta je jedna a dlhá, orezanie na polovicu šírky by
+   vyrobilo prázdnu pravú polovicu pásu. */
+.pas-vysledok{margin:14px 0 0;font-family:var(--serif);
+  font-size:clamp(25px,2.05vw,30px);line-height:1.34;font-weight:700;color:#241a11}
+.pas-pocet{white-space:nowrap;font-size:1.36em;line-height:1;font-weight:700;
+  color:#241a11;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.pas-ostatne{margin:14px 0 0;font-size:17px;line-height:1.55;color:#4a4038}
+.pas-ostatne[hidden]{display:none}
+.pas-hranice{margin:10px 0 0;font-size:17px;line-height:1.55;color:#5b5148}
+/* Dve cesty majú rovnakú váhu zámerne: PDF rozšíri výpočet, konzultácia ho
+   zasadí do kontextu. Nie sú to konkurenčné produkty ani dve tlačidlá. */
+.pas-vyber{margin:26px 0 0;font-size:17px;line-height:1.55;font-weight:700;color:#6f5228}
+.pas-cesty{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:14px 0 0}
+.pas-cesta{display:block;text-decoration:none;background:#f4efe4;
+  border:1px solid #d6c9b2;border-radius:4px;padding:20px 22px;
+  transition:background .18s ease,border-color .18s ease}
+.pas-cesta:focus-visible{outline:2px solid #d9b380;outline-offset:3px}
+/* POKUS (ľahko odstrániteľný blok): nájazd na malú kartu ju rozsvieti na plnú
+   zlatú jej veľkej karty a druhú veľkú kartu stlmí na odtieň malej. Ukáže to,
+   ktorá dvojica patrí k sebe. Na plnej zlatej musí byť tmavé písmo - biele má
+   na nej kontrast 3,3 a pod AA. */
+.pas-cesta:hover,.pas-cesta:focus-visible{background:var(--surface,#ae8753);
+  border-color:rgba(72,48,23,.42)}
+.pas-cesta:hover h4,.pas-cesta:focus-visible h4,
+.pas-cesta:hover p,.pas-cesta:focus-visible p{color:#2b2118}
+.client-panel,.consult-panel.flow-consult{transition:background .18s ease,border-color .18s ease}
+/* Stlmená veľká karta: pozadie na odtieň malej a svetlé písmo, inak by tmavé
+   písmo na tmavom podklade zmizlo. */
+/* Párovanie sa riadi KLIKOM, nie nájazdom. Klik je zámer a stav zostane,
+   kým klient neklikne druhú cestu; pri nájazde by sa polovica obrazovky
+   prekresľovala pri každom pohybe myšou. Nesie to :target - malé karty sú
+   odkazy na nadpisy veľkých kariet, takže po kliknutí je zvolená karta
+   v adrese a druhá sa stlmí. Stlmená karta musí prepnúť na svetlé písmo,
+   inak by tmavý text na stlmenej zlatej zmizol. */
+/* Voľba je klik, náhľad je nájazd. Klik ju zapamätá (nesie ju adresa cez
+   :target), nájazd na druhú minikartu ju dočasne prebije - inak by sa po
+   prvom kliknutí druhá cesta už nedala ani ukázať. Preto má každé stlmenie
+   dva zápisy: jeden pre nájazd a jeden pre zapamätanú voľbu, pričom ten druhý
+   sa vypne, keď myš práve ukazuje na opačnú minikartu. */
+body:has(.pas-cesta[href="#consult-title"]:hover) .delivery-panel,
+body:has(#consult-title:target):not(:has(.pas-cesta[href="#delivery-title"]:hover)) .delivery-panel{
+  --on-gold:#f0eae2;--on-gold-soft:#e3dbd0;
+  background:#514739;border:1px solid #886f52}
+body:has(.pas-cesta[href="#delivery-title"]:hover) .consult-panel.flow-consult,
+body:has(#delivery-title:target):not(:has(.pas-cesta[href="#consult-title"]:hover)) .consult-panel.flow-consult{
+  background:#514739!important;border-color:#886f52!important;
+  box-shadow:none!important}
+body:has(.pas-cesta[href="#delivery-title"]:hover) .consult-panel.flow-consult :is(.flow-title,.path-label,.consult-gain),
+body:has(#delivery-title:target):not(:has(.pas-cesta[href="#consult-title"]:hover)) .consult-panel.flow-consult :is(.flow-title,.path-label,.consult-gain){
+  color:#f0eae2!important}
+body:has(.pas-cesta[href="#delivery-title"]:hover) .consult-panel.flow-consult .consult-intro,
+body:has(#delivery-title:target):not(:has(.pas-cesta[href="#consult-title"]:hover)) .consult-panel.flow-consult .consult-intro{
+  color:#e3dbd0!important}
+.pas-cesta h4{margin:0;font-family:var(--serif);font-size:18px;line-height:1.25;
+  font-weight:700;color:#241a11}
+.pas-cesta p{margin:9px 0 0;font-size:16px;line-height:1.55;color:#4a4038}
+.pas-metodika{margin:26px 0 0;padding-top:16px;
+  border-top:1px solid #d5d1c8}
+.pas-metodika h4{margin:0;font-size:12px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:#6b6259}
+.pas-metodika p{margin:7px 0 0;font-size:14px;line-height:1.6;color:#6b6259}
+/* Názov metódy stojí na vlastnom riadku - je to iný druh údaju než opis
+   toho, z čoho priebehy vychádzajú. */
+.pas-metodika p+p{margin-top:2px}
+@media(max-width:720px){
+  /* Poradie zostáva to isté ako na desktope - je dané poradím v dokumente,
+     nie mriežkou, takže sa nemá ako rozísť s ovládaním klávesnicou. */
+  .vysledok-pas{padding:24px 18px 22px;margin:14px 0 32px}
+  .pas-cesty{grid-template-columns:1fr;gap:14px}
+  .pas-cesta{padding:16px 18px}
+}
 .bottom-flow{display:grid;grid-template-columns:1fr;gap:12px;margin:18px 0 20px}
 .client-panel{background:var(--surface);padding:24px 26px;border-radius:6px;color:var(--on-gold)}
 .client-panel.consult-panel{background:#242424;border:1px solid var(--line);color:#fff}
@@ -391,6 +485,74 @@ body.poradca .flow-options,body.poradca .bottom-flow{display:none}
   .consult-closing{white-space:normal}
   .flow-consult .btn{width:100%;justify-content:center}
 }
+
+/* --- Hero a úvod podľa živej stránky ---------------------------------------
+   Pôvodná verzia (tmavý pás cez celú šírku a fotografia lode) je z prvej
+   verzie stránky a na webe už nie je. Živá stránka má svetlú kartu, zlatý
+   serifový nadpis, štvorriadkové tvrdenie a fotografiu husí zarovnanú
+   k pravej hrane karty. Opis fungovania beží v dvoch stĺpcoch. */
+.intro-lead{max-width:1240px;margin:34px auto 0;padding:0;gap:0;overflow:hidden;
+  border-radius:6px;background:#f3ece1;align-items:stretch;
+  grid-template-columns:minmax(0,1fr) minmax(0,1.08fr)}
+.intro-lead .lead-text{padding:clamp(34px,4vw,64px) clamp(24px,3.4vw,56px)}
+.intro-lead .lead-text h1{color:#a97b3c;margin:0 0 22px;
+  /* Pôvodná veľkosť bola počítaná na nadpis cez celú šírku stránky; v karte
+     má polovicu miesta a pretekal spod fotografie. */
+  font-size:clamp(32px,3.4vw,52px)}
+.intro-lead .lead-claim{font-size:18px;line-height:1.62;color:#2b2118;margin:0 0 26px}
+.intro-lead .intro-jump{color:#8a5a1e;border-bottom-color:rgba(138,90,30,.45)}
+.intro-lead .lead-img{aspect-ratio:auto;border-radius:0;background:none;min-height:330px}
+.intro-lead .lead-img picture,.intro-lead .lead-img img{display:block;width:100%;height:100%;object-fit:cover}
+.intro{max-width:1240px}
+/* Audio blok je na živej stránke tmavý so zlatým akcentom, nie zlatý.
+   Zlaté meno na zlatom podklade sa navyše nedalo prečítať. */
+.intro-audio{background:#1e1b18;color:#f2ece4}
+.intro-audio b{color:#fff}
+.intro-audio small{color:#cdc5ba}
+.intro-audio button{background:var(--btn-gold);color:#fff}
+.intro-audio button:hover{background:#b07c31}
+.intro-audio-line{background:rgba(255,255,255,.16)}
+.intro-audio-line::before{background:var(--gold-strong)}
+.intro-audio-meno{color:var(--gold-strong);font-weight:700}
+.intro-audio-note{color:#a79c8c}
+.intro-audio-note{display:block;margin-top:6px;color:var(--on-gold-soft);font-size:14px}
+.intro-cols{display:grid;grid-template-columns:1fr 1fr;gap:10px 44px;margin-top:14px}
+.intro-cols p{margin:0 0 14px}
+@media(max-width:860px){
+  .intro-lead{grid-template-columns:1fr}
+  .intro-lead .lead-img{min-height:220px}
+  .intro-cols{grid-template-columns:1fr;gap:0}
+}
+
+/* --- Opravy z kola recenzií -------------------------------------------------
+   1. Záverečná veta panelu konzultácie mala zakázané zalamovanie. Vynútila si
+      šírku 998 px, tá držala panel nad 1064 px a ten roztiahol celú stránku:
+      pri 1024 px pretekala o 101 px, pri 600 px o 507 px. Text vtedy vytekal
+      mimo zlatej karty na sivé pozadie, kde klesol kontrast na 2,35.
+   2. Fokusový prstenec bol zlatý a používal sa na zlatých kartách - na úchytoch
+      čiary života mal kontrast 1,00, teda splýval úplne. Tmavé jadro so svetlou
+      aureolou funguje na svetlom aj tmavom podklade.
+   3. Tri výhody konzultácie mali cez zlatý gradient tmavú vrstvu, ktorá zhodila
+      text na 3,52 a poznámku o CMA na 2,87.
+   4. Popisok „vek" na osi mal 3,56 kvôli priehľadnosti. */
+.consult-closing{white-space:normal!important}
+.bottom-flow{grid-template-columns:minmax(0,1fr)}
+.client-panel{min-width:0}
+:focus-visible{outline:2px solid #2b2118;outline-offset:3px;box-shadow:0 0 0 5px #f6f1e8}
+.consult-benefits{background:transparent}
+.consult-benefit{background:rgba(255,255,255,.055)}
+.consult-note{opacity:1;color:#2b2118;font-size:13px}
+/* Tieto tri prehrali so silnejšími pravidlami, ktoré už v súbore boli:
+   zlatý prstenec je zapísaný pri každom type ovládacieho prvku zvlášť,
+   popisok osi má triedu s prefixom html.b-vylepsene a poznámka o CMA má
+   !important. Preto sa prepisujú menovite, nie všeobecne. */
+.handle:focus-visible,.tg button:focus-visible,input[type=range]:focus-visible,
+.btn:focus-visible,.b-krok:focus-visible,summary:focus-visible,
+.pas-cesta:focus-visible,.intro-audio button:focus-visible,
+.sw input[type=checkbox]:focus-visible,.za-znovu:focus-visible{
+  outline:2px solid #2b2118;outline-offset:3px;box-shadow:0 0 0 5px #f6f1e8}
+html.b-vylepsene .axis-cap,.axis-cap{opacity:1;color:#4a4437}
+.consult-benefit .consult-note{opacity:1!important;color:#2b2118!important;font-size:13px!important}
 </style>
 <style>
 /* ============================================================
@@ -673,12 +835,13 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
 
 
 
+
 <main id="lp"><span id="kalkulacka" aria-hidden="true"></span>
   <h1 class="sr-only">Kalkulačka privátnej renty</h1>
 
   <header class="head" aria-hidden="true"></header>
 
-  <nav class="mobile-life-nav" id="mobile-life-nav" aria-label="Čára života — navigácia medzi tromi krokmi">
+  <nav class="mobile-life-nav" id="mobile-life-nav" aria-label="Čiara života — navigácia medzi tromi krokmi">
     <div class="mobile-life-track">
       <button type="button" class="mobile-life-step" data-card="c-today" aria-current="step"><span>Dnes</span><strong id="mobile-life-now">50 r.</strong></button>
       <button type="button" class="mobile-life-step" data-card="c-start"><span>Začiatok</span><strong id="mobile-life-start">65 r.</strong></button>
@@ -847,10 +1010,33 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
 
   <div id="msg" aria-live="polite" data-e style="--d:1.5s"></div>
 
-  <div class="flow-options" data-e style="--d:1.58s">
-    <h3>Ako chcete pokračovať?</h3>
-    <p>Môžete si modeláciu najprv otvoriť a uložiť v PDF, alebo prejsť rovno na osobnú konzultáciu.</p>
-  </div>
+  <!-- Rozhodovacie miesto medzi výpočtom a dvoma kartami. Nesie jediný výsledok,
+       ktorý klientovi povie, či jeho plán obstojí aj v horších trhoch - dovtedy
+       ho videl len poradca. Číslo aj veta sa skladajú v naplnPas() - v HTML sú
+       len zástupné hodnoty pre stav pred prvým výpočtom. -->
+  <section class="vysledok-pas" id="vysledok-pas" data-e style="--d:1.58s"
+           aria-labelledby="pas-nazov" hidden>
+    <h3 class="pas-nazov" id="pas-nazov">Test odolnosti plánu</h3>
+    <p class="pas-vysledok" aria-live="polite">Váš majetok pokryl všetky plánované výplaty renty v <strong class="pas-pocet"><span id="pas-uspesnych">-</span>&nbsp;z&nbsp;<span id="pas-zo">-</span></strong> modelovaných priebehov.</p>
+    <p class="pas-ostatne" id="pas-ostatne" aria-live="polite">V ostatných sa majetok vyčerpal pred plánovaným koncom čerpania.</p>
+    <p class="pas-hranice">Výsledok nie je pravdepodobnosť ani predpoveď. Ukazuje, ako plán obstál v rôznych modelovaných podmienkach.</p>
+    <p class="pas-vyber">Ďalej sa dá pokračovať dvoma spôsobmi. Môžete si vybrať jeden z nich alebo oba.</p>
+    <div class="pas-cesty">
+      <a class="pas-cesta" href="#delivery-title">
+        <h4>Modelácia v PDF</h4>
+        <p>Okrem pl&aacute;nu priv&aacute;tnej renty, ktor&yacute; ste si nastavili, uvid&iacute;te aj to, koľko by ste museli investovať, aby pl&aacute;n obst&aacute;l vo viacer&yacute;ch priebehoch.</p>
+      </a>
+      <a class="pas-cesta" href="#consult-title">
+        <h4>Osobn&aacute; konzult&aacute;cia</h4>
+        <p>V&yacute;sledok testu zasad&iacute;me do kontextu vašej situ&aacute;cie. Ak už investujete, pozrieme sa, či v&aacute;s dnešn&eacute; portf&oacute;lio k tomuto pl&aacute;nu naozaj vedie. Ak zatiaľ neinvestujete, uk&aacute;žeme, ak&eacute; portf&oacute;lio k nemu vedie.</p>
+      </a>
+    </div>
+    <div class="pas-metodika">
+      <h4>Metodika</h4>
+      <p>Počas budovania majetku vych&aacute;dzaj&uacute; modelovan&eacute; priebehy zo s&uacute;visl&yacute;ch &uacute;sekov skutočn&yacute;ch ročn&yacute;ch v&yacute;nosov indexu MSCI World. Počas čerpania počítaj&uacute; s pevn&yacute;m modelov&yacute;m v&yacute;nosom 4&nbsp;% ročne.</p>
+      <p>Použit&aacute; met&oacute;da: Monte Carlo s blokov&yacute;m bootstrapom.</p>
+    </div>
+  </section>
 
   <div class="bottom-flow" data-e style="--d:1.6s">
     <section class="client-panel delivery-panel mobile-continue-card" aria-labelledby="delivery-title">
@@ -905,7 +1091,7 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
         <span class="consult-portrait" role="img" aria-label="Petr Hechtberger"></span>
         <span class="path-label">Osobná konzultácia</span>
         <h3 id="consult-title" class="flow-title">Od modelácie k premyslenej stratégii</h3>
-        <p class="consult-intro">Modelácia ukazuje, aký kapitál si váš plán vyžaduje a ako obstál v simuláciách založených na historických dátach.<br>Ak budete mať záujem, na osobnej konzultácii vieme modeláciu prepojiť s vaším celkovým majetkom a rozhodnutiami, ktoré máte pred sebou.<strong class="consult-gain">Čo tým získate:</strong></p>
+        <p class="consult-intro">Modelácia ukazuje, aký majetok si váš plán vyžaduje a ako obstál v simuláciách založených na historických dátach.<br>Ak budete mať záujem, na osobnej konzultácii vieme modeláciu prepojiť s vaším celkovým majetkom a rozhodnutiami, ktoré máte pred sebou.<strong class="consult-gain">Čo tým získate:</strong></p>
       </div>
       <div class="consult-benefits">
         <section class="consult-benefit"><h4>Pohľad dopredu</h4><p>K historickému testu pridáme modelový pohľad založený na aktuálnych CMA<sup>*</sup> a spoločne posúdime, čo z nich môže vyplývať pre váš plán.</p><p class="consult-note">* CMA znamená Capital Market Assumptions — dlhodobé očakávania výnosov a rizík popredných svetových investičných inštitúcií.</p></section>
@@ -1039,6 +1225,11 @@ const ENUM_KEYS={sit:['build','have'],mode:['lump','monthly','combo'],goal:['ren
   comboDir:['needed','known'],pension:['temporary','perpetuity']};
 const QS=new URLSearchParams(location.search);
 const OUTPUT_MODE=QS.has('vystup');
+/* Odkaz so scenárom v parametroch = plán je návštevníkov už pri načítaní,
+   takže pás nemá na čo čakať. Rovnaká podmienka, akou sa scenár z adresy
+   aj načítava. */
+const ZDIELANY_PLAN=NUM_KEYS.some(k=>QS.has(k))
+  ||Object.keys(ENUM_KEYS).some(k=>QS.has(k))||QS.has('profile')||QS.has('infl_on');
 
 /* Kam vedie odkaz na modeláciu — na výsledkovú stránku vedľa aplikácie.
    Tá si scenár prečíta z rovnakých parametrov a počíta rovnakým jadrom.
@@ -1506,10 +1697,14 @@ function render(){
   const assump=$('assump'),assumpDetail=$('assump-detail');
   if(assump)assump.textContent=o.warn?''
     :'Základný prepočet používa zhodnotenie, ktoré ste '
-     +'zadali vy, a ukazuje, čo z neho matematicky vyplýva. Nejde o odhad ani o odporúčanie.';
+     +'nastavili, a ukazuje, čo z neho matematicky vyplýva. Nejde o odhad ani o odporúčanie.';
 
   if(assumpDetail)assumpDetail.textContent=o.warn?''
-    :`Výpočet vychádza zo zhodnotenia ${pctTxt(o.rPct)} % ročne, ktoré ste zadali vy. `
+    /* Obe sadzby, nie len jedna. Potrebný kapitál určuje sadzba počas
+       vyplácania - keď sa uvádzala len tá z budovania, klient si hlavné číslo
+       nevedel prepočítať. A „ktoré ste zadali vy" neplatí pre predvoľbu. */
+    :`Výpočet počíta so zhodnotením ${pctTxt(o.rPct)} % ročne počas budovania majetku `
+     +`a ${pctTxt(o.rPctRent)} % ročne počas vyplácania; obe hodnoty si nastavujete v aplikácii. `
      +`Uvedené sumy sú po odpočítaní predpokladaného vstupného poplatku ${pctTxt(FEE_IN)}\u00a0% a poplatku za správu ${pctTxt(FEE_M)}\u00a0% ročne; u vás môžu byť nižšie aj vyššie. `
      +(o.rast?`Výpočet zohľadňuje infláciu ${pctTxt(o.infl)} % ročne. `:'Výpočet nezohľadňuje infláciu. ')
      +'Dane z výnosov výpočet nezohľadňuje. Výpočet prebieha na mesačnej báze: '
@@ -1536,23 +1731,26 @@ var cmaObnov=null;
   const PUBLIC_HOST=/(^|\.)hechtberger\.com$|^hechtgit\.github\.io$/i.test(location.hostname);
   const qs=location.search+location.hash;
   const PORADCA=/poradca/i.test(qs)?true:!(PUBLIC_HOST||/verejna/i.test(qs));
-  if(!PORADCA)return;
+  /* Klientovi sa poradenské bloky neodomykajú, ale výpočet potrebuje aj on:
+     výsledkový pás pod kalkulačkou stojí na počte úspešných scenárov. Predtým
+     sa klientovi jadro vôbec nenačítalo. Načíta sa teda tu, so samostatným
+     zavádzačom - ten spoločný je definovaný až nižšie a nedá sa použiť skôr. */
   /* Trieda odomkne poradenské zobrazenie a zároveň skryje akvizičnú časť.
-     Nastaví sa aj vtedy, keď by CMA konfigurácia chýbala — poradenský režim
+     Nastaví sa aj vtedy, keď by CMA konfigurácia chýbala - poradenský režim
      nemá byť závislý na tom, či sa podarilo načítať predpoklady. */
-  document.body.classList.add('poradca');
-  /* Poradcovi uvoľníme rozsah výnosu počas čerpania. Klient má úzke pásmo,
+  if(PORADCA)document.body.classList.add('poradca');
+  /* Poradcovi uvoľníme rozsah výnosu počas vyplácania. Klient má úzke pásmo,
      aby si plán nerozbil optimizmom; poradca pri tom sedí a vie ho zarámovať. */
   const slRent=document.getElementById('sl-vynos-rent');
-  if(slRent){slRent.min=VYNOS_MIN;slRent.max=VYNOS_MAX}
+  if(PORADCA&&slRent){slRent.min=VYNOS_MIN;slRent.max=VYNOS_MAX}
   /* Predpoklady, technické detaily aj právne upozornenie splynú poradcovi do
-     jednej pätičky drobným písmom na konci. Rozbaľovanie nemá zmysel — poradca
+     jednej pätičky drobným písmom na konci. Rozbaľovanie nemá zmysel - poradca
      tieto vety pozná a klientovi ich hovorí sám. Formálne tam ale byť musia. */
   const predpoklady=document.querySelector('.assumptions-block:not(.cma-block)');
   const paticka=document.querySelector('.disclaimer');
-  if(predpoklady&&paticka){
+  if(PORADCA&&predpoklady&&paticka){
     paticka.classList.add('poradca-pata');
-    /* Presúvame samotné odseky, nie ich text — render() ich plní pri každom
+    /* Presúvame samotné odseky, nie ich text - render() ich plní pri každom
        prepočte, takže kópia by zamrzla na prázdnej hodnote. */
     let kam=paticka.firstChild;
     predpoklady.querySelectorAll('details p').forEach(p=>{
@@ -1603,14 +1801,14 @@ var cmaObnov=null;
           riadokVklad=document.getElementById('cma-out-vklad'),
           riadokRozdiel=document.getElementById('cma-out-rozdiel');
     if(!p||p.warn){
-      k.textContent='—';vk.textContent='—';rz.textContent='—';
+      k.textContent='-';vk.textContent='-';rz.textContent='-';
       return;
     }
     k.textContent=fmtEur(p.cap);
     const o=compute();
     /* Rozdiel voči CMA sa formátuje na jednom mieste. Formátovanie súm inak
        orezáva záporné čísla na nulu, takže riadok tvrdil „žiadny rozdiel"
-       vždy, keď bol klientov predpoklad vyšší než CMA — teda pri predvolenom
+       vždy, keď bol klientov predpoklad vyšší než CMA - teda pri predvolenom
        nastavení vždy. A práve vtedy má klienta krotiť najviac. */
     const rozdielHtml=(rozdiel,jednotka)=>{
       const znak=rozdiel>0?'+':(rozdiel<0?'−':'');
@@ -1618,9 +1816,9 @@ var cmaObnov=null;
     };
     const maRentu=S.sit==='have'&&S.goal==='rent';
     if(maRentu){
-      /* Klient majetok už má — CMA hovorí, akú rentu z neho vie čerpať. */
+      /* Klient majetok už má - CMA hovorí, akú rentu si z neho vie vyplácať. */
       riadokVklad.hidden=false;
-      vkK.textContent='Podľa CMA si viem čerpať';
+      vkK.textContent='Podľa CMA si viem vyplácať';
       vk.innerHTML=fmtEur(p.R)+'<small> / mes.</small>';
       riadokRozdiel.hidden=!!(o.warn||!Number.isFinite(o.R)||!Number.isFinite(p.R));
       if(!riadokRozdiel.hidden){
@@ -1635,7 +1833,7 @@ var cmaObnov=null;
       const mesacna=S.mode==='monthly'||S.mode==='combo';
       const cmaSuma=mesacna?p.M:p.P0;
       const klientSuma=mesacna?o.M:o.P0;
-      /* Kto sa pýta, ako dlho mu majetok vydrží, nič neinvestuje — taká suma
+      /* Kto sa pýta, ako dlho mu majetok vydrží, nič neinvestuje - taká suma
          pre neho neexistuje. Riadok sa vtedy nezobrazí; predtým sa na jeho
          mieste vypísalo „NaN €". */
       riadokVklad.hidden=!Number.isFinite(cmaSuma);
@@ -1655,7 +1853,7 @@ var cmaObnov=null;
 
   document.getElementById('cma-lead').textContent=
     'Budovanie majetku počíta s '+cislo(CMA.accumulationReturn)
-    +' ročne podľa dlhodobých výhľadových predpokladov. Od prvého mesiaca čerpania '
+    +' ročne podľa dlhodobých výhľadových predpokladov. Od prvého mesiaca vyplácania '
     +'sa tento predpoklad prestáva používať a platí pevných '+cislo(CMA.drawdownReturn)
     +' ročne po investičných nákladoch, pred infláciou. Nie je to predpoveď ani garancia.';
   document.getElementById('cma-zdroj').textContent=
@@ -1694,11 +1892,11 @@ var cmaObnov=null;
     let d='';for(let m=0;m<=n;m+=1)d+=(m?'L':'M')+x(m).toFixed(1)+' '+y(v.survival[m]).toFixed(1);
     s.appendChild(el('path',{class:'plocha',d:d+`L${x(n).toFixed(1)} ${B}L${L} ${B}Z`}));
     s.appendChild(el('path',{class:'ciara',d}));
-    /* zvislá čiara v momente, keď sa začína čerpať — dovtedy nie je čo minúť */
+    /* zvislá čiara v momente, keď sa začína vyplácať - dovtedy nie je čo minúť */
     if(plan.Nm>0&&plan.Nm<=n){
       s.appendChild(el('line',{class:'start',x1:x(plan.Nm),x2:x(plan.Nm),y1:T,y2:B}));
       const t=el('text',{x:x(plan.Nm),y:T-3,'text-anchor':'middle'});
-      t.textContent='začiatok čerpania';s.appendChild(t);
+      t.textContent='začiatok vyplácania';s.appendChild(t);
     }
     s.appendChild(el('line',{class:'os',x1:L,x2:R,y1:B,y2:B}));
     /* vek na osi x */
@@ -1728,6 +1926,56 @@ var cmaObnov=null;
   }
 
   let cakanie=0;
+  const pasEl=()=>document.getElementById('vysledok-pas');
+  /* Pás je odmena za aktivitu, nie uvítanie. Kým človek nič nenastavil, veta
+     „Váš majetok" by hovorila o našom predvolenom príklade, nie o jeho pláne.
+     Odomkne ho prvá zmena scenára - nie konkrétny ovládací prvok, ale to, že
+     sa scenár odlíši od východiskového. Pokryje to jazdce, prepínače, tlačidlá
+     aj kroky sprievodcu naraz. Kto prejde sprievodcu a všetko iba potvrdí,
+     nezmení nič - toho odomkne sám sprievodca cez odomkniPas().
+     Raz odomknutý zostáva: návrat na pôvodné hodnoty už plán neodoberie. */
+  let pasOdomknuty=ZDIELANY_PLAN, pasVychodisko=null, poslednePas=null;
+  window.odomkniPas=()=>{
+    if(pasOdomknuty)return;
+    pasOdomknuty=true;
+    if(poslednePas)naplnPas(poslednePas[0],poslednePas[1]);
+  };
+  function naplnPas(uspesnych,zo){
+    const pas=pasEl(); if(!pas)return;
+    poslednePas=[uspesnych,zo];
+    const teraz=JSON.stringify(scenar());
+    if(pasVychodisko===null)pasVychodisko=teraz;
+    if(!pasOdomknuty&&teraz!==pasVychodisko)pasOdomknuty=true;
+    if(!pasOdomknuty){pas.hidden=true;return}
+    /* Tá istá podmienka, akou sa riadi zvyšok stránky: bez ohraničeného obdobia
+       čerpania niet voči čomu prežitie merať. Prepočet beží aj vtedy, preto
+       ju treba skontrolovať aj tu - inak by pás číslo hneď vrátil späť. */
+    const bezTestu = S.now===S.start || S.goal==='duration' || S.pension==='perpetuity';
+    if(bezTestu||!Number.isFinite(uspesnych)||!zo){pas.hidden=true;return}
+    /* Veta sa skladá tu, nie v HTML, lebo pri nule sa musí obrátiť: „v 0 z 800
+       priebehov majetok pokryl výplaty“ nie je po slovensky veta. Číslo aj
+       predložka zostávajú v jednom nezalomiteľnom <strong> - rozdelené medzi
+       riadky prestáva byť „604 z 800“ údajom. */
+    const cislo=(t)=>'<strong class="pas-pocet">'+t+'</strong>';
+    document.querySelector('.pas-vysledok').innerHTML = uspesnych===0
+      ? 'V\u00e1\u0161 majetok nepokryl v\u0161etky pl\u00e1novan\u00e9 v\u00fdplaty renty '
+        +'ani v\u00a0jednom z\u00a0'+zo+' modelovan\u00fdch priebehov.'
+      : 'V\u00e1\u0161 majetok pokryl v\u0161etky pl\u00e1novan\u00e9 v\u00fdplaty renty v '
+        +cislo(uspesnych+'\u00a0z\u00a0'+zo)+' modelovan\u00fdch priebehov.';
+    /* Pri nule aj pri plnom počte niet „ostatných“ - veta by hovorila
+       o priebehoch, ktoré neexistujú. */
+    const zvysok=zo-uspesnych;
+    const ostatne=document.getElementById('pas-ostatne');
+    ostatne.hidden=(zvysok<=0||uspesnych===0);
+    /* Pri jedinom zvyšnom priebehu by množné „v ostatných" hovorilo o niečom,
+       čo je jedno. */
+    if(!ostatne.hidden)ostatne.textContent=(zvysok===1?'V jednom':'V ostatn\u00fdch')
+      +' sa majetok vyčerpal pred pl\u00e1novan\u00fdm koncom čerpania.';
+    pas.hidden=false;
+  }
+  /* Keď sa test spustiť nedá, pás nesmie ostať s číslom z predošlého scenára. */
+  function schovajPas(){const pas=pasEl(); if(pas)pas.hidden=true}
+
   function prepocitajOdolnost(){
     if(!window.RentaCore||!window.RentaHistoricalData)return;
     const data=RentaHistoricalData.vynosy||RentaHistoricalData.returns;
@@ -1735,17 +1983,19 @@ var cmaObnov=null;
     let plan,v;
     try{
       plan=RentaCore.computePlan(scenar());
-      if(plan.warn||!plan.Tm){odolnostBlok.hidden=true;return}
+      if(plan.warn||!plan.Tm){odolnostBlok.hidden=true;schovajPas();return}
       v=RentaCore.advisoryOutlook(plan,data);
-    }catch(e){odolnostBlok.hidden=true;return}
-    odolnostBlok.hidden=false;
+    }catch(e){odolnostBlok.hidden=true;schovajPas();return}
+    /* Graf odolnosti zostáva poradenský - klient z neho vidí len výsledok
+       v páse pod kalkulačkou. */
+    odolnostBlok.hidden=!PORADCA;
     nakresliKrivku(v,plan);
     document.getElementById('odolnost-v').textContent=
       Math.round(v.successRate*v.runs)+' z '+v.runs+' priebehov';
     document.getElementById('odolnost-lead').textContent=
       'Z '+v.runs+' simulovaných priebehov ukazuje krivka podiel tých, v ktorých majetok '
-      +'ešte nebol vyčerpaný. Počas budovania majetku sa losujú skutočné ročné výnosy '
-      +'indexu, od začiatku čerpania platí pevných '+pctTxt(v.drawdownReturn)+NB+'% ročne.';
+      +'ešte nebol minutý. Počas budovania majetku sa losujú skutočné ročné výnosy '
+      +'indexu, od začiatku vyplácania platí pevných '+pctTxt(v.drawdownReturn)+NB+'% ročne.';
     /* Akčný krok: koľko treba, aby plán obstál v cieľovom počte priebehov.
        Bez neho graf iba konštatuje problém a poradca nemá čo klientovi ponúknuť. */
     const akciaOut=document.getElementById('akcia-out');
@@ -1765,6 +2015,7 @@ var cmaObnov=null;
         fmtEur(treba)+(mesacne?'<small> / mes.</small>':'')
         +'<small> namiesto '+fmtEur(teraz)+'</small>';
     }
+    naplnPas(Math.round(v.successRate*v.runs),v.runs);
     document.getElementById('odolnost-metodika').textContent=
       'Blokový bootstrap, '+v.runs+' behov, bloky po '+v.blockYears+NB+'rokoch, seed '+v.seed
       +'. Profil '+v.profileId+' (verzia '+v.profileVersion+'). Úspech znamená, že majetok '
@@ -1779,7 +2030,7 @@ var cmaObnov=null;
   Promise.all([nacitaj('dist/renta-core.browser.js'),nacitaj('dist/renta-data.browser.js')])
     .then(()=>{
       if(!window.RentaCore||typeof RentaCore.cmaPlan!=='function')return;
-      /* CMA je deterministické a lacné — počíta sa pri každom prekreslení.
+      /* CMA je deterministické a lacné - počíta sa pri každom prekreslení.
          Simulácia 800 behov trvá takmer sekundu, tá sa preto odloží, kým
          Petr prestane ťahať milník, inak by sa stránka pri ťahaní zasekla. */
       cmaObnov=()=>{
@@ -1787,7 +2038,7 @@ var cmaObnov=null;
         clearTimeout(cakanie);
         cakanie=setTimeout(prepocitajOdolnost,300);
       };
-      blok.hidden=false;
+      if(PORADCA)blok.hidden=false;
       cmaObnov();
     });
 })();

@@ -390,9 +390,9 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
   <section class="assumptions">
     <div class="blok">
       <h2>Použité predpoklady</h2>
-      <p>Základný prepočet používa zhodnotenie, ktoré ste zadali vy, a ukazuje, čo z neho matematicky vyplýva. Nejde o odhad ani o odporúčanie.</p>
+      <p>Základný prepočet používa zhodnotenie, ktoré ste si nastavili, a ukazuje, čo z neho matematicky vyplýva. Nejde o odhad ani o odporúčanie.</p>
       <p id="metodika"></p>
-      <p><strong>Dva pohľady, dve metodiky.</strong> Váš vlastný scenár používa zadané zhodnotenie počas celého obdobia. Historický pohľad používa MSCI World iba počas budovania majetku; počas čerpania používa modelový výnos 4 % ročne po investičných nákladoch, pred infláciou.</p>
+      <p><strong>Dva pohľady, dve metodiky.</strong> Váš vlastný plán počíta s dvoma sadzbami: jednou počas budovania majetku a druhou počas vyplácania, obe si nastavujete v aplikácii. Historický pohľad používa MSCI World iba počas budovania majetku; počas čerpania používa modelový výnos 4 % ročne po investičných nákladoch, pred infláciou.</p>
       <p class="vystraha">Minulá výkonnosť nie je spoľahlivým ukazovateľom budúcich výsledkov.</p>
     </div>
     <div class="recap">
@@ -758,7 +758,10 @@ function vykresli(){
   $('recap').innerHTML=body.map(t=>`<li>${t}</li>`).join('');
 
   $('metodika').textContent=
-    `Výpočet vychádza zo zhodnotenia ${pctTxt(o.rPct)} % ročne, ktoré ste zadali vy. `
+    /* Obe sadzby: potrebný kapitál určuje tá počas vyplácania, takže
+       uvádzať len tú z budovania znamenalo, že si klient číslo neprepočíta. */
+    `Výpočet počíta so zhodnotením ${pctTxt(o.rPct)} % ročne počas budovania majetku `
+    +`a ${pctTxt(o.rPctRent)} % ročne počas vyplácania; obe hodnoty si nastavujete v aplikácii. `
     +`Uvedené sumy sú po odpočítaní vstupného poplatku ${pctTxt(FEE_IN)} % a poplatku za správu ${pctTxt(FEE_M)} % ročne. `
     +(o.rast?`Výpočet zohľadňuje infláciu ${pctTxt(o.infl)} % ročne. `:'Výpočet nezohľadňuje infláciu. ')
     +'Dane z výnosov výpočet nezohľadňuje. Výpočet prebieha na mesačnej báze: '

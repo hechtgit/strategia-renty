@@ -113,6 +113,10 @@ html.b-vylepsene .b-kotva{display:inline}
    štítkom sa tlačidlo „+" nezmestilo do karty. */
 html.b-vylepsene .b-riadok-hodnoty{display:block;margin:6px 0 0}
 html.b-vylepsene .card label.sw+.b-kotva .b-info{margin-left:6px}
+/* Štítok prepínača je flex a zaberal celú šírku karty, takže „i" za ním
+   nemalo kam ísť a padlo na ďalší riadok. Zúžený na obsah stoja vedľa seba. */
+html.b-vylepsene .card label.sw{display:inline-flex;width:auto;vertical-align:middle}
+html.b-vylepsene .card label.sw+.b-kotva{vertical-align:middle}
 
 /* ---------- 5. Čiara života podľa prvého prototypu ----------
    Sivý pás namiesto zlatého: zlatá potom zostáva len na kartách a na rámoch
@@ -121,7 +125,9 @@ html.b-vylepsene .card label.sw+.b-kotva .b-info{margin-left:6px}
 html.b-vylepsene{--axis:#cfccc5}
 html.b-vylepsene .axis{box-shadow:0 1px 0 rgba(255,255,255,.08)}
 html.b-vylepsene .tick{color:#4a4437}
-html.b-vylepsene .axis-cap{color:#4a4437;opacity:.75}
+/* Priehľadnosť zhodila popisok „vek" na kontrast 3,56 - pod hranicu AA.
+   Bez nej má 6,03, teda rovnako ako čísla rokov vedľa neho. */
+html.b-vylepsene .axis-cap{color:#4a4437;opacity:1}
 
 /* Míľnik leží na osi ako svetlé pole so zlatým rámom - nie ako zlatý blok,
    ktorý má rovnakú váhu ako karta. */

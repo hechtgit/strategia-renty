@@ -444,6 +444,9 @@
   }
 
   function hotovo() {
+    /* Kto v rozhovore vyberie samé predvolené odpovede, nezmení ani jeden
+       vstup - pás by mu zostal skrytý, hoci si plán prešiel celý. */
+    if (window.odomkniPas) window.odomkniPas();
     const t = document.createElement('div');
     t.className = 'pv-hotovo';
     t.setAttribute('role', 'status');

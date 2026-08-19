@@ -328,7 +328,10 @@
     panel.hidden = true;
     btn.setAttribute('aria-controls', panel.id);
     zoznam.forEach(el => panel.appendChild(el));
-    kotva.appendChild(text(' '));
+    /* Pevná medzera, nie obyčajná: pri dvojriadkovom štítku ostávala ikona
+       sama na druhom riadku a vyzeralo to ako preklep. Takto sa zalomí
+       spolu s posledným slovom. */
+    kotva.appendChild(text('\u00a0'));
     kotva.appendChild(btn);
     kotva.parentNode.insertBefore(panel, kotva.nextSibling);
     btn.addEventListener('click', e => {
@@ -430,11 +433,23 @@
     zaCim.parentNode.insertBefore(riadok, zaCim.nextSibling);
   }
 
+  /* Obsah niektorých rozbaľovačov sa presúva pod „i" pri príslušnom ovládači.
+     Prázdny rozbaľovač potom sľubuje detaily a otvorí sa do ničoho - a klikne
+     naň práve ten, kto detaily naozaj hľadá. Kontrola musí bežať až na konci,
+     keď sú všetky presuny hotové; skôr by odsek ešte obsah mal. */
+  function schovajPrazdneRozbalovace() {
+    document.querySelectorAll('details.metodika').forEach(d => {
+      const obsah = [...d.children].filter(e => e.tagName !== 'SUMMARY');
+      if (!obsah.length || !obsah.some(e => e.textContent.trim())) d.hidden = true;
+    });
+  }
+
   function start() {
     document.documentElement.classList.add('b-vylepsene');
     POLIA.forEach(ovladac);
     schovajVysvetlenia();
     presunInflaciu();
+    schovajPrazdneRozbalovace();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
