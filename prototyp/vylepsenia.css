@@ -1,0 +1,145 @@
+/* VARIANTA B - ostrá kalkulačka s prenesenými vylepšeniami.
+   Vzhľad zostáva pôvodný. Menia sa tri veci: hodnota sa dá zadať a doladiť,
+   vysvetlenia idú do čitateľného okna, výsledok je odlíšený od zadania.
+   Navyše sa karta sťahuje, aby sa všetky tri zmestili na obrazovku. */
+
+/* ---------- 1. Hodnota ako ovládateľné číslo ---------- */
+html.b-vylepsene .b-ovladac{display:inline-flex;align-items:center;gap:6px;
+  vertical-align:baseline}
+/* Hodnota má rovnakú váhu ako značka na čiare života - 20 px, serif, 700.
+   Predtým bola 16 px bez zvýraznenia a medzi tlačidlami takmer zanikla. */
+html.b-vylepsene .b-cislo,
+html.b-vylepsene .card .b-cislo,
+html.b-vylepsene .card .sl .b-cislo{cursor:text;font-family:var(--serif),"PT Serif",Georgia,serif;
+  font-size:20px;font-weight:700;line-height:1.2;font-variant-numeric:tabular-nums;
+  /* Podčiarknutie hovorí „sem sa dá kliknúť a napísať presnú hodnotu". V pokoji
+     ho nevidno - pri každom čísle na karte pôsobilo ako šum. Objaví sa pod myšou
+     a pri fokuse, takže sa tá možnosť dá stále objaviť. Čiara zostáva
+     priehľadná, nie zrušená, aby sa pri prejdení myšou nič neposunulo. */
+  border-bottom:1px dotted transparent;padding-bottom:1px;
+  transition:border-bottom-color .15s ease,background .15s ease}
+html.b-vylepsene .b-cislo:hover,
+html.b-vylepsene .b-cislo:focus-visible{background:rgba(255,255,255,.28);
+  border-bottom-color:rgba(43,33,24,.9);border-radius:3px 3px 0 0}
+html.b-vylepsene .b-cislo:focus-visible{outline:2px solid var(--on-gold,#2b2118);
+  outline-offset:2px;border-radius:3px}
+/* Číslo medzi tlačidlami − a + býva pôvodne odstavec, ktorý si nesie vlastné
+   odsadenie zhora (8 px). V rade s tlačidlami ho to zhodilo o 4 px nižšie, hoci
+   riadok sám zarovnáva na stred. Vnútri ovládača odsadenie neplatí. */
+/* Historické čísla sú tlačidlá vsadené do vety. Ako blokové prvky rušili
+   medzery okolo seba, takže sa čítalo „dosiahol8,3 %" - text ich pritom
+   obsahuje. V riadku textu musia byť riadkové. */
+/* Porovnanie je veta, nie zoznam prepínačov. Pružné rozloženie z nej robilo
+   samostatné políčka a medzery medzi slovom a číslom zahodilo, takže sa čítalo
+   „dosiahol8,3 %". V toku bežného textu sa medzery zachovajú a čísla zostanú
+   klikateľné. Platí bez ohľadu na to, kde je odsek vložený. */
+html.b-vylepsene #tg-tipy{display:block!important}
+html.b-vylepsene #tg-tipy button{display:inline-block!important;vertical-align:baseline}
+html.b-vylepsene .b-ovladac .b-cislo{margin:0!important}
+html.b-vylepsene .b-krok{width:26px;height:26px;min-height:0;padding:0;border:0;
+  border-radius:5px;background:rgba(255,255,255,.34);
+  box-shadow:inset 0 0 0 1px rgba(43,33,24,.28);color:#2b2118;
+  font:400 15px/1 inherit;cursor:pointer;flex:0 0 auto;transition:background .12s}
+html.b-vylepsene .b-krok:hover{background:rgba(255,255,255,.62)}
+html.b-vylepsene .b-krok:active{background:rgba(255,255,255,.78)}
+html.b-vylepsene .b-krok[disabled]{opacity:.32;cursor:default}
+html.b-vylepsene .b-pole{width:6ch;padding:0;border:0;background:transparent;
+  color:#2b2118;font:inherit;font-variant-numeric:tabular-nums;text-align:inherit}
+html.b-vylepsene .b-pole:focus{outline:none}
+html.b-vylepsene .b-poznamka{display:block;margin:6px 0 0;padding:6px 9px;
+  border-radius:5px;background:rgba(255,255,255,.45);
+  box-shadow:inset 0 0 0 1px rgba(43,33,24,.2);
+  font-size:12.5px;line-height:1.4;font-weight:600;color:#2b2118}
+
+/* Posuvník zostáva - na hľadanie hranice je ťahanie stále najrýchlejšie.
+   Stlmí sa a rozsvieti až pri práci s riadkom, aby karta nebola hlučná. */
+html.b-vylepsene .card input[type=range]{opacity:.45;transition:opacity .15s}
+html.b-vylepsene .sl:hover input[type=range],
+html.b-vylepsene .set:hover input[type=range],
+html.b-vylepsene .card input[type=range]:focus{opacity:1}
+
+/* ---------- 2. Vysvetlenie v okne ---------- */
+html.b-vylepsene .b-info{display:inline-grid;place-items:center;width:20px;height:20px;
+  margin-left:2px;padding:0;border:0;border-radius:50%;background:rgba(255,255,255,.34);
+  box-shadow:inset 0 0 0 1px rgba(43,33,24,.4);color:#2b2118;
+  font:600 12px/1 Georgia,serif;cursor:pointer;vertical-align:middle}
+html.b-vylepsene .b-info:hover{background:rgba(255,255,255,.62)}
+html.b-vylepsene .b-info:focus-visible{outline:2px solid #2b2118;outline-offset:2px}
+.b-prekrytie{position:fixed;inset:0;z-index:200;display:grid;place-items:center;
+  padding:28px;background:rgba(20,14,8,.62)}
+.b-prekrytie[hidden]{display:none}
+.b-okno{width:min(660px,100%);max-height:82vh;overflow:auto;padding:26px 30px 30px;
+  border-radius:8px;background:#f4ece0;color:#2b2118;
+  box-shadow:0 26px 60px rgba(0,0,0,.45)}
+.b-hlavicka{display:flex;align-items:flex-start;gap:16px;margin-bottom:16px}
+.b-nadpis{flex:1 1 auto;margin:0;font-family:"PT Serif",Georgia,serif;font-size:23px;
+  font-weight:700;line-height:1.25;color:#241a10}
+.b-zavri{flex:0 0 auto;width:34px;height:34px;padding:0;border:0;border-radius:6px;
+  background:rgba(43,33,24,.08);color:#2b2118;font-size:16px;line-height:1;cursor:pointer}
+.b-zavri:hover{background:rgba(43,33,24,.16)}
+.b-okno .b-panel>*{margin:0!important;font-size:18px!important;line-height:1.6!important;
+  color:#2b2118!important;text-align:left!important;font-weight:400!important;
+  text-transform:none!important;letter-spacing:0!important}
+.b-okno .b-panel>*+*{margin-top:14px!important}
+.b-okno .b-panel #tg-tipy{display:block!important}
+.b-okno .b-panel #tg-tipy button{padding:9px 14px;border-radius:6px;font-size:17px;
+  background:rgba(43,33,24,.1);color:#2b2118;min-height:0}
+.b-okno .b-panel #tg-tipy button:hover{background:rgba(43,33,24,.2)}
+.b-okno .b-panel #tg-tipy button.on{background:#514b44;color:#f6f1e8}
+
+/* ---------- 3. Výsledok sa odlíši od zadania ---------- */
+html.b-vylepsene .card .out .v{font-size:32px;line-height:1.1}
+html.b-vylepsene .card .out{margin-top:16px}
+
+/* ---------- 4. Karta sa stiahne, nech sa všetky tri zmestia ----------
+   Pôvodná prostredná karta merala 670 px a končila pod ohybom. Uberá sa
+   len prázdne miesto a deliace čiary, nie obsah. */
+html.b-vylepsene .card{padding:16px 18px 18px}
+html.b-vylepsene .card h2{margin-bottom:2px}
+html.b-vylepsene .card .when{margin-bottom:10px}
+html.b-vylepsene .card .set,
+html.b-vylepsene .card .out{border-top:0;padding-top:0}
+html.b-vylepsene .card .set{margin-top:14px}
+html.b-vylepsene .card .sl{margin-top:12px}
+html.b-vylepsene .card .tg{margin-bottom:10px}
+html.b-vylepsene .card .cap{margin-bottom:2px}
+/* Text, ktorý sa presunul pod „i", už na karte nemá zaberať miesto. */
+html.b-vylepsene .card .b-panel[hidden]{display:none}
+
+/* „i" pri prepínači inflácie stojí v riadku so štítkom, nie pod ním -
+   samostatný riadok pre jednu ikonu tlačil kartu do výšky. */
+html.b-vylepsene .b-kotva{display:inline}
+/* Hodnota inflácie má vlastný riadok pod textom - v jednom riadku so
+   štítkom sa tlačidlo „+" nezmestilo do karty. */
+html.b-vylepsene .b-riadok-hodnoty{display:block;margin:6px 0 0}
+html.b-vylepsene .card label.sw+.b-kotva .b-info{margin-left:6px}
+
+/* ---------- 5. Čiara života podľa prvého prototypu ----------
+   Sivý pás namiesto zlatého: zlatá potom zostáva len na kartách a na rámoch
+   troch aktívnych míľnikov, takže os prestane súťažiť s obsahom. Čísla rokov
+   aj popisok „vek" zostávajú vnútri pásu tak, ako sú dnes. */
+html.b-vylepsene{--axis:#cfccc5}
+html.b-vylepsene .axis{box-shadow:0 1px 0 rgba(255,255,255,.08)}
+html.b-vylepsene .tick{color:#4a4437}
+html.b-vylepsene .axis-cap{color:#4a4437;opacity:.75}
+
+/* Míľnik leží na osi ako svetlé pole so zlatým rámom - nie ako zlatý blok,
+   ktorý má rovnakú váhu ako karta. */
+html.b-vylepsene .handle>span{background:#e8e5df;
+  box-shadow:inset 0 0 0 2px var(--gold-strong,#c49a63);color:#2b2118}
+html.b-vylepsene .handle:hover:not([data-locked="1"])>span{background:#f2efe9}
+html.b-vylepsene .handle[data-locked="1"]>span{
+  box-shadow:inset 0 0 0 2px rgba(196,154,99,.45);color:#5b5245}
+
+/* Spojnica karty s míľnikom: vlasová zlatá linka namiesto širokého bloku
+   vo farbe karty. Vedie zo stredu karty do stredu míľnika a nič neprekrýva. */
+html.b-vylepsene .card-stem{width:2px;height:var(--stem-len,26px);
+  transform-origin:50% 0;transform:translateX(-50%) rotate(var(--stem-rot,0deg));
+  background:var(--tone,var(--gold-strong,#c49a63));
+  border-radius:0;opacity:1}
+html.b-vylepsene .card-stem::after{display:none}
+
+/* Výhrada k sadzbe stojí v okne pod „i" ako prvá a nesie väčšiu váhu než
+   technické podmienky pod ňou. Vytvára ju vylepsenia.js, preto je štýl tu -
+   používajú ju všetky prototypy, ktoré túto vrstvu načítavajú. */
+html.b-vylepsene .b-vyhrada{margin:0 0 11px;font-weight:600}

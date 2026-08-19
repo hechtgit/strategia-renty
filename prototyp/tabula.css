@@ -1,0 +1,99 @@
+/* PROTOTYP — varianta „Odletová tabuľa" (split-flap).
+   Vrstva nad vrstvou viet: usporiadanie obsahu ani farby karty nemení.
+   Preberá sa mechanika tabule, nie jej čierny panel — karta zostáva
+   v pôvodnej zlatobéžovej palete a klapky sú z toho istého svetlého
+   materiálu ako krokovacie tlačidlá.
+
+   Logika, ktorú si tabuľa nesie:
+   • hodnota sa nikdy neprepíše, vždy sa preklopí a je vidieť aj počuť, že
+     sa mení — zmena má trvanie a smer;
+   • klapky sa nespúšťajú naraz, ale zľava doprava, takže riadok „prebehne";
+   • čo sa práve nemení, stojí; pozornosť patrí tomu, čo sa preklopilo. */
+
+html.tabula{
+  --t-klapka:rgba(255,255,255,.44);      /* čelo klapky — ako plocha krokovadla */
+  --t-klapka-tien:rgba(255,255,255,.28); /* spodná polovica je vždy o niečo tmavšia */
+  --t-klapka-ram:rgba(43,33,24,.26);
+  --t-skara:rgba(43,33,24,.42);          /* škára medzi polovicami */
+}
+
+/* ---------- 1. Popisy tabule ----------
+   Tabuľa píše verzálkami a v jednej stopáži — riadok tak drží rytmus aj
+   vtedy, keď sa jeho hodnota preklápa. Farby zostávajú z pôvodnej karty. */
+html.tabula.veta-pripravena .veta,
+html.tabula.veta-pripravena .tg,
+html.tabula.veta-pripravena .card h2,
+html.tabula.veta-pripravena .out.vysledok-veta .k{
+  font-size:13.5px;font-weight:600;letter-spacing:.075em;text-transform:uppercase}
+html.tabula.veta-pripravena .card h2 .vedlajsi-udaj{font-size:12px;letter-spacing:.07em}
+html.tabula.veta-pripravena .tg button{text-transform:uppercase;letter-spacing:.07em;
+  font-size:12.5px;font-weight:600}
+html.tabula.veta-pripravena .zaver-konca{text-transform:uppercase;
+  letter-spacing:.07em;font-size:12.5px}
+
+/* ---------- 2. Klapky ----------
+   Znak je rozdelený na dve polovice so škárou uprostred. Statické polovice
+   nesú vždy konečnú hodnotu — preklápanie beží nad nimi v prekryvných
+   vrstvách, takže text prvku je správny od prvej milisekundy a nikto
+   (ani čítačka) nečíta medzistav. */
+html.tabula .klapky{display:inline-flex;gap:2px;vertical-align:baseline;
+  font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  font-variant-numeric:tabular-nums;letter-spacing:0}
+html.tabula .klapka{position:relative;display:inline-block;width:.72em;height:1.18em;
+  perspective:220px;vertical-align:baseline}
+
+html.tabula .vrstva{position:absolute;left:0;right:0;height:.59em;overflow:hidden;
+  background:var(--t-klapka);color:var(--ink-cislo);
+  box-shadow:inset 0 0 0 1px var(--t-klapka-ram)}
+html.tabula .vrstva.horna{top:0;border-radius:2px 2px 0 0;
+  border-bottom:1px solid var(--t-skara)}
+html.tabula .vrstva.dolna{top:.59em;border-radius:0 0 2px 2px;
+  background:var(--t-klapka-tien)}
+/* Znak vykresľuje pseudoprvok — do textu prvku sa tak nedostane ani jeden
+   medzistav preklápania. */
+html.tabula .vrstva::after{content:attr(data-znak);display:block;height:1.18em;
+  line-height:1.18em;text-align:center}
+html.tabula .vrstva.dolna::after{margin-top:-.59em}
+html.tabula .vrstva.klopa{z-index:3;backface-visibility:hidden}
+html.tabula .vrstva.klopa.horna{transform-origin:bottom center}
+html.tabula .vrstva.klopa.dolna{transform-origin:top center}
+html.tabula .vrstva.kryt{z-index:2}
+
+/* Statický znak pod klapkami nesie skutočný text prvku — vidieť ho netreba
+   (kreslia ho polovice klapky), ale musí ostať kopírovateľný a čitateľný
+   pre kód aj pre čítačku. */
+html.tabula .znak{position:absolute;left:0;right:0;top:0;height:1.18em;
+  line-height:1.18em;text-align:center;color:transparent;z-index:0}
+
+/* Jedna veľkosť, jedna farba a jedno písmo pre každú hodnotu — zadanú
+   aj vypočítanú. */
+html.tabula.veta-pripravena .card .zive-cislo,
+html.tabula.veta-pripravena .out .v,
+html.tabula.veta-pripravena .out.sec .v{
+  font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-weight:400;
+  font-size:23px;letter-spacing:0;color:var(--ink-cislo)}
+html.tabula.veta-pripravena .out .v small{font-size:12px;letter-spacing:.07em;
+  text-transform:uppercase}
+
+/* Riadok, ktorý sa práve preklápa, sa nakrátko prisvieti — tak je vidieť,
+   ktorý údaj sa mení, aj keď sa pozeráte inam. */
+html.tabula .klapky.bezi{filter:drop-shadow(0 0 5px rgba(255,255,255,.6))}
+/* Pôvodné presvietenie hodnoty pri zmene je tu navyše — zmenu už hlási
+   samotné preklopenie a dve oznámenia naraz si zavadzajú. */
+html.tabula .out .v.beat{animation:none!important}
+
+/* ---------- 3. Prepínač zvuku ----------
+   Zvuk je súčasť tabule, ale nikto ho nechce dostať bez opýtania. */
+.tabula-zvuk{position:fixed;left:16px;top:16px;z-index:60;display:inline-flex;
+  align-items:center;gap:7px;padding:7px 12px;border:1px solid rgba(255,255,255,.22);
+  border-radius:4px;background:rgba(255,255,255,.08);color:#d8cfc0;
+  font:600 11.5px/1 "Asap",Arial,sans-serif;letter-spacing:.09em;
+  text-transform:uppercase;cursor:pointer}
+.tabula-zvuk:hover{background:rgba(255,255,255,.16);color:#fff}
+.tabula-zvuk[aria-pressed="true"]{border-color:var(--zlata-akcent);color:var(--zlata-akcent)}
+.tabula-zvuk .bod{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.3)}
+.tabula-zvuk[aria-pressed="true"] .bod{background:var(--zlata-akcent)}
+
+@media (prefers-reduced-motion:reduce){
+  html.tabula .vrstva.klopa{display:none}
+}

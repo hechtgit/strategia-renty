@@ -1,0 +1,145 @@
+/* PROTOTYP v2 — kompaktné klientske karty (desktop, cieľ 14" MacBook).
+   Vrstva nad živou aplikáciou. Nemení výpočet ani logiku, iba usporiadanie.
+
+   Východisko druhého priechodu: prvá verzia iba zhusťovala medzery. Tu sa
+   mení kompozícia — súvisiace údaje idú vedľa seba, deliace čiary miznú
+   a ovládanie sa priznáva ako ovládanie. */
+
+/* ---------- 1. Hlavička: jedna prirodzená veta ----------
+   Nadpis, riadok o veku a dve krokovacie tlačidlá boli tri riadky, ktoré sa
+   pri zalomení rozpadli. Teraz je to jedna veta a krokovanie v nej. */
+.kompakt-pripraveny .card h2{font-size:20px;line-height:1.3;margin:0 0 10px;
+  letter-spacing:-.01em;text-wrap:balance}
+.kompakt-pripraveny .card h2 .veta{display:inline}
+.kompakt-pripraveny .card h2 .vek-v-nadpise{white-space:nowrap}
+.kompakt-pripraveny .card h2 .vedlajsi-udaj{font-size:15px;font-weight:400;
+  font-family:var(--sans,inherit);color:var(--on-gold-soft);white-space:nowrap;opacity:.85}
+.kompakt-pripraveny .card h2 .vedlajsi-udaj::before{content:"("}
+.kompakt-pripraveny .card h2 .vedlajsi-udaj::after{content:")"}
+.kompakt-pripraveny .card h2 .kroky{display:inline-flex;align-items:center;gap:4px;
+  margin-left:8px;vertical-align:middle}
+.kompakt-pripraveny .card h2 .kroky .step{width:22px;height:22px;line-height:1;
+  font-size:14px;flex:0 0 auto;opacity:.5;transition:opacity .15s}
+.kompakt-pripraveny .card:hover h2 .kroky .step{opacity:1}
+/* Pôvodný riadok s vekom je celý v hlavičke — ostáva v DOM len ako zdroj textu. */
+.kompakt-pripraveny .when-row{display:none}
+
+/* ---------- 2. Menej čiar, menej kapitálok ----------
+   Karta prestala vyzerať ako formulár tým, že sa odstránili vodorovné linky
+   a veľké prestrkávané popisy. Hierarchiu nesie veľkosť a tón, nie čiary. */
+.kompakt-pripraveny .set,.kompakt-pripraveny .out{border-top:0!important;
+  padding-top:0!important}
+.kompakt-pripraveny .set{margin-top:12px}
+.kompakt-pripraveny .out{margin-top:12px}
+.kompakt-pripraveny .out.sec{margin-top:12px}
+.kompakt-pripraveny .set .cap{text-transform:none;letter-spacing:0;
+  font-size:15px;font-weight:600;margin:0;color:var(--on-gold-soft)}
+.kompakt-pripraveny .out .k,.kompakt-pripraveny .sl .k{font-size:14.5px}
+.kompakt-pripraveny .out .v{font-size:26px;margin-top:2px}
+.kompakt-pripraveny .out.sec .v{font-size:22px}
+.kompakt-pripraveny .card{padding:15px 17px 16px}
+
+/* ---------- 3. Popis a hodnota na jednom riadku ---------- */
+.riadok-ovladania{display:flex;align-items:baseline;justify-content:space-between;
+  gap:10px;margin:0 0 3px}
+.riadok-ovladania .cap{flex:1 1 auto;min-width:0}
+.riadok-ovladania>p.when{margin:0!important;font-size:15px;font-weight:600;
+  text-align:right;white-space:nowrap}
+
+/* ---------- 4. Číslo sa priznáva ako pole ----------
+   V prvej verzii vyzerala hodnota ako statický text a nebolo zrejmé, že sa dá
+   prepísať. Teraz má vlastnú plochu a rámik — jemný, aby karta nezískala
+   formulárový výraz. */
+.editovatelne{display:inline-flex;align-items:baseline;gap:3px;
+  padding:1px 7px;border:1px solid rgba(43,33,24,.3);border-radius:4px;
+  background:rgba(255,255,255,.18);cursor:text;white-space:nowrap;
+  font-variant-numeric:tabular-nums;transition:background .15s,border-color .15s}
+.editovatelne:hover{background:rgba(255,255,255,.34);border-color:rgba(43,33,24,.55)}
+.editovatelne:focus-visible{outline:2px solid var(--on-gold);outline-offset:1px}
+/* V nadpise by plný rámik pôsobil ako formulárové pole uprostred vety.
+   Stačí jemná plocha a podčiarknutie — je vidieť, že sa dá klepnúť. */
+.card h2 .editovatelne{padding:0 4px;border:0;border-bottom:1px dashed rgba(43,33,24,.45);
+  border-radius:3px 3px 0 0;background:rgba(255,255,255,.14)}
+.card h2 .editovatelne:hover{background:rgba(255,255,255,.34);
+  border-bottom-color:rgba(43,33,24,.75)}
+.pole-hodnoty{width:6.5em;padding:0;border:0;background:transparent;
+  color:#2b2118;font:inherit;font-variant-numeric:tabular-nums;text-align:right}
+.pole-hodnoty:focus{outline:none}
+.pole-hodnoty.pole-vek{width:2.4em;text-align:center}
+.pole-poznamka{display:block;margin-top:3px;font-size:12px;color:var(--on-gold)}
+
+/* ---------- 5. Dvojstĺpcové usporiadanie ----------
+   Hlavný zásah do výšky prostrednej karty: čo patrí k sebe, stojí vedľa seba. */
+.dvojica{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;align-items:start;
+  margin-top:12px}
+.dvojica>*{margin-top:0!important}
+.dvojica .sw{flex-wrap:wrap;row-gap:1px}
+/* V polovičnom stĺpci sa dlhší popis nemá lámať po slovách vedľa hodnoty —
+   dostane celý riadok a hodnota si sadne pod neho. */
+.dvojica .riadok-ovladania{flex-wrap:wrap;row-gap:2px}
+.dvojica .riadok-ovladania .cap{flex:1 1 100%}
+.dvojica .riadok-ovladania>p.when{text-align:left}
+.dvojica .out .v{font-size:24px}
+.dvojica .out.sec .v{font-size:24px}
+
+/* ---------- 6. Vysvetlenia v jednom páse ----------
+   Nič sa nemaže. Vety, ktoré boli pod sebou s vlastnými odsadeniami, tvoria
+   súvislý pás pod ovládaním. */
+.pas-poznamok{margin-top:7px}
+.kompakt-pripraveny .assumption-note{margin:5px 0 0!important;font-size:13px!important;
+  line-height:1.4!important;font-weight:500!important}
+.riadok-tipov{display:flex;flex-wrap:wrap;align-items:center;gap:5px 9px;margin-top:7px}
+/* Popis ide nad tlačidlá, nie vedľa nich — vedľa by sa lámal do troch riadkov. */
+.riadok-tipov .popis-tipov{flex:1 1 100%;margin:0!important;font-size:12.5px;
+  line-height:1.3;text-align:left}
+.riadok-tipov .tg{margin:0!important;flex:0 0 auto;gap:5px}
+.riadok-tipov .tg button{padding:5px 8px;font-size:12.5px;white-space:nowrap}
+.poznamka-siroka{margin-top:8px!important}
+.kompakt-pripraveny #vynos-note{margin:5px 0 0!important;font-size:12.5px}
+.otazka-prepinaca{display:block;margin:0 0 4px;font-size:14.5px;font-weight:600;
+  color:var(--on-gold-soft)}
+/* „(v dnešných cenách)" patrí k popisu renty, nie na vlastný riadok. */
+.kompakt-pripraveny .sl .k-note.v-popise{display:inline;white-space:normal;
+  margin:0;font-size:12.5px}
+
+/* ---------- 7. Ovládacie prvky ---------- */
+.kompakt-pripraveny .tg{margin-bottom:8px;gap:5px}
+.kompakt-pripraveny .tg button{padding:6px 5px;font-size:13.5px}
+.kompakt-pripraveny .sl{margin-top:10px}
+.kompakt-pripraveny input[type=range]{height:22px;margin-top:2px;position:relative;z-index:3}
+.kompakt-pripraveny .sl .v{font-size:17px}
+
+/* ---------- 8. Ľahšie napojenie karty na míľnik ----------
+   Široká obdĺžniková stonka pôsobila technicky. Nahrádza ju vlasová linka
+   zakončená bodkou — prepojenie zostáva jednoznačné, ale prestane ťažiť. */
+.kompakt-pripraveny .card-stem{width:1px;height:24px;background:var(--gold-strong);
+  opacity:.85}
+.kompakt-pripraveny .card-stem::after{content:"";position:absolute;left:50%;
+  width:7px;height:7px;margin-left:-3px;border-radius:50%;background:var(--gold-strong)}
+.kompakt-pripraveny .card.above .card-stem::after{bottom:-2px}
+.kompakt-pripraveny .card.below .card-stem::after{top:-2px}
+html.kompakt-pripraveny:not(.viewport-compact) .card-stem{height:28px}
+
+/* ---------- 9. Míľniky sedia na osi, nerozbíjajú ju ----------
+   Zlatý blok okolo čísla mal rovnakú váhu ako karta a čiaru opticky delil.
+   Zostáva čitateľné číslo na svetlej ploche, ktorá na osi leží. */
+.kompakt-pripraveny .handle{width:48px;height:40px;padding:0;background:transparent}
+.kompakt-pripraveny .handle>span{width:48px;height:40px;border-radius:5px;
+  background:rgba(255,255,255,.66);box-shadow:inset 0 0 0 1px rgba(43,33,24,.2);
+  font-size:19px}
+.kompakt-pripraveny .handle:hover:not([data-locked="1"])>span{
+  background:rgba(255,255,255,.86);box-shadow:inset 0 0 0 1px rgba(43,33,24,.4)}
+.kompakt-pripraveny .tick{font-size:13px;opacity:.8}
+
+/* ---------- 10. Šírky kariet ----------
+   Tri karty v jednom rade nad osou. Rovnaká šírka pôsobí zámerne a každej
+   karte dá dosť miesta na to, aby jej obsah vyšiel na menej riadkov. */
+.kompakt-pripraveny.viewport-compact .card{width:min(420px,calc((100% - 28px)/3))}
+.kompakt-pripraveny.viewport-compact #lp{padding-top:14px}
+.kompakt-pripraveny.viewport-compact .card h2{font-size:20px;margin-bottom:10px}
+.kompakt-pripraveny.viewport-compact .set{margin-top:12px}
+.kompakt-pripraveny.viewport-compact .out{margin-top:12px;padding-top:0}
+.kompakt-pripraveny:not(.viewport-compact) #c-start{width:420px}
+/* Prvá značka (18) leží presne na začiatku osi — zarovnáva sa zľava, aby
+   polovica čísla nevisela mimo čiary. */
+.kompakt-pripraveny .tick.tick-prva{transform:translateX(-2px)}

@@ -1,0 +1,1190 @@
+<!doctype html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Editor karty — Dnes</title>
+<style>
+/* ------------------------------------------------------------------
+   EDITOR VZOROVEJ KARTY
+   Karta je poskladaná z riadkov, riadok z blokov. Bloky stoja vedľa
+   seba, dajú sa ťahať medzi riadkami aj v rámci riadka a ich obsah sa
+   dá prepísať. Nič sa nepočíta — čísla sú text, aby sa dala skúšať
+   kompozícia bez zásahu do aplikácie.
+------------------------------------------------------------------- */
+:root{
+  --plocha:#1e1a16; --panel:#f5f2ec; --panel-ink:#2c2620; --panel-tlm:#6a6055;
+  --linka:#d9d3c8;
+  --karta:#bd9a68; --karta-ink:#2b2118; --karta-tlm:#463421; --zlata:#c49a63;
+  --serif:"pt-serif-pro-extended","PT Serif",Georgia,serif;
+  --sans:"Asap","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --akcent:#8a5a1e;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--plocha);color:#efe9e0;font-family:var(--sans);
+  font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+
+/* ---------------------------------------------------------- lišta */
+.lista{display:flex;align-items:center;gap:18px;padding:11px 20px;
+  background:#181410;border-bottom:1px solid #322a22;position:sticky;top:0;z-index:40}
+.lista .nazov{font-family:var(--serif);font-size:17px;color:#e8dcc8;letter-spacing:.01em}
+.lista .nazov b{color:var(--zlata)}
+.lista .akcie{margin-left:auto;display:flex;gap:7px;flex-wrap:wrap}
+.tl{border:1px solid #453a2e;background:#241f19;color:#e3dcd2;border-radius:6px;
+  padding:6px 11px;font:500 13px var(--sans);cursor:pointer;transition:background .12s,border-color .12s}
+.tl:hover{background:#2f2820;border-color:#5d4e3e}
+.tl:active{background:#3a3128}
+.tl.hlavne{background:var(--zlata);border-color:var(--zlata);color:#221a11;font-weight:600}
+.tl.hlavne:hover{background:#d3a970}
+.tl:disabled{opacity:.4;cursor:default}
+
+/* -------------------------------------------------------- rozloženie */
+main{display:grid;grid-template-columns:minmax(0,1fr) 336px;height:calc(100% - 49px)}
+.platno{overflow:auto;padding:30px 30px 60px;display:flex;flex-direction:column;align-items:center;gap:18px}
+.panel{background:var(--panel);color:var(--panel-ink);border-left:1px solid #322a22;
+  overflow:auto;padding:16px 16px 40px}
+
+/* ------------------------------------------------------------ karta */
+.karta{width:min(560px,100%);background:var(--karta);color:var(--karta-ink);
+  border-radius:7px;padding:16px 18px 18px;box-shadow:0 12px 34px rgba(0,0,0,.42);
+  display:flex;flex-direction:column}
+.karta.mimo-fokusu{filter:none}
+
+.riadok{position:relative;display:flex;flex-wrap:wrap;align-items:baseline;
+  gap:4px 8px;padding:4px 30px 4px 22px;border-radius:5px;min-height:34px;
+  transition:background .12s,box-shadow .12s}
+.riadok:hover{background:rgba(255,255,255,.10)}
+.riadok.vybrany{background:rgba(255,255,255,.16);box-shadow:inset 0 0 0 1px rgba(43,33,24,.35)}
+.riadok.cielovy{background:rgba(255,255,255,.20)}
+.riadok.prazdny::after{content:"Sem pretiahnite blok";font-size:12.5px;color:var(--karta-tlm);
+  opacity:.7;font-style:italic}
+
+/* Úchyt riadka — riadky sa presúvajú za neho, bloky celou plochou. */
+.uchyt{position:absolute;left:2px;top:5px;width:16px;height:22px;display:flex;
+  align-items:center;justify-content:center;border-radius:4px;cursor:grab;
+  color:var(--karta-tlm);opacity:0;font-size:13px;line-height:1;transition:opacity .12s,background .12s}
+.riadok:hover .uchyt,.riadok.vybrany .uchyt{opacity:.75}
+.uchyt:hover{background:rgba(43,33,24,.14);opacity:1}
+.uchyt:active{cursor:grabbing}
+.zmaz-riadok{position:absolute;right:4px;top:5px;width:20px;height:20px;border:0;
+  background:transparent;color:var(--karta-tlm);border-radius:4px;cursor:pointer;
+  opacity:0;font-size:14px;line-height:1;transition:opacity .12s,background .12s}
+.riadok:hover .zmaz-riadok{opacity:.7}
+.zmaz-riadok:hover{background:rgba(43,33,24,.16);opacity:1}
+
+/* Štýly riadkov — zodpovedajú vrstvám na karte v prototype. */
+.riadok.hlavicka{font-family:var(--serif);font-size:22px;line-height:1.25;margin-bottom:2px}
+.riadok.hlavicka .text{font-weight:700}
+.riadok.zaver{margin-top:8px;padding-top:10px;border-top:1px solid rgba(43,33,24,.22);border-radius:0 0 5px 5px}
+.riadok.tlmeny{font-size:13px;color:var(--karta-tlm)}
+
+/* ------------------------------------------------------------ bloky */
+.blok{position:relative;display:inline-flex;align-items:baseline;gap:5px;
+  border-radius:5px;padding:2px 4px;margin:0 -2px;cursor:grab;
+  outline:1px dashed transparent;transition:outline-color .12s,background .12s}
+.blok:hover{outline-color:rgba(43,33,24,.34);background:rgba(255,255,255,.13)}
+.blok.vybrany{outline:1px solid var(--akcent);background:rgba(255,255,255,.24)}
+.blok.tahany{opacity:.32}
+.blok:active{cursor:grabbing}
+.blok [contenteditable]{outline:none;cursor:text;border-radius:3px;
+  box-shadow:inset 0 -1px 0 rgba(43,33,24,.3)}
+.blok [contenteditable]:focus{background:rgba(255,255,255,.55);box-shadow:none;
+  padding:0 3px;margin:0 -3px}
+
+.text{font-size:16px}
+.riadok.tlmeny .text{font-size:13px}
+.cislo{font-family:var(--serif);font-weight:700;font-size:24px;line-height:1.1;
+  font-variant-numeric:tabular-nums;color:#241a10}
+.cislo .jednotka{font-size:16px;font-weight:400}
+.riadok.hlavicka .cislo{font-size:inherit;font-weight:700}
+.riadok.hlavicka .cislo .jednotka{font-size:inherit;font-weight:inherit}
+
+/* Krokovadlo je rozdelené na dva samostatné bloky: − stojí pred číslom,
+   + za ním, takže sa dajú umiestniť nezávisle. */
+.krok{width:24px;height:24px;display:inline-grid;place-items:center;border-radius:5px;
+  background:rgba(255,255,255,.34);box-shadow:inset 0 0 0 1px rgba(43,33,24,.28);
+  font-size:15px;line-height:1;color:#2b2118;vertical-align:middle}
+
+.volba{display:inline-flex;align-items:baseline;gap:7px;flex-wrap:wrap}
+.volba .popis{font-size:14px;color:var(--karta-tlm)}
+.volba .moznosti{display:inline-flex;gap:3px;border-radius:6px;padding:2px;
+  background:rgba(43,33,24,.13)}
+.moznost{border:0;background:transparent;color:#3a2c1c;font:500 13.5px var(--sans);
+  padding:5px 10px;border-radius:5px;cursor:pointer;white-space:nowrap}
+.moznost:hover{background:rgba(255,255,255,.4)}
+.moznost.zap{background:#514b44;color:#f6f1e8;font-weight:600}
+
+/* Výsledok stojí v jednej úrovni ako ostatné riadky — popis a hodnota
+   vedľa seba na spoločnej účiare, nie pod sebou. */
+.vysledok{display:inline-flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.vysledok .popis{font-size:16px;color:var(--karta-tlm)}
+.vysledok .hodnota{font-family:var(--serif);font-weight:700;font-size:26px;line-height:1.15;
+  font-variant-numeric:tabular-nums;color:#2a1d0f}
+
+.info{width:20px;height:20px;display:inline-grid;place-items:center;border-radius:50%;
+  box-shadow:inset 0 0 0 1px rgba(43,33,24,.45);font:600 12px var(--serif);
+  color:#3a2c1c;vertical-align:middle}
+.poznamka{font-size:12.5px;line-height:1.4;color:var(--karta-tlm);max-width:44ch}
+
+/* --------------------------------------------------- vkladacie miesta */
+.kurzor{width:2px;align-self:stretch;min-height:20px;background:var(--akcent);
+  border-radius:2px;margin:0 -1px;flex:0 0 auto;animation:bliknutie .9s ease-in-out infinite}
+@keyframes bliknutie{50%{opacity:.35}}
+.medzera{height:9px;border-radius:4px;margin:0 8px;flex:0 0 auto;transition:background .12s}
+.medzera.cielova{background:var(--akcent);height:4px;margin:2px 8px}
+
+/* ------------------------------------------------------- ponuka obnovy */
+.obnova{width:min(560px,100%);display:flex;flex-wrap:wrap;align-items:center;gap:9px;
+  background:#2c2419;border:1px solid var(--zlata);border-radius:7px;padding:12px 14px;
+  color:#efe4d2;font-size:13.5px;line-height:1.45}
+.obnova span{flex:1 1 220px}
+
+/* ---------------------------------------------------------- nápoveda */
+.napoveda{width:min(560px,100%);margin:0;color:#9b9184;font-size:12.5px;line-height:1.6}
+.napoveda b{color:#c8bda9;font-weight:600}
+.napoveda kbd{font:inherit;background:#2a241d;border:1px solid #3d3428;border-radius:4px;
+  padding:0 5px;color:#d8cfc0}
+
+/* ------------------------------------------------------------- panel */
+.panel h3{margin:0 0 8px;font:600 12px var(--sans);letter-spacing:.09em;
+  text-transform:uppercase;color:var(--panel-tlm)}
+.panel section{margin-bottom:22px}
+.pole{margin-bottom:9px}
+.pole label{display:block;font-size:12.5px;color:var(--panel-tlm);margin-bottom:3px}
+.pole input[type=text],.pole textarea,.pole select{width:100%;border:1px solid var(--linka);
+  border-radius:5px;padding:7px 9px;font:15px var(--sans);color:var(--panel-ink);
+  background:#fff;resize:vertical}
+.pole input:focus,.pole textarea:focus,.pole select:focus{outline:2px solid var(--akcent);
+  outline-offset:-1px;border-color:var(--akcent)}
+.pole .radok{display:flex;gap:6px}
+.pole .radok input{flex:1 1 auto;min-width:0}
+.moznosti-edit{display:flex;flex-direction:column;gap:5px}
+.moznost-riadok{display:flex;gap:5px;align-items:center}
+.moznost-riadok input[type=radio]{margin:0;accent-color:var(--akcent)}
+.moznost-riadok input[type=text]{flex:1 1 auto;min-width:0}
+.mini{border:1px solid var(--linka);background:#fff;border-radius:5px;padding:4px 8px;
+  font:13px var(--sans);color:var(--panel-ink);cursor:pointer}
+.mini:hover{background:#efeae1}
+.mini.cerveny{color:#8d2b1a;border-color:#e0c6c0}
+.mini.cerveny:hover{background:#f7ece9}
+.tlacidla{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.prazdny-inspektor{color:var(--panel-tlm);font-size:13.5px;line-height:1.6;
+  background:#ece7de;border-radius:6px;padding:11px 12px}
+
+.paleta{display:flex;flex-wrap:wrap;gap:6px}
+.dlazdica{border:1px dashed #c4bcae;background:#fff;border-radius:6px;padding:7px 10px;
+  font:13px var(--sans);color:var(--panel-ink);cursor:grab;user-select:none;
+  display:inline-flex;align-items:center;gap:6px;transition:border-color .12s,background .12s}
+.dlazdica:hover{border-color:var(--akcent);background:#fbf7f0}
+.dlazdica:active{cursor:grabbing}
+.dlazdica i{font-style:normal;color:var(--panel-tlm);font-size:12px}
+
+.vypis{width:100%;height:150px;border:1px solid var(--linka);border-radius:5px;padding:8px;
+  font:12px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;background:#fff;color:#31291f}
+.stav{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#2a241d;
+  color:#f0e8dc;border:1px solid #453a2e;border-radius:7px;padding:9px 15px;font-size:13.5px;
+  opacity:0;pointer-events:none;transition:opacity .2s;z-index:60}
+.stav.vidno{opacity:1}
+</style>
+</head>
+<body>
+
+<div class="lista">
+  <div class="nazov">Editor vzorovej karty · <b>Dnes</b></div>
+  <div class="akcie">
+    <button class="tl" id="tl-riadok">+ Riadok</button>
+    <button class="tl" id="tl-spat" disabled>↶ Späť</button>
+    <button class="tl" id="tl-povodna">Pôvodná karta</button>
+    <button class="tl" id="tl-json">Kopírovať JSON</button>
+    <button class="tl hlavne" id="tl-html">Kopírovať HTML</button>
+  </div>
+</div>
+
+<main>
+  <div class="platno">
+    <div class="karta" id="karta"></div>
+    <p class="napoveda">
+      <b>Presun:</b> blok chyťte kdekoľvek a pustite na iné miesto v riadku, do iného riadka
+      alebo do medzery medzi riadkami (vznikne nový riadok). Celý riadok presuniete za úchyt
+      <kbd>⠿</kbd> vľavo.<br>
+      <b>Úprava:</b> dvojklik na text alebo číslo priamo v karte, alebo klik na blok a úprava
+      v paneli vpravo.<br>
+      <b>Klávesnica:</b> <kbd>⌥ ←</kbd> / <kbd>⌥ →</kbd> posun bloku, <kbd>Enter</kbd> úprava,
+      <kbd>⌫</kbd> odstránenie, <kbd>Esc</kbd> zrušenie výberu, <kbd>⌘Z</kbd> späť.<br>
+      Rozloženie sa priebežne ukladá v prehliadači. Nič sa nepočíta a nič sa neposiela do aplikácie.
+    </p>
+  </div>
+
+  <aside class="panel">
+    <section>
+      <h3>Vlastnosti</h3>
+      <div id="inspektor"></div>
+    </section>
+    <section>
+      <h3>Nové bloky — pretiahnite do karty</h3>
+      <div class="paleta" id="paleta"></div>
+    </section>
+    <section>
+      <h3>Štruktúra</h3>
+      <textarea class="vypis" id="vypis" spellcheck="false" readonly></textarea>
+    </section>
+  </aside>
+</main>
+
+<div class="stav" id="stav"></div>
+
+<script>
+(function(){
+'use strict';
+
+/* ================================================================
+   1. Model — karta DNES z prototypu, prepísaná do blokov.
+      Zodpovedá východiskovému stavu: majetok budujem, investujem
+      jednorazovo. Čísla sú text; nič sa neprepočítava.
+   ================================================================ */
+
+/* Vetva kombinácie — riadky, ktoré karta v tomto stave ukáže. Sú vlastnou
+   konštantou, lebo sa dopĺňajú aj do staršieho rozloženia pri prevode. */
+const RIADKY_KOMBINACIE = [
+  { znak:'Jednorazovo investujem', riadok:{ styl:'', bloky:[
+      { typ:'text', text:'Jednorazovo investujem' },
+      { typ:'krok', smer:'−' },
+      { typ:'cislo', hodnota:'100 000', jednotka:'€' },
+      { typ:'krok', smer:'+' }
+  ]}},
+  { znak:'Mesačnú sumu', riadok:{ styl:'', bloky:[
+      { typ:'volba', popis:'Mesačnú sumu', moznosti:['zadám sám','chcem dopočítať'], vybrana:1 }
+  ]}},
+  { znak:'Investujem mesačne', riadok:{ styl:'', bloky:[
+      { typ:'text', text:'Investujem mesačne' },
+      { typ:'krok', smer:'−' },
+      { typ:'cislo', hodnota:'5 000', jednotka:'€' },
+      { typ:'krok', smer:'+' }
+  ]}}
+];
+
+const POVODNA = {
+  riadky: [
+    { styl:'hlavicka', bloky:[
+      { typ:'text', text:'Dnes mám' },
+      { typ:'krok', smer:'−' },
+      { typ:'cislo', hodnota:'50', jednotka:'rokov' },
+      { typ:'krok', smer:'+' }
+    ]},
+    { styl:'', bloky:[
+      { typ:'volba', popis:'Majetok', moznosti:['budujem','už mám'], vybrana:0 }
+    ]},
+    { styl:'', bloky:[
+      { typ:'volba', popis:'Investujem', moznosti:['jednorazovo','pravidelne','kombináciou'], vybrana:2 }
+    ]},
+    ...RIADKY_KOMBINACIE.map(x => JSON.parse(JSON.stringify(x.riadok))),
+    { styl:'', bloky:[
+      { typ:'text', text:'Počas budovania počítam s ročným zhodnotením' },
+      { typ:'krok', smer:'−' },
+      { typ:'cislo', hodnota:'8,3', jednotka:'%' },
+      { typ:'krok', smer:'+' },
+      { typ:'info', text:'Je to váš vlastný predpoklad, nie odhad ani odporúčanie.' }
+    ]},
+    { styl:'zaver', bloky:[
+      { typ:'vysledok', popis:'Potrebná pravidelná investícia', hodnota:'1 234 € mesačne' }
+    ]}
+  ]
+};
+
+/* Zásobník nových blokov. Texty pochádzajú z ostatných vetiev karty
+   DNES (už mám majetok, kombinácia), aby sa dali skladať aj tie. */
+const PALETA = [
+  { menovka:'Text',        vzor:{ typ:'text', text:'Nový text' } },
+  { menovka:'Číslo',       vzor:{ typ:'cislo', hodnota:'100 000', jednotka:'€' } },
+  { menovka:'Voľba',       vzor:{ typ:'volba', popis:'Popis', moznosti:['prvá','druhá'], vybrana:0 } },
+  { menovka:'Výsledok',    vzor:{ typ:'vysledok', popis:'Popis výsledku', hodnota:'0 €' } },
+  { menovka:'Krok −',      vzor:{ typ:'krok', smer:'−' }, i:'pred číslo' },
+  { menovka:'Krok +',      vzor:{ typ:'krok', smer:'+' }, i:'za číslo' },
+  { menovka:'Vysvetlenie ⓘ', vzor:{ typ:'info', text:'Text vysvetlenia pod ikonou.' } },
+  { menovka:'Poznámka',    vzor:{ typ:'poznamka', text:'Drobná poznámka pod vetou.' } },
+  { menovka:'Majetok',     vzor:{ typ:'text', text:'Na rentu mám pripravených' }, i:'z vetvy „už mám“' },
+  { menovka:'600 000 €',   vzor:{ typ:'cislo', hodnota:'600 000', jednotka:'€' }, i:'z vetvy „už mám“' },
+  { menovka:'Chcem vedieť',vzor:{ typ:'volba', popis:'Chcem vedieť', moznosti:['koľko mi vyplatí','ako dlho vydrží'], vybrana:0 }, i:'z vetvy „už mám“' },
+  { menovka:'Mesačná suma',vzor:{ typ:'volba', popis:'Mesačnú sumu', moznosti:['zadám sám','chcem dopočítať'], vybrana:1 }, i:'z kombinácie' },
+  { menovka:'Jednorazová časť', vzor:{ typ:'text', text:'Jednorazovo investujem' }, i:'z kombinácie' }
+];
+
+const KLUC = 'editor-karty-dnes-v2';   /* v2 = rozdelené krokovadlo, vetva kombinácie */
+const KLUC_STARY = 'editor-karty-dnes-v1';
+const KLUC_ZNACKA = 'editor-karty-dnes-prevedene';
+let model = nacitaj();
+let vyber = null;          /* {typ:'blok', i, j} | {typ:'riadok', i} */
+let tahane = null;         /* {zdroj:'blok', i, j} | {zdroj:'riadok', i} | {zdroj:'paleta', k} */
+let historia = [];
+
+/* ================================================================
+   2. Pomôcky
+   ================================================================ */
+
+function $(id){ return document.getElementById(id); }
+function kopia(x){ return JSON.parse(JSON.stringify(x)); }
+
+function precitaj(kluc){
+  try{
+    const ulozene = localStorage.getItem(kluc);
+    if (!ulozene) return null;
+    const m = JSON.parse(ulozene);
+    return (m && Array.isArray(m.riadky)) ? m : null;
+  }catch(e){ return null; }   /* poškodený záznam ignorujeme */
+}
+
+/* Staršie rozloženie sa nikdy neprepisuje ani nemaže — prevedie sa do
+   novej podoby a pôvodný záznam zostáva v prehliadači ako záloha. */
+function nacitaj(){
+  const nove = precitaj(KLUC);
+  const stare = precitaj(KLUC_STARY);
+  let prevedene = false;
+  try{ prevedene = localStorage.getItem(KLUC_ZNACKA) === '1'; }catch(e){}
+
+  if (stare && !prevedene && (!nove || rovnake(nove, POVODNA))){
+    const m = prevod(stare);
+    try{
+      localStorage.setItem(KLUC, JSON.stringify(m));
+      localStorage.setItem(KLUC_ZNACKA, '1');
+    }catch(e){}
+    setTimeout(()=>hlaska('Obnovil som vaše rozloženie a doplnil do neho zmeny'), 250);
+    return m;
+  }
+  if (stare && !prevedene && nove) setTimeout(ponukniObnovu, 250);
+  return nove || kopia(POVODNA);
+}
+
+function rovnake(a, b){ return JSON.stringify(a) === JSON.stringify(b); }
+
+/* Prevod staršieho rozloženia: spojené krokovadlo sa rozdelí na − a +
+   (− pred najbližšie číslo vľavo, + na miesto pôvodného bloku) a doplní
+   sa vetva kombinácie, ak v rozložení chýba. Poradie ostatných blokov
+   zostáva presne tak, ako ste ho poskladali. */
+function prevod(stary){
+  const m = kopia(stary);
+  m.riadky.forEach(r => { r.bloky = prevodRiadka(r.bloky); });
+  doplnKombinaciu(m);
+  return m;
+}
+
+function prevodRiadka(bloky){
+  const krok = smer => ({ typ:'krok', smer });
+  const von = [];
+  for (let k = 0; k < bloky.length; k++){
+    const b = bloky[k];
+    if (b.typ !== 'krok' || b.smer){ von.push(b); continue; }
+
+    /* Číslo vľavo — krokovadlo patrilo za neho. */
+    let kde = -1;
+    for (let x = von.length - 1; x >= 0; x--){ if (von[x].typ === 'cislo'){ kde = x; break; } }
+    if (kde >= 0){
+      von.splice(kde, 0, krok('−'));
+      von.splice(kde + 2, 0, krok('+'));
+      continue;
+    }
+
+    /* Číslo až vpravo — krokovadlo stálo pred ním. */
+    let dalsie = -1;
+    for (let x = k + 1; x < bloky.length; x++){ if (bloky[x].typ === 'cislo'){ dalsie = x; break; } }
+    if (dalsie < 0){ von.push(krok('−'), krok('+')); continue; }
+    von.push(krok('−'));
+    for (let x = k + 1; x <= dalsie; x++) von.push(bloky[x]);
+    von.push(krok('+'));
+    k = dalsie;
+  }
+  return von;
+}
+
+function doplnKombinaciu(m){
+  const znenie = r => r.bloky.map(b => (b.text || b.popis || '')).join(' ');
+  const uzJe = znak => m.riadky.some(r => znenie(r).indexOf(znak) >= 0);
+
+  m.riadky.forEach(r => r.bloky.forEach(b => {
+    if (b.typ === 'volba' && /Investujem/i.test(b.popis || '') && b.moznosti.length > 2){
+      b.vybrana = b.moznosti.length - 1;
+    }
+  }));
+
+  let kam = m.riadky.findIndex(r =>
+    r.bloky.some(b => b.typ === 'volba' && /Investujem/i.test(b.popis || '')));
+  kam = kam < 0 ? m.riadky.length : kam + 1;
+
+  RIADKY_KOMBINACIE.forEach(({ znak, riadok }) => {
+    if (uzJe(znak)) return;
+    m.riadky.splice(kam, 0, kopia(riadok));
+    kam += 1;
+  });
+}
+
+/* Ponuka pre prípad, že v novej karte už niečo vzniklo — vtedy sa staršie
+   rozloženie neobnoví samo, aby sa neprepísala rozrobená práca. */
+function ponukniObnovu(){
+  if (document.querySelector('.obnova')) return;
+  const p = document.createElement('div');
+  p.className = 'obnova';
+  p.innerHTML = '<span>Našiel som vaše staršie rozloženie karty. Obnoviť ho aj so zmenami '
+    + '(rozdelené − a +, vetva kombinácie)?</span>';
+  const ano = document.createElement('button');
+  ano.className = 'tl hlavne';
+  ano.textContent = 'Obnoviť moje rozloženie';
+  ano.addEventListener('click', ()=>{
+    const stare = precitaj(KLUC_STARY);
+    if (!stare) return;
+    po(()=>{ model = prevod(stare); vyber = null; });
+    try{ localStorage.setItem(KLUC_ZNACKA, '1'); }catch(e){}
+    p.remove();
+    hlaska('Obnovil som vaše rozloženie a doplnil do neho zmeny');
+  });
+  const nie = document.createElement('button');
+  nie.className = 'tl';
+  nie.textContent = 'Nechať túto kartu';
+  nie.addEventListener('click', ()=>{
+    try{ localStorage.setItem(KLUC_ZNACKA, '1'); }catch(e){}
+    p.remove();
+  });
+  p.appendChild(ano); p.appendChild(nie);
+  const platno = document.querySelector('.platno');
+  platno.insertBefore(p, platno.firstChild);
+}
+
+function uloz(){
+  try{ localStorage.setItem(KLUC, JSON.stringify(model)); }catch(e){}
+}
+
+function zapamataj(){
+  historia.push(kopia(model));
+  if (historia.length > 60) historia.shift();
+  $('tl-spat').disabled = false;
+}
+
+function hlaska(text){
+  const s = $('stav');
+  s.textContent = text;
+  s.classList.add('vidno');
+  clearTimeout(hlaska._t);
+  hlaska._t = setTimeout(()=>s.classList.remove('vidno'), 1900);
+}
+
+function po(zmena){        /* jedna cesta pre každú zmenu modelu */
+  zapamataj();
+  zmena();
+  uloz();
+  kresli();
+}
+
+/* Výber sa nesmie kresliť cez kresli(): prekreslenie vymení uzly a klik
+   by tak zabil dvojklik na úpravu skôr, než sa stihne ohlásiť. */
+function vyberni(novy){
+  vyber = novy;
+  document.querySelectorAll('.blok.vybrany,.riadok.vybrany')
+    .forEach(x => x.classList.remove('vybrany'));
+  if (vyber){
+    const kde = vyber.typ === 'blok'
+      ? '.riadok[data-i="' + vyber.i + '"] .blok[data-j="' + vyber.j + '"]'
+      : '.riadok[data-i="' + vyber.i + '"]';
+    const el = document.querySelector(kde);
+    if (el) el.classList.add('vybrany');
+  }
+  kresliInspektor();
+}
+
+/* ================================================================
+   3. Kreslenie karty
+   ================================================================ */
+
+function kresli(){
+  const karta = $('karta');
+  karta.textContent = '';
+
+  model.riadky.forEach((riadok, i) => {
+    karta.appendChild(medzera(i));
+    karta.appendChild(kresliRiadok(riadok, i));
+  });
+  karta.appendChild(medzera(model.riadky.length));
+
+  kresliInspektor();
+  $('vypis').value = JSON.stringify(model, null, 1);
+}
+
+function medzera(index){
+  const m = document.createElement('div');
+  m.className = 'medzera';
+  m.dataset.medzera = index;
+  return m;
+}
+
+function kresliRiadok(riadok, i){
+  const el = document.createElement('div');
+  el.className = 'riadok' + (riadok.styl ? ' ' + riadok.styl : '');
+  el.dataset.i = i;
+  if (!riadok.bloky.length) el.classList.add('prazdny');
+  if (vyber && vyber.typ === 'riadok' && vyber.i === i) el.classList.add('vybrany');
+
+  const uchyt = document.createElement('div');
+  uchyt.className = 'uchyt';
+  uchyt.textContent = '⠿';
+  uchyt.title = 'Presunúť celý riadok';
+  uchyt.draggable = true;
+  uchyt.addEventListener('dragstart', e => {
+    tahane = { zdroj:'riadok', i };
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', 'riadok');
+    el.classList.add('tahany');
+  });
+  uchyt.addEventListener('dragend', koniecTahania);
+  el.appendChild(uchyt);
+
+  const zmaz = document.createElement('button');
+  zmaz.className = 'zmaz-riadok';
+  zmaz.type = 'button';
+  zmaz.textContent = '✕';
+  zmaz.title = 'Odstrániť riadok';
+  zmaz.addEventListener('click', e => {
+    e.stopPropagation();
+    po(()=>{ model.riadky.splice(i,1); vyber = null; });
+  });
+  el.appendChild(zmaz);
+
+  riadok.bloky.forEach((blok, j) => el.appendChild(kresliBlok(blok, i, j)));
+
+  el.addEventListener('click', e => {
+    if (e.target.closest('.blok')) return;
+    vyberni({ typ:'riadok', i });
+  });
+
+  el.addEventListener('dragover', e => {
+    if (!tahane || tahane.zdroj === 'riadok') return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    ukazKurzor(el, e.clientX);
+  });
+  el.addEventListener('dragleave', e => {
+    if (el.contains(e.relatedTarget)) return;
+    skryKurzor();
+  });
+  el.addEventListener('drop', e => {
+    if (!tahane || tahane.zdroj === 'riadok') return;
+    e.preventDefault();
+    e.stopPropagation();
+    const kam = pozicia(el, e.clientX);
+    pust(i, kam);
+  });
+
+  return el;
+}
+
+function kresliBlok(blok, i, j){
+  const el = document.createElement('span');
+  el.className = 'blok';
+  el.dataset.i = i; el.dataset.j = j;
+  el.draggable = true;
+  el.tabIndex = 0;
+  if (vyber && vyber.typ === 'blok' && vyber.i === i && vyber.j === j) el.classList.add('vybrany');
+
+  telo(el, blok, i, j);
+
+  el.addEventListener('dragstart', e => {
+    if (el.querySelector('[contenteditable]:focus')) { e.preventDefault(); return; }
+    tahane = { zdroj:'blok', i, j };
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', textBloku(blok));
+    setTimeout(()=>el.classList.add('tahany'), 0);
+  });
+  el.addEventListener('dragend', koniecTahania);
+
+  el.addEventListener('click', e => {
+    if (e.target.closest('.moznost')) return;
+    e.stopPropagation();
+    vyberni({ typ:'blok', i, j });
+  });
+
+  el.addEventListener('keydown', e => {
+    if (e.target.isContentEditable) return;
+    if (e.key === 'Enter'){
+      const pole = el.querySelector('[data-pole]');
+      if (pole){ e.preventDefault(); upravNaMieste(pole); }
+    }
+    if (e.key === 'Backspace' || e.key === 'Delete'){
+      e.preventDefault();
+      po(()=>{ model.riadky[i].bloky.splice(j,1); vyber = null; });
+    }
+    if (e.altKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')){
+      e.preventDefault();
+      const smer = e.key === 'ArrowRight' ? 1 : -1;
+      const ciel = j + smer;
+      if (ciel < 0 || ciel >= model.riadky[i].bloky.length) return;
+      po(()=>{
+        const b = model.riadky[i].bloky.splice(j,1)[0];
+        model.riadky[i].bloky.splice(ciel,0,b);
+        vyber = { typ:'blok', i, j:ciel };
+      });
+      const n = document.querySelector('.blok.vybrany');
+      if (n) n.focus({ preventScroll:true });
+    }
+  });
+
+  return el;
+}
+
+/* Obsah bloku podľa typu. Polia označené data-pole sa dajú prepísať
+   priamo v karte dvojklikom. */
+function telo(el, blok, i, j){
+  const pole = (trieda, cesta, hodnota) => {
+    const s = document.createElement('span');
+    s.className = trieda;
+    s.dataset.pole = cesta;
+    s.dataset.i = i; s.dataset.j = j;
+    s.textContent = hodnota;
+    s.addEventListener('dblclick', ev => { ev.stopPropagation(); upravNaMieste(s); });
+    return s;
+  };
+
+  if (blok.typ === 'text'){
+    el.appendChild(pole('text','text', blok.text));
+
+  } else if (blok.typ === 'poznamka'){
+    el.appendChild(pole('poznamka','text', blok.text));
+
+  } else if (blok.typ === 'cislo'){
+    const c = document.createElement('span');
+    c.className = 'cislo';
+    c.appendChild(pole('hodnota','hodnota', blok.hodnota));
+    if (blok.jednotka){
+      /* Skutočná medzera, nie iba odsadenie — číslo s jednotkou sa má dať
+         skopírovať tak, ako sa číta. */
+      c.appendChild(document.createTextNode(' '));
+      const jed = pole('jednotka','jednotka', blok.jednotka);
+      jed.classList.add('jednotka');
+      c.appendChild(jed);
+    }
+    el.appendChild(c);
+
+  } else if (blok.typ === 'krok'){
+    const k = document.createElement('span');
+    k.className = 'krok';
+    k.textContent = blok.smer === '+' ? '+' : '−';
+    el.appendChild(k);
+
+  } else if (blok.typ === 'volba'){
+    const v = document.createElement('span');
+    v.className = 'volba';
+    if (blok.popis) v.appendChild(pole('popis','popis', blok.popis));
+    const m = document.createElement('span');
+    m.className = 'moznosti';
+    blok.moznosti.forEach((text, k) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'moznost' + (k === blok.vybrana ? ' zap' : '');
+      b.textContent = text;
+      b.addEventListener('click', ev => {
+        ev.stopPropagation();
+        po(()=>{ blok.vybrana = k; vyber = { typ:'blok', i, j }; });
+      });
+      m.appendChild(b);
+    });
+    v.appendChild(m);
+    el.appendChild(v);
+
+  } else if (blok.typ === 'vysledok'){
+    const v = document.createElement('span');
+    v.className = 'vysledok';
+    v.appendChild(pole('popis','popis', blok.popis));
+    v.appendChild(pole('hodnota','hodnota', blok.hodnota));
+    el.appendChild(v);
+
+  } else if (blok.typ === 'info'){
+    const s = document.createElement('span');
+    s.className = 'info';
+    s.textContent = 'i';
+    s.title = blok.text || '';
+    el.appendChild(s);
+  }
+}
+
+function textBloku(b){
+  if (b.typ === 'cislo') return b.hodnota + (b.jednotka ? ' ' + b.jednotka : '');
+  if (b.typ === 'volba') return b.popis + ': ' + b.moznosti.join(' / ');
+  if (b.typ === 'vysledok') return b.popis + ' — ' + b.hodnota;
+  if (b.typ === 'krok') return b.smer === '+' ? '+' : '−';
+  return b.text || '';
+}
+
+/* -------------------------------------------------- úprava v karte */
+function upravNaMieste(pole){
+  const i = Number(pole.dataset.i), j = Number(pole.dataset.j);
+  const blok = model.riadky[i] && model.riadky[i].bloky[j];
+  if (!blok) return;
+  const cesta = pole.dataset.pole;
+  const povodne = String(blok[cesta] || '');
+  const rodic = pole.closest('.blok');
+
+  rodic.draggable = false;
+  pole.contentEditable = 'true';
+  pole.focus();
+  const r = document.createRange();
+  r.selectNodeContents(pole);
+  const s = window.getSelection();
+  s.removeAllRanges(); s.addRange(r);
+
+  let hotovo = false;
+  const zavri = ulozit => {
+    if (hotovo) return;
+    hotovo = true;
+    const nova = pole.textContent.replace(/\s+/g,' ').trim();
+    pole.contentEditable = 'false';
+    rodic.draggable = true;
+    if (ulozit && nova !== povodne){
+      po(()=>{ blok[cesta] = nova; vyber = { typ:'blok', i, j }; });
+    } else {
+      pole.textContent = povodne;
+    }
+  };
+
+  pole.addEventListener('keydown', ev => {
+    ev.stopPropagation();
+    if (ev.key === 'Enter'){ ev.preventDefault(); zavri(true); }
+    if (ev.key === 'Escape'){ ev.preventDefault(); zavri(false); }
+  });
+  pole.addEventListener('blur', ()=>zavri(true), { once:true });
+}
+
+/* ================================================================
+   4. Presúvanie
+   ================================================================ */
+
+let kurzor = null;
+
+function ukazKurzor(riadokEl, x){
+  if (!kurzor){ kurzor = document.createElement('div'); kurzor.className = 'kurzor'; }
+  const index = pozicia(riadokEl, x);
+  const deti = [...riadokEl.querySelectorAll(':scope > .blok:not(.tahany)')];
+  if (index >= deti.length) riadokEl.appendChild(kurzor);
+  else riadokEl.insertBefore(kurzor, deti[index]);
+  document.querySelectorAll('.riadok.cielovy').forEach(r=>r.classList.remove('cielovy'));
+  riadokEl.classList.add('cielovy');
+}
+
+function skryKurzor(){
+  if (kurzor && kurzor.parentNode) kurzor.parentNode.removeChild(kurzor);
+  document.querySelectorAll('.riadok.cielovy').forEach(r=>r.classList.remove('cielovy'));
+}
+
+/* Poradie počítame medzi blokmi bez toho ťahaného — výsledok tak platí
+   pre pole, z ktorého bol blok už vybratý. */
+function pozicia(riadokEl, x){
+  const deti = [...riadokEl.querySelectorAll(':scope > .blok:not(.tahany)')];
+  for (let k = 0; k < deti.length; k++){
+    const r = deti[k].getBoundingClientRect();
+    if (x < r.left + r.width / 2) return k;
+  }
+  return deti.length;
+}
+
+function pust(cielRiadok, cielIndex){
+  const t = tahane;
+  skryKurzor();
+  if (!t) return;
+  po(()=>{
+    let blok;
+    if (t.zdroj === 'paleta'){
+      blok = kopia(PALETA[t.k].vzor);
+    } else {
+      blok = model.riadky[t.i].bloky.splice(t.j, 1)[0];
+    }
+    model.riadky[cielRiadok].bloky.splice(cielIndex, 0, blok);
+    vyber = { typ:'blok', i:cielRiadok, j:cielIndex };
+  });
+  tahane = null;
+}
+
+function pustDoMedzery(index){
+  const t = tahane;
+  skryKurzor();
+  if (!t) return;
+  po(()=>{
+    if (t.zdroj === 'riadok'){
+      const r = model.riadky.splice(t.i, 1)[0];
+      const kam = index > t.i ? index - 1 : index;
+      model.riadky.splice(kam, 0, r);
+      vyber = { typ:'riadok', i:kam };
+      return;
+    }
+    let blok;
+    if (t.zdroj === 'paleta'){
+      blok = kopia(PALETA[t.k].vzor);
+      model.riadky.splice(index, 0, { styl:'', bloky:[blok] });
+      vyber = { typ:'blok', i:index, j:0 };
+      return;
+    }
+    blok = model.riadky[t.i].bloky.splice(t.j, 1)[0];
+    model.riadky.splice(index, 0, { styl:'', bloky:[blok] });
+    vyber = { typ:'blok', i:index, j:0 };
+  });
+  tahane = null;
+}
+
+function koniecTahania(){
+  tahane = null;
+  skryKurzor();
+  document.querySelectorAll('.tahany').forEach(x=>x.classList.remove('tahany'));
+  document.querySelectorAll('.medzera.cielova').forEach(x=>x.classList.remove('cielova'));
+}
+
+/* Medzery medzi riadkami obsluhujeme na karte, aby prežili prekreslenie. */
+$('karta').addEventListener('dragover', e => {
+  const m = e.target.closest('.medzera');
+  if (!m || !tahane) return;
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  skryKurzor();
+  document.querySelectorAll('.medzera.cielova').forEach(x=>x.classList.remove('cielova'));
+  m.classList.add('cielova');
+});
+$('karta').addEventListener('dragleave', e => {
+  const m = e.target.closest('.medzera');
+  if (m) m.classList.remove('cielova');
+});
+$('karta').addEventListener('drop', e => {
+  const m = e.target.closest('.medzera');
+  if (!m || !tahane) return;
+  e.preventDefault();
+  m.classList.remove('cielova');
+  pustDoMedzery(Number(m.dataset.medzera));
+});
+
+/* ================================================================
+   5. Panel vlastností
+   ================================================================ */
+
+function kresliInspektor(){
+  const box = $('inspektor');
+  box.textContent = '';
+
+  if (!vyber){
+    const p = document.createElement('p');
+    p.className = 'prazdny-inspektor';
+    p.textContent = 'Kliknite na blok alebo na voľnú plochu riadka. '
+      + 'Vlastnosti sa objavia tu; text sa dá prepísať aj priamo v karte dvojklikom.';
+    box.appendChild(p);
+    return;
+  }
+
+  if (vyber.typ === 'riadok'){
+    const riadok = model.riadky[vyber.i];
+    if (!riadok){ vyber = null; return kresliInspektor(); }
+    box.appendChild(vyberPola('Štýl riadka', riadok.styl || '', [
+      ['','Bežný riadok'], ['hlavicka','Hlavička'], ['zaver','Záver'], ['tlmeny','Tlmený']
+    ], v => po(()=>{ riadok.styl = v; })));
+
+    const t = document.createElement('div');
+    t.className = 'tlacidla';
+    t.appendChild(tlacidlo('Duplikovať riadok', ()=>po(()=>{
+      model.riadky.splice(vyber.i+1, 0, kopia(riadok));
+      vyber = { typ:'riadok', i:vyber.i+1 };
+    })));
+    t.appendChild(tlacidlo('Odstrániť riadok', ()=>po(()=>{
+      model.riadky.splice(vyber.i,1); vyber = null;
+    }), true));
+    box.appendChild(t);
+    return;
+  }
+
+  const riadok = model.riadky[vyber.i];
+  const blok = riadok && riadok.bloky[vyber.j];
+  if (!blok){ vyber = null; return kresliInspektor(); }
+
+  const nazov = document.createElement('p');
+  nazov.className = 'prazdny-inspektor';
+  nazov.style.marginTop = '0';
+  nazov.textContent = 'Blok: ' + nazovTypu(blok.typ) + ' · riadok ' + (vyber.i+1)
+    + ', pozícia ' + (vyber.j+1);
+  box.appendChild(nazov);
+
+  const zmen = (kluc, hodnota) => po(()=>{ blok[kluc] = hodnota; });
+
+  if (blok.typ === 'text' || blok.typ === 'poznamka' || blok.typ === 'info'){
+    box.appendChild(textPole(blok.typ === 'info' ? 'Text vysvetlenia' : 'Text',
+      blok.text || '', v => zmen('text', v), true));
+  }
+  if (blok.typ === 'cislo'){
+    box.appendChild(textPole('Hodnota', blok.hodnota, v => zmen('hodnota', v)));
+    box.appendChild(textPole('Jednotka', blok.jednotka || '', v => zmen('jednotka', v)));
+  }
+  if (blok.typ === 'vysledok'){
+    box.appendChild(textPole('Popis', blok.popis, v => zmen('popis', v)));
+    box.appendChild(textPole('Hodnota', blok.hodnota, v => zmen('hodnota', v)));
+  }
+  if (blok.typ === 'volba'){
+    box.appendChild(textPole('Popis', blok.popis || '', v => zmen('popis', v)));
+    box.appendChild(moznostiPole(blok));
+  }
+  if (blok.typ === 'krok'){
+    box.appendChild(vyberPola('Znamienko', blok.smer === '+' ? '+' : '−', [
+      ['−','− (patrí pred číslo)'], ['+','+ (patrí za číslo)']
+    ], v => zmen('smer', v)));
+  }
+
+  const t = document.createElement('div');
+  t.className = 'tlacidla';
+  t.appendChild(tlacidlo('Duplikovať', ()=>po(()=>{
+    riadok.bloky.splice(vyber.j+1, 0, kopia(blok));
+    vyber = { typ:'blok', i:vyber.i, j:vyber.j+1 };
+  })));
+  t.appendChild(tlacidlo('◀ Posunúť', ()=>{
+    if (vyber.j === 0) return;
+    po(()=>{
+      const b = riadok.bloky.splice(vyber.j,1)[0];
+      riadok.bloky.splice(vyber.j-1, 0, b);
+      vyber = { typ:'blok', i:vyber.i, j:vyber.j-1 };
+    });
+  }));
+  t.appendChild(tlacidlo('Posunúť ▶', ()=>{
+    if (vyber.j >= riadok.bloky.length-1) return;
+    po(()=>{
+      const b = riadok.bloky.splice(vyber.j,1)[0];
+      riadok.bloky.splice(vyber.j+1, 0, b);
+      vyber = { typ:'blok', i:vyber.i, j:vyber.j+1 };
+    });
+  }));
+  t.appendChild(tlacidlo('Odstrániť', ()=>po(()=>{
+    riadok.bloky.splice(vyber.j,1); vyber = null;
+  }), true));
+  box.appendChild(t);
+}
+
+function nazovTypu(t){
+  return { text:'text', cislo:'číslo', volba:'voľba', vysledok:'výsledok',
+           krok:'krok', info:'vysvetlenie', poznamka:'poznámka' }[t] || t;
+}
+
+function textPole(menovka, hodnota, zmena, viacriadkovy){
+  const w = document.createElement('div');
+  w.className = 'pole';
+  const l = document.createElement('label');
+  l.textContent = menovka;
+  const vstup = document.createElement(viacriadkovy ? 'textarea' : 'input');
+  if (!viacriadkovy) vstup.type = 'text';
+  else vstup.rows = 3;
+  vstup.value = hodnota;
+  /* Zapisujeme až pri opustení poľa — inak by každé písmeno vytvorilo
+     krok v histórii a prekreslenie by ukradlo kurzor. */
+  vstup.addEventListener('change', ()=>zmena(vstup.value));
+  vstup.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !viacriadkovy){ e.preventDefault(); vstup.blur(); }
+  });
+  w.appendChild(l); w.appendChild(vstup);
+  return w;
+}
+
+function vyberPola(menovka, hodnota, moznosti, zmena){
+  const w = document.createElement('div');
+  w.className = 'pole';
+  const l = document.createElement('label');
+  l.textContent = menovka;
+  const s = document.createElement('select');
+  moznosti.forEach(([v, text]) => {
+    const o = document.createElement('option');
+    o.value = v; o.textContent = text;
+    if (v === hodnota) o.selected = true;
+    s.appendChild(o);
+  });
+  s.addEventListener('change', ()=>zmena(s.value));
+  w.appendChild(l); w.appendChild(s);
+  return w;
+}
+
+function moznostiPole(blok){
+  const w = document.createElement('div');
+  w.className = 'pole';
+  const l = document.createElement('label');
+  l.textContent = 'Možnosti (bodka označuje vybranú)';
+  w.appendChild(l);
+
+  const zoznam = document.createElement('div');
+  zoznam.className = 'moznosti-edit';
+  blok.moznosti.forEach((text, k) => {
+    const r = document.createElement('div');
+    r.className = 'moznost-riadok';
+    const radio = document.createElement('input');
+    radio.type = 'radio'; radio.name = 'vybrana-moznost';
+    radio.checked = k === blok.vybrana;
+    radio.addEventListener('change', ()=>po(()=>{ blok.vybrana = k; }));
+    const vstup = document.createElement('input');
+    vstup.type = 'text'; vstup.value = text;
+    vstup.addEventListener('change', ()=>po(()=>{ blok.moznosti[k] = vstup.value; }));
+    const zmaz = document.createElement('button');
+    zmaz.className = 'mini cerveny'; zmaz.type = 'button'; zmaz.textContent = '✕';
+    zmaz.title = 'Odstrániť možnosť';
+    zmaz.addEventListener('click', ()=>po(()=>{
+      blok.moznosti.splice(k,1);
+      if (blok.vybrana >= blok.moznosti.length) blok.vybrana = Math.max(0, blok.moznosti.length-1);
+    }));
+    r.appendChild(radio); r.appendChild(vstup); r.appendChild(zmaz);
+    zoznam.appendChild(r);
+  });
+  w.appendChild(zoznam);
+
+  const pridaj = document.createElement('button');
+  pridaj.className = 'mini'; pridaj.type = 'button'; pridaj.textContent = '+ možnosť';
+  pridaj.style.marginTop = '6px';
+  pridaj.addEventListener('click', ()=>po(()=>{ blok.moznosti.push('nová'); }));
+  w.appendChild(pridaj);
+  return w;
+}
+
+function tlacidlo(text, akcia, cerveny){
+  const b = document.createElement('button');
+  b.className = 'mini' + (cerveny ? ' cerveny' : '');
+  b.type = 'button';
+  b.textContent = text;
+  b.addEventListener('click', akcia);
+  return b;
+}
+
+/* ================================================================
+   6. Paleta
+   ================================================================ */
+
+function kresliPaletu(){
+  const box = $('paleta');
+  box.textContent = '';
+  PALETA.forEach((p, k) => {
+    const d = document.createElement('div');
+    d.className = 'dlazdica';
+    d.draggable = true;
+    d.append(p.menovka);
+    if (p.i){
+      const i = document.createElement('i');
+      i.textContent = p.i;
+      d.appendChild(i);
+    }
+    d.addEventListener('dragstart', e => {
+      tahane = { zdroj:'paleta', k };
+      /* Karta prijíma presun ako „move"; pri „copy" by Chrome pustenie
+         odmietol, lebo povolený a zvolený efekt sa musia prekrývať. */
+      e.dataTransfer.effectAllowed = 'copyMove';
+      e.dataTransfer.setData('text/plain', p.menovka);
+    });
+    d.addEventListener('dragend', koniecTahania);
+    d.addEventListener('dblclick', ()=>po(()=>{
+      const i = vyber ? vyber.i : model.riadky.length - 1;
+      const riadok = model.riadky[i] || model.riadky[model.riadky.length-1];
+      riadok.bloky.push(kopia(p.vzor));
+      vyber = { typ:'blok', i:model.riadky.indexOf(riadok), j:riadok.bloky.length-1 };
+    }));
+    box.appendChild(d);
+  });
+}
+
+/* ================================================================
+   7. Výstup
+   ================================================================ */
+
+function naHtml(){
+  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const riadky = model.riadky.map(r => {
+    const bloky = r.bloky.map(b => {
+      if (b.typ === 'text')      return '    <span class="veta-text">' + esc(b.text) + '</span>';
+      if (b.typ === 'poznamka')  return '    <span class="veta-poznamka">' + esc(b.text) + '</span>';
+      if (b.typ === 'cislo')     return '    <span class="zive-cislo">' + esc(b.hodnota)
+                                          + (b.jednotka ? ' <span class="jednotka">' + esc(b.jednotka) + '</span>' : '')
+                                          + '</span>';
+      if (b.typ === 'krok')      return '    <button type="button" class="krok" aria-label="'
+                                          + (b.smer === '+' ? 'Zvýšiť' : 'Znížiť') + '">'
+                                          + (b.smer === '+' ? '+' : '−') + '</button>';
+      if (b.typ === 'info')      return '    <button type="button" class="info-i" aria-label="'
+                                          + esc(b.text) + '">i</button>';
+      if (b.typ === 'volba')     return '    <span class="veta-volba">'
+                                          + (b.popis ? '<span class="volba-popis">' + esc(b.popis) + '</span>' : '')
+                                          + '<span class="volba-moznosti">'
+                                          + b.moznosti.map((m,k)=>'<button type="button"'
+                                              + (k===b.vybrana ? ' class="zap" aria-pressed="true"' : ' aria-pressed="false"')
+                                              + '>' + esc(m) + '</button>').join('')
+                                          + '</span></span>';
+      if (b.typ === 'vysledok')  return '    <span class="veta-vysledok"><span class="k">' + esc(b.popis)
+                                          + '</span><span class="v">' + esc(b.hodnota) + '</span></span>';
+      return '';
+    }).filter(Boolean).join('\n');
+    return '  <div class="veta-riadok' + (r.styl ? ' ' + r.styl : '') + '">\n' + bloky + '\n  </div>';
+  }).join('\n');
+  return '<div class="karta karta-dnes">\n' + riadky + '\n</div>';
+}
+
+function kopiruj(text, popis){
+  const hotovo = ()=>hlaska(popis + ' skopírované do schránky');
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(hotovo, ()=>zalozny(text, hotovo));
+  } else zalozny(text, hotovo);
+}
+
+function zalozny(text, hotovo){
+  const t = document.createElement('textarea');
+  t.value = text;
+  t.style.position = 'fixed'; t.style.opacity = '0';
+  document.body.appendChild(t);
+  t.select();
+  try{ document.execCommand('copy'); hotovo(); }
+  catch(e){ hlaska('Kopírovanie zlyhalo — text je v poli Štruktúra vpravo.'); }
+  document.body.removeChild(t);
+}
+
+/* ================================================================
+   8. Lišta a klávesnica
+   ================================================================ */
+
+$('tl-riadok').addEventListener('click', ()=>po(()=>{
+  model.riadky.push({ styl:'', bloky:[] });
+  vyber = { typ:'riadok', i:model.riadky.length-1 };
+}));
+
+$('tl-spat').addEventListener('click', vrat);
+
+$('tl-povodna').addEventListener('click', ()=>{
+  if (!confirm('Vrátiť kartu do pôvodného stavu? Vaše rozloženie sa stratí.')) return;
+  po(()=>{ model = kopia(POVODNA); vyber = null; });
+  hlaska('Karta je späť v pôvodnom stave');
+});
+
+$('tl-json').addEventListener('click', ()=>kopiruj(JSON.stringify(model, null, 2), 'JSON'));
+$('tl-html').addEventListener('click', ()=>kopiruj(naHtml(), 'HTML karty'));
+
+function vrat(){
+  if (!historia.length) return;
+  model = historia.pop();
+  vyber = null;
+  uloz();
+  kresli();
+  $('tl-spat').disabled = !historia.length;
+  hlaska('Vrátené o krok späť');
+}
+
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z'){
+    if (document.activeElement && (document.activeElement.isContentEditable
+        || /INPUT|TEXTAREA/.test(document.activeElement.tagName))) return;
+    e.preventDefault();
+    vrat();
+    return;
+  }
+  if (e.key === 'Escape' && vyber){
+    if (document.activeElement && document.activeElement.isContentEditable) return;
+    vyberni(null);
+  }
+});
+
+/* Klik mimo karty aj panela zruší výber. */
+document.querySelector('.platno').addEventListener('click', e => {
+  if (e.target.closest('.karta')) return;
+  if (!vyber) return;
+  vyberni(null);
+});
+
+/* ================================================================ */
+
+kresliPaletu();
+kresli();
+})();
+</script>
+</body>
+</html>

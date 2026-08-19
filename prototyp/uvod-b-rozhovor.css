@@ -1,0 +1,133 @@
+/* VARIANTA B - príbehový vstup, ktorý poskladá prvý plán.
+
+   Samostatná vrstva nad aplikáciou. Nie je to formulár ani zber kontaktov:
+   je to krátky rozhovor, ktorý na pozadí nastavuje skutočný scenár. Preto
+   je vizuálne ľahký - jedna otázka, veľa vzduchu, žiadne polia navyše. */
+
+.pv-vrstva{position:fixed;inset:0;z-index:9000;display:grid;place-items:center;
+  padding:24px;background:rgba(24,18,13,.93);
+  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+  font-family:var(--sans,'Asap',system-ui,sans-serif)}
+.pv-vrstva[hidden]{display:none}
+
+.pv-panel{width:min(620px,100%);max-height:calc(100vh - 48px);overflow:auto;
+  background:#241c14;border:1px solid rgba(196,154,99,.3);border-radius:12px;
+  padding:34px 38px 28px;box-shadow:0 30px 80px rgba(0,0,0,.55);color:#f2e6d6}
+.pv-panel:focus{outline:none}
+
+/* ------------------------------------------------------------- priebeh */
+
+.pv-postup{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+.pv-postup-text{font-size:11.5px;font-weight:600;letter-spacing:.09em;
+  text-transform:uppercase;color:#c49a63;white-space:nowrap}
+.pv-pas{flex:1;height:2px;background:rgba(196,154,99,.2);border-radius:2px;overflow:hidden}
+.pv-pas i{display:block;height:100%;background:#c49a63;border-radius:2px;
+  transition:width .4s cubic-bezier(.22,.61,.36,1)}
+
+/* -------------------------------------------------------------- otázka */
+
+.pv-otazka{margin:0 0 8px;font-family:var(--serif,'PT Serif',Georgia,serif);
+  font-size:27px;line-height:1.22;font-weight:700;color:#fff}
+.pv-pod{margin:0 0 22px;font-size:15px;line-height:1.55;color:rgba(242,230,214,.78)}
+.pv-pod:last-of-type{margin-bottom:0}
+
+/* -------------------------------------------------------- veľké voľby */
+
+.pv-volby{display:grid;gap:10px;margin:0 0 4px}
+.pv-volba{display:block;width:100%;text-align:left;cursor:pointer;
+  padding:15px 18px;border-radius:9px;border:1px solid rgba(196,154,99,.26);
+  background:rgba(255,255,255,.03);color:#f2e6d6;font:inherit;
+  transition:border-color .18s,background .18s,transform .18s}
+.pv-volba:hover{border-color:rgba(196,154,99,.72);background:rgba(196,154,99,.09)}
+.pv-volba:focus-visible{outline:2px solid #c49a63;outline-offset:3px}
+.pv-volba b{display:block;font-size:16.5px;font-weight:600;color:#fff}
+.pv-volba small{display:block;margin-top:3px;font-size:13.5px;line-height:1.45;
+  color:rgba(242,230,214,.66)}
+.pv-volba.je{border-color:#c49a63;background:rgba(196,154,99,.13)}
+
+/* ------------------------------------------------------------ hodnota */
+
+.pv-cislo{font-family:var(--serif,'PT Serif',Georgia,serif);font-size:44px;
+  font-weight:700;color:#fff;line-height:1.1;font-variant-numeric:tabular-nums}
+.pv-cislo small{font-size:19px;font-weight:400;color:rgba(242,230,214,.7);
+  margin-left:8px;font-family:var(--sans,'Asap',system-ui,sans-serif)}
+.pv-vysvetlenie{margin:6px 0 0;font-size:14px;color:rgba(242,230,214,.62);min-height:20px}
+
+.pv-posuvnik{-webkit-appearance:none;appearance:none;width:100%;height:26px;
+  margin:18px 0 0;background:transparent;cursor:pointer}
+.pv-posuvnik::-webkit-slider-runnable-track{height:4px;border-radius:3px;
+  background:rgba(242,230,214,.22)}
+.pv-posuvnik::-moz-range-track{height:4px;border-radius:3px;background:rgba(242,230,214,.22)}
+.pv-posuvnik::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
+  width:22px;height:22px;margin-top:-9px;border-radius:50%;background:#c49a63;
+  border:3px solid #241c14;box-shadow:0 2px 8px rgba(0,0,0,.45)}
+.pv-posuvnik::-moz-range-thumb{width:16px;height:16px;border-radius:50%;
+  background:#c49a63;border:3px solid #241c14;box-shadow:0 2px 8px rgba(0,0,0,.45)}
+.pv-posuvnik:focus-visible{outline:2px solid #c49a63;outline-offset:6px;border-radius:4px}
+.pv-krajne{display:flex;justify-content:space-between;margin-top:6px;
+  font-size:12.5px;color:rgba(242,230,214,.45)}
+
+/* --------------------------------------------------------------- päta */
+
+.pv-pata{display:flex;align-items:center;gap:14px;margin-top:26px;
+  padding-top:18px;border-top:1px solid rgba(196,154,99,.2)}
+.pv-tichy{background:none;border:0;padding:5px 2px;cursor:pointer;font:inherit;
+  font-size:13.5px;color:rgba(242,230,214,.6);text-decoration:underline;
+  text-underline-offset:3px}
+.pv-tichy:hover{color:#f2e6d6}
+.pv-tichy:focus-visible{outline:2px solid #c49a63;outline-offset:3px;border-radius:3px}
+.pv-medzera{margin-left:auto}
+.pv-hlavne{padding:12px 26px;border-radius:8px;border:0;cursor:pointer;font:inherit;
+  font-size:15px;font-weight:600;background:#ae8753;color:#2b2118;
+  transition:background .18s}
+.pv-hlavne:hover{background:#c49a63}
+.pv-hlavne:focus-visible{outline:2px solid #f2e6d6;outline-offset:3px}
+.pv-hlavne[disabled]{opacity:.45;cursor:default}
+
+/* ------------------------------------------------------------- záverečná */
+
+.pv-hotovo{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);
+  z-index:9000;display:flex;align-items:center;gap:16px;
+  max-width:min(620px,calc(100vw - 32px));padding:13px 16px 13px 20px;
+  border-radius:8px;background:#241c14;color:#f2e6d6;
+  border:1px solid rgba(196,154,99,.34);box-shadow:0 16px 40px rgba(0,0,0,.42);
+  font:400 14.5px/1.5 var(--sans,'Asap',system-ui,sans-serif)}
+.pv-hotovo strong{color:#fff;font-weight:600}
+.pv-zavri{flex:none;background:none;border:0;cursor:pointer;padding:4px 8px;
+  color:rgba(242,230,214,.6);font:inherit;font-size:18px;line-height:1}
+.pv-zavri:hover{color:#f2e6d6}
+.pv-zavri:focus-visible{outline:2px solid #c49a63;outline-offset:2px;border-radius:4px}
+
+.pv-znovu{position:fixed;left:16px;bottom:16px;z-index:8000;
+  display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:999px;
+  cursor:pointer;background:rgba(36,28,20,.9);border:1px solid rgba(196,154,99,.3);
+  color:rgba(242,230,214,.78);font:500 13px var(--sans,'Asap',system-ui,sans-serif);
+  box-shadow:0 6px 18px rgba(0,0,0,.3);transition:color .2s,border-color .2s}
+.pv-znovu:hover{color:#f2e6d6;border-color:rgba(196,154,99,.6)}
+.pv-znovu:focus-visible{outline:2px solid #c49a63;outline-offset:3px}
+.pv-znovu::before{content:"";width:6px;height:6px;border-radius:50%;background:#c49a63}
+
+@media (prefers-reduced-motion:reduce){
+  .pv-vrstva,.pv-pas i,.pv-hotovo{transition:none}
+}
+/* Na nízkom okne (notebook s otvorenou konzolou, menšie rozlíšenie) sa panel
+   stiahne, aby päta s tlačidlom Pokračovať zostala nad okrajom a nemuselo sa
+   v otázke rolovať. */
+@media (max-height:660px){
+  .pv-panel{padding:22px 28px 18px}
+  .pv-postup{margin-bottom:14px}
+  .pv-otazka{font-size:22px}
+  .pv-pod{margin-bottom:14px}
+  .pv-cislo{font-size:34px}
+  .pv-volba{padding:11px 15px}
+  .pv-posuvnik{margin-top:12px}
+  .pv-pata{margin-top:16px;padding-top:13px}
+}
+@media (max-width:620px){
+  .pv-vrstva{padding:12px}
+  .pv-panel{padding:26px 22px 22px}
+  .pv-otazka{font-size:23px}
+  .pv-cislo{font-size:38px}
+  .pv-pata{flex-wrap:wrap}
+  .pv-znovu{left:12px;bottom:12px}
+}
