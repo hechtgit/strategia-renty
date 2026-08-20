@@ -48,7 +48,28 @@
     const today=document.getElementById("s1-v")?.textContent.trim()||document.getElementById("t-value")?.textContent.trim()||"—";
     const target=document.getElementById("s-value1")?.textContent.trim()||"—";
     const success=(value(0).match(/[0-9]+/)||["—"])[0],meta600=value(1),meta720=value(2);
-    const približne=v=>{const n=Number(String(v).replace(/[^0-9-]/g,""));return Number.isFinite(n)?fmt(Math.round(n/1000)*1000):v;};
+    /* Number("") je NULA, nie NaN. Master píše do splnenej méty text „už spĺňa"
+       a bez tejto poistky z neho vzniklo „0 €" - klient čítal, že na tú úroveň
+       nepotrebuje nič, hoci ju spĺňa práve svojou dnešnou investíciou. */
+    const jeSuma=v=>/[0-9]/.test(String(v));
+    const približne=v=>{if(!jeSuma(v))return v;
+      const n=Number(String(v).replace(/[^0-9-]/g,""));
+      return Number.isFinite(n)?fmt(Math.round(n/1000)*1000):v;};
+    /* Či je méta splnená, sa NEODVODZUJE z textu, ale z počtu úspešných
+       simulácií - text sa dá kedykoľvek preformulovať, číslo nie. */
+    const dosiahnute=Number(success);
+    const splnena=h=>Number.isFinite(dosiahnute)&&dosiahnute>=h;
+    /* `sentence` vzniká až o riadok nižšie, preto sa číta až pri volaní,
+       nie pri definícii - inak by to padlo na dočasnej mŕtvej zóne. */
+    const riadokCitlivosti=(hranica,hodnota,podiel)=>
+      '<div class="citlivost-rad"><div class="co">'+(splnena(hranica)
+        ?'<strong>Túto úroveň spĺňa už '+(sentence.charAt(0).toLowerCase()+sentence.slice(1))+' '+today+'</strong>'
+         +'<small>Dosiahli ste '+success+'&nbsp;z&nbsp;800 simulácií.</small>'
+        :'<strong>Približná modelová výška vstupu: '+približne(hodnota)+'</strong>'
+         +'<small>Zaokrúhlená ilustračná hranica namiesto '+today+'.</small>')
+      +'</div><div class="kolko"><strong>Majetok by pokryl všetky výplaty aspoň v '
+      +hranica+'&nbsp;z&nbsp;800 simulácií</strong><span>Ilustračná úroveň '
+      +podiel+'&nbsp;% simulácií v tomto modeli.</span></div></div>';
     const sentence=sit==="have"?"Váš dnešný majetok":mode==="lump"?"Vaša dnešná investícia":"Všetky vaše investície počas budovania";
     const label=document.getElementById("s1-k");if(label)label.textContent=sit==="have"?"Váš majetok dnes":mode==="lump"?"Koľko investujete dnes":"Koľko investujete spolu";
     odolnost.querySelector("h2").textContent="Obstál by váš plán aj pri rozdielnom vývoji trhov?";
@@ -60,13 +81,12 @@
       '<li><strong>'+sentence+':</strong> '+today+'.</li>'+
       '<li><strong>Cieľ:</strong> renta '+fmt(rent)+' mesačne v dnešnej hodnote od '+start+' do '+end+' rokov; počas čerpania rastie so zadanou infláciou.</li>'+
       '<li><strong>Základný prepočet:</strong> pri rovnakom zhodnotení každý rok má táto suma do veku '+start+' rokov vyrásť na '+target+'.</li></ul>'+
-      '<p class="poznamka">V modelovaných simuláciách sa zhodnotenie počas budovania každý rok mení. Preto sa mení aj kapitál, ktorý je k dispozícii na začiatku renty.</p>';
-    tbody.innerHTML='<tr class="vas"><td class="kolko" colspan="2"><span class="vysledok-label">Výsledok modelovaných simulácií</span><strong>Kapitál pokryl všetky plánované výplaty v '+success+'&nbsp;z&nbsp;800 simulácií</strong><span>Teda rentu '+fmt(rent)+' mesačne v dnešnej hodnote od '+start+' do '+end+' rokov, počas čerpania zvyšovanú o infláciu. Ide o podiel úspešných simulácií v tomto modeli, nie odhad pravdepodobnosti budúceho úspechu.</span></td></tr>';
+      '<p class="poznamka">V modelovaných simuláciách sa zhodnotenie počas budovania každý rok mení. Preto sa mení aj majetok, ktorý je k dispozícii na začiatku renty.</p>';
+    tbody.innerHTML='<tr class="vas"><td class="kolko" colspan="2"><span class="vysledok-label">Výsledok modelovaných simulácií</span><strong>Majetok pokryl všetky plánované výplaty v '+success+'&nbsp;z&nbsp;800 simulácií</strong><span>Teda rentu '+fmt(rent)+' mesačne v dnešnej hodnote od '+start+' do '+end+' rokov, počas čerpania zvyšovanú o infláciu. Ide o podiel úspešných simulácií v tomto modeli, nie odhad pravdepodobnosti budúceho úspechu.</span></td></tr>';
     let sensitivity=odolnost.querySelector(".odolnost-citlivost");
     if(!sensitivity){sensitivity=document.createElement("details");sensitivity.className="odolnost-citlivost";tbody.closest("table").after(sensitivity);}
     sensitivity.innerHTML='<summary>Doplňujúci detail: ako sa výsledok mení s vyššou rezervou</summary><p class="uvod">Dve ilustračné úrovne ukazujú citlivosť výsledku na vyšší vstup. Nie sú odporúčanými cieľmi ani odhadom budúcej pravdepodobnosti.</p>'+
-      '<div class="citlivost-rad"><div class="co"><strong>Približná modelová výška vstupu: '+približne(meta600)+'</strong><small>Zaokrúhlená ilustračná hranica namiesto '+today+'.</small></div><div class="kolko"><strong>Kapitál by pokryl všetky výplaty aspoň v 600&nbsp;z&nbsp;800 simulácií</strong><span>Ilustračná úroveň 75 % simulácií v tomto modeli.</span></div></div>'+
-      '<div class="citlivost-rad"><div class="co"><strong>Približná modelová výška vstupu: '+približne(meta720)+'</strong><small>Zaokrúhlená ilustračná hranica namiesto '+today+'.</small></div><div class="kolko"><strong>Kapitál by pokryl všetky výplaty aspoň v 720&nbsp;z&nbsp;800 simulácií</strong><span>Ilustračná úroveň 90 % simulácií v tomto modeli.</span></div></div>';
+      riadokCitlivosti(600,meta600,75)+riadokCitlivosti(720,meta720,90);
     let conclusion=odolnost.querySelector(".odolnost-zaver");
     if(!conclusion){conclusion=document.createElement("p");conclusion.className="odolnost-zaver";sensitivity.before(conclusion);}
     conclusion.innerHTML="<strong>Čo si z toho odniesť?</strong> Základný prepočet predpokladá rovnaké zhodnotenie každý rok. Modelované simulácie ukazujú citlivosť na poradie výnosov počas budovania majetku. Kolísanie výnosov počas čerpania renty tento test nemodeluje.";
