@@ -696,6 +696,63 @@ const BLOK_ROKOV=5;           /* dĺžka súvislého úseku histórie */
 const PRIEBEHOV=800;
 const METY=[600,720];         /* pevné méty; keď ich scenár prekoná, povie sa to */
 
+/* Generátor PDF je samostatný súbor a tieto čísla si dosiaľ písal natvrdo.
+   Keby sa ktorékoľvek z nich zmenilo tu, dokument by ďalej tvrdil staré
+   hodnoty — a klient by mal v ruke papier, ktorý nesedí so stránkou, z ktorej
+   vznikol. Stránka ich preto vystaví ako jediný zdroj. */
+/* `globalThis`, nie `window`: tests/shared-core-parity.mjs púšťa tento úsek
+   v Node cez vm, kde `window` neexistuje - test na tom padal. V prehliadači
+   je to tá istá vec. */
+globalThis.PH_KONST=Object.freeze({PRIEBEHOV,REF_CERPANIE,BLOK_ROKOV,
+  FEE_IN,FEE_M,HIST_OD,HIST_DO});
+
+/* Prvá strana dokumentu je samé číslo a nič, na čo sa dá pozrieť — pritom jej
+   pod predpokladmi ostáva prázdny pás. Krivka majetku ho zaplní tvarom, ktorý
+   celý plán zhrnie na jeden pohľad: rastie, vyvrcholí na začiatku renty
+   a spotrebuje sa.
+
+   Nepočíta sa nanovo: používa tie isté rekurencie ako samotný plán, takže
+   v koncových bodoch dáva presne tie sumy, ktoré stoja v kartách nad grafom.
+   Čerpanie ide mesiac po mesiaci — ročný krok by pri rastúcej rente nakreslil
+   iný priebeh, než podľa akého je majetok vyrátaný.
+
+   Vracia null pre scenáre, v ktorých krivka nič nehovorí: rentu bez konca
+   (nikdy sa nespotrebuje) a nedopočítaný scenár. */
+globalThis.PH_KRIVKA=function(){
+  const o=compute();
+  if(o.warn||o.nek||o.forever)return null;
+  const mesiacovC=Number.isFinite(o.months)?Math.round(o.months):o.Tm;
+  if(!mesiacovC||o.N<0)return null;
+  const iA=o.iA,i=o.i,g=o.g,e=o.e;
+  const rast=1+rocnaCista(S.vynos);
+  const anuita=m=>iA===0?m:(Math.pow(1+iA,m)-1)/iA;
+  const zaklad=S.sit==='have'?S.existing:0;
+  const jednorazovo=S.sit==='have'?0:(o.P0||0);
+  const mesacne=S.sit==='have'?0:(o.M||0);
+  const body=[];
+  for(let k=0;k<=o.N;k++)body.push({vek:S.now+k,
+    suma:(zaklad+jednorazovo*e)*Math.pow(rast,k)+mesacne*e*anuita(k*12)});
+  /* Čerpanie začína tam, kde budovanie skončilo. Brať namiesto toho o.cap by
+     v scenári „jednorazová investícia už rentu pokrýva" vyrobilo v grafe
+     zlom — krivka by na vrchole skočila dole na nižšiu hodnotu. */
+  let bal=body[body.length-1].suma,R=o.R,m=0;
+  for(let k=1;k<=Math.ceil(mesiacovC/12);k++){
+    const po=Math.min(mesiacovC,k*12);
+    for(;m<po;m++){bal=bal*(1+i)-R;R*=1+g}
+    body.push({vek:S.now+o.N+po/12,suma:Math.max(0,bal)});
+  }
+  /* Číslo, ktoré má graf popísať, je majetok NA ZAČIATKU RENTY - tá istá suma,
+     aká stojí o pár centimetrov vyššie v karte „Začiatok čerpania". Nie je to
+     nutne najvyšší bod krivky: kým čistý výnos prevyšuje prvé výplaty, majetok
+     ešte pár rokov po začatí renty rastie. Popísať maximum by teda vyrobilo
+     v dokumente tretie, nikde inde neuvedené číslo. Formátuje sa tou istou
+     funkciou ako karty, aby sa nemali ako rozísť. */
+  const vrchol=body[o.N].suma;
+  return {body,vrchol,vrcholText:fmtEur(vrchol),
+    maximum:body.reduce((a,p)=>Math.max(a,p.suma),0),
+    dnes:S.now,start:S.now+o.N,koniec:S.now+o.N+mesiacovC/12};
+};
+
 const REF_FAKTORY_A=HIST_VYNOSY.map(r=>1+r);
 const REF_FAKTOR_C=1+REF_CERPANIE/100;
 
@@ -859,7 +916,7 @@ function vykresli(){
       $('t-value').textContent=fmtEur(o.P0);
       $('t-sub').textContent=`Obdobie budovania majetku: ${yrs(o.N)}.`;
     }else if(S.mode==='monthly'){
-      $('t-label').textContent='Investujem mesačne';
+      $('t-label').textContent='Investujete mesačne';
       $('t-value').textContent=fmtEur(o.M);
       $('t-sub').textContent=`Pravidelne počas ${yrs(o.N)}.`;
     }else{
@@ -874,14 +931,14 @@ function vykresli(){
       }
     }
   }else{
-    $('t-label').textContent='Môj majetok dnes';
+    $('t-label').textContent='Váš majetok dnes';
     $('t-value').textContent=fmtEur(S.existing);
     $('t-sub').textContent=o.immediate?'Renta sa začína čerpať hneď.'
       :`Obdobie budovania majetku: ${yrs(o.N)}.`;
   }
 
   /* ===== karta ZAČIATOK ČERPANIA ===== */
-  $('s-label1').textContent=S.sit==='have'?'Môj majetok vtedy':'Potrebný majetok';
+  $('s-label1').textContent=S.sit==='have'?'Váš majetok vtedy':'Potrebný majetok';
   $('s-value1').textContent=fmtEur(o.cap);
   $('s-label2').textContent='Mesačná renta pri začiatku';
   $('s-value2').textContent=fmtEur(o.R);
@@ -1237,8 +1294,8 @@ $('btn-pdf').addEventListener('click',async()=>{
     await cakajNaFinalnuCopyVysledku();
     if(!pdfNacitanie)pdfNacitanie=(async()=>{
       await Promise.all([nacitaj('jspdf.min.js'),nacitaj('pdf-font.js')]);
-      await nacitaj('pdf.js?v=20260820d');
-      await nacitaj('pdf-alternativa.js?v=20260820n');
+      await nacitaj('pdf.js?v=20260820e');
+      await nacitaj('pdf-alternativa.js?v=20260820p');
     })();
     await pdfNacitanie;
     await window.PH_PDF();

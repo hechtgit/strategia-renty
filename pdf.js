@@ -336,6 +336,94 @@
       doc.text(d.vystraha, OKRAJ, y + 2.5);
       y += 6;
     }
+    /* ——— vývoj majetku ———
+       Jediný obrázok v dokumente a jediná vec, ktorú z prvej strany pochopí
+       aj ten, kto si nič neprečíta: majetok rastie, na začiatku renty
+       vyvrcholí a potom sa spotrebuje.
+
+       Kreslí sa len vtedy, keď na neho medzi predpokladmi a pätičkou naozaj
+       ostane miesto. Pri dlhšom scenári radšej nie je — tlačiť kvôli grafu
+       pätičku na tretiu stranu by bola horšia sadzba než prázdny pás. */
+    doc.setFont("Asap", "normal"); doc.setFontSize(7);
+    var riadkovD = doc.splitTextToSize(d.disclaimer, SIRKA).length;
+    var VYSKA_PATKY = 5 + 18 + 5 + riadkovD * 7 * 0.3528 * 1.5 + 1;
+
+    /* Vlastný nadpis graf nedostal zámerne - medzi predpokladmi a pätičkou je
+       reálne okolo 25 mm a nadpis by z nich ukrojil pätinu. „BUDOVANIE
+       MAJETKU" a „ČERPANIE RENTY" priamo v ploche, suma na vrchole a veky pod
+       osou povedia to isté a nezaberú ani riadok navyše.
+
+       Výška sa prispôsobuje tomu, čo zvýšilo: pri stručnom scenári je graf
+       vyšší, pri obsiahlejšom nižší, a keď by klesol pod čitateľnú mieru,
+       nekreslí sa vôbec. */
+    var krivka = typeof window.PH_KRIVKA === "function" ? window.PH_KRIVKA() : null;
+    var POPISKY = 3.4, MIN_TELO = 15, MAX_TELO = 26;
+    var VOLNE = A4.v - OKRAJ - VYSKA_PATKY - y - 3;
+    var NAD = 4;   /* suma na vrchole sa píše nad plochu - tu je na ňu miesto */
+    if (krivka && krivka.body.length > 2 && VOLNE >= NAD + MIN_TELO + POPISKY) {
+      medzera(NAD);
+      var gx = OKRAJ, gw = SIRKA, gy = y,
+          gh = Math.min(MAX_TELO, VOLNE - NAD - POPISKY);
+      var body = krivka.body;
+      /* Mierka sa škáluje podľa najvyššieho bodu krivky, popiska sa viaže na
+         majetok na začiatku renty - to nie je vždy tá istá hodnota. */
+      var strop = krivka.maximum || 1;
+      var rozpatie = krivka.koniec - krivka.dnes || 1;
+      var xOf = function (v) { return gx + gw * (v - krivka.dnes) / rozpatie; };
+      var yOf = function (s) { return gy + gh * (1 - s / strop); };
+
+      /* jsPDF kreslí cestu ako rad prírastkov od východiskového bodu. */
+      function cesta(zoznam, x0, y0, styl, zavriet) {
+        var px = x0, py = y0, kroky = [];
+        zoznam.forEach(function (b) {
+          kroky.push([b[0] - px, b[1] - py]); px = b[0]; py = b[1];
+        });
+        doc.lines(kroky, x0, y0, [1, 1], styl, !!zavriet);
+      }
+
+      var vrch = body.map(function (p) { return [xOf(p.vek), yOf(p.suma)]; });
+      doc.setFillColor(250, 246, 238);
+      cesta(vrch.concat([[xOf(body[body.length - 1].vek), gy + gh]]),
+        xOf(body[0].vek), gy + gh, "F", true);
+      doc.setDrawColor(ZLATA[0], ZLATA[1], ZLATA[2]);
+      doc.setLineWidth(0.45);
+      cesta(vrch.slice(1), vrch[0][0], vrch[0][1], "S", false);
+
+      /* Zvislica na začiatku renty rozdeľuje graf na dve fázy - bez nej je to
+         len kopec bez deja. */
+      var xS = xOf(krivka.start);
+      doc.setLineWidth(0.2);
+      doc.setDrawColor(168, 160, 146);
+      doc.line(xS, gy, xS, gy + gh);
+      doc.setDrawColor(LINKA[0], LINKA[1], LINKA[2]);
+      doc.line(gx, gy + gh, gx + gw, gy + gh);
+
+      doc.setFont("Asap", "normal"); doc.setFontSize(6.6);
+      doc.setTextColor(SEDA[0], SEDA[1], SEDA[2]);
+      if (xS - gx > 24) doc.text("BUDOVANIE MAJETKU", gx + 2, gy + 3);
+      if (gx + gw - xS > 20) doc.text("ČERPANIE RENTY", xS + 2, gy + 3);
+
+      /* Majetok na začiatku renty je jediné číslo, ktoré si z krivky treba
+         odniesť - a je to tá istá suma, aká stojí v karte „Začiatok čerpania".
+         Píše sa na tú stranu zvislice, kde je viac miesta, aby nevisel cez
+         okraj strany. */
+      doc.setFont("Asap", "bold"); doc.setFontSize(8);
+      doc.setTextColor(ZLATA[0], ZLATA[1], ZLATA[2]);
+      doc.setFillColor(ZLATA[0], ZLATA[1], ZLATA[2]);
+      doc.circle(xS, yOf(krivka.vrchol), 0.8, "F");
+      var doprava = gx + gw - xS > xS - gx;
+      doc.text(krivka.vrcholText, doprava ? xS + 2.6 : xS - 2.6, yOf(krivka.vrchol) - 1.8,
+        { align: doprava ? "left" : "right" });
+
+      y = gy + gh + 3.4;
+      doc.setFont("Asap", "normal"); doc.setFontSize(6.8);
+      doc.setTextColor(SEDA[0], SEDA[1], SEDA[2]);
+      doc.text(krivka.dnes + " rokov", gx, y);
+      doc.text("začiatok renty · " + krivka.start + " rokov", xS, y, { align: "center" });
+      doc.text(Math.round(krivka.koniec) + " rokov", gx + gw, y, { align: "right" });
+      y += 3;
+    }
+
     /* ——— ďalší krok ———
        Obsah tejto sekcie sa presúva na druhú stranu, takže tu býva prázdna.
        Čiara sa predtým kreslila bezpodmienečne a nad pätkou zostali dve linky

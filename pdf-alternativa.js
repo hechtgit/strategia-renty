@@ -30,6 +30,24 @@
      nečíta sa zo stránky - na webe tá sekcia vyzerá inak a je dlhšia.
      Oproti dodanému zneniu sú dve opravy kvôli súladu so zvyškom: „vy" sa
      všade píše malým písmenom a produkt sa volá privátna, nie súkromná renta. */
+  /* Počet priebehov, plánovací výnos, poplatky a rozsah histórie sú vlastnosti
+     modelu, nie tohto súboru. Stránka ich vystavuje v PH_KONST; keby sa
+     ktorákoľvek zmenila, PDF by inak tvrdilo staré čísla a papier by sa
+     rozišiel s obrazovkou. Záloha je len pre prípad, že by sa skript
+     nenačítal — nie druhé miesto, kde sa hodnoty udržiavajú. */
+  var K = window.PH_KONST || { PRIEBEHOV: 800, REF_CERPANIE: 4, BLOK_ROKOV: 5,
+    FEE_IN: 1.5, FEE_M: 0.9, HIST_OD: 1970, HIST_DO: 2025 };
+  var N = K.PRIEBEHOV;
+  function cislo(x) { return String(x).replace(".", ","); }
+  /* „so 4 %" sa číta „so štyrmi percentami" - predložka sa riadi tým, čím
+     číslovka ZAČÍNA, nie tým, ako sa píše. Štyri, šesť a sedem začínajú na
+     š/s, preto pri nich „so"; pri ostatných „s". Bez toho by veta po zmene
+     plánovacieho výnosu znela nesprávne v jednom alebo druhom smere. */
+  function sCislom(x) {
+    return (/^[467]$/.test(String(Math.trunc(x))) ? "so " : "s ") + cislo(x);
+  }
+  var SLOVOM = { 3: "trojročné", 5: "päťročné", 10: "desaťročné" };
+
   var LIST_NADPIS = "Od čísla k stratégii";
   var LIST_TELO = "Táto modelácia vám dáva prvý obraz o tom, aký majetok môže byť "
     + "potrebný pre vašu privátnu rentu. Nevidí však celý váš majetok, ďalšie "
@@ -71,16 +89,26 @@
             nadpis: hlavny
               ? text(odolnost.querySelector(".odolnost-testuje li:first-child"))
               : text(r.querySelector(".co strong")),
+            /* „Ide o zaokrúhlenú ilustračnú hranicu." stálo pod oboma
+               úrovňami, hoci úvod dva riadky nad nimi hovorí to isté
+               („Dve ilustračné úrovne…"). Dokument tak mal tú istú výhradu
+               trikrát na jednej obrazovke. */
             vysvetlenie: hlavny
               ? "Tento vstup testujeme v každej modelovanej simulácii."
-              : text(r.querySelector(".co small")),
+              : text(r.querySelector(".co small"))
+                .replace(/\s*Ide o zaokrúhlenú ilustračnú hranicu\.\s*$/, ""),
             hodnota: text(r.querySelector(".kolko strong")),
             /* Prvý <span> v hlavnom riadku je malý štítok „Výsledok modelovaných
                simulácií"; vysvetľujúca veta je až ten druhý. querySelector bral
                ten prvý, takže PDF tlačilo štítok namiesto vysvetlenia - a rámček
                potom zíval prázdnotou. */
+            /* Veta začínala „Teda rentu 3 000 € mesačne od 55 do 90 rokov…",
+               čo je do tretice ten istý cieľ: raz v perexe prvej strany, raz
+               v perexe nad panelom. Tlačila pritom dole práve tú vetu, kvôli
+               ktorej odsek v rámčeku je — že nejde o pravdepodobnosť. */
             doplnenie: text(r.querySelector(".kolko span:not(.vysledok-label)")
                             || r.querySelector(".kolko span"))
+                       .replace(/^Teda\s+rentu[^.]*\.\s*/, "")
           };
         }
       ).filter(function (r) { return r.nadpis && r.hodnota; }),
@@ -91,7 +119,20 @@
       /* Kratšie a zároveň úplnejšie: pribudol názov metódy a to, že sa bloky
          LOSUJÚ (bez toho znel postup ako deterministický), a ubudlo štvornásobné
          opakovanie slova „model". Ušetrený riadok potrebuje záver strany. */
-      metodika: "Simulácie vznikajú metódou Monte Carlo: z výnosov indexu MSCI World (v EUR, 1970–2025) sa losujú súvislé päťročné bloky a skladajú do nových priebehov. História platí len počas budovania majetku; čerpanie počíta so 4 % ročne po nákladoch, pred infláciou. Slabé výnosy hneď na začiatku čerpania môžu obdobie renty výrazne skrátiť.",
+      /* Tri veci, ktoré dokument doteraz zamlčal: euro pred rokom 1999
+         neexistovalo (staršie roky sú doň prepočítané spätne), poplatky sa
+         neodpočítavajú len počas čerpania, a výhrada o minulej výkonnosti
+         stála na prvej strane, kde žiadne historické čísla nie sú. Pripája
+         sa sem ako koniec vety, nie ako siedmy samostatný varovný riadok. */
+      metodika: "Simulácie vznikajú metódou Monte Carlo: z výnosov indexu MSCI World (v EUR, "
+        + K.HIST_OD + "–" + K.HIST_DO + "; roky pred zavedením eura sú doň prepočítané spätne) "
+        + "sa losujú súvislé " + (SLOVOM[K.BLOK_ROKOV] || K.BLOK_ROKOV + "-ročné")
+        + " bloky a skladajú do nových priebehov. História platí len počas budovania majetku — "
+        + "aj tam sa odpočítava vstupný poplatok " + cislo(K.FEE_IN) + " % a správa "
+        + cislo(K.FEE_M) + " % ročne. Čerpanie počíta " + sCislom(K.REF_CERPANIE)
+        + " % ročne, v ktorých sú investičné náklady už zohľadnené, pred infláciou. "
+        + "Slabé výnosy hneď na začiatku čerpania môžu obdobie renty výrazne skrátiť; "
+        + "minulá výkonnosť nie je spoľahlivým ukazovateľom budúcich výsledkov.",
       konzultaciaNadpis: text(document.querySelector(".next h2")),
       konzultacia: Array.prototype.map.call(document.querySelectorAll(".next p"), text)
     };
@@ -169,6 +210,8 @@
       y = testTop + testH + 8;
     }
 
+    var vzorPomeru = new RegExp("([0-9]+)\\s*z\\s*" + N);
+
     d.riadky.forEach(function (r, index) {
       if (index === 1 && d.citlivostNadpis) {
         medzera(2);
@@ -188,12 +231,12 @@
          v PDF stálo holé „604 z 800 simulácií" - veľké zlaté číslo bez
          výsledku, na ktoré nadväzujúca veta nemala ako nadviazať. Preberáme
          preto celú vetu tak, ako ju stránka zložila. */
-      var uspesneHl = (r.hodnota.match(/([0-9]+)\s*z\s*800/) || [])[1];
+      var uspesneHl = (r.hodnota.match(vzorPomeru) || [])[1];
       var hodnotaHl = r.hodnota;
       /* A najmä: dokument nikde nehovoril, čo sa stalo vo zvyšku. Bez tejto
          vety si klient odnesie len to, koľkokrát to vyšlo. */
       var nepokrylo = uspesneHl
-        ? "V zvyšných " + (800 - Number(uspesneHl)) + " z 800 simulácií by majetok "
+        ? "V zvyšných " + (N - Number(uspesneHl)) + " z " + N + " simulácií by majetok "
           + "plánované výplaty nepokryl."
         : "";
       var panelH = 0;
@@ -234,8 +277,8 @@
       var yL = y;
       y = vrch;
       if (index) {
-        var pomer = (r.hodnota.match(/([0-9]+)\s*z\s*800/) || [])[1];
-        napis(pomer ? pomer + " z 800 simulácií" : r.hodnota,
+        var pomer = (r.hodnota.match(vzorPomeru) || [])[1];
+        napis(pomer ? pomer + " z " + N + " simulácií" : r.hodnota,
           OKRAJ + lava + 8, 8.2, "bold", SEDA, prava, 1.3);
         /* Predtým tu stálo oznamovacie „Všetky plánované výplaty boli pokryté."
            - minulý čas, bez väzby na počet. Vedľa vety „Túto úroveň spĺňa už
@@ -243,7 +286,7 @@
            všetko", čo je opak toho, čo model hovorí. Stránka má správne
            podmieňovací spôsob aj kvantifikátor, tak ich používame tiež. */
         napis(pomer
-          ? "Majetok by všetky plánované výplaty pokryl aspoň v " + pomer + " z 800 simulácií."
+          ? "Majetok by všetky plánované výplaty pokryl aspoň v " + pomer + " z " + N + " simulácií."
           : "Ilustračná úroveň.", OKRAJ + lava + 8, 7.8, "normal", SEDA, prava, 1.3);
       }
       y = Math.max(y, yL) + 2.5;
@@ -391,16 +434,24 @@
                  + m[2] + " % ročne počas vyplácania; obe ste zadali vy. "
                : "";
     })();
-    docasneSkrat(predpoklady[1], sadzby + "Zohľadňuje vstupný poplatok 1,5 %, správu 0,9 % ročne, zadanú infláciu a mesačný priebeh výpočtu; dane z výnosov nezohľadňuje.");
+    docasneSkrat(predpoklady[1], sadzby + "Zohľadňuje vstupný poplatok " + cislo(K.FEE_IN)
+      + " %, správu " + cislo(K.FEE_M) + " % ročne, zadanú infláciu a mesačný priebeh výpočtu; "
+      + "dane z výnosov nezohľadňuje.");
     docasneSkrat(predpoklady[2], dataDruhejStrany
       ? "Metodiku modelovaných simulácií nájdete na druhej strane."
       : "Tento scenár nemá obdobie budovania s vopred zvoleným koncom čerpania, preto sa historický test nezobrazuje.");
+    /* „Minulá výkonnosť nie je spoľahlivým ukazovateľom" stálo na prvej
+       strane, na ktorej niet ani jedného historického čísla — patrí k metodike
+       na druhej, a tam je teraz. Keď druhá strana nevznikne, výhrada zostáva
+       na prvej, aby dokument neodišiel bez nej. */
+    var budeDruhaStrana = !!(dataDruhejStrany && dataDruhejStrany.riadky.length);
+    if (budeDruhaStrana) docasneSkrat(document.querySelector(".blok .vystraha"), "");
     docasneSkrat(document.querySelector(".next h2"), "");
     docasneSkrat(document.querySelector(".next p"), "");
 
     /* Prvá strana kreslí číslovanie skôr, než sa pridá druhá - musí preto
        vopred vedieť, či nejaká druhá vôbec bude. */
-    window.PH_PDF_STRAN = dataDruhejStrany && dataDruhejStrany.riadky.length ? 2 : 1;
+    window.PH_PDF_STRAN = budeDruhaStrana ? 2 : 1;
     window.jspdf.jsPDF = ZachytavajuciKonstruktor;
     try {
       povodnePDF();
