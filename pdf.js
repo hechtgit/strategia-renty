@@ -71,6 +71,17 @@
       suhrn: suhrn,
       preKoho: text(document.getElementById("pre-koho")),
       vyhotovene: text(document.getElementById("vyhotovene")),
+      /* Tri míľniky ako čísla, nie ako veta - klient si vie 35 + 20 = 55
+         overiť na prvý pohľad. Berú sa z adresy, teda z toho istého zdroja,
+         akým je zložený celý výpočet. */
+      veky: (function () {
+        var q = new URLSearchParams(location.search);
+        var dnes = q.get("now"), start = q.get("start"), koniec = q.get("end");
+        if (!dnes || !start) return "";
+        var kusy = ["Vek dnes: " + dnes, "Začiatok čerpania: " + start];
+        if (koniec && q.get("pension") !== "perpetuity") kusy.push("Koniec: " + koniec);
+        return kusy.join("   ·   ");
+      })(),
       vystraha: text(document.querySelector(".blok .vystraha")),
       predpokladyNadpis: text(document.querySelector(".blok h2")),
       predpoklady: predpoklady,
@@ -149,13 +160,26 @@
     odstavec(d.nadpis, 17, "bold", TMAVA, SIRKA, 1.2);
     medzera(1.5);
     odstavec(d.uvod, 8.8, "normal", SEDA, SIRKA, 1.34);
+
+    /* Dokument hovoril „obdobie budovania majetku: 20 rokov" a „renta od 55
+       rokov", ale dnešný vek klienta neuvádzal nikde - tie dve čísla si teda
+       nemal ako spojiť ani overiť. Tri míľniky na jednom riadku to zavrú. */
+    if (d.veky) {
+      medzera(1.5);
+      odstavec(d.veky, 8, "bold", TMAVA, SIRKA, 1.3);
+    }
+
     medzera(2);
     ciara();
 
     /* ——— plán ——— */
     odstavec(d.plan, 12, "bold", TMAVA, SIRKA, 1.25);
-    medzera(0.5);
-    odstavec(d.ciel, 9, "normal", SEDA, SIRKA, 1.38);
+    /* d.ciel bol vytlačený dvakrát: raz v perexe (d.uvod ho obsahuje) a hneď
+       pod čiarou znova. */
+    if (d.ciel && d.uvod.indexOf(d.ciel) === -1) {
+      medzera(0.5);
+      odstavec(d.ciel, 9, "normal", SEDA, SIRKA, 1.38);
+    }
     medzera(1.5);
 
     /* ——— míľniky ——— */

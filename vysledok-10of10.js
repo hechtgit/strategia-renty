@@ -85,7 +85,7 @@
     tbody.innerHTML='<tr class="vas"><td class="kolko" colspan="2"><span class="vysledok-label">Výsledok modelovaných simulácií</span><strong>Majetok pokryl všetky plánované výplaty v '+success+'&nbsp;z&nbsp;800 simulácií</strong><span>Teda rentu '+fmt(rent)+' mesačne v dnešnej hodnote od '+start+' do '+end+' rokov, počas čerpania zvyšovanú o infláciu. Ide o podiel úspešných simulácií v tomto modeli, nie odhad pravdepodobnosti budúceho úspechu.</span></td></tr>';
     let sensitivity=odolnost.querySelector(".odolnost-citlivost");
     if(!sensitivity){sensitivity=document.createElement("details");sensitivity.className="odolnost-citlivost";tbody.closest("table").after(sensitivity);}
-    sensitivity.innerHTML='<summary>Doplňujúci detail: ako sa výsledok mení s vyššou rezervou</summary><p class="uvod">Dve ilustračné úrovne ukazujú citlivosť výsledku na vyšší vstup. Nie sú odporúčanými cieľmi ani odhadom budúcej pravdepodobnosti.</p>'+
+    sensitivity.innerHTML='<summary>Doplňujúci detail: ako sa výsledok mení s vyššou rezervou</summary><p class="uvod">Dve ilustračné úrovne ukazujú, ako by sa výsledok menil pri vyššom vstupe. Jednu z nich váš dnešný vstup už dosahuje.</p>'+
       riadokCitlivosti(600,meta600,75)+riadokCitlivosti(720,meta720,90);
     let conclusion=odolnost.querySelector(".odolnost-zaver");
     if(!conclusion){conclusion=document.createElement("p");conclusion.className="odolnost-zaver";sensitivity.before(conclusion);}

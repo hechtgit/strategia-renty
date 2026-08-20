@@ -647,7 +647,10 @@ function vykresli(){
     $('e-value').textContent='Bez konca';
     $('e-sub').textContent=`V tomto modelovom scenári zostáva majetok ${fmtEur(o.cap)} zachovaný.`;
   }else{
-    $('e-label').textContent='Plánovaný horizont';
+    /* endEff je VEK, nie počet rokov. Na stránke to drží veková os pod
+       kartami, ale v PDF žiadna os nie je - karta potom sama sebe protirečila:
+       veľké „90 rokov" ako horizont a hneď pod tým „35 rokov" ako dĺžka. */
+    $('e-label').textContent='Koniec čerpania vo veku';
     $('e-value').textContent=`${endEff} rokov`;
     $('e-sub').textContent=`${yrs(Math.max(0,endEff-S.start))} pravidelného čerpania.`;
   }
@@ -988,8 +991,8 @@ $('btn-pdf').addEventListener('click',async()=>{
     await cakajNaFinalnuCopyVysledku();
     if(!pdfNacitanie)pdfNacitanie=(async()=>{
       await Promise.all([nacitaj('jspdf.min.js'),nacitaj('pdf-font.js')]);
-      await nacitaj('pdf.js');
-      await nacitaj('pdf-alternativa.js?v=20260820d');
+      await nacitaj('pdf.js?v=20260820a');
+      await nacitaj('pdf-alternativa.js?v=20260820l');
     })();
     await pdfNacitanie;
     await window.PH_PDF();
@@ -1019,6 +1022,6 @@ if(window.parent!==window)
   addEventListener('load',()=>window.parent.postMessage({type:'ph-renta-na-zaciatok'},'*'));
 })();
 </script>
-<script src="vysledok-10of10.js?v=20260820b"></script>
+<script src="vysledok-10of10.js?v=20260820c"></script>
 </body>
 </html>

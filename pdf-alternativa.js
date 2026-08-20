@@ -51,9 +51,18 @@
     return {
       nadpis: text(odolnost.querySelector("h2")),
       uvod: text(document.getElementById("odolnost-uvod")),
+      /* Prvá odrážka („Vaša dnešná investícia: 856 425 €.") je tá istá veta,
+         ktorou začína zlatý panel hneď pod týmto boxom. Dva rámčeky pod sebou
+         otvárané rovnakou vetou pôsobia ako dvojité vykreslenie - a riadok
+         navyše je na tejto strane drahý. */
       testujeme: Array.prototype.map.call(
         odolnost.querySelectorAll(".odolnost-testuje li"), text
-      ),
+      /* Ostáva jediná odrážka - tá o základnom prepočte. Prvá („Vaša dnešná
+         investícia") otvárala aj panel pod boxom, druhá („Cieľ: renta…") je
+         doslova to, čo stojí v perexe nad ním. Cieľ sa v dokumente opakoval
+         štyrikrát; tu z neho ubúda štvrtý výskyt a strane sa uvoľní miesto
+         pre portrét v závere. */
+      ).filter(function (t) { return !/^Vaša dnešná investícia|^Cieľ:/.test(t); }),
       riadky: Array.prototype.map.call(
         zdrojoveRiadky,
         function (r) {
@@ -79,7 +88,10 @@
       citlivostNadpis: text(odolnost.querySelector(".odolnost-citlivost summary")),
       citlivostUvod: text(odolnost.querySelector(".odolnost-citlivost .uvod")),
       upozornenie: text(document.getElementById("odolnost-vystraha")),
-      metodika: "Každá z 800 modelovaných simulácií vzniká spojením súvislých päťročných blokov ročných výnosov MSCI World Net Total Return v EUR z rokov 1970–2025 do novej modelovanej kombinácie. História sa používa iba počas budovania majetku; čerpanie pracuje s plánovacím výnosom 4 % ročne po nákladoch, pred infláciou. Podiel úspešných simulácií nie je odhadom pravdepodobnosti budúceho úspechu.",
+      /* Kratšie a zároveň úplnejšie: pribudol názov metódy a to, že sa bloky
+         LOSUJÚ (bez toho znel postup ako deterministický), a ubudlo štvornásobné
+         opakovanie slova „model". Ušetrený riadok potrebuje záver strany. */
+      metodika: "Simulácie vznikajú metódou Monte Carlo: z výnosov indexu MSCI World (v EUR, 1970–2025) sa losujú súvislé päťročné bloky a skladajú do nových priebehov. História platí len počas budovania majetku; čerpanie počíta so 4 % ročne po nákladoch, pred infláciou. Slabé výnosy hneď na začiatku čerpania môžu obdobie renty výrazne skrátiť.",
       konzultaciaNadpis: text(document.querySelector(".next h2")),
       konzultacia: Array.prototype.map.call(document.querySelectorAll(".next p"), text)
     };
@@ -168,39 +180,70 @@
       var panelTop = y;
       var lava = index ? 112 : 104;
       var prava = SIRKA - lava - 8;
+      /* Stránka píše „Majetok pokryl všetky plánované výplaty v 604 z 800
+         simulácií". Regex z toho vytiahol číslo a SLOVESO ZAHODIL, takže
+         v PDF stálo holé „604 z 800 simulácií" - veľké zlaté číslo bez
+         výsledku, na ktoré nadväzujúca veta nemala ako nadviazať. Preberáme
+         preto celú vetu tak, ako ju stránka zložila. */
       var uspesneHl = (r.hodnota.match(/([0-9]+)\s*z\s*800/) || [])[1];
-      var hodnotaHl = uspesneHl ? uspesneHl + " z 800 simulácií" : r.hodnota;
+      var hodnotaHl = r.hodnota;
+      /* A najmä: dokument nikde nehovoril, čo sa stalo vo zvyšku. Bez tejto
+         vety si klient odnesie len to, koľkokrát to vyšlo. */
+      var nepokrylo = uspesneHl
+        ? "V zvyšných " + (800 - Number(uspesneHl)) + " z 800 simulácií by majetok "
+          + "plánované výplaty nepokryl."
+        : "";
       var panelH = 0;
+      /* Hlavný panel bol dvojstĺpcový: vľavo dva riadky, vpravo šesť, a medzi
+         nimi polovica rámčeka prázdna. Pod sebou na celú šírku sa dlhá veta
+         zalomí do dvoch riadkov namiesto piatich - panel je nižší a nič
+         nezíva. Detailné riadky nižšie dvojstĺpcové zostávajú, tam sú obe
+         strany podobne dlhé a porovnanie vedľa seba dáva zmysel. */
+      var PLNA = SIRKA - 12;
       if (!index) {
-        /* Výška bola zapísaná natvrdo (37). Keď sa text sprava skrátil, rámček
-           zostal rovnako vysoký a pod obsahom ostala prázdna plocha. Ráta sa
-           preto z toho, čo sa doň naozaj vojde. */
-        var hLava = vyskaTextu(r.nadpis, 10, lava, 1.3)
-                  + vyskaTextu(r.vysvetlenie, 8.5, lava, 1.35);
-        var hPrava = vyskaTextu(hodnotaHl, 12.2, prava, 1.24)
-                   + vyskaTextu(r.doplnenie, 8.3, prava, 1.4);
-        panelH = Math.max(hLava, hPrava) + 12;
+        panelH = vyskaTextu(r.nadpis, 10, PLNA, 1.3)
+               + vyskaTextu(r.vysvetlenie, 8.5, PLNA, 1.35)
+               + 3
+               + vyskaTextu(hodnotaHl, 12.2, PLNA, 1.24)
+               + (nepokrylo ? 1.5 + vyskaTextu(nepokrylo, 8.3, PLNA, 1.4) : 0)
+               + vyskaTextu(r.doplnenie, 8.3, PLNA, 1.4)
+               + 12;
         doc.setFillColor(250, 246, 238);
         doc.setDrawColor.apply(doc, ZLATA);
         doc.setLineWidth(0.35);
         doc.roundedRect(OKRAJ, panelTop, SIRKA, panelH, 1.8, 1.8, "FD");
-        y += 6;
+        y += 6;   /* text sa predtým dotýkal rámu - vnútorný okraj bol nula */
       }
       var vrch = y;
-      napis(r.nadpis, OKRAJ, index ? 9.2 : 10, "bold", TMAVA, lava, 1.3);
-      napis(r.vysvetlenie, OKRAJ, index ? 7.8 : 8.5, "normal", SEDA, lava, 1.35);
+      if (!index) {
+        var xP = OKRAJ + 6;
+        napis(r.nadpis, xP, 10, "bold", TMAVA, PLNA, 1.3);
+        napis(r.vysvetlenie, xP, 8.5, "normal", SEDA, PLNA, 1.35);
+        medzera(3);
+        napis(hodnotaHl, xP, 12.2, "bold", ZLATA, PLNA, 1.24);
+        if (nepokrylo) { medzera(1.5); napis(nepokrylo, xP, 8.3, "bold", TMAVA, PLNA, 1.4); }
+        napis(r.doplnenie, xP, 8.3, "normal", SEDA, PLNA, 1.4);
+        y = Math.max(panelTop + panelH, y) + 8;
+        return;
+      }
+      napis(r.nadpis, OKRAJ, 9.2, "bold", TMAVA, lava, 1.3);
+      napis(r.vysvetlenie, OKRAJ, 7.8, "normal", SEDA, lava, 1.35);
       var yL = y;
       y = vrch;
       if (index) {
         var pomer = (r.hodnota.match(/([0-9]+)\s*z\s*800/) || [])[1];
-        var percento = pomer === "600" ? "75 %" : pomer === "720" ? "90 %" : "";
-        napis((pomer ? pomer + " z 800 simulácií" : r.hodnota) + (percento ? " (" + percento + " simulácií v tomto modeli)" : ""), OKRAJ + lava + 8, 8.2, "bold", SEDA, prava, 1.3);
-        napis("Všetky plánované výplaty boli pokryté.", OKRAJ + lava + 8, 7.8, "normal", SEDA, prava, 1.3);
-      } else {
-        napis(hodnotaHl, OKRAJ + lava + 8, 12.2, "bold", ZLATA, prava, 1.24);
-        napis(r.doplnenie, OKRAJ + lava + 8, 8.3, "normal", SEDA, prava, 1.4);
+        napis(pomer ? pomer + " z 800 simulácií" : r.hodnota,
+          OKRAJ + lava + 8, 8.2, "bold", SEDA, prava, 1.3);
+        /* Predtým tu stálo oznamovacie „Všetky plánované výplaty boli pokryté."
+           - minulý čas, bez väzby na počet. Vedľa vety „Túto úroveň spĺňa už
+           vaša dnešná investícia" sa to čítalo ako „moje peniaze pokryli
+           všetko", čo je opak toho, čo model hovorí. Stránka má správne
+           podmieňovací spôsob aj kvantifikátor, tak ich používame tiež. */
+        napis(pomer
+          ? "Majetok by všetky plánované výplaty pokryl aspoň v " + pomer + " z 800 simulácií."
+          : "Ilustračná úroveň.", OKRAJ + lava + 8, 7.8, "normal", SEDA, prava, 1.3);
       }
-      y = index ? Math.max(y, yL) + 2.5 : Math.max(panelTop + panelH, y, yL) + 8;
+      y = Math.max(y, yL) + 2.5;
     });
 
     if (d.zaver) {
@@ -229,19 +272,25 @@
          Spodný okraj strany je inde 16 mm; tento blok smie ísť až na 8 mm.
          Práve tých 8 mm rozhoduje o tom, či sa sekcia zmestí na druhú stranu -
          a keďže je posledná na strane, užší okraj pod ňou nie je vidieť. */
-      var VNU = 6;
+      /* Sekcia potrebovala s portrétom 50 mm a na strane ich zostáva 47.
+         Tie tri milimetre sa berú z vnútorných okrajov a medzery nad
+         tlačidlom - nie z textu ani z veľkosti fotky. */
+      var VNU = 5;
       var FOTO = d.portret ? 26 : 0;
       var MEDZI = FOTO ? 6 : 0;
       var TXT = SIRKA - 2 * VNU - FOTO - MEDZI;
-      var CTA_S = 62, CTA_V = 9;
+      var CTA_S = 62, CTA_V = 8.5;
 
-      var DOSTUPNE = doc.internal.pageSize.getHeight() - 8 - y;
+      /* Pätka je ukotvená natvrdo na 282 mm. Predtým som blok pustil až na
+         289 mm, čo je 7 mm POD ňu - v tomto scenári to nevyskočilo, ale bola
+         to čakajúca chyba. */
+      var DOSTUPNE = 282 - 4 - y;
       function vyskaListu(sFotkou) {
         var sirka = SIRKA - 2 * VNU - (sFotkou ? FOTO + MEDZI : 0);
         var h = vyskaTextu(LIST_NADPIS, 12.5, sirka, 1.25) + 2
               + vyskaTextu(LIST_TELO, 8.3, sirka, 1.4);
         return { hlava: Math.max(sFotkou ? FOTO : 0, h),
-                 cela: VNU + Math.max(sFotkou ? FOTO : 0, h) + 3 + CTA_V + VNU };
+                 cela: VNU + Math.max(sFotkou ? FOTO : 0, h) + 2 + CTA_V + VNU };
       }
       /* Pri dlhšom obsahu nad sekciou nemusí zostať na portrét miesto. Vtedy
          padá on, nie text - bez portrétu je blok o výšku fotky nižší. Text sa
@@ -250,7 +299,9 @@
       if (!sFotkou) { FOTO = 0; MEDZI = 0; TXT = SIRKA - 2 * VNU; }
       var miery = vyskaListu(sFotkou);
       var hHlava = miery.hlava;
-      var konzH = Math.min(miery.cela, DOSTUPNE);
+      /* Rámček sa NESMIE orezať pod výšku obsahu - predtým som ho zmenšil na
+         dostupné miesto, ale text sa kreslil ďalej a tlačidlo pristálo naň. */
+      var konzH = miery.cela;
 
       var konzTop = y;
       doc.setFillColor(250, 246, 238);
@@ -258,7 +309,11 @@
       doc.setLineWidth(0.3);
       doc.roundedRect(OKRAJ, konzTop, SIRKA, konzH, 1.8, 1.8, "FD");
 
-      if (d.portret) {
+      /* Podmienka musí byť `sFotkou`, nie `d.portret`. Keď sa portrét nezmestí,
+         FOTO je nula - a addImage s nulovým rozmerom si jsPDF vyloží ako
+         „použi vlastnú veľkosť obrázka", takže 400 px vykreslil cez pol
+         strany. */
+      if (sFotkou) {
         var fx = OKRAJ + VNU, fy = konzTop + VNU + Math.max(0, (hHlava - FOTO) / 2);
         try { doc.addImage(d.portret, "PNG", fx, fy, FOTO, FOTO); } catch (e) {}
         doc.setDrawColor.apply(doc, ZLATA);
@@ -290,6 +345,12 @@
     doc.setTextColor.apply(doc, SEDA);
     doc.text("Modelácia privátnej renty · hechtberger.com", OKRAJ, 287);
     doc.text("2 / 2", OKRAJ + SIRKA, 287, { align: "right" });
+    /* Práve táto strana nesie čísla úspešnosti aj výzvu na konzultáciu, a
+       pritom bola jediná bez akejkoľvek výhrady. Ak ju niekto odfotí alebo
+       pošle samostatne, išla by von bez upozornenia. */
+    doc.setFontSize(6.2);
+    doc.text("Ilustračný a vzdelávací výpočet. Nejde o investičné poradenstvo ani odporúčanie.",
+      OKRAJ, 291.5);
   }
 
   window.PH_PDF = async function () {
@@ -315,9 +376,21 @@
     }
     var predpoklady = document.querySelectorAll(".assumptions .blok p:not(.vystraha)");
     docasneSkrat(predpoklady[0], "Výpočet používa zhodnotenie, ktoré ste zadali vy. Nejde o odhad ani odporúčanie.");
-    docasneSkrat(predpoklady[1], "Zohľadňuje vstupný poplatok 1,5 %, správu 0,9 % ročne, zadanú infláciu a mesačný priebeh výpočtu; dane z výnosov nezohľadňuje.");
+    /* Model počíta s DVOMA sadzbami - jednou počas budovania, druhou počas
+       vyplácania - a potrebný majetok určuje prevažne tá druhá. V PDF stála
+       len prvá, takže kľúčové číslo nemalo v dokumente oporu. Sadzby sa
+       neprepisujú natvrdo: čítajú sa z vety, ktorú stránka zloží do
+       #metodika, aby sa pri zmene predpokladu nerozišli. */
+    var sadzby = (function () {
+      var m = text(document.getElementById("metodika"))
+        .match(/so zhodnotením\s*([0-9.,]+)\s*%[^0-9]+([0-9.,]+)\s*%/);
+      return m ? "Výpočet počíta so zhodnotením " + m[1] + " % ročne počas budovania majetku a "
+                 + m[2] + " % ročne počas vyplácania; obe ste zadali vy. "
+               : "";
+    })();
+    docasneSkrat(predpoklady[1], sadzby + "Zohľadňuje vstupný poplatok 1,5 %, správu 0,9 % ročne, zadanú infláciu a mesačný priebeh výpočtu; dane z výnosov nezohľadňuje.");
     docasneSkrat(predpoklady[2], dataDruhejStrany
-      ? "Základný prepočet a modelované simulácie používajú dve odlišné metodiky, vysvetlené na druhej strane."
+      ? "Metodiku modelovaných simulácií nájdete na druhej strane."
       : "Tento scenár nemá obdobie budovania s vopred zvoleným koncom čerpania, preto sa historický test nezobrazuje.");
     docasneSkrat(document.querySelector(".next h2"), "");
     docasneSkrat(document.querySelector(".next p"), "");
