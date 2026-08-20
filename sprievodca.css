@@ -86,11 +86,11 @@
    spoľahlivo. */
 html.za-pripnute .za-znovu{position:absolute;bottom:auto;right:auto}
 
-/* Zlatá pilulka je zámerne TMAVŠIA (#7f5416) než hlavné tlačidlá stránky
-   (--btn-gold #9a6929). Dve rovnako zlaté tlačidlá by si konkurovali a klient
-   by nevedel, ktoré je to hlavné - sprievodca je ponuka, konzultácia je cieľ.
-   Odtieň nie je nový: tou istou farbou je písané počítadlo krokov aj pás
-   postupu v bubline. */
+/* Pilulka nesie farbu prvej karty (#ad8652) - je to ten istý odtieň, na ktorý
+   sa klient pozerá hneď vedľa, takže tlačidlo pôsobí ako súčasť aplikácie, nie
+   ako nalepený ovládač. Text je preto tmavý ako v kartách: krémový by mal na
+   tejto zlatej kontrast 3,15:1, tmavý má 4,73:1 a prejde AA. Biely obiehajúci
+   lem má 3,20:1, čo pre grafický prvok stačí. */
 
 /* Po obvode tlačidla obieha zlatý segment - stále, pokojným tempom. Nahradil
    pulzovanie, ktoré na minútu nafúklo tieň a potom stíchlo: to si pozornosť
@@ -102,7 +102,7 @@ html.za-pripnute .za-znovu{position:absolute;bottom:auto;right:auto}
 @keyframes za-obeh{to{stroke-dashoffset:calc(-1 * var(--za-obvod))}}
 .za-znovu svg{position:absolute;inset:0;overflow:visible;pointer-events:none}
 .za-znovu rect{fill:none;stroke-linecap:round}
-.za-znovu .za-zaklad{stroke:rgba(255,255,255,.2);stroke-width:1.5}
+.za-znovu .za-zaklad{stroke:rgba(255,255,255,.3);stroke-width:1.5}
 .za-znovu .za-bezec{stroke:#fffaf0;stroke-width:2;
   stroke-dasharray:var(--za-seg) var(--za-medzera);
   animation:za-obeh 6s linear infinite}
@@ -117,15 +117,15 @@ html.za-pripnute .za-znovu{position:absolute;bottom:auto;right:auto}
    výraznejší znak než bodka a bodka mu popri ňom len prekážala. */
 .za-znovu{position:fixed;left:16px;bottom:16px;z-index:8000;
   display:inline-flex;align-items:center;padding:8px 15px;border-radius:999px;
-  cursor:pointer;background:#7f5416;border:1px solid rgba(255,255,255,.22);
-  color:#fff8ec;font:600 13px var(--sans,'Asap',system-ui,sans-serif);
+  cursor:pointer;background:#ad8652;border:0;
+  color:#2b2118;font:600 13px var(--sans,'Asap',system-ui,sans-serif);
   box-shadow:0 8px 22px rgba(0,0,0,.4);
   transition:background .2s,color .2s,border-color .2s}
 /* Text potrebuje vlastnú vrstvu: <svg> je absolútne a v DOM stojí za ním,
    takže by sa inak kreslilo cezeň. */
 .za-text{position:relative;z-index:1}
-.za-znovu:hover{background:#96651e;color:#fff;border-color:rgba(255,255,255,.45)}
-.za-znovu:focus-visible{outline:2px solid #9a6929;outline-offset:3px}
+.za-znovu:hover{background:#b8925f;color:#000}
+.za-znovu:focus-visible{outline:2px solid #2b2118;outline-offset:3px}
 
 /* ----------------------------------------------------------- záverečná */
 

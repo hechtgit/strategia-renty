@@ -464,10 +464,13 @@
     if (!app) return;
     const umiestni = () => {
       const r = app.getBoundingClientRect();
-      const odsadenie = parseFloat(getComputedStyle(app).paddingRight) || 16;
-      pilulka.style.top = Math.round(r.top + window.scrollY + 6) + 'px';
+      /* Rovnaká medzera zhora aj sprava, aby roh pôsobil symetricky. Berie sa
+         pravé odsadenie aplikácie: tým pilulka nikdy nepresiahne stĺpec
+         obsahu a na užších displejoch sa zúži spolu s ním. */
+      const medzera = parseFloat(getComputedStyle(app).paddingRight) || 16;
+      pilulka.style.top = Math.round(r.top + window.scrollY + medzera) + 'px';
       pilulka.style.left =
-        Math.round(r.right + window.scrollX - odsadenie - pilulka.offsetWidth) + 'px';
+        Math.round(r.right + window.scrollX - medzera - pilulka.offsetWidth) + 'px';
     };
     umiestni();
     requestAnimationFrame(umiestni);
