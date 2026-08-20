@@ -86,25 +86,46 @@
    spoľahlivo. */
 html.za-pripnute .za-znovu{position:absolute;bottom:auto;right:auto}
 
-/* Prvú minútu od chvíle, keď sa aplikácia dostane pred návštevníka, si
-   tlačidlo pýta pozornosť - dýchaním, nie pohybom po stránke. Potom stíchne,
-   aby pri práci s plánom nerušilo. */
-@keyframes za-pulz{
-  0%,100%{box-shadow:0 8px 22px rgba(0,0,0,.4),0 0 0 0 rgba(154,105,41,.42)}
-  50%    {box-shadow:0 8px 22px rgba(0,0,0,.4),0 0 0 9px rgba(154,105,41,0)}
-}
-.za-znovu.pulzuje{animation:za-pulz 2.4s ease-out infinite}
+/* Zlatá pilulka je zámerne TMAVŠIA (#7f5416) než hlavné tlačidlá stránky
+   (--btn-gold #9a6929). Dve rovnako zlaté tlačidlá by si konkurovali a klient
+   by nevedel, ktoré je to hlavné - sprievodca je ponuka, konzultácia je cieľ.
+   Odtieň nie je nový: tou istou farbou je písané počítadlo krokov aj pás
+   postupu v bubline. */
+
+/* Po obvode tlačidla obieha zlatý segment - stále, pokojným tempom. Nahradil
+   pulzovanie, ktoré na minútu nafúklo tieň a potom stíchlo: to si pozornosť
+   vypýtalo raz, obeh ju drží. Segment má 62 % obvodu, jeden obeh 6 s. Pod ním
+   leží tichý statický obrys, aby tlačidlo malo tvar aj v tej časti obehu, kde
+   segment práve nie je. Obvod aj dĺžku dopočítava skript z rozmerov, ktoré
+   tlačidlo naozaj má - natvrdo zapísané číslo by pri inej dĺžke textu segment
+   useklo. */
+@keyframes za-obeh{to{stroke-dashoffset:calc(-1 * var(--za-obvod))}}
+.za-znovu svg{position:absolute;inset:0;overflow:visible;pointer-events:none}
+.za-znovu rect{fill:none;stroke-linecap:round}
+.za-znovu .za-zaklad{stroke:rgba(255,255,255,.2);stroke-width:1.5}
+.za-znovu .za-bezec{stroke:#fffaf0;stroke-width:2;
+  stroke-dasharray:var(--za-seg) var(--za-medzera);
+  animation:za-obeh 6s linear infinite}
+/* Počas behu sprievodcu je obeh zbytočný - tlačidlo vtedy hovorí „Ukončiť“
+   a pozornosť patrí pokynu, nie jemu. */
+.za-znovu.bezi .za-bezec{animation:none;opacity:.45}
 @media (prefers-reduced-motion:reduce){
-  .za-znovu.pulzuje{animation:none;border-color:rgba(154,105,41,.6)}
+  .za-znovu .za-bezec{animation:none;opacity:.55}
 }
+
+/* Zlatá pilulka bez bodky vo vnútri - obrys, ktorý po nej obieha, je
+   výraznejší znak než bodka a bodka mu popri ňom len prekážala. */
 .za-znovu{position:fixed;left:16px;bottom:16px;z-index:8000;
-  display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:999px;
-  cursor:pointer;background:#fdf8ef;border:1px solid rgba(43,33,24,.14);
-  color:#5c4d3b;font:600 13px var(--sans,'Asap',system-ui,sans-serif);
-  box-shadow:0 8px 22px rgba(0,0,0,.4);transition:color .2s,border-color .2s}
-.za-znovu:hover{color:#2b2118;border-color:rgba(154,105,41,.6)}
+  display:inline-flex;align-items:center;padding:8px 15px;border-radius:999px;
+  cursor:pointer;background:#7f5416;border:1px solid rgba(255,255,255,.22);
+  color:#fff8ec;font:600 13px var(--sans,'Asap',system-ui,sans-serif);
+  box-shadow:0 8px 22px rgba(0,0,0,.4);
+  transition:background .2s,color .2s,border-color .2s}
+/* Text potrebuje vlastnú vrstvu: <svg> je absolútne a v DOM stojí za ním,
+   takže by sa inak kreslilo cezeň. */
+.za-text{position:relative;z-index:1}
+.za-znovu:hover{background:#96651e;color:#fff;border-color:rgba(255,255,255,.45)}
 .za-znovu:focus-visible{outline:2px solid #9a6929;outline-offset:3px}
-.za-znovu::before{content:"";width:6px;height:6px;border-radius:50%;background:#9a6929}
 
 /* ----------------------------------------------------------- záverečná */
 

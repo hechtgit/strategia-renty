@@ -282,10 +282,36 @@
   const dopredu = [];
   let vrstva, tien, prstenec, bublina, elNadpis, elPopis, elPocitadlo, elPas, tlSpat, tlDalej;
   let pilulka = null;
+  /* Text sa mení do vlastného <span>. textContent na celom tlačidle by zmazal
+     aj <svg> s obiehajúcim lemom - ten by po prvom prepnutí zmizol. Zmena textu
+     mení šírku, takže sa hneď prepočíta aj obvod. */
   const obnovPilulku = () => {
     if (!pilulka) return;
-    pilulka.textContent = bezi ? 'Ukončiť sprievodcu' : 'Sprievodca';
+    const t = pilulka.querySelector('.za-text');
+    if (t) t.textContent = bezi ? 'Ukončiť sprievodcu' : 'Sprievodca';
+    pilulka.classList.toggle('bezi', bezi);
+    obkresliPilulku();
   };
+
+  /* Obvod pilulky: dve rovné strany plus kruh z oboch polkruhových koncov.
+     Ráta sa z rozmerov, ktoré tlačidlo naozaj má - natvrdo zapísané číslo by
+     pri dlhšom texte („Ukončiť sprievodcu") segment useklo. */
+  function obkresliPilulku() {
+    if (!pilulka) return;
+    const r = pilulka.getBoundingClientRect();
+    if (!r.width) return;
+    const w = r.width - 2, h = r.height - 2;   /* 1 px na stranu pre stroke */
+    pilulka.querySelectorAll('rect').forEach(rect => {
+      rect.setAttribute('x', 1); rect.setAttribute('y', 1);
+      rect.setAttribute('width', w); rect.setAttribute('height', h);
+      rect.setAttribute('rx', h / 2);
+    });
+    const obvod = 2 * (w - h) + Math.PI * h;
+    const seg = obvod * 0.62;
+    pilulka.style.setProperty('--za-obvod', obvod.toFixed(1) + 'px');
+    pilulka.style.setProperty('--za-seg', seg.toFixed(1) + 'px');
+    pilulka.style.setProperty('--za-medzera', (obvod - seg).toFixed(1) + 'px');
+  }
 
   /* ------------------------------------------------------------- stavba */
 
@@ -352,7 +378,9 @@
     const p = document.createElement('button');
     p.type = 'button';
     p.className = 'za-znovu';
-    p.textContent = 'Sprievodca';
+    p.innerHTML = '<span class="za-text">Sprievodca</span>'
+      + '<svg aria-hidden="true"><rect class="za-zaklad"></rect>'
+      + '<rect class="za-bezec"></rect></svg>';
     p.addEventListener('click', () => (bezi ? koniec(false) : start()));
     document.body.appendChild(p);
     /* Tá istá pilulka sprievodcu spúšťa aj ukončuje - musí to povedať, inak
@@ -443,7 +471,11 @@
     };
     umiestni();
     requestAnimationFrame(umiestni);
-    addEventListener('resize', umiestni);
+    addEventListener('resize', () => { umiestni(); obkresliPilulku(); });
+    /* Kým sa nenačíta Asap, tlačidlo má šírku v náhradnom písme - obvod by
+       sedel na rozmer, ktorý o chvíľu prestane platiť. */
+    if (document.fonts && document.fonts.ready)
+      document.fonts.ready.then(() => { umiestni(); obkresliPilulku(); });
     document.documentElement.classList.add('za-pripnute');
 
     /* Pulz sa spustí až keď je aplikácia naozaj pred návštevníkom - inak by
