@@ -674,8 +674,21 @@ html,body{background:var(--bg)}
 .handle small{display:none}
 .handle:hover:not([data-locked="1"]){box-shadow:none}
 .handle:hover:not([data-locked="1"])>span{box-shadow:0 0 0 2px rgba(255,255,255,.28)}
-.card{width:320px;min-height:292px;background:var(--surface);border:0;border-radius:6px;
+/* Tri karty stoja v jednom rade nad osou, takže si šírku delia. Na širokom
+   displeji zostáva pôvodných 320 px; zužujú sa až vtedy, keď by sa vedľa seba
+   nezmestili. Pri pevných 320 px sa pod ~1200 px prekrývali - o 168 px pri
+   1100 px a o 228 px pri 900 px. */
+.card{width:min(320px,calc((100% - 28px)/3));min-height:292px;
+  background:var(--tone,var(--surface));border:0;border-radius:6px;
   padding:19px 20px 20px;color:var(--on-gold);box-shadow:0 22px 52px rgba(0,0,0,.24)}
+/* Tri odtiene jednej zlatej, nie tri farby. Poradie kariet je vždy rovnaké
+   (dnes ≤ začiatok < koniec), preto môže mať každá pevný odtieň: zľava doprava
+   sa zlatá postupne rozjasňuje - čas plynie a plán sa rozsvecuje. Odtieň 34,3°
+   a sýtosť 36 % držíme, mení sa výhradne svetlosť 50 → 56 → 60 %. Keď sýtosť
+   rástla so svetlosťou, tretia karta vyšla broskyňová a druhá hnedá. */
+#c-today{--tone:#ad8652}
+#c-start{--tone:#b79566}
+#c-end{--tone:#be9e74}
 .card.above{top:var(--card-top,10px)}
 .card.below{top:var(--card-top,405px)}
 .card::after{display:none}
