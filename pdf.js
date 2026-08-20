@@ -400,20 +400,43 @@
 
       doc.setFont("Asap", "normal"); doc.setFontSize(6.6);
       doc.setTextColor(SEDA[0], SEDA[1], SEDA[2]);
-      if (xS - gx > 24) doc.text("BUDOVANIE MAJETKU", gx + 2, gy + 3);
-      if (gx + gw - xS > 20) doc.text("ČERPANIE RENTY", xS + 2, gy + 3);
-
       /* Majetok na začiatku renty je jediné číslo, ktoré si z krivky treba
          odniesť - a je to tá istá suma, aká stojí v karte „Začiatok čerpania".
          Píše sa na tú stranu zvislice, kde je viac miesta, aby nevisel cez
-         okraj strany. */
+         okraj strany.
+
+         Suma aj popisky fáz mieria do toho istého pruhu pod horným okrajom.
+         Kým krivka po začatí renty ešte stúpa - a to robí vždy, keď čistý
+         výnos prevýši prvé výplaty - vrchol klesne presne medzi ne a suma sa
+         čítala cez „ČERPANIE RENTY". Preto sa najprv zistí, kde suma leží,
+         a popiska na jej strane sa až potom umiestni tak, aby jej neliezla
+         do cesty. */
+      doc.setFont("Asap", "bold"); doc.setFontSize(8);
+      var sirkaSumy = doc.getTextWidth(krivka.vrcholText);
+      var ySumy = yOf(krivka.vrchol) - 1.8;
+      var doprava = gx + gw - xS > xS - gx;
+      var xSumy = doprava ? xS + 2.6 : xS - 2.6 - sirkaSumy;
+      /* Popisky sedia na účtovnej čiare gy+3; ich horný okraj je asi 2,3 mm
+         nad ňou. Suma im prekáža, kým jej účiara nie je aspoň o riadok vyššie. */
+      var vKonflikte = ySumy < gy + 5;
+
+      doc.setFont("Asap", "normal"); doc.setFontSize(6.6);
+      doc.setTextColor(SEDA[0], SEDA[1], SEDA[2]);
+      var xVlavo = gx + 2;
+      var xVpravo = (vKonflikte && doprava) ? xSumy + sirkaSumy + 4 : xS + 2;
+      /* Vľavo sa popiska posunúť nedá - je na okraji. Keď by suma sadla na ňu,
+         radšej odpadne: fáza sa dá odčítať aj zo zvislice a z rokov pod osou,
+         suma nikde inde nie je. */
+      var vlavoVolno = !(vKonflikte && !doprava)
+        || xSumy > xVlavo + doc.getTextWidth("BUDOVANIE MAJETKU") + 4;
+      if (xS - xVlavo > 24 && vlavoVolno) doc.text("BUDOVANIE MAJETKU", xVlavo, gy + 3);
+      if (gx + gw - xVpravo > 20) doc.text("ČERPANIE RENTY", xVpravo, gy + 3);
+
       doc.setFont("Asap", "bold"); doc.setFontSize(8);
       doc.setTextColor(ZLATA[0], ZLATA[1], ZLATA[2]);
       doc.setFillColor(ZLATA[0], ZLATA[1], ZLATA[2]);
       doc.circle(xS, yOf(krivka.vrchol), 0.8, "F");
-      var doprava = gx + gw - xS > xS - gx;
-      doc.text(krivka.vrcholText, doprava ? xS + 2.6 : xS - 2.6, yOf(krivka.vrchol) - 1.8,
-        { align: doprava ? "left" : "right" });
+      doc.text(krivka.vrcholText, xSumy, ySumy);
 
       y = gy + gh + 3.4;
       doc.setFont("Asap", "normal"); doc.setFontSize(6.8);
