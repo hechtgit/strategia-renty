@@ -265,7 +265,12 @@
 
     var telo = document.createElement("section");
     telo.className = "cz-body";
-    var audioSlug = window.matchMedia("(max-width:480px)").matches
+    /* Tá istá podmienka, akou prepína rozloženie samotná aplikácia. Kým tu
+       stálo 480 px, tablet a užšie okno dostali mobilnú mapu, ale desktopové
+       audio — a to hovorí „vpravo hore" a „desať krokov", čo na mape neplatí
+       ani raz. Pri zmene hranice v aplikácii treba zmeniť aj túto. */
+    var audioSlug = window.matchMedia(
+        "(max-width:860px),(max-height:520px) and (any-pointer:coarse)").matches
       ? "strategia-privatnej-renty-mobile"
       : "strategia-privatnej-renty";
     telo.innerHTML =
