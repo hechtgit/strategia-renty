@@ -1110,16 +1110,16 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
     </section>
   </div>
 
-  <section class="assumptions-block" data-e style="--d:1.68s">
-    <details class="metodika">
-      <summary>Použité predpoklady</summary>
-      <p id="assump"></p>
-    </details>
-    <details class="metodika">
-      <summary>Technické detaily výpočtu</summary>
-      <p id="assump-detail"></p>
-    </details>
-  </section>
+  <!-- „Použité predpoklady" odstránené 2026-08-20. Hovorilo to isté, čo klient
+       nájde pod „i" pri zhodnotení a čo mu povie audio - a to isté, len s väčšou
+       váhou, hovorí právna výhrada v pätičke. Na obrazovke tak stála výhrada
+       dvakrát. S odsekom padol aj rám sekcie: po presune technických detailov
+       do panela pod „i" by z nej ostali len dve čiary okolo prázdna.
+
+       Technické detaily zostávajú v DOM, lebo si ich vrstva vylepšení
+       vyzdvihuje do panela pod „i" - preto skrytý držiak bez rámu, nie
+       rozbaľovacie na stránke. -->
+  <div hidden><p id="assump-detail"></p></div>
 
   <!-- Poradenský CMA pohľad. Klient ho nikdy neuvidí: sekcia je `hidden` a odomkne
        ju až poradenský režim. Vizuálne používa tie isté komponenty ako zvyšok
@@ -2768,8 +2768,8 @@ if(ANIM&&!REDUCED){
      Vo vloženom ráme si nevie scrollovať (rám je zamknutý na 0,0, rodič je na
      inej doméne), preto pri každom kroku pošle rodičovi rozsah, ktorý má byť
      vidieť; poslucháč je v code injection stránky. Na mobile sa nespúšťa. -->
-<link rel="stylesheet" href="sprievodca.css?v=20260820k">
-<script src="sprievodca.js?v=20260820k"></script>
+<link rel="stylesheet" href="sprievodca.css?v=20260820l">
+<script src="sprievodca.js?v=20260820l"></script>
 
 <script>
 /* ---- Vloženie do Squarespace: hlásenie výšky rodičovi ----
