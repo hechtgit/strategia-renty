@@ -1235,10 +1235,10 @@ $('btn-pdf').addEventListener('click',async()=>{
     if(!pdfNacitanie)pdfNacitanie=(async()=>{
       await Promise.all([nacitaj('jspdf.min.js'),nacitaj('pdf-font.js')]);
       await nacitaj('pdf.js');
-      await nacitaj('pdf-alternativa.js?v=20260820a');
+      await nacitaj('pdf-alternativa.js?v=20260820d');
     })();
     await pdfNacitanie;
-    window.PH_PDF();
+    await window.PH_PDF();
   }catch(e){
     console.warn('PDF sa nepodarilo zložiť, tlačím',e);
     pdfNacitanie=null;

@@ -6,6 +6,37 @@
   "use strict";
 
   var povodnePDF = window.PH_PDF;
+
+  /* Portrét je kruhový PNG s priehľadným pozadím - jsPDF orezať do kruhu nevie,
+     tak kruh nesie priamo obrázok a zlatý lem sa dokreslí. Sťahuje sa hneď pri
+     načítaní tohto súboru; ak by sa nestihol alebo chýbal, sekcia sa vykreslí
+     bez neho. */
+  var portretData = null;
+  var portretHotovy = fetch("portrait-petr-kruh.png")
+    .then(function (r) { return r.ok ? r.blob() : null; })
+    .then(function (b) {
+      if (!b) return null;
+      return new Promise(function (hotovo) {
+        var fr = new FileReader();
+        fr.onload = function () { portretData = fr.result; hotovo(fr.result); };
+        fr.onerror = function () { hotovo(null); };
+        fr.readAsDataURL(b);
+      });
+    })
+    .catch(function () { return null; });
+
+  /* Záverečná sekcia je osobné oslovenie od Petra, nie marketingový blok.
+     Text píše Redaktor (job j-20260820-170542-6eba); tu je preto natvrdo a
+     nečíta sa zo stránky - na webe tá sekcia vyzerá inak a je dlhšia.
+     Oproti dodanému zneniu sú dve opravy kvôli súladu so zvyškom: „vy" sa
+     všade píše malým písmenom a produkt sa volá privátna, nie súkromná renta. */
+  var LIST_NADPIS = "Od čísla k stratégii";
+  var LIST_TELO = "Táto modelácia vám dáva prvý obraz o tom, aký majetok môže byť "
+    + "potrebný pre vašu privátnu rentu. Nevidí však celý váš majetok, ďalšie "
+    + "investície, rezervu, likviditu ani rozhodnutia, ktoré máte pred sebou. "
+    + "Na konzultácii ju viem zasadiť do vašej reality a oddeliť zaujímavé číslo "
+    + "od stratégie, podľa ktorej sa dá pokojne rozhodovať. Preto má zmysel "
+    + "sadnúť si k tomu spolu.";
   if (typeof povodnePDF !== "function" || !window.jspdf || !window.jspdf.jsPDF) return;
 
   function text(el) {
@@ -191,24 +222,65 @@
 
     if (d.konzultaciaNadpis) {
       medzera(6);
+      /* Posledný blok na strane: portrét vľavo, oslovenie vpravo, tlačidlo pod
+         tým. Doteraz tu bola natvrdo vysoká škatuľa s jednou vetou, ktorá na
+         webe ani nestála. Výška sa ráta z obsahu.
+
+         Spodný okraj strany je inde 16 mm; tento blok smie ísť až na 8 mm.
+         Práve tých 8 mm rozhoduje o tom, či sa sekcia zmestí na druhú stranu -
+         a keďže je posledná na strane, užší okraj pod ňou nie je vidieť. */
+      var VNU = 6;
+      var FOTO = d.portret ? 26 : 0;
+      var MEDZI = FOTO ? 6 : 0;
+      var TXT = SIRKA - 2 * VNU - FOTO - MEDZI;
+      var CTA_S = 62, CTA_V = 9;
+
+      var DOSTUPNE = doc.internal.pageSize.getHeight() - 8 - y;
+      function vyskaListu(sFotkou) {
+        var sirka = SIRKA - 2 * VNU - (sFotkou ? FOTO + MEDZI : 0);
+        var h = vyskaTextu(LIST_NADPIS, 12.5, sirka, 1.25) + 2
+              + vyskaTextu(LIST_TELO, 8.3, sirka, 1.4);
+        return { hlava: Math.max(sFotkou ? FOTO : 0, h),
+                 cela: VNU + Math.max(sFotkou ? FOTO : 0, h) + 3 + CTA_V + VNU };
+      }
+      /* Pri dlhšom obsahu nad sekciou nemusí zostať na portrét miesto. Vtedy
+         padá on, nie text - bez portrétu je blok o výšku fotky nižší. Text sa
+         neskracuje nikdy: radšej list bez tváre než useknutá veta. */
+      var sFotkou = !!d.portret && vyskaListu(true).cela <= DOSTUPNE;
+      if (!sFotkou) { FOTO = 0; MEDZI = 0; TXT = SIRKA - 2 * VNU; }
+      var miery = vyskaListu(sFotkou);
+      var hHlava = miery.hlava;
+      var konzH = Math.min(miery.cela, DOSTUPNE);
+
       var konzTop = y;
       doc.setFillColor(250, 246, 238);
       doc.setDrawColor.apply(doc, ZLATA);
       doc.setLineWidth(0.3);
-      doc.roundedRect(OKRAJ, konzTop, SIRKA, 43, 1.8, 1.8, "FD");
-      y += 6;
-      napis(d.konzultaciaNadpis, OKRAJ + 7, 12.5, "bold", TMAVA, SIRKA - 14, 1.3);
+      doc.roundedRect(OKRAJ, konzTop, SIRKA, konzH, 1.8, 1.8, "FD");
+
+      if (d.portret) {
+        var fx = OKRAJ + VNU, fy = konzTop + VNU + Math.max(0, (hHlava - FOTO) / 2);
+        try { doc.addImage(d.portret, "PNG", fx, fy, FOTO, FOTO); } catch (e) {}
+        doc.setDrawColor.apply(doc, ZLATA);
+        doc.setLineWidth(0.5);
+        doc.circle(fx + FOTO / 2, fy + FOTO / 2, FOTO / 2, "S");
+      }
+
+      var textX = OKRAJ + VNU + (FOTO ? FOTO + MEDZI : 0);
+      y = konzTop + VNU;
+      napis(LIST_NADPIS, textX, 12.5, "bold", TMAVA, TXT, 1.25);
       medzera(2);
-      napis("Na osobnej konzultácii zasadíme výsledok do kontextu vášho skutočného majetku a doplníme pohľad založený na aktuálnych dlhodobých očakávaniach popredných svetových investičných inštitúcií.", OKRAJ + 7, 8.5, "normal", SEDA, SIRKA - 14, 1.38);
-      medzera(4);
+      napis(LIST_TELO, textX, 8.3, "normal", SEDA, TXT, 1.4);
+
+      var ctaY = konzTop + konzH - VNU - CTA_V;
       doc.setFillColor.apply(doc, ZLATA);
-      doc.rect(OKRAJ + 7, y, 64, 10, "F");
+      doc.rect(textX, ctaY, CTA_S, CTA_V, "F");
       doc.setFont("Asap", "bold");
       doc.setFontSize(8.5);
       doc.setTextColor(255, 255, 255);
-      doc.text("Rezervovať konzultáciu", OKRAJ + 39, y + 6.3, { align: "center" });
-      doc.link(OKRAJ + 7, y, 64, 10, { url: "https://hechtberger.com/rezervacia" });
-      y = konzTop + 43;
+      doc.text("Rezervovať konzultáciu", textX + CTA_S / 2, ctaY + 5.9, { align: "center" });
+      doc.link(textX, ctaY, CTA_S, CTA_V, { url: "https://hechtberger.com/rezervacia" });
+      y = konzTop + konzH;
     }
 
     doc.setDrawColor.apply(doc, LINKA);
@@ -220,7 +292,7 @@
     doc.text("2 / 2", OKRAJ + SIRKA, 287, { align: "right" });
   }
 
-  window.PH_PDF = function () {
+  window.PH_PDF = async function () {
     var dataDruhejStrany = dataZoStranky();
     var SkutocnyKonstruktor = window.jspdf.jsPDF;
     var dokument = null;
@@ -261,6 +333,8 @@
       throw new Error("PDF dokument sa nepodarilo zachytiť.");
     }
 
+    try { await portretHotovy; } catch (e) {}
+    if (dataDruhejStrany) dataDruhejStrany.portret = portretData;
     pridajDruhuStranu(dokument, dataDruhejStrany);
     skutocneUlozenie.call(dokument, "modelacia-privatnej-renty.pdf");
   };
