@@ -781,6 +781,23 @@
         const pasHore = top + height * 0.25, pasDole = top + height * 0.75;
         if (dole > pasHore && hore < pasDole) spusti();
       });
+
+      /* Rodič hlásiť nemusí - stránka môže byť staršia, blok v nej vypnutý
+         alebo prepísaný. Sprievodca sa preto nesmie na jeho správu spoliehať
+         ako na jedinú cestu, inak by na takej stránke nenaskočil nikdy.
+         Náhradou je vlastný dotyk: myš ani koliesko sa nad rámom nepohnú
+         skôr, než sa naň človek pozrie, takže je to poctivý dôkaz, že je pri
+         kalkulačke - a na rozdiel od pôvodného IntersectionObservera to
+         nikoho nikam neposunie. */
+      setTimeout(() => {
+        if (spustene || oknoRodica) return;
+        const udalosti = ['pointermove', 'pointerdown', 'wheel', 'touchstart', 'keydown'];
+        const naDotyk = () => {
+          udalosti.forEach(u => document.removeEventListener(u, naDotyk));
+          spusti();
+        };
+        udalosti.forEach(u => document.addEventListener(u, naDotyk, { passive: true }));
+      }, 5000);
       return;
     }
 
