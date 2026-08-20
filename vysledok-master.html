@@ -310,7 +310,7 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
         <div class="doc-meta" id="doc-meta" hidden><span id="vyhotovene"></span></div>
       </div>
       <h1>Váš plán privátnej renty v jednom prehľade</h1>
-      <p class="lead" id="model-lead">Vaším cieľom je privátna renta 3 000 € mesačne v dnešnej hodnote od 65 rokov počas 25 rokov. Nižšie uvidíte, aký kapitál si tento plán vyžaduje a ako obstál v modelovaných simuláciách založených na historických dátach.</p>
+      <p class="lead" id="model-lead">Vaším cieľom je privátna renta 3 000 € mesačne v dnešnej hodnote od 65 rokov počas 25 rokov. Nižšie uvidíte, aký majetok si tento plán vyžaduje a ako obstál v modelovaných simuláciách založených na historických dátach.</p>
       <div class="actions">
         <button class="btn-primary" type="button" id="btn-pdf">Stiahnuť modeláciu v PDF</button>
       </div>
@@ -406,7 +406,7 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
       <span class="next-portrait" role="img" aria-label="Petr Hechtberger"></span>
       <span class="next-kicker">Osobná konzultácia</span>
       <h2>Od modelácie k premyslenej stratégii</h2>
-      <p class="next-intro">Modelácia ukazuje, aký kapitál si váš plán vyžaduje a ako obstál v simuláciách založených na historických dátach.<br>Ak budete mať záujem, na osobnej konzultácii vieme modeláciu prepojiť s vaším celkovým majetkom a rozhodnutiami, ktoré máte pred sebou.<strong class="next-gain">Čo tým získate:</strong></p>
+      <p class="next-intro">Modelácia ukazuje, aký majetok si váš plán vyžaduje a ako obstál v simuláciách založených na historických dátach.<br>Ak budete mať záujem, na osobnej konzultácii vieme modeláciu prepojiť s vaším celkovým majetkom a rozhodnutiami, ktoré máte pred sebou.<strong class="next-gain">Čo tým získate:</strong></p>
     </div>
     <div class="next-benefits">
       <section class="next-benefit"><h3>Pohľad dopredu</h3><p>K historickému testu pridáme modelový pohľad založený na aktuálnych CMA<sup>*</sup> a spoločne posúdime, čo z nich môže vyplývať pre váš plán.</p><p class="next-note">* CMA znamená Capital Market Assumptions — dlhodobé očakávania výnosov a rizík popredných svetových investičných inštitúcií.</p></section>
@@ -600,13 +600,13 @@ function vykresli(){
   /* ===== karta DNES ===== */
   if(S.sit==='build'){
     if(o.immediate){
-      $('t-label').textContent='Potrebný kapitál dnes';
+      $('t-label').textContent='Potrebný majetok dnes';
       $('t-value').textContent=fmtEur(o.P0);
       $('t-sub').textContent='Renta sa začína čerpať hneď.';
     }else if(S.mode==='lump'){
       $('t-label').textContent='Jednorazová investícia';
       $('t-value').textContent=fmtEur(o.P0);
-      $('t-sub').textContent=`Obdobie budovania kapitálu: ${yrs(o.N)}.`;
+      $('t-sub').textContent=`Obdobie budovania majetku: ${yrs(o.N)}.`;
     }else if(S.mode==='monthly'){
       $('t-label').textContent='Investujem mesačne';
       $('t-value').textContent=fmtEur(o.M);
@@ -626,11 +626,11 @@ function vykresli(){
     $('t-label').textContent='Môj majetok dnes';
     $('t-value').textContent=fmtEur(S.existing);
     $('t-sub').textContent=o.immediate?'Renta sa začína čerpať hneď.'
-      :`Obdobie budovania kapitálu: ${yrs(o.N)}.`;
+      :`Obdobie budovania majetku: ${yrs(o.N)}.`;
   }
 
   /* ===== karta ZAČIATOK ČERPANIA ===== */
-  $('s-label1').textContent=S.sit==='have'?'Môj majetok vtedy':'Potrebný kapitál';
+  $('s-label1').textContent=S.sit==='have'?'Môj majetok vtedy':'Potrebný majetok';
   $('s-value1').textContent=fmtEur(o.cap);
   $('s-label2').textContent='Mesačná renta pri začiatku';
   $('s-value2').textContent=fmtEur(o.R);
@@ -640,7 +640,7 @@ function vykresli(){
   if(openEnd){
     $('e-label').textContent='Plánovaný horizont';
     $('e-value').textContent='Bez konca';
-    $('e-sub').textContent=`V tomto modelovom scenári zostáva kapitál ${fmtEur(o.cap)} zachovaný.`;
+    $('e-sub').textContent=`V tomto modelovom scenári zostáva majetok ${fmtEur(o.cap)} zachovaný.`;
   }else{
     $('e-label').textContent='Plánovaný horizont';
     $('e-value').textContent=`${endEff} rokov`;
@@ -652,17 +652,17 @@ function vykresli(){
   if(c){
     $('suhrn').hidden=false;
     if(c.nekonecne){
-      $('s1-k').textContent='Investovaný kapitál';    $('s1-v').textContent=fmtEur(c.vklady);
-      $('s2-k').textContent='Kapitál pri štarte';  $('s2-v').textContent=fmtEur(c.kapital);
+      $('s1-k').textContent='Investovaná suma';    $('s1-v').textContent=fmtEur(c.vklady);
+      $('s2-k').textContent='Majetok pri štarte';  $('s2-v').textContent=fmtEur(c.kapital);
       $('s3-k').textContent='Čerpanie';            $('s3-v').textContent='bez konca';
-      $('suhrn-pod').textContent='Renta beží z výnosov, takže samotný kapitál sa nemíňa — '
+      $('suhrn-pod').textContent='Renta beží z výnosov, takže samotný majetok sa nemíňa — '
         +'zostáva vám aj tým, ktorým ho raz odovzdáte.';
     }else{
-      $('s1-k').textContent='Investovaný kapitál';           $('s1-v').textContent=fmtEur(c.vklady);
+      $('s1-k').textContent='Investovaná suma';           $('s1-v').textContent=fmtEur(c.vklady);
       $('s2-k').textContent='Objem vyplatenej renty';    $('s2-v').textContent=fmtEur(c.vyplatene);
       $('s3-k').textContent='Modelovaný rozdiel';  $('s3-v').textContent=fmtEur(c.vynos);
       $('suhrn-pod').textContent='Renta v objeme '+fmtEur(c.vyplatene)+' je počas čerpania krytá '
-        +'investovaným kapitálom a modelovaným výnosom portfólia. Sumy sú nominálne, pred zdanením.';
+        +'investovanou sumou a modelovaným výnosom portfólia. Sumy sú nominálne, pred zdanením.';
     }
   }
 
@@ -750,7 +750,7 @@ function vykresli(){
       :S.mode==='monthly'?'pravidelné mesačné investovanie'
       :'jednorazová investícia a pravidelné investovanie');
   const body=[
-    `Spôsob tvorby kapitálu: ${sposob}`,
+    `Spôsob tvorby majetku: ${sposob}`,
     `Zhodnotenie: ${pctTxt(o.rPct)} % ročne (váš predpoklad)`,
     o.rast?`Inflácia: ${pctTxt(o.infl)} % ročne`:'Inflácia: nezohľadnená',
     o.rast?'Renta rastie počas čerpania':'Renta zostáva počas čerpania rovnaká'
@@ -1014,6 +1014,6 @@ if(window.parent!==window)
   addEventListener('load',()=>window.parent.postMessage({type:'ph-renta-na-zaciatok'},'*'));
 })();
 </script>
-<script src="vysledok-10of10.js?v=20260820a"></script>
+<script src="vysledok-10of10.js?v=20260820b"></script>
 </body>
 </html>

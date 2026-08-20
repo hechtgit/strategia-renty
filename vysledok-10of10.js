@@ -15,7 +15,7 @@
       const ciel=document.getElementById("ciel")?.textContent.trim()||"Váš plán privátnej renty je pripravený.";
       const historickyDovetok=q.get("sit")==="have"
         ? "Nižšie uvidíte hlavné čísla plánu a ako obstál v modelovaných simuláciách založených na historických dátach."
-        : "Nižšie uvidíte, aký kapitál si tento plán vyžaduje a ako obstál v modelovaných simuláciách založených na historických dátach.";
+        : "Nižšie uvidíte, aký majetok si tento plán vyžaduje a ako obstál v modelovaných simuláciách založených na historických dátach.";
       lead.textContent=maHistorickyTest
         ? `${ciel} ${historickyDovetok}`
         : `${ciel} Nižšie uvidíte hlavné čísla plánu a predpoklady, z ktorých výpočet vychádza.`;
