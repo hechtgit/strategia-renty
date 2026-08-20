@@ -615,11 +615,11 @@ function vykresli(){
       $('t-label').textContent='Jednorazová investícia';
       $('t-value').textContent=fmtEur(S.combo);
       if(o.calculatesRent){
-        $('t-sub').innerHTML=`a mesačne <strong>${fmtEur(o.M)}</strong> počas ${o.N} rokov.`;
+        $('t-sub').innerHTML=`a mesačne <strong>${fmtEur(o.M)}</strong> počas ${yrs(o.N)}.`;
       }else if(o.covers){
         $('t-sub').textContent=`Investícia na rentu stačí, mesačne už netreba dopĺňať.`;
       }else{
-        $('t-sub').innerHTML=`a mesačne <strong>${fmtEur(o.M)}</strong> počas ${o.N} rokov.`;
+        $('t-sub').innerHTML=`a mesačne <strong>${fmtEur(o.M)}</strong> počas ${yrs(o.N)}.`;
       }
     }
   }else{

@@ -1677,8 +1677,10 @@ function render(){
 
   /* podnadpisy kariet - reč o živote, nie o produkte */
   txt($('w-now'),`Mám ${S.now} rokov`);
+  /* Rovnaký vzor ako ostatné dve karty: číslo veku a za ním „rokov" -
+     predtým sa práve tu strácalo, hoci karty Dnes a Koniec ho majú vždy. */
   txt($('w-start'),o.immediate?'Začínam hneď teraz'
-    :`O ${yrs(o.N)}, keď budem mať ${S.start}`);
+    :`O ${yrs(o.N)}, keď budem mať ${S.start} rokov`);
   txt($('w-end'),openEnd?'Nekonečná renta'
     :(derived?`Vo veku ${endEff} rokov`:`Vo veku ${endEff} rokov`));
 
@@ -1713,7 +1715,9 @@ function render(){
   }else{
     if(S.goal==='rent'){txt($('have-k'),'Prvá vyplatená renta v budúcich cenách');money($('have-v'),o.R,' mesačne')}
     else{txt($('have-k'),'Majetok mi vydrží');
-      txt($('have-v'),o.forever?'Nevyčerpá sa':`${Math.floor(o.months/12)} r ${o.months%12} m`)}
+      /* Bodky pri skratke: v tej istej karte stojí hneď nad tým „Mám 35 rokov"
+         plným slovom, takže holé „r"/„m" bez bodky pôsobilo ako preklep. */
+      txt($('have-v'),o.forever?'Nevyčerpá sa':`${Math.floor(o.months/12)} r. ${o.months%12} mes.`)}
   }
   /* Rovnaká podmienka, akú používa výsledková stránka: bez plánovaného obdobia
      niet voči čomu prežitie merať, a renta bez konca ho tiež nemá. Vtedy mizne
@@ -2433,7 +2437,10 @@ function syncMobileLifeNav(){
   const mapVals={
     today:[S.now,todayValues],
     start:[S.start,[(o.rast?fmtEur(rentaDnes)+' / mes. v dnešných cenách':fmtEur(rentaDnes)+' / mes. nominálne'),o.rast?'Inflácia '+pctTxt(o.infl)+' %':'Bez inflácie',(o.calculatesRent?'Vytvorím ':'Potrebujem ')+capSummary]],
-    end:[S.pension==='perpetuity'?100:S.end,S.pension==='perpetuity'?['Bez konca']:['Do '+S.end+' rokov','Renta '+Math.max(0,S.end-S.start)+' rokov']]
+    /* Dĺžka renty tu bola natvrdo „ rokov", zatiaľ čo tá istá hodnota v karte
+       (pole end-v, cez yrs()) vie skloňovať 1/2-4/5+ - vedľa seba tak stálo
+       „Renta 1 rokov" a „1 rok". */
+    end:[S.pension==='perpetuity'?100:S.end,S.pension==='perpetuity'?['Bez konca']:['Do '+S.end+' rokov','Renta '+yrs(Math.max(0,S.end-S.start))]]
   };
   Object.entries(mapVals).forEach(([key,val])=>{
     const card=document.getElementById('map-'+key),summary=document.getElementById('map-'+key+'-summary');
@@ -2716,7 +2723,7 @@ function scenarioSummary(){
     bits.push(`má ${fmtEur(S.existing)}`);
     if(S.goal==='rent')bits.push(`renta ${fmtEur(o.R)} / mes.`);
     else bits.push(o.forever?'majetok sa nevyčerpá'
-      :`vydrží ${Math.floor(o.months/12)} r ${o.months%12} m`);
+      :`vydrží ${Math.floor(o.months/12)} r. ${o.months%12} mes.`);
   }
   bits.push(`zhodnotenie ${pctTxt(S.vynos)} % ročne`);
   bits.push(o.rast?`inflácia ${pctTxt(o.infl)} %`:'bez inflácie');
