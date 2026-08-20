@@ -82,8 +82,12 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font
 
 /* prepínače */
 .tg{display:grid;gap:5px;margin-bottom:10px}
-.tg.c2{grid-template-columns:1fr 1fr}
-.tg.c3{grid-template-columns:1fr 1fr 1fr}
+/* `1fr` je `minmax(auto,1fr)`, takže sa stĺpec nezmenší pod svoj obsah:
+   „Kombinácia" si vynútila 82 px a trojica tlačidiel prerástla kartu o 33 px.
+   `auto-fit` s dolnou hranicou radšej zalomí do dvoch riadkov, než by tlačidlo
+   vytlačila von - a na plnej karte zostanú vedľa seba ako doteraz. */
+.tg.c2{grid-template-columns:repeat(auto-fit,minmax(96px,1fr))}
+.tg.c3{grid-template-columns:repeat(auto-fit,minmax(84px,1fr))}
 .tg button{border:1px solid var(--line);background:var(--inset);color:var(--ink);
   font:500 13.5px/1.3 var(--sans);padding:10px 5px;cursor:pointer}
 .tg button:hover{border-color:var(--gold)}
@@ -93,7 +97,13 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font
 
 /* posuvník s hodnotou */
 .sl{display:block;margin:12px 0 0}
-.sl .row{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+/* Riadok „popisok — hodnota" sa musí vedieť zalomiť. Karta má na šírkach
+   pod ~1050 px len okolo 212 px vnútra, ale ovládač „− 3 000 € / mes. +"
+   potrebuje 196 px a popisok ďalších 90 - hodnota potom vytiekla 58 px mimo
+   kartu na sivé pozadie. Keď sa nezmestia vedľa seba, hodnota si sadne pod
+   popisok; na plnej šírke sa nezmení nič, lebo sa zmestia. */
+.sl .row{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:4px 10px}
+.sl .row>.v,.sl .row>.b-ovladac{margin-left:auto}
 .sl .k{font-size:16px;color:var(--muted)}
 /* Spresnenie „v dnešných cenách" patrí na vlastný riadok pod popis a nesmie sa
    lámať — v úzkej karte by sa inak roztrieštilo na štyri riadky. */
@@ -173,7 +183,12 @@ input[type=range]:disabled{opacity:.35;cursor:not-allowed}
 .lead-img{margin:0;min-width:0;position:relative;overflow:hidden;border-radius:5px;
   aspect-ratio:16/10;background:#242424}
 .lead-img img{display:block;width:100%;height:100%;object-fit:cover}
-@media(max-width:480px){
+/* Telefón na šírku má 844x390: dosť široký na to, aby prešiel ako malý
+   desktop, ale na tri karty vysoké 400-620 px je príliš nízky - texty
+   z nich vytekali. Prepínač preto nesleduje len šírku, ale aj výšku, a to
+   iba na dotykových zariadeniach: krátke okno na počítači si desktopové
+   rozloženie ponechá. */
+@media(max-width:860px),(max-height:520px) and (any-pointer:coarse){
   .intro-lead{grid-template-columns:1fr;gap:26px;padding:34px 16px 4px}
   .lead-text h1{font-size:clamp(27px,8vw,38px);margin-bottom:18px}
   .lead-text h2{margin-top:30px}
@@ -381,7 +396,7 @@ body.poradca .flow-options,body.poradca .bottom-flow{display:none}
 .mob{display:none}
 .mobile-life-nav{display:none}
 .mobile-life-map{display:none}
-@media (max-width:480px){
+@media (max-width:860px),(max-height:520px) and (any-pointer:coarse){
   #lp{padding:20px 16px 26px}
   .mobile-life-nav{display:none}
   .mobile-life-map{position:relative;display:block;height:668px;margin:0 -2px 22px;padding:20px 0 20px 66px;border:1px solid rgba(174,135,83,.34);background:linear-gradient(180deg,#24211d,#171717);overflow:hidden}
@@ -393,7 +408,9 @@ body.poradca .flow-options,body.poradca .bottom-flow{display:none}
      tá istá trojica míľnikov, len postavená na výšku. Jednotná zlatá z nich
      robila tri rovnaké obdĺžniky. */
   #map-today{--tone:#ad8652}#map-start{--tone:#b79566}#map-end{--tone:#be9e74}
-  .mobile-map-card{position:absolute;left:66px;right:14px;display:grid;grid-template-columns:minmax(0,.85fr) 1px minmax(0,1.15fr);gap:10px;align-items:center;min-height:88px;padding:11px 12px;border:1px solid rgba(174,135,83,.56);border-radius:4px;background:var(--tone,#b58b52);color:#211a13;text-align:left;box-shadow:0 10px 24px rgba(0,0,0,.26);cursor:grab;transform:translateY(-50%);touch-action:none;user-select:none}
+  /* Na tablete alebo v širšom okne by karta mala aj 780 px a mapa by pôsobila
+     prázdno. Šírka je preto zhora obmedzená; os aj krúžky ostávajú vľavo. */
+  .mobile-map-card{position:absolute;left:66px;right:14px;max-width:420px;display:grid;grid-template-columns:minmax(0,.85fr) 1px minmax(0,1.15fr);gap:10px;align-items:center;min-height:88px;padding:11px 12px;border:1px solid rgba(174,135,83,.56);border-radius:4px;background:var(--tone,#b58b52);color:#211a13;text-align:left;box-shadow:0 10px 24px rgba(0,0,0,.26);cursor:grab;transform:translateY(-50%);touch-action:none;user-select:none}
   .mobile-map-card{z-index:1}
   .mobile-map-card.dragging{z-index:3;cursor:grabbing;box-shadow:0 14px 32px rgba(0,0,0,.4),0 0 0 2px #e1bd86;transition:none}
   .mobile-map-card.dragging+.mobile-map-bod,.mobile-map-bod.aktivny{z-index:3}
@@ -419,7 +436,7 @@ body.poradca .flow-options,body.poradca .bottom-flow{display:none}
      mape, takže si pozornosť vezme sám a nemusí o ňu súťažiť so zlatými
      kartami. Je to tá istá krémová ako v bubline sprievodcu - klient tak vidí
      jeden nástroj, nie dva. Tmavý text má na nej kontrast 7,7:1, tučný 14,9:1. */
-  .mobile-map-vodidlo{position:absolute;left:66px;right:14px;top:12px;z-index:2;
+  .mobile-map-vodidlo{position:absolute;left:66px;right:14px;max-width:420px;top:12px;z-index:2;
     display:flex;align-items:center;gap:10px;padding:9px 11px;
     border:1px solid rgba(43,33,24,.14);border-radius:7px;
     background:#fdf8ef;box-shadow:0 8px 20px rgba(0,0,0,.34)}
@@ -741,7 +758,10 @@ input[type=range]::-moz-range-thumb{background:#2b2118;box-shadow:0 0 0 2px rgba
 
 /* Na nižšom desktopovom displeji zmenšíme iba vertikálny rytmus. Veľkosť
    bežného textu ostáva čitateľná a mobilné rozhranie má vlastné pravidlá. */
-@media(min-width:481px){
+/* Presný opak mobilnej podmienky: širšie NEŽ 480 a zároveň buď dosť
+   vysoké, alebo s myšou. Bez druhej vetvy by tieto pravidlá v telefóne
+   na šírku pretlačili mobilné rozloženie. */
+@media(min-width:861px) and (min-height:521px),(min-width:861px) and (any-pointer:fine){
   html.viewport-compact #lp{padding-top:10px}
   html.viewport-compact .card{width:min(320px,calc((100% - 28px)/3));padding:13px 16px 14px}
   html.viewport-compact .card h2{font-size:21px;margin-bottom:2px}
@@ -764,7 +784,7 @@ html[data-anim] #lp.in .axis::after{animation:lpSweep 4.6s cubic-bezier(.25,.1,.
   background:linear-gradient(100deg,transparent 39%,rgba(255,255,255,.2) 50%,transparent 61%)}
 html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px 60px rgba(0,0,0,.3)}
 
-@media(max-width:480px){
+@media(max-width:860px),(max-height:520px) and (any-pointer:coarse){
   #lp{padding:16px 13px 24px}
   .axis-wrap{height:36px;margin:6px 0 12px}
   .axis{height:36px}
@@ -831,7 +851,7 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
   .mobile-consult-card .mobile-expand-content>.consult-head>.flow-title{display:none}
   @keyframes mobile-card-invitation{0%,100%{transform:scale(1);filter:brightness(1);box-shadow:0 0 0 0 rgba(241,207,158,0)}50%{transform:scale(1.012);filter:brightness(1.08);box-shadow:0 0 0 4px rgba(241,207,158,.62),0 14px 30px rgba(0,0,0,.28)}}
 }
-@media(min-width:481px){.mobile-continue-summary{display:none}.mobile-expand-content{display:contents}}
+@media(min-width:861px) and (min-height:521px),(min-width:861px) and (any-pointer:fine){.mobile-continue-summary{display:none}.mobile-expand-content{display:contents}}
 @media(prefers-reduced-motion:reduce){.mobile-continue-card{animation:none!important}}
 </style>
 </head>
@@ -1492,7 +1512,10 @@ const FA=40,FS=14;
 const pct=v=>v<=FA?v/FA*FS:FS+(v-FA)/(AXMAX-FA)*(100-FS);
 const ageAt=p=>p<=FS?p/FS*FA:FA+(p-FS)/(100-FS)*(AXMAX-FA);
 const NBSP='\u00a0';
-const isMob=()=>matchMedia('(max-width:480px)').matches;
+/* Rovnaká podmienka ako v CSS - keby sa rozišli, skript by pracoval
+   s jedným rozložením a štýly kreslili druhé. */
+const MOBILNE_MEDIA='(max-width:860px),(max-height:520px) and (any-pointer:coarse)';
+const isMob=()=>matchMedia(MOBILNE_MEDIA).matches;
 
 /* Výšku skutočného okna pozná rodičovská stránka, nie vnorený iframe. Podľa
    nej zapíname iba kompaktnú desktopovú hustotu; výpočty ani mobil sa nemenia. */

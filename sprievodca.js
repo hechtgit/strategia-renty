@@ -377,7 +377,7 @@
        sprievodcu (karty, os, prepínače, jazdce) sú display:none - tlačidlo
        by tam ponúkalo prehliadku, ktorá nemá čo ukázať. Mobil je samostatná
        úloha. */
-    if (window.innerWidth <= 480) return;
+    if (MOBILNE.matches) return;
     const p = document.createElement('button');
     p.type = 'button';
     p.className = 'za-znovu';
@@ -1005,7 +1005,9 @@
 
   /* ------------------------------------------------------------- spustenie */
 
-  const MOBILNE = matchMedia('(max-width:480px)');
+  /* Tá istá podmienka, akou prepína rozloženie aplikácia: telefón na šírku
+     (844x390) je stále telefón, hoci je širší než 480 px. */
+  const MOBILNE = matchMedia('(max-width:860px),(max-height:520px) and (any-pointer:coarse)');
   let vrstvaPostavena = false;
   function postavRaz() { if (!vrstvaPostavena) { postav(); vrstvaPostavena = true; } }
 
