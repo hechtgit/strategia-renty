@@ -296,22 +296,25 @@
   /* Obvod pilulky: dve rovné strany plus kruh z oboch polkruhových koncov.
      Ráta sa z rozmerov, ktoré tlačidlo naozaj má - natvrdo zapísané číslo by
      pri dlhšom texte („Ukončiť sprievodcu") segment useklo. */
-  function obkresliPilulku() {
-    if (!pilulka) return;
-    const r = pilulka.getBoundingClientRect();
+  /* Ten istý výpočet používa aj mobilné tlačidlo vo vodidle nad mapou -
+     obiehajúci lem je na oboch rovnaký, len tlačidlo je iné. */
+  function obkresli(el) {
+    if (!el) return;
+    const r = el.getBoundingClientRect();
     if (!r.width) return;
     const w = r.width - 2, h = r.height - 2;   /* 1 px na stranu pre stroke */
-    pilulka.querySelectorAll('rect').forEach(rect => {
+    el.querySelectorAll('rect').forEach(rect => {
       rect.setAttribute('x', 1); rect.setAttribute('y', 1);
       rect.setAttribute('width', w); rect.setAttribute('height', h);
       rect.setAttribute('rx', h / 2);
     });
     const obvod = 2 * (w - h) + Math.PI * h;
     const seg = obvod * 0.62;
-    pilulka.style.setProperty('--za-obvod', obvod.toFixed(1) + 'px');
-    pilulka.style.setProperty('--za-seg', seg.toFixed(1) + 'px');
-    pilulka.style.setProperty('--za-medzera', (obvod - seg).toFixed(1) + 'px');
+    el.style.setProperty('--za-obvod', obvod.toFixed(1) + 'px');
+    el.style.setProperty('--za-seg', seg.toFixed(1) + 'px');
+    el.style.setProperty('--za-medzera', (obvod - seg).toFixed(1) + 'px');
   }
+  function obkresliPilulku() { obkresli(pilulka); }
 
   /* ------------------------------------------------------------- stavba */
 
@@ -900,10 +903,17 @@
     kon.textContent = 'Ukončiť';
     kon.addEventListener('click', () => mKoniec(false));
     hlava.append(poc, kon);
+    /* Tenký pás postupu, rovnaký ako v desktopovej bubline - pri troch krokoch
+       povie na prvý pohľad, koľko z nich je za nami. */
+    const pas = document.createElement('div');
+    pas.className = 'za-mobil-pas';
+    const vypln = document.createElement('i');
+    vypln.style.width = Math.round((index + 1) / KROKY_MOBIL.length * 100) + '%';
+    pas.appendChild(vypln);
     const popis = document.createElement('p');
     popis.className = 'za-mobil-popis';
     popis.textContent = k.popis;
-    box.append(hlava, popis);
+    box.append(hlava, pas, popis);
     karta.prepend(box);
   }
 
@@ -966,10 +976,15 @@
   }
 
   let mTlacidlo = null;
+  /* Text ide do vlastného <span> - textContent na celom tlačidle by zmazal aj
+     <svg> s obiehajúcim lemom. Zmena textu mení šírku, preto sa lem hneď
+     prekreslí. */
   function mNastavTlacidlo(bezi) {
     if (!mTlacidlo) return;
-    mTlacidlo.textContent = bezi ? 'Ukončiť' : 'Sprievodca';
+    const t = mTlacidlo.querySelector('.za-text');
+    if (t) t.textContent = bezi ? 'Ukončiť' : 'Sprievodca';
     mTlacidlo.classList.toggle('bezi', !!bezi);
+    obkresli(mTlacidlo);
   }
 
   function postavMobil() {
@@ -978,10 +993,14 @@
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'za-mobil-start';
-    b.textContent = 'Sprievodca';
+    b.innerHTML = '<span class="za-text">Sprievodca</span>'
+      + '<svg aria-hidden="true"><rect class="za-zaklad"></rect>'
+      + '<rect class="za-bezec"></rect></svg>';
     b.addEventListener('click', () => (mKrok >= 0 ? mKoniec(false) : mStart()));
     vodidlo.appendChild(b);
     mTlacidlo = b;
+    /* Lem sa dá obkresliť až keď tlačidlo má rozmery. */
+    requestAnimationFrame(() => obkresli(b));
   }
 
   /* ------------------------------------------------------------- spustenie */
