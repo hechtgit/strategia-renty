@@ -344,6 +344,11 @@
   }
 
   function postavPilulku() {
+    /* Pod 481 px prepína aplikácia na mobilnú mapu plánu a všetky ciele
+       sprievodcu (karty, os, prepínače, jazdce) sú display:none - tlačidlo
+       by tam ponúkalo prehliadku, ktorá nemá čo ukázať. Mobil je samostatná
+       úloha. */
+    if (window.innerWidth <= 480) return;
     const p = document.createElement('button');
     p.type = 'button';
     p.className = 'za-znovu';
@@ -354,7 +359,7 @@
        klient nevie, čo klik urobí. */
     pilulka = p;
     obnovPilulku();
-    sledujOknoRodica();
+    pripniPilulku();
   }
 
   /* Vo vloženom ráme sa position:fixed neviaže na obrazovku klienta, ale na
@@ -419,15 +424,43 @@
     window.parent.postMessage({ type: 'ph-renta-viewport-prosim' }, '*');
   }
 
-  function sledujOknoRodica() {
-    naOknoRodica((top, height) => {
-      if (!pilulka) return;
-      const okraj = 16;
-      const spodok = top + height - okraj - pilulka.offsetHeight;
-      const strop = okraj;
-      const dno = document.documentElement.scrollHeight - okraj - pilulka.offsetHeight;
-      pilulka.style.top = Math.round(Math.max(strop, Math.min(spodok, dno))) + 'px';
+  /* Pilulka stojí napevno v pravom hornom rohu aplikácie. Predtým sledovala
+     obrazovku, aby bola vždy po ruke - lenže rám o scrolle vie len z hlásení,
+     ktoré chodia po skokoch, takže tlačidlo za pohybom viditeľne plávalo.
+     Pevné miesto je pokojnejšie a nájde sa rovnako spoľahlivo: pravý horný
+     roh je prázdny (karta „Koniec čerpania" siaha nižšie), takže tam nič
+     neprekrýva. Pozornosť si vypýta pulzovaním, nie pohybom. */
+  function pripniPilulku() {
+    if (!pilulka) return;
+    const app = document.getElementById('lp');
+    if (!app) return;
+    const umiestni = () => {
+      const r = app.getBoundingClientRect();
+      const odsadenie = parseFloat(getComputedStyle(app).paddingRight) || 16;
+      pilulka.style.top = Math.round(r.top + window.scrollY + 6) + 'px';
+      pilulka.style.left =
+        Math.round(r.right + window.scrollX - odsadenie - pilulka.offsetWidth) + 'px';
+    };
+    umiestni();
+    requestAnimationFrame(umiestni);
+    addEventListener('resize', umiestni);
+    document.documentElement.classList.add('za-pripnute');
+
+    /* Pulz sa spustí až keď je aplikácia naozaj pred návštevníkom - inak by
+       si minútu odbil, kým je človek ešte hore pri audiu, a tlačidlo by sa
+       prihlásilo o slovo do prázdna. */
+    let pulzovalo = false;
+    naOknoRodica(() => {
+      if (pulzovalo) return;
+      pulzovalo = true;
+      pilulka.classList.add('pulzuje');
+      setTimeout(() => pilulka.classList.remove('pulzuje'), 60000);
     });
+    if (window.parent === window) {
+      pulzovalo = true;
+      pilulka.classList.add('pulzuje');
+      setTimeout(() => pilulka.classList.remove('pulzuje'), 60000);
+    }
   }
 
   /* ---------------------------------------------------------- umiestnenie */
@@ -708,6 +741,9 @@
     dopredu.length = 0;
     aktualny = null;
     vrstva.hidden = false;
+    /* Pulz mal jedinú úlohu - upozorniť, že sprievodca existuje. Po kliku
+       je splnená, ďalšie dýchanie by pri práci s plánom už len rušilo. */
+    if (pilulka) pilulka.classList.remove('pulzuje');
     obnovPilulku();
     document.addEventListener('click', naKlik, true);
     addEventListener('keydown', naKlaves);
@@ -761,89 +797,14 @@
     postav();
     postavPilulku();
 
-    if (QS.has('bez-uvodu')) return;
-    let videne = false;
-    try { videne = localStorage.getItem(KLUC) === '1'; } catch (e) {}
-    if (videne && !QS.has('uvod')) return;
-
-    /* Karty sa po načítaní ešte dosúvajú - sprievodca počká, nech prstenec
-       nesadne na miesto, z ktorého sa prvok o chvíľu odsunie. */
-    const odklad = QS.has('uvod') ? 200 : 1400;
-
-    /* Aplikácia nemusí byť pri načítaní na obrazovke - na webe pod ňou stojí
-       článok a človek k nej doscrolluje. Spustiť sprievodcu do prázdna by
-       znamenalo, že ho minie: kým doscrolluje, prstenec už ukazuje na krok,
-       ktorý nevidel začať. Preto čakáme, kým je aplikácia naozaj v zábere. */
-    /* Pod 481 px aplikácia prepína na mobilnú mapu plánu a VŠETKY ciele
-       sprievodcu (karty, os, prepínače, jazdce) sú display:none. Sprievodca by
-       tam neukázal ani jeden krok a napriek tomu by sa označil za dokončený -
-       zapísal by „videné" a odomkol pás bez jediného dotyku. Mobilný tok je
-       samostatná úloha. */
-    if (window.innerWidth <= 480) return;
-
-    const app = document.getElementById('lp');
-    let spustene = false;
-    const spusti = () => {
-      if (spustene) return;
-      spustene = true;
-      setTimeout(start, odklad);
-    };
-
-    /* Vo vloženom ráme sa na IntersectionObserver spoľahnúť NEDÁ: zorné pole
-       je tam celý rám (1700 px), ktorý si rodič nastavuje na výšku obsahu,
-       takže aplikácia doň zasahuje vždy - už v prvom okamihu po načítaní.
-       Sprievodca sa preto spustil hneď a jeho prvý krok si vypýtal scroll,
-       takže návštevníka rovno po príchode odsunul do kalkulačky. Stránka má
-       pritom začať hore, pri audiu. Skutočné okno pozná jedine rodič, ktorý
-       ho hlási cez ph-renta-viewport - čakáme teda na jeho slovo. */
-    if (app && window.parent !== window) {
-      naOknoRodica((top, height) => {
-        if (spustene) return;
-        /* Samotný prienik nestačí. Rám je takmer celá aplikácia, takže „pás
-           cez stred" pretne aj 200 px vysoký prúžok pri spodnej hrane, keď je
-           návštevník ešte v úvode - a sprievodca by naskočil skôr, než sa naň
-           vôbec pozrel. Preto musí byť z rámu vidieť aj poriadny kus. */
-        if (height < 450) return;
-        const r = app.getBoundingClientRect();
-        const hore = r.top + window.scrollY, dole = r.bottom + window.scrollY;
-        const pasHore = top + height * 0.25, pasDole = top + height * 0.75;
-        if (dole > pasHore && hore < pasDole) spusti();
-      });
-
-      /* Rodič hlásiť nemusí - stránka môže byť staršia, blok v nej vypnutý
-         alebo prepísaný. Sprievodca sa preto nesmie na jeho správu spoliehať
-         ako na jedinú cestu, inak by na takej stránke nenaskočil nikdy.
-         Náhradou je vlastný dotyk: myš ani koliesko sa nad rámom nepohnú
-         skôr, než sa naň človek pozrie, takže je to poctivý dôkaz, že je pri
-         kalkulačke - a na rozdiel od pôvodného IntersectionObservera to
-         nikoho nikam neposunie. */
-      setTimeout(() => {
-        if (spustene || oknoRodica) return;
-        const udalosti = ['pointermove', 'pointerdown', 'wheel', 'touchstart', 'keydown'];
-        const naDotyk = () => {
-          udalosti.forEach(u => document.removeEventListener(u, naDotyk));
-          spusti();
-        };
-        udalosti.forEach(u => document.addEventListener(u, naDotyk, { passive: true }));
-      }, 5000);
-      return;
-    }
-
-    if (!app || !('IntersectionObserver' in window)) {
-      setTimeout(start, odklad);
-      return;
-    }
-    /* Prah sa NESMIE počítať z podielu aplikácie - tá je vyššia než obrazovka
-       (na telefóne 2845 px proti 844 px), takže podiel 0,4 sa nedosiahne nikdy
-       a sprievodca by sa nespustil. Namiesto toho sa sleduje, či aplikácia
-       zasiahne do stredného pásu obrazovky; to platí pri každej výške. */
-    const sledovac = new IntersectionObserver((zaznamy) => {
-      if (zaznamy.some(z => z.isIntersecting)) {
-        sledovac.disconnect();
-        spusti();
-      }
-    }, { threshold: 0, rootMargin: '-25% 0px -25% 0px' });
-    sledovac.observe(app);
+    /* Sprievodca sa NESPÚŠŤA sám. Predtým naskakoval prvému návštevníkovi,
+       len čo sa aplikácia dostala do záberu - a keďže si k prvému kroku pýtal
+       scroll, odsunul človeka do kalkulačky skôr, než stihol čokoľvek vidieť.
+       Teraz ho spúšťa výhradne klik na pilulku, ktorá stojí napevno v pravom
+       hornom rohu aplikácie a prvú minútu jemne pulzuje. Hovorí to aj audio
+       úvod stránky, takže návštevník vie, že si ho má pustiť sám a kde ho
+       nájde. `?uvod` v adrese ho spustí rovno - to je na testovanie. */
+    if (QS.has('uvod')) setTimeout(start, 200);
   }
 
   if (document.readyState === 'loading')
