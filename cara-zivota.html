@@ -82,11 +82,6 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font
   font-variant-numeric:tabular-nums;pointer-events:none}
 .tick::before{content:"";position:absolute;left:50%;top:-7px;width:1px;height:5px;background:rgba(183,175,165,.3)}
 .axis-cap{position:absolute;right:-2px;top:52px;color:rgba(183,175,165,.55);font-size:15px;pointer-events:none}
-.longevity{position:absolute;right:0;top:76px;color:var(--gold);font-size:15px;opacity:0;transition:opacity .3s;pointer-events:none}
-/* Stav sa na koreni volá inak než popisok. Rovnaké meno by `.longevity`
-   nechalo dopadnúť aj na samotné #lp — celá aplikácia by po prekročení
-   veku 100 dostala opacity:0 a position:absolute, teda by zmizla. */
-#lp.longevity-on .longevity{opacity:1}
 
 /* ===== milník: úchyt vyrastá z čiary a nesie kartu ===== */
 .node{position:absolute;top:23px;left:0;transform:translate(-50%,-50%);z-index:7}
@@ -455,7 +450,7 @@ body.poradca .flow-options,body.poradca .bottom-flow{display:none}
   .stage{height:auto!important}
   .axis-wrap{display:none}
   .axis{height:26px}
-  .tick,.axis-cap,.longevity,.handle small{display:none}
+  .tick,.axis-cap,.handle small{display:none}
   .node{top:13px;pointer-events:none}
   .handle{width:38px;height:26px;font-size:17px}
   .mob{display:block;margin:10px 0 0;padding:18px 16px;border:1px solid rgba(174,135,83,.5);border-radius:4px;background:linear-gradient(145deg,#27231e,#191817);color:#eee7dd;box-shadow:0 10px 25px rgba(0,0,0,.2);text-align:left}
@@ -672,7 +667,6 @@ html,body{background:var(--bg)}
   font-weight:500;z-index:1;line-height:1}
 .tick::before{display:none}
 .axis-cap{display:none}
-.longevity{top:59px;color:var(--gold-strong)}
 .node{top:26px}
 .handle{width:62px;height:52px;background:var(--surface);border:0;border-radius:0;color:var(--axis-ink);
   font:700 20px var(--serif);z-index:8;box-shadow:none;padding:7px}
@@ -873,7 +867,6 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
       </div>
       <div id="ticks"></div>
       <span class="axis-cap">vek</span>
-      <div class="longevity">a ďalej →</div>
       <div class="node" id="n-now" style="--d:.75s">
         <button class="handle" id="h-now" data-key="now" role="slider" aria-label="Koľko mám dnes rokov"
           aria-valuemin="18" aria-valuemax="105" aria-valuenow="50"><span id="v-now">50</span><small>dnes</small></button>
@@ -1562,7 +1555,6 @@ function render(){
     :Math.min(120,Math.max(S.start+1,Math.round(S.now+o.N+(o.months||0)/12)));
   const openEnd=!!(o.nek||o.forever);
   lp.classList.toggle('perp',openEnd);
-  lp.classList.toggle('longevity-on',endEff>=100&&!openEnd);
 
   $('blk-build').hidden=S.sit!=='build';
   $('blk-have').hidden=S.sit!=='have';
