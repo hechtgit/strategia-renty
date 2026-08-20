@@ -365,22 +365,41 @@
      ph-renta-scroll, len opačným smerom. Kým prvá správa nepríde (priame
      otvorenie aplikácie, staršia stránka bez odosielateľa), zostáva pôvodné
      fixed umiestnenie - tam funguje správne. */
-  function sledujOknoRodica() {
-    if (window.parent === window) return;
+  /* Jediné miesto, kde sa počúva rodičovo okno. Odoberateľov je viac -
+     pilulka sa podľa neho umiestňuje a sprievodca podľa neho vie, kedy je
+     aplikácia naozaj pred návštevníkom - a musia dostávať tú istú hodnotu. */
+  const odberatelia = [];
+  let oknoRodica = null;
+  let kanalOtvoreny = false;
+
+  function naOknoRodica(fn) {
+    odberatelia.push(fn);
+    if (oknoRodica) fn(oknoRodica.top, oknoRodica.height);
+    if (kanalOtvoreny || window.parent === window) return;
+    kanalOtvoreny = true;
     window.addEventListener('message', (e) => {
       const d = e.data;
       if (!d || d.type !== 'ph-renta-viewport') return;
       if (typeof d.top !== 'number' || typeof d.height !== 'number') return;
-      if (!pilulka) return;
+      oknoRodica = { top: d.top, height: d.height };
       document.documentElement.classList.add('za-ram');
+      odberatelia.forEach(f => f(d.top, d.height));
+    });
+    /* Rodič posiela pri scrolle a pri zmene veľkosti. Rám sa však načíta až
+       keď k nemu návštevník doscrolluje, takže posledný scroll býva už za
+       nami a ďalší nemusí prísť - polohu si preto vypýtame sami. */
+    window.parent.postMessage({ type: 'ph-renta-viewport-prosim' }, '*');
+  }
+
+  function sledujOknoRodica() {
+    naOknoRodica((top, height) => {
+      if (!pilulka) return;
       const okraj = 16;
-      const spodok = d.top + d.height - okraj - pilulka.offsetHeight;
+      const spodok = top + height - okraj - pilulka.offsetHeight;
       const strop = okraj;
       const dno = document.documentElement.scrollHeight - okraj - pilulka.offsetHeight;
       pilulka.style.top = Math.round(Math.max(strop, Math.min(spodok, dno))) + 'px';
     });
-    /* Rodič posiela až pri scrolle; vypýtame si polohu hneď po štarte. */
-    window.parent.postMessage({ type: 'ph-renta-viewport-prosim' }, '*');
   }
 
   /* ---------------------------------------------------------- umiestnenie */
@@ -735,16 +754,40 @@
     if (window.innerWidth <= 480) return;
 
     const app = document.getElementById('lp');
-    if (!app || !('IntersectionObserver' in window)) {
-      setTimeout(start, odklad);
-      return;
-    }
     let spustene = false;
     const spusti = () => {
       if (spustene) return;
       spustene = true;
       setTimeout(start, odklad);
     };
+
+    /* Vo vloženom ráme sa na IntersectionObserver spoľahnúť NEDÁ: zorné pole
+       je tam celý rám (1700 px), ktorý si rodič nastavuje na výšku obsahu,
+       takže aplikácia doň zasahuje vždy - už v prvom okamihu po načítaní.
+       Sprievodca sa preto spustil hneď a jeho prvý krok si vypýtal scroll,
+       takže návštevníka rovno po príchode odsunul do kalkulačky. Stránka má
+       pritom začať hore, pri audiu. Skutočné okno pozná jedine rodič, ktorý
+       ho hlási cez ph-renta-viewport - čakáme teda na jeho slovo. */
+    if (app && window.parent !== window) {
+      naOknoRodica((top, height) => {
+        if (spustene) return;
+        /* Samotný prienik nestačí. Rám je takmer celá aplikácia, takže „pás
+           cez stred" pretne aj 200 px vysoký prúžok pri spodnej hrane, keď je
+           návštevník ešte v úvode - a sprievodca by naskočil skôr, než sa naň
+           vôbec pozrel. Preto musí byť z rámu vidieť aj poriadny kus. */
+        if (height < 450) return;
+        const r = app.getBoundingClientRect();
+        const hore = r.top + window.scrollY, dole = r.bottom + window.scrollY;
+        const pasHore = top + height * 0.25, pasDole = top + height * 0.75;
+        if (dole > pasHore && hore < pasDole) spusti();
+      });
+      return;
+    }
+
+    if (!app || !('IntersectionObserver' in window)) {
+      setTimeout(start, odklad);
+      return;
+    }
     /* Prah sa NESMIE počítať z podielu aplikácie - tá je vyššia než obrazovka
        (na telefóne 2845 px proti 844 px), takže podiel 0,4 sa nedosiahne nikdy
        a sprievodca by sa nespustil. Namiesto toho sa sleduje, či aplikácia
