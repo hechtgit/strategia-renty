@@ -2162,32 +2162,4 @@ body.is-mobile-overlay-active .Mobile-bar {
   });
 })();
 </script>
-<!--   <script>
-/* Tlacidlo sprievodcu je v rame position:fixed - a fixed sa v rame viaze
-     na ram (1700 px, zamknuty na 0,0), nie na obrazovku navstevnika, takze
-     tlacidlo koncilo az pod aplikaciou. Ram nevie precitat nas scroll (ina
-     domena), preto mu posielame, ktora jeho cast je prave vidiet. */
-  (function () {
-    function ramApp() { return document.querySelector('iframe[src*="cara-zivota"]'); }
-    function posli() {
-      var f = ramApp();
-      if (!f || !f.contentWindow) return;
-      var b = f.getBoundingClientRect();
-      var top = Math.max(0, -b.top);
-      var height = Math.min(window.innerHeight, b.bottom) - Math.max(0, b.top);
-      if (height <= 0) return;
-      f.contentWindow.postMessage(
-        { type: "ph-renta-viewport", top: Math.round(top), height: Math.round(height) },
-        "https://hechtgit.github.io");
-    }
-    window.addEventListener("scroll", posli, { passive: true });
-    window.addEventListener("resize", posli);
-    window.addEventListener("message", function (e) {
-      if (e.data && e.data.type === "ph-renta-viewport-prosim") posli();
-    });
-    document.addEventListener("DOMContentLoaded", posli);
-    setTimeout(posli, 1200);
-  })();
-</script>
-
-  PH_SPRIEVODCA_SCROLL_V1_END -->
+<!-- PH_SPRIEVODCA_SCROLL_V1_END -->
