@@ -354,6 +354,33 @@
        klient nevie, čo klik urobí. */
     pilulka = p;
     obnovPilulku();
+    sledujOknoRodica();
+  }
+
+  /* Vo vloženom ráme sa position:fixed neviaže na obrazovku klienta, ale na
+     rám - a ten je vysoký 1700 px a zamknutý na 0,0. Pilulka preto skončila
+     na y≈1684, teda až pod koncom aplikácie: klient ju uvidel jedine vtedy,
+     keď doscroloval úplne dole. Rám nemá ako zistiť, kam sa rodič posunul
+     (iná doména), takže mu to rodič sám posiela - rovnaký kanál ako
+     ph-renta-scroll, len opačným smerom. Kým prvá správa nepríde (priame
+     otvorenie aplikácie, staršia stránka bez odosielateľa), zostáva pôvodné
+     fixed umiestnenie - tam funguje správne. */
+  function sledujOknoRodica() {
+    if (window.parent === window) return;
+    window.addEventListener('message', (e) => {
+      const d = e.data;
+      if (!d || d.type !== 'ph-renta-viewport') return;
+      if (typeof d.top !== 'number' || typeof d.height !== 'number') return;
+      if (!pilulka) return;
+      document.documentElement.classList.add('za-ram');
+      const okraj = 16;
+      const spodok = d.top + d.height - okraj - pilulka.offsetHeight;
+      const strop = okraj;
+      const dno = document.documentElement.scrollHeight - okraj - pilulka.offsetHeight;
+      pilulka.style.top = Math.round(Math.max(strop, Math.min(spodok, dno))) + 'px';
+    });
+    /* Rodič posiela až pri scrolle; vypýtame si polohu hneď po štarte. */
+    window.parent.postMessage({ type: 'ph-renta-viewport-prosim' }, '*');
   }
 
   /* ---------------------------------------------------------- umiestnenie */

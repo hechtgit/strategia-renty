@@ -78,6 +78,12 @@
 
 /* ------------------------------------------ trvalé, nenápadné spustenie */
 
+/* Vo vloženom ráme sa fixed viaže na rám (1700 px, zamknutý na 0,0), nie na
+   obrazovku - pilulka tak skončila pod koncom aplikácie. Keď rodič začne
+   posielať polohu svojho okna, sprievodca pridá .za-ram a pilulka sa prepne
+   na absolute; `top` jej potom dopočítava skript. Bez tej správy zostáva
+   fixed, čo je správne pri priamom otvorení aplikácie. */
+html.za-ram .za-znovu{position:absolute;bottom:auto}
 .za-znovu{position:fixed;left:16px;bottom:16px;z-index:8000;
   display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:999px;
   cursor:pointer;background:#fdf8ef;border:1px solid rgba(43,33,24,.14);
