@@ -392,7 +392,11 @@
        na to netreba od stránky. Hustý zoznam prahov je tu preto, že
        IntersectionObserver hlási zmeny, nie scroll: čím viac prahov, tým
        jemnejšie tlačidlo sleduje obrazovku. */
-    const app = document.getElementById('lp') || document.body;
+    /* Sleduje sa CELÝ rám, nie len telo kalkulačky. Rám býva vyšší než jeho
+       obsah a pod aplikáciou zostáva prázdny pruh; keby sa sledovalo iba
+       #lp, prienik by tam skončil, prestali by chodiť správy a tlačidlo by
+       ostalo visieť tam, kde ho nechal posledný záznam. */
+    const app = document.body;
     if ('IntersectionObserver' in window) {
       const prahy = [];
       for (let i = 0; i <= 200; i++) prahy.push(i / 200);
