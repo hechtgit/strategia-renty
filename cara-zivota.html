@@ -1072,7 +1072,12 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
           <button id="send-model" type="button">Získať moju modeláciu</button>
         </div>
         <div id="overenie-box" aria-hidden="true"></div>
-        <small class="privacy-note">Odoslaním formulára beriete na vedomie spracovanie osobných údajov na účely vytvorenia a doručenia modelácie podľa Pravidiel ochrany osobných údajov.</small>
+        <!-- Odkaz musí byť ABSOLÚTNY: aplikácia beží na hechtgit.github.io vo
+             vloženom ráme, takže „/pravidla-…" by mierilo na github.io, nie na
+             web. A otvára sa v novom okne - v ráme by pravidlá nahradili
+             kalkulačku a klient by prišiel o rozpracovaný plán. Adresa je tá
+             istá, akú web používa všade inde (links.privacy). -->
+        <small class="privacy-note">Odoslaním formulára beriete na vedomie spracovanie osobných údajov na účely vytvorenia a doručenia modelácie podľa <a href="https://www.hechtberger.com/pravidla-ochrany-osobnych-udajov" target="_blank" rel="noopener">Pravidiel ochrany osobných údajov</a>.</small>
         <p class="send-status" id="send-status" aria-live="polite"></p>
         </div>
       </div>
@@ -2768,8 +2773,8 @@ if(ANIM&&!REDUCED){
      Vo vloženom ráme si nevie scrollovať (rám je zamknutý na 0,0, rodič je na
      inej doméne), preto pri každom kroku pošle rodičovi rozsah, ktorý má byť
      vidieť; poslucháč je v code injection stránky. Na mobile sa nespúšťa. -->
-<link rel="stylesheet" href="sprievodca.css?v=20260820l">
-<script src="sprievodca.js?v=20260820l"></script>
+<link rel="stylesheet" href="sprievodca.css?v=20260820m">
+<script src="sprievodca.js?v=20260820m"></script>
 
 <script>
 /* ---- Vloženie do Squarespace: hlásenie výšky rodičovi ----
