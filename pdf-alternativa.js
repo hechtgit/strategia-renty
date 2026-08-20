@@ -35,7 +35,12 @@
               ? "Tento vstup testujeme v každej modelovanej simulácii."
               : text(r.querySelector(".co small")),
             hodnota: text(r.querySelector(".kolko strong")),
-            doplnenie: text(r.querySelector(".kolko span"))
+            /* Prvý <span> v hlavnom riadku je malý štítok „Výsledok modelovaných
+               simulácií"; vysvetľujúca veta je až ten druhý. querySelector bral
+               ten prvý, takže PDF tlačilo štítok namiesto vysvetlenia - a rámček
+               potom zíval prázdnotou. */
+            doplnenie: text(r.querySelector(".kolko span:not(.vysledok-label)")
+                            || r.querySelector(".kolko span"))
           };
         }
       ).filter(function (r) { return r.nadpis && r.hodnota; }),
@@ -77,6 +82,12 @@
       rs.forEach(function (r, i) { doc.text(r, x, y + vel * 0.3528 * 0.8 + i * krok); });
       y += rs.length * krok;
       return rs.length * krok;
+    }
+    /* Výška, ktorú text zaberie, bez toho aby sa čokoľvek vykreslilo -
+       panel treba nakresliť skôr, než sa doň píše. */
+    function vyskaTextu(t, vel, sirka, line) {
+      if (!t) return 0;
+      return riadky(t, vel, sirka).length * vel * 0.3528 * (line || 1.38);
     }
     function medzera(mm) { y += mm; }
     function ciara() {
@@ -124,16 +135,27 @@
       }
       if (index) ciara();
       var panelTop = y;
+      var lava = index ? 112 : 104;
+      var prava = SIRKA - lava - 8;
+      var uspesneHl = (r.hodnota.match(/([0-9]+)\s*z\s*800/) || [])[1];
+      var hodnotaHl = uspesneHl ? uspesneHl + " z 800 simulácií" : r.hodnota;
+      var panelH = 0;
       if (!index) {
+        /* Výška bola zapísaná natvrdo (37). Keď sa text sprava skrátil, rámček
+           zostal rovnako vysoký a pod obsahom ostala prázdna plocha. Ráta sa
+           preto z toho, čo sa doň naozaj vojde. */
+        var hLava = vyskaTextu(r.nadpis, 10, lava, 1.3)
+                  + vyskaTextu(r.vysvetlenie, 8.5, lava, 1.35);
+        var hPrava = vyskaTextu(hodnotaHl, 12.2, prava, 1.24)
+                   + vyskaTextu(r.doplnenie, 8.3, prava, 1.4);
+        panelH = Math.max(hLava, hPrava) + 12;
         doc.setFillColor(250, 246, 238);
         doc.setDrawColor.apply(doc, ZLATA);
         doc.setLineWidth(0.35);
-        doc.roundedRect(OKRAJ, panelTop, SIRKA, 37, 1.8, 1.8, "FD");
+        doc.roundedRect(OKRAJ, panelTop, SIRKA, panelH, 1.8, 1.8, "FD");
         y += 6;
       }
       var vrch = y;
-      var lava = index ? 112 : 104;
-      var prava = SIRKA - lava - 8;
       napis(r.nadpis, OKRAJ, index ? 9.2 : 10, "bold", TMAVA, lava, 1.3);
       napis(r.vysvetlenie, OKRAJ, index ? 7.8 : 8.5, "normal", SEDA, lava, 1.35);
       var yL = y;
@@ -144,12 +166,10 @@
         napis((pomer ? pomer + " z 800 simulácií" : r.hodnota) + (percento ? " (" + percento + " simulácií v tomto modeli)" : ""), OKRAJ + lava + 8, 8.2, "bold", SEDA, prava, 1.3);
         napis("Všetky plánované výplaty boli pokryté.", OKRAJ + lava + 8, 7.8, "normal", SEDA, prava, 1.3);
       } else {
-        var uspesne = (r.hodnota.match(/([0-9]+)\s*z\s*800/) || [])[1];
-        napis(uspesne ? uspesne + " z 800 simulácií" : r.hodnota,
-          OKRAJ + lava + 8, 12.2, "bold", ZLATA, prava, 1.24);
+        napis(hodnotaHl, OKRAJ + lava + 8, 12.2, "bold", ZLATA, prava, 1.24);
         napis(r.doplnenie, OKRAJ + lava + 8, 8.3, "normal", SEDA, prava, 1.4);
       }
-      y = index ? Math.max(y, yL) + 2.5 : Math.max(panelTop + 37, y, yL) + 8;
+      y = index ? Math.max(y, yL) + 2.5 : Math.max(panelTop + panelH, y, yL) + 8;
     });
 
     if (d.zaver) {
