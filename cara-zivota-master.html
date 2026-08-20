@@ -2756,5 +2756,12 @@ if(ANIM&&!REDUCED){
 })();
 </script>
 <script src="renta-flow-10of10.js?v=20260816-2"></script>
+
+<!-- Sprievodca: prekryv, ktorý nového návštevníka prevedie všetkými vstupmi.
+     Vo vloženom ráme si nevie scrollovať (rám je zamknutý na 0,0, rodič je na
+     inej doméne), preto pri každom kroku pošle rodičovi rozsah, ktorý má byť
+     vidieť; poslucháč je v code injection stránky. Na mobile sa nespúšťa. -->
+<link rel="stylesheet" href="sprievodca.css?v=20260820a">
+<script src="sprievodca.js?v=20260820a"></script>
 </body>
 </html>

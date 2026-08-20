@@ -1,0 +1,119 @@
+/* VARIANTA A - interaktívne zaškolenie priamo v aplikácii.
+
+   Reverzné prevedenie: aplikácia je tmavá, sprievodca svetlý. Bublina je
+   jediná svetlá plocha na obrazovke a výrez má jasný svetlý obrys, takže oko
+   nemá kam inam ísť. Okolie sa stlmí výrazne, nie nesmelo - polovičné
+   stlmenie by nechalo zlaté karty súťažiť o pozornosť s pokynom.
+
+   Vrstva iba prekrýva a nič neblokuje: klikať sa dá kdekoľvek, sprievodca
+   len čaká, kým sa zvýraznená hodnota zmení. */
+
+.za-vrstva{position:fixed;inset:0;z-index:9000;pointer-events:none;
+  font-family:var(--sans,'Asap',system-ui,sans-serif)}
+.za-vrstva[hidden]{display:none}
+
+/* Geometria sa dopočítava v každom snímku, aby výrez sedel aj počas ťahania
+   míľnika. Preto na nej nesmie byť CSS prechod: reštartoval by sa pri každom
+   zápise, nikdy by nedobehol a výrez by za cieľom trvalo zaostával. */
+.za-tien{position:absolute;border-radius:10px;pointer-events:none;
+  box-shadow:0 0 0 9999px rgba(18,13,9,.78)}
+
+/* Svetlý obrys namiesto zlatého: na stlmenej ploche je najjasnejším bodom
+   obrazovky a jednoznačne ukazuje, čoho sa pokyn týka. */
+.za-prstenec{position:absolute;border-radius:10px;pointer-events:none;
+  box-shadow:0 0 0 3px #fdf8ef,0 0 0 11px rgba(253,248,239,.2)}
+@media (prefers-reduced-motion:no-preference){
+  .za-prstenec{animation:za-dych 2.8s ease-in-out infinite}
+}
+@keyframes za-dych{
+  0%,100%{box-shadow:0 0 0 3px #fdf8ef,0 0 0 11px rgba(253,248,239,.2)}
+  50%    {box-shadow:0 0 0 3px #fdf8ef,0 0 0 16px rgba(253,248,239,.08)}
+}
+
+/* ------------------------------------------------------------- bublina */
+
+.za-bublina{position:absolute;width:370px;max-width:calc(100vw - 32px);
+  pointer-events:auto;background:#fdf8ef;color:#2b2118;border-radius:10px;
+  padding:18px 20px 15px;box-shadow:0 28px 64px rgba(0,0,0,.6);
+  border:1px solid rgba(43,33,24,.12)}
+.za-bublina:focus{outline:none}
+
+.za-pocitadlo{display:block;font-size:11.5px;font-weight:700;letter-spacing:.09em;
+  text-transform:uppercase;color:#7f5416}
+/* Pri desiatich krokoch by rad bodiek zabral pol päty a tlačidlá by sa do nej
+   nezmestili - tenký pás znesie ľubovoľný počet krokov. */
+.za-pas{height:2px;margin:8px 0 11px;border-radius:2px;
+  background:rgba(43,33,24,.13);overflow:hidden}
+.za-pas i{display:block;height:100%;background:#7f5416;border-radius:2px;
+  transition:width .3s cubic-bezier(.22,.61,.36,1)}
+.za-nadpis{margin:0 0 6px;font-family:var(--serif,'PT Serif',Georgia,serif);
+  font-size:21px;font-weight:700;line-height:1.24;color:#2b2118}
+.za-popis{margin:0;font-size:14.5px;line-height:1.52;color:#5c4d3b}
+
+.za-pata{display:flex;align-items:center;gap:14px;margin-top:15px;
+  padding-top:12px;border-top:1px solid rgba(43,33,24,.13)}
+.za-dalej{margin-left:auto}
+
+.za-koniec{background:none;border:0;padding:5px 2px;cursor:pointer;font:inherit;
+  font-size:13px;color:#7a6952;text-decoration:underline;text-underline-offset:3px}
+.za-koniec:hover{color:#2b2118}
+.za-koniec:focus-visible{outline:2px solid #9a6929;outline-offset:3px;border-radius:3px}
+
+/* „Potvrdiť" je rovnocenná cesta ďalej, nie únik - pri desiatich krokoch
+   nesmie byť klient nútený hýbať infláciou len preto, aby mohol pokračovať. */
+.za-dalej{padding:8px 15px;border-radius:7px;cursor:pointer;font:inherit;
+  font-size:13.5px;font-weight:600;background:#2b2118;color:#fdf8ef;border:0;
+  transition:background .18s}
+.za-dalej:hover{background:#463526}
+.za-dalej:focus-visible{outline:2px solid #9a6929;outline-offset:3px}
+
+.za-bublina::before{content:"";position:absolute;width:12px;height:12px;
+  background:#fdf8ef;border-left:1px solid rgba(43,33,24,.12);
+  border-top:1px solid rgba(43,33,24,.12);transform:rotate(45deg)}
+.za-bublina[data-smer="dole"]::before{top:-7px;left:var(--sipka,50%);margin-left:-6px}
+/* Pri bočnom umiestnení šípka odpadá - vzťah k prvku nesie prstenec vedľa. */
+.za-bublina[data-smer="bok"]::before{display:none}
+.za-bublina[data-smer="hore"]::before{bottom:-7px;left:var(--sipka,50%);margin-left:-6px;
+  transform:rotate(225deg)}
+
+/* ------------------------------------------ trvalé, nenápadné spustenie */
+
+.za-znovu{position:fixed;left:16px;bottom:16px;z-index:8000;
+  display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:999px;
+  cursor:pointer;background:#fdf8ef;border:1px solid rgba(43,33,24,.14);
+  color:#5c4d3b;font:600 13px var(--sans,'Asap',system-ui,sans-serif);
+  box-shadow:0 8px 22px rgba(0,0,0,.4);transition:color .2s,border-color .2s}
+.za-znovu:hover{color:#2b2118;border-color:rgba(154,105,41,.6)}
+.za-znovu:focus-visible{outline:2px solid #9a6929;outline-offset:3px}
+.za-znovu::before{content:"";width:6px;height:6px;border-radius:50%;background:#9a6929}
+
+/* ----------------------------------------------------------- záverečná */
+
+.za-hotovo{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);
+  z-index:9000;max-width:min(600px,calc(100vw - 32px));
+  padding:14px 20px;border-radius:9px;background:#fdf8ef;color:#5c4d3b;
+  border:1px solid rgba(43,33,24,.12);box-shadow:0 20px 50px rgba(0,0,0,.5);
+  font:400 14.5px/1.5 var(--sans,'Asap',system-ui,sans-serif);text-align:center}
+.za-hotovo strong{color:#2b2118;font-weight:700}
+
+@media (max-width:620px){
+  .za-bublina{width:calc(100vw - 24px);left:12px!important}
+  .za-bublina::before{display:none}
+  .za-znovu{left:12px;bottom:12px}
+}
+@media (max-height:660px){
+  .za-bublina{padding:14px 17px 12px}
+  .za-nadpis{font-size:19px}
+  .za-popis{font-size:14px}
+  .za-pata{margin-top:12px;padding-top:10px}
+}
+
+/* Pilulka je ukotvená v ľavom dolnom rohu a bez tohto odsadenia by trvalo
+   ležala na poslednom riadku obsahu. */
+body{padding-bottom:58px}
+
+/* Okno pod „i" je to, na čo sprievodca sám posiela („Pod „i" nájdete historické
+   čísla…"). Vo vlastnej vrstve má z-index 200, sprievodca 9000 - okno sa preto
+   otváralo POD bublinou a klient dostal za splnenie pokynu prekrytý text.
+   Otvorené okno má prednosť pred sprievodcom. */
+.b-prekrytie{z-index:9400}
