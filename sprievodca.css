@@ -157,3 +157,41 @@ body{padding-bottom:58px}
    otváralo POD bublinou a klient dostal za splnenie pokynu prekrytý text.
    Otvorené okno má prednosť pred sprievodcom. */
 .b-prekrytie{z-index:9400}
+
+/* ===================== mobil: tri kroky, tri karty =====================
+
+   Na mobile sa nič nestlmuje ani nezvýrazňuje: editor karty zaberá celú
+   obrazovku, takže nie je čo od čoho odlíšiť. Pokyn je preto prvý blok
+   priamo v editore - nie plávajúca bublina, ktorá by na 390 px prekryla
+   ovládač, o ktorom hovorí, a nie pruh na `position:fixed`, ktorý sa vo
+   vloženom ráme viaže na rám a skončil by inde, než kam mieri. */
+
+.za-mobil{margin:0 0 15px;padding:11px 13px 12px;border-radius:6px;
+  background:rgba(26,19,11,.88);
+  font-family:var(--sans,'Asap',system-ui,sans-serif)}
+.za-mobil-hlava{display:flex;align-items:center;gap:10px}
+.za-mobil-pocitadlo{flex:1 1 auto;font-size:10.5px;font-weight:800;
+  letter-spacing:.1em;text-transform:uppercase;color:#e2bd88}
+/* „Ukončiť" je únik, nie rovnocenná cesta ďalej - preto podčiarknutý text,
+   nie ďalšie tlačidlo súťažiace s „Hotovo" o pozornosť. */
+.za-mobil-koniec{flex:0 0 auto;padding:3px 2px;border:0;background:none;
+  color:#cbb69a;font:inherit;font-size:12.5px;cursor:pointer;
+  text-decoration:underline;text-underline-offset:3px}
+.za-mobil-koniec:focus-visible{outline:2px solid #f2d6aa;outline-offset:2px;
+  border-radius:3px}
+.za-mobil-popis{margin:6px 0 0;color:#f1e4d0;font-size:13.5px;line-height:1.46}
+
+/* Tlačidlo vo vodidle nad mapou. Stojí v riadku, ktorý klientovi hovorí, ako
+   sa aplikácia ovláda - práve preto, že samotnú popisku tester prehliadol.
+   Zlatá je tá istá ako na prvej karte, text tmavý (kontrast 4,73:1). */
+.za-mobil-start{flex:0 0 auto;min-height:32px;padding:6px 13px;border:0;
+  border-radius:999px;background:#ad8652;color:#2b2118;
+  font:700 12.5px/1 var(--sans,'Asap',system-ui,sans-serif);cursor:pointer}
+.za-mobil-start:focus-visible{outline:2px solid #f8e4c0;outline-offset:2px}
+.za-mobil-start.bezi{background:rgba(174,135,83,.28);color:#f2d6aa;
+  box-shadow:inset 0 0 0 1px rgba(174,135,83,.6)}
+
+/* Vzduch pod „Hotovo" nepridávame: karta je rolovateľná a najvyšší z troch
+   editorov má 642 px, takže aj s pokynom navrchu ostáva celý na obrazovke.
+   Vlastné odsadenie by navyše rozbilo lištu, ktorá si ho zápornou marginou
+   vyťahuje späť. */

@@ -384,26 +384,39 @@ body.poradca .flow-options,body.poradca .bottom-flow{display:none}
 @media (max-width:480px){
   #lp{padding:20px 16px 26px}
   .mobile-life-nav{display:none}
-  .mobile-life-map{position:relative;display:block;height:620px;margin:0 -2px 22px;padding:20px 0 20px 66px;border:1px solid rgba(174,135,83,.34);background:linear-gradient(180deg,#24211d,#171717);overflow:hidden}
-  .mobile-map-axis{position:absolute;left:31px;top:70px;bottom:32px;width:2px;background:linear-gradient(180deg,#8d785f,#c39a63)}
+  .mobile-life-map{position:relative;display:block;height:668px;margin:0 -2px 22px;padding:20px 0 20px 66px;border:1px solid rgba(174,135,83,.34);background:linear-gradient(180deg,#24211d,#171717);overflow:hidden}
+  .mobile-map-axis{position:absolute;left:31px;top:118px;bottom:32px;width:2px;background:linear-gradient(180deg,#8d785f,#c39a63)}
   .mobile-map-axis-label{position:absolute;left:50%;top:-56px;transform:translateX(-50%);color:#cdbb9f;font:800 11px/1 var(--sans);letter-spacing:.16em;white-space:nowrap}
   .mobile-map-endpoint{position:absolute;left:50%;display:grid;place-items:center;width:38px;height:38px;transform:translate(-50%,-50%);border:2px solid #d7b47d;border-radius:50%;background:#1c1a17;color:#f3dfc0;font:800 13px/1 var(--sans);font-variant-numeric:tabular-nums;box-shadow:0 0 0 3px rgba(174,135,83,.12)}
   .mobile-map-endpoint.start{top:0}.mobile-map-endpoint.end{top:100%}
-  .mobile-map-card{position:absolute;left:66px;right:14px;display:grid;grid-template-columns:minmax(0,.85fr) 1px minmax(0,1.15fr);gap:10px;align-items:center;min-height:88px;padding:11px 12px;border:1px solid rgba(174,135,83,.56);border-radius:4px;background:#b58b52;color:#211a13;text-align:left;box-shadow:0 10px 24px rgba(0,0,0,.26);cursor:grab;transform:translateY(-50%);touch-action:none;user-select:none}
+  /* Tri odtiene, ktoré na desktope odlišujú karty, patria aj sem - mapa je
+     tá istá trojica míľnikov, len postavená na výšku. Jednotná zlatá z nich
+     robila tri rovnaké obdĺžniky. */
+  #map-today{--tone:#ad8652}#map-start{--tone:#b79566}#map-end{--tone:#be9e74}
+  .mobile-map-card{position:absolute;left:66px;right:14px;display:grid;grid-template-columns:minmax(0,.85fr) 1px minmax(0,1.15fr);gap:10px;align-items:center;min-height:88px;padding:11px 12px;border:1px solid rgba(174,135,83,.56);border-radius:4px;background:var(--tone,#b58b52);color:#211a13;text-align:left;box-shadow:0 10px 24px rgba(0,0,0,.26);cursor:grab;transform:translateY(-50%);touch-action:none;user-select:none}
   .mobile-map-card.dragging{cursor:grabbing;box-shadow:0 14px 32px rgba(0,0,0,.4),0 0 0 2px #e1bd86;transition:none}
   .mobile-map-card::before{content:"";position:absolute;right:100%;top:50%;width:15px;height:1px;background:#ae8753}
   .mobile-map-card::after{content:attr(data-age);position:absolute;right:calc(100% + 15px);top:50%;display:grid;place-items:center;width:38px;height:38px;transform:translateY(-50%);border:2px solid #d7b47d;border-radius:50%;background:#1c1a17;color:#f3dfc0;font:800 13px/1 var(--sans);font-variant-numeric:tabular-nums;box-shadow:0 0 0 3px rgba(174,135,83,.12)}
   .mobile-map-left,.mobile-map-values{min-width:0}.mobile-map-card strong,.mobile-map-card span{display:block}.mobile-map-card strong{font:700 20px/1.05 var(--serif)}.mobile-map-card small{display:block;margin-top:7px;color:#4b3520;font-size:10px;font-weight:700;line-height:1.2}.mobile-map-divider{align-self:stretch;width:1px;background:rgba(32,23,15,.48)}.mobile-map-values{display:grid;gap:4px;color:#2b2118;font-size:11px;font-weight:700;line-height:1.18}.mobile-map-values span{margin:0;overflow:hidden;text-overflow:ellipsis}
-  .mobile-map-hint{position:absolute;left:66px;right:14px;top:14px;margin:0;color:#c5b9aa;font-size:12px;line-height:1;white-space:nowrap}
-  .mobile-map-hint strong{color:#f2d6aa;font-weight:800}
+  /* Vodidlo bolo 12 px sivý riadok medzi zlatými kartami a tester ho prehliadol.
+     Teraz je to pruh s vlastným rámom, svetlejším textom a tlačidlom sprievodcu:
+     riadok, ktorý niečo ponúka, sa prehliadne ťažšie než popiska. Zostáva
+     absolútny, aby karty ležali ďalej presne podľa veku - miesto pod ním im
+     uvoľnil posunutý začiatok osi (70 → 118 px). */
+  .mobile-map-vodidlo{position:absolute;left:66px;right:14px;top:12px;z-index:2;
+    display:flex;align-items:center;gap:10px;padding:8px 10px;
+    border:1px solid rgba(174,135,83,.44);border-radius:6px;
+    background:rgba(174,135,83,.15)}
+  .mobile-map-hint{flex:1 1 auto;margin:0;color:#e6d9c5;font-size:12px;line-height:1.32}
+  .mobile-map-hint strong{color:#f8e4c0;font-weight:800}
   body.mobile-editor-open{overflow:hidden}
   body.mobile-editor-open #lp{padding:0}
   body.mobile-editor-open .mobile-life-map,body.mobile-editor-open .mob,body.mobile-editor-open #msg,body.mobile-editor-open .bottom-flow,body.mobile-editor-open .assumptions-block{display:none!important}
   body.mobile-editor-open .stage{display:block!important;height:auto!important;margin:0!important}
   body.mobile-editor-open .stage>.card{display:none!important}
-  body.mobile-editor-open .stage>.card.mobile-editing{position:relative!important;inset:auto!important;z-index:200;display:block!important;width:100%!important;height:auto!important;max-height:100dvh!important;margin:0!important;padding:18px 18px 28px!important;border:0!important;border-radius:0!important;overflow-y:auto;background:#b58b52;box-shadow:none}
+  body.mobile-editor-open .stage>.card.mobile-editing{position:relative!important;inset:auto!important;z-index:200;display:block!important;width:100%!important;height:auto!important;max-height:100dvh!important;margin:0!important;padding:18px 18px 28px!important;border:0!important;border-radius:0!important;overflow-y:auto;background:var(--tone,#b58b52);box-shadow:none}
   .mobile-editor-toolbar{display:none}
-  body.mobile-editor-open .mobile-editing>.mobile-editor-toolbar{position:static;display:flex;justify-content:flex-end;margin:18px -18px -28px;padding:12px 14px;background:#b58b52;border-top:1px solid rgba(47,31,15,.22)}
+  body.mobile-editor-open .mobile-editing>.mobile-editor-toolbar{position:static;display:flex;justify-content:flex-end;margin:18px -18px -28px;padding:12px 14px;background:var(--tone,#b58b52);border-top:1px solid rgba(47,31,15,.22)}
   .mobile-editor-done{display:block;width:auto;min-height:40px;padding:10px 24px;border:1px solid rgba(47,31,15,.48);border-radius:3px;background:#171717;color:#f2d6aa;box-shadow:0 7px 18px rgba(0,0,0,.28);font:800 15px/1 var(--sans);cursor:pointer}
   .mobile-editor-done:hover,.mobile-editor-done:focus-visible{background:#2a2118;outline:2px solid #fff;outline-offset:2px}
   .mobile-life-track{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
@@ -882,7 +895,9 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
     <button type="button" class="mobile-map-card" data-editor-card="c-end" data-age="90" id="map-end">
       <span class="mobile-map-left"><strong>Koniec renty</strong><small>Potiahnite alebo ťuknite</small></span><span class="mobile-map-divider" aria-hidden="true"></span><span class="mobile-map-values" id="map-end-summary"><span>Do 90 rokov</span><span>Renta 25 rokov</span></span>
     </button>
-    <p class="mobile-map-hint"><strong>Ťuknutím</strong> otvoríte kartu, <strong>potiahnutím</strong> zmeníte vek.</p>
+    <div class="mobile-map-vodidlo" id="mobile-map-vodidlo">
+      <p class="mobile-map-hint" id="mobile-map-hint"><strong>Ťuknutím</strong> otvoríte kartu, <strong>potiahnutím</strong> zmeníte vek.</p>
+    </div>
   </section>
 
   <section class="stage">
@@ -2299,7 +2314,7 @@ function syncMobileLifeNav(){
     const card=document.getElementById('map-'+key),summary=document.getElementById('map-'+key+'-summary');
     if(card){
       const age=Math.max(18,Math.min(100,val[0]));
-      card.style.top=(70+((age-18)/82)*518)+'px';card.dataset.age=val[0]===Infinity?'∞':val[0];
+      card.style.top=(118+((age-18)/82)*518)+'px';card.dataset.age=val[0]===Infinity?'∞':val[0];
       card.setAttribute('aria-label',val[0]+' rokov, '+val[1].join(', ')+'. Potiahnite po osi alebo ťuknite a upravte.');
     }
     if(summary)summary.innerHTML=val[1].map(x=>'<span>'+x+'</span>').join('');
@@ -2350,6 +2365,11 @@ function openMobileEditor(cardId){
   requestAnimationFrame(()=>parent.postMessage({type:'ph-renta-editor',open:true,height:card.scrollHeight},'*'));
   card.scrollTop=0;done.focus({preventScroll:true});
 }
+/* Sprievodca je samostatný súbor a editor si sám otvoriť nevie - ťuknutie na
+   kartu beží cez pointer udalosti kvôli ťahaniu, takže syntetický klik by
+   neprešiel. Vystavené je len otvorenie; zatvára sa výhradne tlačidlom
+   „Hotovo", aby existovala jediná cesta von. */
+window.otvorMobilnyEditor=openMobileEditor;
 mobileMapCards.forEach(mapCard=>{
   const key=mapCard.dataset.editorCard==='c-today'?'now':mapCard.dataset.editorCard==='c-start'?'start':'end';
   let drag=null;

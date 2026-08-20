@@ -826,10 +826,173 @@
     }, 7000);
   }
 
+
+  /* ================= mobil: tri kroky, tri karty =================
+
+     Pod 481 px aplikácia neukazuje os, prepínače ani jazdce - má mapu troch
+     kariet a každá sa ťuknutím otvorí ako samostatný editor. Desaťkrokový
+     sprievodca sem preto preniesť nejde: jeho ciele tu neexistujú, sú
+     poskladané práve do tých troch editorov.
+
+     Mobilný sprievodca má preto tri kroky a nič nezvýrazňuje - stlmiť
+     okolie panela, ktorý zaberá celú obrazovku, nemá čo ukázať. Pokyn nie je
+     ani plávajúca bublina: tá má 370 px a na 390 px obrazovke by prekryla
+     práve ten ovládač, o ktorom hovorí. A `position:fixed` sa vo vloženom
+     ráme viaže na rám, nie na obrazovku - pruh pri spodnej hrane by teda
+     skončil inde, než kam mieri. Pokyn je preto prvý blok v samotnom
+     editore: klient ho vidí hneď po otvorení a „Hotovo" je pod ním.
+
+     Ďalej sa ide výhradne tlačidlom „Hotovo", ktoré v editore už je. Druhé
+     tlačidlo na to isté by pýtalo rozhodnutie navyše. */
+
+  const KROKY_MOBIL = [
+    { karta: 'c-today', tlacidlo: 'map-today',
+      popis: 'Váš vek, či majetok budujete alebo ho už máte, koľko doň dáte '
+           + 'a s akým zhodnotením rátate. Meniť nemusíte nič - keď vám '
+           + 'hodnoty sedia, ťuknite Hotovo.' },
+    { karta: 'c-start', tlacidlo: 'map-start',
+      popis: 'Vek, v ktorom má renta začať, jej mesačná výška v dnešných '
+           + 'cenách, inflácia a zhodnotenie počas čerpania. Hneď vidíte, aký '
+           + 'majetok si to vyžiada.' },
+    { karta: 'c-end', tlacidlo: 'map-end',
+      popis: 'Dokedy má renta trvať, alebo či má bežať navždy. Posledný krok - '
+           + 'potom uvidíte celý plán.' },
+  ];
+
+  let mKrok = -1;
+  let mPozorovatel = null;
+  let mCakaNaZatvorenie = false;
+
+  const mEditorOtvoreny = () =>
+    document.body.classList.contains('mobile-editor-open');
+
+  /* Pôvodné znenie vodidla - po sprievodcovi sa doň text vracia. */
+  let mPovodneVodidlo = '';
+
+  function mPovedz(html, docasne) {
+    const h = $('mobile-map-hint');
+    if (!h) return;
+    if (!mPovodneVodidlo) mPovodneVodidlo = h.innerHTML;
+    h.innerHTML = html;
+    if (docasne) setTimeout(() => { h.innerHTML = mPovodneVodidlo; }, 9000);
+  }
+
+  function mOdstranPokyn() {
+    document.querySelectorAll('.za-mobil').forEach(e => e.remove());
+  }
+
+  function mVlozPokyn(index) {
+    mOdstranPokyn();
+    const k = KROKY_MOBIL[index];
+    const karta = $(k.karta);
+    if (!karta) return;
+    const box = document.createElement('div');
+    box.className = 'za-mobil';
+    box.setAttribute('role', 'note');
+    const hlava = document.createElement('div');
+    hlava.className = 'za-mobil-hlava';
+    const poc = document.createElement('span');
+    poc.className = 'za-mobil-pocitadlo';
+    poc.textContent = 'Krok ' + (index + 1) + ' z ' + KROKY_MOBIL.length;
+    const kon = document.createElement('button');
+    kon.type = 'button';
+    kon.className = 'za-mobil-koniec';
+    kon.textContent = 'Ukončiť';
+    kon.addEventListener('click', () => mKoniec(false));
+    hlava.append(poc, kon);
+    const popis = document.createElement('p');
+    popis.className = 'za-mobil-popis';
+    popis.textContent = k.popis;
+    box.append(hlava, popis);
+    karta.prepend(box);
+  }
+
+  function mUkaz(index) {
+    mKrok = index;
+    /* Editor sa otvára až po vložení pokynu, aby ho klient videl hneď v prvom
+       snímku a nie ako niečo, čo doskočilo dodatočne. */
+    mVlozPokyn(index);
+    mCakaNaZatvorenie = false;
+    if (typeof window.otvorMobilnyEditor === 'function')
+      window.otvorMobilnyEditor(KROKY_MOBIL[index].karta);
+    /* Otvorenie editora samo o sebe nikam neposúva - vo vloženom ráme to za
+       stránku spraví rodič, ale pri priamom otvorení odkazu by klient zostal
+       tam, kde práve bol, a pokyn navrchu karty by nevidel. */
+    try { window.scrollTo(0, 0); } catch (e) {}
+    requestAnimationFrame(() => { mCakaNaZatvorenie = true; });
+  }
+
+  function mDalej() {
+    mOdstranPokyn();
+    if (mKrok + 1 >= KROKY_MOBIL.length) { mKoniec(true); return; }
+    /* Editor sa práve zatvoril a stránka scrolluje mapu do záberu; ďalší
+       otvárame až v nasledujúcom snímku, nech si to neprekročí cestu. */
+    const dalsi = mKrok + 1;
+    requestAnimationFrame(() => requestAnimationFrame(() => mUkaz(dalsi)));
+  }
+
+  function mKoniec(dokoncene) {
+    mKrok = -1;
+    mCakaNaZatvorenie = false;
+    mOdstranPokyn();
+    if (mPozorovatel) { mPozorovatel.disconnect(); mPozorovatel = null; }
+    mNastavTlacidlo(false);
+    if (!dokoncene) return;
+    /* Kto prešiel sprievodcu a všetko iba potvrdil, nezmenil ani jeden vstup -
+       pás s výsledkom by mu inak zostal skrytý. */
+    if (window.odomkniPas) window.odomkniPas();
+    /* Záverečná správa nemôže byť plávajúci pruh (fixed sa viaže na rám).
+       Ide do vodidla nad mapou - stránka tam po zatvorení editora scrolluje,
+       takže je to presne miesto, kam sa klient pozerá. */
+    /* Krátko, na dva riadky: pri klientovi vo veku 18 rokov leží prvá karta
+       hneď pod pruhom a dlhší text by na ňu dosadol. */
+    mPovedz('<strong>Plán je nastavený.</strong> Súhrn nájdete pod mapou.', true);
+  }
+
+  function mStart() {
+    if (mKrok >= 0) { mKoniec(false); return; }
+    if (!mPozorovatel) {
+      /* Ďalej sa ide zatvorením editora, nie vlastným tlačidlom. Sledujeme
+         triedu na <body>, nie klik na „Hotovo" - tak sa krok posunie aj vtedy,
+         keď editor zavrie čokoľvek iné. */
+      mPozorovatel = new MutationObserver(() => {
+        if (mKrok < 0 || !mCakaNaZatvorenie) return;
+        if (!mEditorOtvoreny()) { mCakaNaZatvorenie = false; mDalej(); }
+      });
+      mPozorovatel.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    }
+    mNastavTlacidlo(true);
+    mUkaz(0);
+  }
+
+  let mTlacidlo = null;
+  function mNastavTlacidlo(bezi) {
+    if (!mTlacidlo) return;
+    mTlacidlo.textContent = bezi ? 'Ukončiť' : 'Sprievodca';
+    mTlacidlo.classList.toggle('bezi', !!bezi);
+  }
+
+  function postavMobil() {
+    const vodidlo = $('mobile-map-vodidlo');
+    if (!vodidlo || vodidlo.querySelector('.za-mobil-start')) return;
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'za-mobil-start';
+    b.textContent = 'Sprievodca';
+    b.addEventListener('click', () => (mKrok >= 0 ? mKoniec(false) : mStart()));
+    vodidlo.appendChild(b);
+    mTlacidlo = b;
+  }
+
   /* ------------------------------------------------------------- spustenie */
 
+  const MOBILNE = matchMedia('(max-width:480px)');
+  let vrstvaPostavena = false;
+  function postavRaz() { if (!vrstvaPostavena) { postav(); vrstvaPostavena = true; } }
+
   function pripoj() {
-    postav();
+    if (MOBILNE.matches) { postavMobil(); return; }
+    postavRaz();
     postavPilulku();
 
     /* Sprievodca sa NESPÚŠŤA sám. Predtým naskakoval prvému návštevníkovi,
@@ -841,6 +1004,21 @@
        nájde. `?uvod` v adrese ho spustí rovno - to je na testovanie. */
     if (QS.has('uvod')) setTimeout(start, 200);
   }
+
+  /* Otočenie telefónu prehodí aplikáciu medzi mapou a plnou kalkulačkou.
+     Bez tohto by na mobilnej mape zostala desktopová pilulka, ktorá by
+     spustila prehliadku prvkov, čo tam nie sú. Rozbehnutý sprievodca sa
+     najprv korektne ukončí. */
+  const preposta = () => {
+    if (mKrok >= 0) mKoniec(false);
+    if (bezi) koniec(false);
+    document.querySelectorAll('.za-znovu,.za-mobil-start').forEach(e => e.remove());
+    mTlacidlo = null;
+    pilulka = null;
+    if (MOBILNE.matches) postavMobil();
+    else { postavRaz(); postavPilulku(); }
+  };
+  if (MOBILNE.addEventListener) MOBILNE.addEventListener('change', preposta);
 
   if (document.readyState === 'loading')
     document.addEventListener('DOMContentLoaded', pripoj);
