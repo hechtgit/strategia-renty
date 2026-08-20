@@ -154,14 +154,17 @@
     medzera(5);
 
     if (d.testujeme.length) {
-      var testText = d.testujeme.map(function (p) { return "• " + p; }).join("\n");
+      /* Znak „•" v zabudovanom subsete písma Asap nie je, takže sa odrážky
+         nevykreslili vôbec - text začínal bez nich a bez odsadenia. Prvá
+         strana ich kreslí ako plné kruhy, tu to robíme rovnako. */
+      var testText = d.testujeme.join("\n");
       var testTop = y;
       doc.setFillColor(250, 246, 238);
       doc.setDrawColor.apply(doc, ZLATA);
       var testR = riadky(testText, 9.2, SIRKA - 14);
-      var testH = 10 + testR.length * 9.2 * 0.3528 * 1.42;
+      var testH = 9 + testR.length * 9.2 * 0.3528 * 1.42;
       doc.roundedRect(OKRAJ, y, SIRKA, testH, 1.5, 1.5, "FD");
-      y += 4;
+      y += 5;   /* bolo 4 hore a 6 dole - box pôsobil posunutý nahor */
       napis(testText, OKRAJ + 7, 9.2, "normal", TMAVA, SIRKA - 14, 1.42);
       y = testTop + testH + 8;
     }
@@ -375,7 +378,7 @@
       el.textContent = novyText;
     }
     var predpoklady = document.querySelectorAll(".assumptions .blok p:not(.vystraha)");
-    docasneSkrat(predpoklady[0], "Výpočet používa zhodnotenie, ktoré ste zadali vy. Nejde o odhad ani odporúčanie.");
+    docasneSkrat(predpoklady[0], "Výpočet používa zhodnotenie, ktoré ste zadali vy.");
     /* Model počíta s DVOMA sadzbami - jednou počas budovania, druhou počas
        vyplácania - a potrebný majetok určuje prevažne tá druhá. V PDF stála
        len prvá, takže kľúčové číslo nemalo v dokumente oporu. Sadzby sa
@@ -395,6 +398,9 @@
     docasneSkrat(document.querySelector(".next h2"), "");
     docasneSkrat(document.querySelector(".next p"), "");
 
+    /* Prvá strana kreslí číslovanie skôr, než sa pridá druhá - musí preto
+       vopred vedieť, či nejaká druhá vôbec bude. */
+    window.PH_PDF_STRAN = dataDruhejStrany && dataDruhejStrany.riadky.length ? 2 : 1;
     window.jspdf.jsPDF = ZachytavajuciKonstruktor;
     try {
       povodnePDF();

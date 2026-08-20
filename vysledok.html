@@ -353,7 +353,7 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
         <span class="age" data-age="60">60</span>
         <span class="age" data-age="80">80</span>
         <span class="age" data-age="100">100</span>
-        <div class="phase" id="ph-build" hidden>TVORBA KAPITÁLU<strong id="ph-build-v"></strong></div>
+        <div class="phase" id="ph-build" hidden>TVORBA MAJETKU<strong id="ph-build-v"></strong></div>
         <div class="phase" id="ph-draw">VÝPLATA PRIVÁTNEJ RENTY<strong id="ph-draw-v"></strong></div>
 
         <div class="milestone" id="m-today">
@@ -1237,8 +1237,8 @@ $('btn-pdf').addEventListener('click',async()=>{
     await cakajNaFinalnuCopyVysledku();
     if(!pdfNacitanie)pdfNacitanie=(async()=>{
       await Promise.all([nacitaj('jspdf.min.js'),nacitaj('pdf-font.js')]);
-      await nacitaj('pdf.js?v=20260820a');
-      await nacitaj('pdf-alternativa.js?v=20260820l');
+      await nacitaj('pdf.js?v=20260820d');
+      await nacitaj('pdf-alternativa.js?v=20260820n');
     })();
     await pdfNacitanie;
     await window.PH_PDF();
@@ -1268,7 +1268,7 @@ if(window.parent!==window)
   addEventListener('load',()=>window.parent.postMessage({type:'ph-renta-na-zaciatok'},'*'));
 })();
 </script>
-<script src="vysledok-10of10.js?v=20260820c"></script>
+<script src="vysledok-10of10.js?v=20260820d"></script>
 
 <script>
 /* ---- Vloženie do Squarespace: hlásenie výšky rodičovi ----

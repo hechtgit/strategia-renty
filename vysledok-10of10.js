@@ -66,7 +66,7 @@
         ?'<strong>Túto úroveň spĺňa už '+(sentence.charAt(0).toLowerCase()+sentence.slice(1))+' '+today+'</strong>'
          +'<small>Dosiahli ste '+success+'&nbsp;z&nbsp;800 simulácií.</small>'
         :'<strong>Približná modelová výška vstupu: '+približne(hodnota)+'</strong>'
-         +'<small>Zaokrúhlená ilustračná hranica namiesto '+today+'.</small>')
+         +'<small>Namiesto vašich '+today+'. Ide o zaokrúhlenú ilustračnú hranicu.</small>')
       +'</div><div class="kolko"><strong>Majetok by pokryl všetky výplaty aspoň v '
       +hranica+'&nbsp;z&nbsp;800 simulácií</strong><span>Ilustračná úroveň '
       +podiel+'&nbsp;% simulácií v tomto modeli.</span></div></div>';
@@ -101,7 +101,7 @@
     const num=el=>Number((el?.textContent||"").replace(/[^0-9-]/g,""));
     if(k2)k2.textContent="Nominálny súčet vyplatenej renty";if(k3)k3.textContent="Rozdiel medzi nominálnou rentou a investíciami";
     if(s1&&s2&&s3&&Number.isFinite(num(s1))&&Number.isFinite(num(s2)))s3.textContent=fmt(num(s2)-num(s1));
-    if(pod)pod.textContent="Ide o nominálny súčet mesačných rent, ktoré počas čerpania rastú so zadanou infláciou. Nie je to suma v dnešnej kúpnej sile; údaje sú pred zdanením.";
+    if(pod)pod.textContent="Ide o nominálny súčet mesačných rent, ktoré počas čerpania rastú so zadanou infláciou. Rozdiel odčítava dnešnú investíciu od budúcich rent, nejde teda o výnos ani zisk. Nie je to suma v dnešnej kúpnej sile; údaje sú pred zdanením.";
   }
 
   function assumptions(){

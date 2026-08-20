@@ -184,7 +184,11 @@
 
     /* ——— míľniky ——— */
     d.karty.forEach(function (k) {
-      var vyskaBloku = 7.5 + k.riadky.length * 7.2 + (k.pod ? 4.4 : 0);
+      /* Podtext („Obdobie budovania majetku: 20 rokov.") dosadal 0,05 mm nad
+         rám, takže dolné dotiahnutia písmen j, g, p rám pretínali. Rovnaký
+         krok ako pri riadkoch dá pod text toľko vzduchu, koľko je nad
+         nadpisom. */
+      var vyskaBloku = 7.5 + k.riadky.length * 7.2 + (k.pod ? 7.2 : 0);
       miesto(vyskaBloku);
 
       var vrch = y;
@@ -224,7 +228,14 @@
 
     /* ——— čo to znamená v číslach ——— */
     if (d.suhrn && d.suhrn.polozky.length) {
-      var vyskaS = 11 + 11 + (d.suhrn.pod ? 10.5 : 0);
+      /* Rámček musí pojať aj dvojriadkový popisok - výška sa preto dopočíta
+         z toho, koľko riadkov popisky naozaj zaberú. */
+      var sirkaStlpca = (SIRKA - 12) / d.suhrn.polozky.length;
+      doc.setFont("Asap", "normal"); doc.setFontSize(7);
+      var riadkovPopisku = d.suhrn.polozky.reduce(function (a, p) {
+        return Math.max(a, doc.splitTextToSize(p[0].toUpperCase(), sirkaStlpca - 6).length);
+      }, 1);
+      var vyskaS = 11 + 11 + (riadkovPopisku - 1) * 3 + (d.suhrn.pod ? 10.5 : 0);
       miesto(vyskaS);
       var vrchS = y;
       doc.setFillColor(250, 246, 238);
@@ -240,16 +251,29 @@
       y += 7;
 
       var stlpec = (SIRKA - 12) / d.suhrn.polozky.length;
+      /* Popisky sa kreslili holým doc.text bez zalomenia, takže dlhší z nich
+         („ROZDIEL MEDZI NOMINÁLNOU RENTOU A INVESTÍCIAMI") prerástol svoj
+         stĺpec a dobehol až na rám rámčeka. Zalamujú sa na šírku stĺpca
+         zmenšenú o medzeru, a keďže sa tým jeden z nich stane dvojriadkovým,
+         hodnoty sa sadzajú na spoločnú účtovnú čiaru - inak by zlaté sumy
+         stáli každá inde. */
+      doc.setFont("Asap", "normal"); doc.setFontSize(7);
+      var popisky = d.suhrn.polozky.map(function (p) {
+        return doc.splitTextToSize(p[0].toUpperCase(), stlpec - 6);
+      });
+      var najviacRiadkov = popisky.reduce(function (a, r) { return Math.max(a, r.length); }, 1);
+      var yHodnoty = y + (najviacRiadkov - 1) * 3 + 6;
+
       d.suhrn.polozky.forEach(function (p, i) {
         var x = OKRAJ + 6 + i * stlpec;
         doc.setFont("Asap", "normal"); doc.setFontSize(7);
         doc.setTextColor(SEDA[0], SEDA[1], SEDA[2]);
-        doc.text(p[0].toUpperCase(), x, y);
+        popisky[i].forEach(function (r, j) { doc.text(r, x, y + j * 3); });
         doc.setFont("Asap", "bold"); doc.setFontSize(12.5);
         doc.setTextColor(ZLATA[0], ZLATA[1], ZLATA[2]);
-        doc.text(p[1], x, y + 6);
+        doc.text(p[1], x, yHodnoty);
       });
-      y = vrchS + 11 + 14;
+      y = yHodnoty + 8;
 
       if (d.suhrn.pod) {
         doc.setFont("Asap", "normal"); doc.setFontSize(8);
@@ -288,14 +312,18 @@
     d.predpoklady.forEach(function (t) { yL = odstavecStlpca(t, xL, yL, stlp) + 1; });
 
     var yP = nadpisStlpca(d.vychodiskaNadpis, xP, vrchS2);
-    doc.setFont("Asap", "normal"); doc.setFontSize(8.2);
-    var vrOdr = 8.2 * 0.3528 * 1.34;
+    /* Pravý stĺpec mal odrážky o bod väčšie než text vľavo a odsadené o 4,6 mm
+       od nadpisu - dva rovnocenné stĺpce tak vyzerali ako hlavný a vedľajší.
+       Veľkosť je teraz rovnaká ako vľavo a guľôčka visí v medzistĺpci, takže
+       nadpis aj text lícujú na jednej zvislici. */
+    doc.setFont("Asap", "normal"); doc.setFontSize(7.4);
+    var vrOdr = 7.4 * 0.3528 * 1.32;
     d.vychodiska.forEach(function (v) {
       doc.setTextColor(SEDA[0], SEDA[1], SEDA[2]);
       doc.setFillColor(ZLATA[0], ZLATA[1], ZLATA[2]);
-      doc.circle(xP + 1.3, yP + 2.1, 0.7, "F");
-      var riadky = doc.splitTextToSize(v, stlp - 5);
-      riadky.forEach(function (r, i) { doc.text(r, xP + 4.6, yP + 3 + i * vrOdr); });
+      doc.circle(xP - 2.6, yP + 2.1, 0.7, "F");
+      var riadky = doc.splitTextToSize(v, stlp);
+      riadky.forEach(function (r, i) { doc.text(r, xP, yP + 2.4 + i * vrOdr); });
       /* dlhá odrážka sa zalomí — posun musí ísť podľa počtu riadkov,
          inak nasledujúca odrážka pristane na nej */
       yP += Math.max(5.2, riadky.length * vrOdr + 1.4);
@@ -308,10 +336,14 @@
       doc.text(d.vystraha, OKRAJ, y + 2.5);
       y += 6;
     }
-    ciara();
-
-    /* ——— ďalší krok ——— */
-    nadpisSTelom(d.dalejNadpis, d.dalej, 11, 8.5);
+    /* ——— ďalší krok ———
+       Obsah tejto sekcie sa presúva na druhú stranu, takže tu býva prázdna.
+       Čiara sa predtým kreslila bezpodmienečne a nad pätkou zostali dve linky
+       s ničím medzi sebou - klasický príznak „niečo sa nenačítalo". */
+    if (d.dalejNadpis || d.dalej) {
+      ciara();
+      nadpisSTelom(d.dalejNadpis, d.dalej, 11, 8.5);
+    }
 
     /* ——— kto to pripravil ———
        PDF putuje ďalej bez stránky, takže musí samo povedať, od koho je
@@ -358,6 +390,12 @@
     linka();
     doc.setFont("Asap", "normal"); doc.setFontSize(7);
     doc.setTextColor(130, 125, 118);
+    /* Číslovanie mala len druhá strana („2 / 2"), takže prvá pôsobila, akoby
+       do dokumentu nepatrila. Ide pod disclaimer, nie k telefónu - tam ho
+       prvý pokus položil rovno na číslo. Počet strán dodá pdf-alternativa.js
+       ešte pred kreslením; bez neho ostane samotné „1". */
+    doc.text(window.PH_PDF_STRAN ? "1 / " + window.PH_PDF_STRAN : "1",
+      OKRAJ + SIRKA, y + 2.4, { align: "right" });
     doc.splitTextToSize(d.disclaimer, SIRKA).forEach(function (r, i) {
       doc.text(r, OKRAJ, y + i * 7 * 0.3528 * 1.5 + 2);
     });
