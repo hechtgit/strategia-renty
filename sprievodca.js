@@ -372,22 +372,46 @@
   let oknoRodica = null;
   let kanalOtvoreny = false;
 
+  function publikuj(top, height) {
+    if (!(height > 0)) return;
+    oknoRodica = { top: top, height: height };
+    document.documentElement.classList.add('za-ram');
+    odberatelia.forEach(f => f(top, height));
+  }
+
   function naOknoRodica(fn) {
     odberatelia.push(fn);
     if (oknoRodica) fn(oknoRodica.top, oknoRodica.height);
     if (kanalOtvoreny || window.parent === window) return;
     kanalOtvoreny = true;
+
+    /* Hlavný zdroj: rám sa spýta sám seba. IntersectionObserver dostáva
+       intersectionRect orezaný aj nadradeným rámom, takže aj tu - v rámci na
+       cudzej doméne - povie, ktorý pruh aplikácie má návštevník naozaj pred
+       sebou. Je to súradnica v rámci rámu, presne to, čo potrebujeme, a nič
+       na to netreba od stránky. Hustý zoznam prahov je tu preto, že
+       IntersectionObserver hlási zmeny, nie scroll: čím viac prahov, tým
+       jemnejšie tlačidlo sleduje obrazovku. */
+    const app = document.getElementById('lp') || document.body;
+    if ('IntersectionObserver' in window) {
+      const prahy = [];
+      for (let i = 0; i <= 200; i++) prahy.push(i / 200);
+      new IntersectionObserver((zaznamy) => {
+        const z = zaznamy[zaznamy.length - 1];
+        if (!z || !z.isIntersecting) return;
+        const r = z.intersectionRect;
+        publikuj(Math.round(r.top + window.scrollY), Math.round(r.height));
+      }, { threshold: prahy }).observe(app);
+    }
+
+    /* Druhý zdroj, ak ho stránka ponúka. Presnejší (pozná celé okno, nielen
+       prienik s aplikáciou), preto ho necháme prepisovať prvý. */
     window.addEventListener('message', (e) => {
       const d = e.data;
       if (!d || d.type !== 'ph-renta-viewport') return;
       if (typeof d.top !== 'number' || typeof d.height !== 'number') return;
-      oknoRodica = { top: d.top, height: d.height };
-      document.documentElement.classList.add('za-ram');
-      odberatelia.forEach(f => f(d.top, d.height));
+      publikuj(d.top, d.height);
     });
-    /* Rodič posiela pri scrolle a pri zmene veľkosti. Rám sa však načíta až
-       keď k nemu návštevník doscrolluje, takže posledný scroll býva už za
-       nami a ďalší nemusí prísť - polohu si preto vypýtame sami. */
     window.parent.postMessage({ type: 'ph-renta-viewport-prosim' }, '*');
   }
 
