@@ -204,6 +204,12 @@ ok(foreignScroll.frames.length===0,'Cudzí origin nesmie spustiť stabilizačnú
 close(foreignScroll.win.scrollY,0,'Cudzí origin nesmie meniť polohu stránky',0);
 
 const ctaScrollSource=between(pageInjection,'/* CTA_SCROLL_POLICY:START */','/* CTA_SCROLL_POLICY:END */');
+ok(pageInjection.includes('<button type="button" class="cz-jump" aria-controls="ph-renta-calculator">')
+  &&!pageInjection.includes('<a class="cz-jump" href="#ph-renta-calculator">'),
+  'CTA musí byť tlačidlo, aby ho globálny Squarespace handler kotiev nemohol zachytiť.');
+ok(pageInjection.includes('background:transparent!important')
+  &&pageInjection.includes('.cz-jump:focus-visible{outline:'),
+  'CTA tlačidlo musí zachovať priehľadný vzhľad odkazu aj viditeľný klávesnicový fokus.');
 const ctaTarget={getBoundingClientRect(){return {top:400};}};
 const ctaCalls={push:[],scroll:[]};
 const ctaWindow={
@@ -240,8 +246,8 @@ ok(ctaCalls.push.length===1&&ctaCalls.scroll.length===2,
   'Opakovaný klik pri rovnakom hashi nesmie vytvoriť duplicitný záznam histórie.');
 const modifiedClick=ctaEvent({metaKey:true});
 ctaContext.handle(modifiedClick);
-ok(modifiedClick.prevented===0&&modifiedClick.stopped===0&&ctaCalls.scroll.length===2,
-  'Klik s modifikátorom musí zachovať natívne správanie odkazu.');
+ok(modifiedClick.prevented===1&&modifiedClick.stopped===1&&ctaCalls.scroll.length===3,
+  'CTA tlačidlo musí fungovať rovnako aj pri zapnutom modifikátore.');
 
 const guidePolicy=between(guide,'/* GUIDE_VIEWPORT_POLICY:START */','/* GUIDE_VIEWPORT_POLICY:END */');
 const guideContext=vm.createContext({URL});

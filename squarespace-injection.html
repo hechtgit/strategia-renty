@@ -60,7 +60,8 @@
   .cz-hero-copy h1{font-family:Lora,"PT Serif",Georgia,serif;font-size:clamp(38px,3.8vw,58px);font-weight:400;line-height:1.02;letter-spacing:-.025em;margin:0 0 42px;white-space:nowrap;color:#1b1a18}
   .cz-hero-copy p{font-family:Asap,Arial,Helvetica,sans-serif;font-size:clamp(16px,1.25vw,18px);line-height:1.6;margin:0 0 28px;color:#34312d}
   .cz-hero-copy p span{display:block;white-space:nowrap}
-  .cz-jump{display:inline-flex;align-items:center;gap:12px;color:#725432;font-family:Asap,Arial,Helvetica,sans-serif;font-weight:700;text-decoration:none;border-bottom:1px solid #ae8753;padding:0 0 7px}
+  .cz-jump{display:inline-flex;align-items:center;gap:12px;color:#725432;font-family:Asap,Arial,Helvetica,sans-serif;font-size:inherit;line-height:inherit;font-weight:700;text-align:left;text-decoration:none;-webkit-appearance:none;appearance:none;background:transparent!important;border:0;border-bottom:1px solid #ae8753;padding:0 0 7px;box-shadow:none!important;text-transform:none;cursor:pointer}
+  .cz-jump:focus-visible{outline:2px solid #725432;outline-offset:4px}
   .cz-body{position:relative;left:50%;transform:translateX(-50%);
     width:min(1480px,calc(100vw - 32px));max-width:none;margin:0;padding:8px 0 20px}
   #cz-audio{width:min(910px,100%);min-height:190px;margin:0 auto}
@@ -258,14 +259,13 @@
         '<div class="cz-hero-copy">' +
           '<h1>Stratégia privátnej renty</h1>' +
           '<p><span>Majetok sám osebe nie je príjem.</span><span>Aj majitelia hodnotných portfólií často nevedia,</span><span>koľko si z majetku môžu mesačne vyplácať,</span><span>aby ho nevyčerpali skôr, než plánovali.</span></p>' +
-          '<a class="cz-jump" href="#ph-renta-calculator">Prejsť priamo k aplikácii <span aria-hidden="true">↓</span></a>' +
+          '<button type="button" class="cz-jump" aria-controls="ph-renta-calculator">Prejsť priamo k aplikácii <span aria-hidden="true">↓</span></button>' +
         '</div>' +
         '<div class="cz-hero-image" aria-hidden="true"></div>' +
       '</article>';
 
     /* CTA_SCROLL_POLICY:START */
     function obsluzSkokKApp(e) {
-      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       var ciel = document.getElementById("ph-renta-calculator");
       if (!ciel) return;
       e.preventDefault();
