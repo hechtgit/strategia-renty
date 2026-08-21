@@ -7,6 +7,7 @@ const result=fs.readFileSync(new URL('../vysledok-10of10.js',import.meta.url),'u
 const resultMaster=fs.readFileSync(new URL('../vysledok-master.html',import.meta.url),'utf8');
 const guide=fs.readFileSync(new URL('../sprievodca.js',import.meta.url),'utf8');
 const footerInjection=fs.readFileSync(new URL('../squarespace-footer-injection.html',import.meta.url),'utf8');
+const pageInjection=fs.readFileSync(new URL('../squarespace-injection.html',import.meta.url),'utf8');
 
 function between(source,start,end){
   const a=source.indexOf(start),b=source.indexOf(end,a);
@@ -201,6 +202,46 @@ foreignScroll.handlers.message({data:{type:'ph-renta-scroll',top:300,bottom:550}
   origin:'https://utocnik.example',source:foreignScroll.frameWindow});
 ok(foreignScroll.frames.length===0,'Cudzí origin nesmie spustiť stabilizačnú slučku.');
 close(foreignScroll.win.scrollY,0,'Cudzí origin nesmie meniť polohu stránky',0);
+
+const ctaScrollSource=between(pageInjection,'/* CTA_SCROLL_POLICY:START */','/* CTA_SCROLL_POLICY:END */');
+const ctaTarget={getBoundingClientRect(){return {top:400};}};
+const ctaCalls={push:[],scroll:[]};
+const ctaWindow={
+  pageYOffset:1000,
+  location:{hash:''},
+  history:{pushState(...args){ctaCalls.push.push(args);ctaWindow.location.hash=args[2];}},
+  scrollTo(options){ctaCalls.scroll.push(options);}
+};
+const ctaContext=vm.createContext({
+  window:ctaWindow,
+  document:{getElementById(id){return id==='ph-renta-calculator'?ctaTarget:null;}}
+});
+vm.runInContext(`${ctaScrollSource};globalThis.handle=obsluzSkokKApp;`,ctaContext);
+function ctaEvent(overrides={}){
+  return {
+    button:0,metaKey:false,ctrlKey:false,shiftKey:false,altKey:false,
+    prevented:0,stopped:0,
+    preventDefault(){this.prevented++;},
+    stopImmediatePropagation(){this.stopped++;},
+    ...overrides
+  };
+}
+const normalClick=ctaEvent();
+ctaContext.handle(normalClick);
+ok(normalClick.prevented===1&&normalClick.stopped===1,
+  'Bežný klik na CTA musí zastaviť Squarespace animáciu kotvy.');
+ok(ctaCalls.push.length===1&&ctaWindow.location.hash==='#ph-renta-calculator',
+  'Bežný klik na CTA musí zapísať cieľ do histórie.');
+ok(ctaCalls.scroll.length===1&&ctaCalls.scroll[0].top===1400&&ctaCalls.scroll[0].behavior==='auto',
+  'CTA musí skočiť k aplikácii jedným okamžitým scrollom.');
+const repeatClick=ctaEvent();
+ctaContext.handle(repeatClick);
+ok(ctaCalls.push.length===1&&ctaCalls.scroll.length===2,
+  'Opakovaný klik pri rovnakom hashi nesmie vytvoriť duplicitný záznam histórie.');
+const modifiedClick=ctaEvent({metaKey:true});
+ctaContext.handle(modifiedClick);
+ok(modifiedClick.prevented===0&&modifiedClick.stopped===0&&ctaCalls.scroll.length===2,
+  'Klik s modifikátorom musí zachovať natívne správanie odkazu.');
 
 const guidePolicy=between(guide,'/* GUIDE_VIEWPORT_POLICY:START */','/* GUIDE_VIEWPORT_POLICY:END */');
 const guideContext=vm.createContext({URL});

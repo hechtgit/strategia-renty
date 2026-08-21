@@ -263,6 +263,25 @@
         '<div class="cz-hero-image" aria-hidden="true"></div>' +
       '</article>';
 
+    /* CTA_SCROLL_POLICY:START */
+    function obsluzSkokKApp(e) {
+      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      var ciel = document.getElementById("ph-renta-calculator");
+      if (!ciel) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      if (window.location.hash !== "#ph-renta-calculator") {
+        window.history.pushState(null, "", "#ph-renta-calculator");
+      }
+      var top = ciel.getBoundingClientRect().top + window.pageYOffset;
+      window.scrollTo({
+        top: Math.max(0, Math.round(top)),
+        behavior: "auto"
+      });
+    }
+    /* CTA_SCROLL_POLICY:END */
+    lead.querySelector(".cz-jump").addEventListener("click", obsluzSkokKApp, true);
+
     var telo = document.createElement("section");
     telo.className = "cz-body";
     /* Tá istá podmienka, akou prepína rozloženie samotná aplikácia. Kým tu
