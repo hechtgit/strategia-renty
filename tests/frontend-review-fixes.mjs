@@ -6,6 +6,7 @@ const landing=fs.readFileSync(new URL('../cara-zivota-master.html',import.meta.u
 const result=fs.readFileSync(new URL('../vysledok-10of10.js',import.meta.url),'utf8');
 const resultMaster=fs.readFileSync(new URL('../vysledok-master.html',import.meta.url),'utf8');
 const guide=fs.readFileSync(new URL('../sprievodca.js',import.meta.url),'utf8');
+const footerInjection=fs.readFileSync(new URL('../squarespace-footer-injection.html',import.meta.url),'utf8');
 
 function between(source,start,end){
   const a=source.indexOf(start),b=source.indexOf(end,a);
@@ -121,6 +122,12 @@ const sensitivityContext=vm.createContext({});
 vm.runInContext(`globalThis.intro=dosiahnute=>{${sensitivitySource};return sensitivityIntro;};`,sensitivityContext);
 ok(!sensitivityContext.intro(599).includes('už dosahuje'),'Nesplnená hranica nesmie tvrdiť, že ju vstup dosahuje.');
 ok(sensitivityContext.intro(600).includes('už dosahuje'),'Splnená prvá hranica má zachovať pravdivú vetu.');
+ok(sensitivityContext.intro(719).includes('Jednu z nich'),'Hodnota 719 musí zostať v jednotnom čísle.');
+ok(sensitivityContext.intro(720).includes('Obe z nich váš dnešný vstup už dosahuje.')
+  &&sensitivityContext.intro(800).includes('Obe z nich'),
+  'Splnené obe hranice musia použiť množné číslo.');
+ok(footerInjection.includes('e.origin !== POVOLENY_POVOD || e.source !== f.contentWindow'),
+  'Globálny scroll poslucháč musí overiť pôvod aj konkrétny rám.');
 
 const guidePolicy=between(guide,'/* GUIDE_VIEWPORT_POLICY:START */','/* GUIDE_VIEWPORT_POLICY:END */');
 const guideContext=vm.createContext({URL});

@@ -146,7 +146,9 @@
     let sensitivity=odolnost.querySelector(".odolnost-citlivost");
     if(!sensitivity){sensitivity=document.createElement("details");sensitivity.className="odolnost-citlivost";tbody.closest("table").after(sensitivity);}
     /* SENSITIVITY_INTRO:START */
-    const sensitivityIntro=dosiahnute>=600
+    const sensitivityIntro=dosiahnute>=720
+      ?'Dve ilustračné úrovne ukazujú, ako by sa výsledok menil pri vyššom vstupe. Obe z nich váš dnešný vstup už dosahuje.'
+      :dosiahnute>=600
       ?'Dve ilustračné úrovne ukazujú, ako by sa výsledok menil pri vyššom vstupe. Jednu z nich váš dnešný vstup už dosahuje.'
       :'Dve ilustračné úrovne ukazujú, aký vyšší vstup by bol potrebný na dosiahnutie každej z nich.';
     /* SENSITIVITY_INTRO:END */

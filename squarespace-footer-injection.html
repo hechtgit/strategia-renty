@@ -2142,12 +2142,14 @@ body.is-mobile-overlay-active .Mobile-bar {
    má byť vidieť (prstenec aj bublinu naraz), a odscrollujeme ho tu - ale len
    ak naozaj treba. Bez toho ostali kroky 7 a 8 mimo obrazovky. */
 (function () {
+  var POVOLENY_POVOD = "https://hechtgit.github.io";
   window.addEventListener("message", function (e) {
     var d = e.data;
     if (!d || d.type !== "ph-renta-scroll") return;
-    if (typeof d.top !== "number" || typeof d.bottom !== "number") return;
     var f = document.querySelector('iframe[src*="cara-zivota"]');
     if (!f) return;
+    if (e.origin !== POVOLENY_POVOD || e.source !== f.contentWindow) return;
+    if (typeof d.top !== "number" || typeof d.bottom !== "number") return;
     var base = f.getBoundingClientRect().top + window.scrollY;
     var top = base + d.top, bottom = base + d.bottom;
     var okraj = 24;
