@@ -273,7 +273,7 @@
       if (window.location.hash !== "#ph-renta-calculator") {
         window.history.pushState(null, "", "#ph-renta-calculator");
       }
-      var top = ciel.getBoundingClientRect().top + window.pageYOffset;
+      var top = ciel.getBoundingClientRect().top + window.pageYOffset - 80;
       window.scrollTo({
         top: Math.max(0, Math.round(top)),
         behavior: "auto"

@@ -238,8 +238,8 @@ ok(normalClick.prevented===1&&normalClick.stopped===1,
   'Bežný klik na CTA musí zastaviť Squarespace animáciu kotvy.');
 ok(ctaCalls.push.length===1&&ctaWindow.location.hash==='#ph-renta-calculator',
   'Bežný klik na CTA musí zapísať cieľ do histórie.');
-ok(ctaCalls.scroll.length===1&&ctaCalls.scroll[0].top===1400&&ctaCalls.scroll[0].behavior==='auto',
-  'CTA musí skočiť k aplikácii jedným okamžitým scrollom.');
+ok(ctaCalls.scroll.length===1&&ctaCalls.scroll[0].top===1320&&ctaCalls.scroll[0].behavior==='auto',
+  'CTA musí skočiť k aplikácii jedným okamžitým scrollom s priestorom pre pevnú hlavičku.');
 const repeatClick=ctaEvent();
 ctaContext.handle(repeatClick);
 ok(ctaCalls.push.length===1&&ctaCalls.scroll.length===2,
