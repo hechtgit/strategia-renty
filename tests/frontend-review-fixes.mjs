@@ -129,9 +129,78 @@ ok(sensitivityContext.intro(720).includes('Obe z nich váš dnešný vstup už 
 ok(footerInjection.includes('e.origin !== POVOLENY_POVOD || e.source !== f.contentWindow'),
   'Globálny scroll poslucháč musí overiť pôvod aj konkrétny rám.');
 ok(footerInjection.includes('window.scrollTo({ top: Math.max(0, Math.round(ciel)), behavior: "auto" })'),
-  'Scroll sprievodcu musí zrušiť rozbehnutý posun rodičovského odkazu.');
+  'Scroll sprievodcu musí dorovnávať polohu okamžite.');
 ok(!footerInjection.includes('window.scrollTo({ top: Math.max(0, Math.round(ciel)), behavior: "smooth" })'),
   'Scroll sprievodcu nesmie pretekať s animáciou rodičovského odkazu.');
+ok(footerInjection.includes('requestAnimationFrame(function () { stabilizuj(')
+  &&footerInjection.includes('performance.now() + 900'),
+  'Najnovší krok musí 900 ms odolávať dobiehajúcej JS animácii kotvy.');
+
+const scrollBlock=between(footerInjection,'<!-- PH_SPRIEVODCA_SCROLL_V1_START -->',
+  '<!-- PH_SPRIEVODCA_SCROLL_V1_END -->');
+const scrollScript=scrollBlock.match(/<script>([\s\S]*?)<\/script>/)?.[1];
+ok(scrollScript,'Chýba vykonateľný scroll poslucháč sprievodcu.');
+function scrollHarness(){
+  const handlers={},frames=[];
+  const frameWindow={};
+  let now=0;
+  const win={
+    scrollY:0,innerHeight:700,
+    addEventListener(type,fn){handlers[type]=fn;},
+    scrollTo({top}){this.scrollY=top;}
+  };
+  const frame={
+    contentWindow:frameWindow,
+    getBoundingClientRect(){return {top:1000-win.scrollY};}
+  };
+  const context=vm.createContext({
+    window:win,
+    document:{querySelector(selector){return selector.includes('cara-zivota')?frame:null;}},
+    performance:{now(){return now;}},
+    requestAnimationFrame(fn){frames.push(fn);return frames.length;}
+  });
+  vm.runInContext(scrollScript,context);
+  return {
+    handlers,frames,win,frameWindow,
+    frame(ms=16){now+=ms;const fn=frames.shift();if(fn)fn(now);},
+    drain(){while(frames.length&&now<=1000)this.frame();}
+  };
+}
+function validScroll(h,data){
+  h.handlers.message({data:{type:'ph-renta-scroll',...data},
+    origin:'https://hechtgit.github.io',source:h.frameWindow});
+}
+const lateScroll=scrollHarness();
+validScroll(lateScroll,{top:300,bottom:550});
+close(lateScroll.win.scrollY,1075,'Počiatočné dorovnanie sprievodcu',0);
+lateScroll.win.scrollY=1475;
+lateScroll.frame();
+close(lateScroll.win.scrollY,1075,'Neskorý scroll Squarespace musí byť dorovnaný v ďalšom snímku',0);
+lateScroll.drain();
+lateScroll.win.scrollY=1475;
+lateScroll.frame();
+close(lateScroll.win.scrollY,1475,'Po 900 ms už slučka nesmie držať starý krok',0);
+
+const expiredFrame=scrollHarness();
+validScroll(expiredFrame,{top:300,bottom:550});
+expiredFrame.win.scrollY=1475;
+expiredFrame.frame(901);
+close(expiredFrame.win.scrollY,1475,'Oneskorený snímok nesmie obnoviť expirovaný krok',0);
+
+const generations=scrollHarness();
+validScroll(generations,{top:100,bottom:300});
+validScroll(generations,{top:700,bottom:900});
+generations.win.scrollY=2000;
+generations.frame();
+close(generations.win.scrollY,2000,'Staršia generácia nesmie dorovnať nový krok',0);
+generations.frame();
+close(generations.win.scrollY,1450,'Najnovší krok sa musí dorovnať',0);
+
+const foreignScroll=scrollHarness();
+foreignScroll.handlers.message({data:{type:'ph-renta-scroll',top:300,bottom:550},
+  origin:'https://utocnik.example',source:foreignScroll.frameWindow});
+ok(foreignScroll.frames.length===0,'Cudzí origin nesmie spustiť stabilizačnú slučku.');
+close(foreignScroll.win.scrollY,0,'Cudzí origin nesmie meniť polohu stránky',0);
 
 const guidePolicy=between(guide,'/* GUIDE_VIEWPORT_POLICY:START */','/* GUIDE_VIEWPORT_POLICY:END */');
 const guideContext=vm.createContext({URL});

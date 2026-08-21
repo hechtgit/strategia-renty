@@ -2143,13 +2143,11 @@ body.is-mobile-overlay-active .Mobile-bar {
    ak naozaj treba. Bez toho ostali kroky 7 a 8 mimo obrazovky. */
 (function () {
   var POVOLENY_POVOD = "https://hechtgit.github.io";
-  window.addEventListener("message", function (e) {
-    var d = e.data;
-    if (!d || d.type !== "ph-renta-scroll") return;
+  var generacia = 0;
+
+  function dorovnaj(d) {
     var f = document.querySelector('iframe[src*="cara-zivota"]');
     if (!f) return;
-    if (e.origin !== POVOLENY_POVOD || e.source !== f.contentWindow) return;
-    if (typeof d.top !== "number" || typeof d.bottom !== "number") return;
     var base = f.getBoundingClientRect().top + window.scrollY;
     var top = base + d.top, bottom = base + d.bottom;
     var okraj = 24;
@@ -2161,6 +2159,26 @@ body.is-mobile-overlay-active .Mobile-bar {
       ? top - okraj
       : top - (window.innerHeight - vyska) / 2;
     window.scrollTo({ top: Math.max(0, Math.round(ciel)), behavior: "auto" });
+  }
+
+  function stabilizuj(d, moja, doKedy) {
+    if (generacia !== moja || performance.now() >= doKedy) return;
+    dorovnaj(d);
+    requestAnimationFrame(function () { stabilizuj(d, moja, doKedy); });
+  }
+
+  window.addEventListener("message", function (e) {
+    var d = e.data;
+    if (!d || d.type !== "ph-renta-scroll") return;
+    var f = document.querySelector('iframe[src*="cara-zivota"]');
+    if (!f) return;
+    if (e.origin !== POVOLENY_POVOD || e.source !== f.contentWindow) return;
+    if (typeof d.top !== "number" || typeof d.bottom !== "number") return;
+    var moja = ++generacia;
+    var rozsah = { top: d.top, bottom: d.bottom };
+    var doKedy = performance.now() + 900;
+    dorovnaj(rozsah);
+    requestAnimationFrame(function () { stabilizuj(rozsah, moja, doKedy); });
   });
 })();
 </script>
