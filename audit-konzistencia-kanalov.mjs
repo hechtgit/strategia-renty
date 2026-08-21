@@ -13,11 +13,12 @@ const files = {
 };
 
 const errors = [];
+const comparable = value => value.replace(/\u00a0/g, " ");
 const must = (channel, phrase) => {
-  if (!files[channel].includes(phrase)) errors.push(`${channel}: chýba „${phrase}“`);
+  if (!comparable(files[channel]).includes(comparable(phrase))) errors.push(`${channel}: chýba „${phrase}“`);
 };
 const forbid = (channel, phrase) => {
-  if (files[channel].includes(phrase)) errors.push(`${channel}: zostalo zakázané „${phrase}“`);
+  if (comparable(files[channel]).includes(comparable(phrase))) errors.push(`${channel}: zostalo zakázané „${phrase}“`);
 };
 
 must("landing", "rentu chcete čerpať");
@@ -25,13 +26,13 @@ must("landing", "metódy Monte Carlo");
 must("landing", "800 simulovaných priebehov");
 for (const channel of ["result", "email"]) must(channel, "vopred zvolený koniec čerpania");
 for (const channel of ["result", "email"]) must(channel, "800 modelovaných simuláci");
-must("pdf", "modelované simulácie");
+must("pdf", "modelovanej simulácii");
 must("landing", "Kam vám máme poslať odkaz na modeláciu?");
 must("landing", "Modelácia sa vám otvorí okamžite");
-must("result", "Kapitál pokryl všetky plánované výplaty");
+must("result", "Majetok pokryl všetky plánované výplaty");
 must("result", "nie odhad pravdepodobnosti budúceho úspechu");
-must("pdf", "novej modelovanej kombinácie");
-must("pdf", "Podiel úspešných simulácií nie je odhadom pravdepodobnosti");
+must("pdf", "Simulácie vznikajú metódou Monte Carlo");
+must("pdf", "minulá výkonnosť nie je spoľahlivým ukazovateľom budúcich výsledkov");
 must("email", "Nie je odhadom pravdepodobnosti ani predpoveďou");
 must("email", "Capital Market Assumptions, CMA");
 must("landing", "renta-boldem.renta-relay.workers.dev");
@@ -54,8 +55,27 @@ forbid("result", "Uvedené sumy nie sú odporúčaná výška investície");
 forbid("result", "z 800 z 800");
 
 must("builtLanding", "renta-flow-10of10.js?v=20260816-2");
-must("builtResult", "vysledok-10of10.js?v=20260816-1");
-must("builtResult", "pdf-alternativa.js?v=20260815-7");
+must("builtLanding", "dist/renta-core.browser.js?v=20260821a");
+must("builtLanding", "dist/renta-data.browser.js?v=20260821a");
+must("builtLanding", "sprievodca.css?v=20260821a");
+must("builtLanding", "sprievodca.js?v=20260821a");
+must("builtResult", "vysledok-10of10.js?v=20260821a");
+must("builtResult", "jspdf.min.js?v=20260821a");
+must("builtResult", "pdf-font.js?v=20260821a");
+must("builtResult", "pdf.js?v=20260821a");
+must("builtResult", "pdf-alternativa.js?v=20260821a");
+
+/* Každý lokálny meniteľný asset musí mať cache-buster. Inak môže klient po
+   nasadení na desať minút skombinovať novú stránku so starým skriptom. */
+for (const [channel, source] of [["builtLanding", files.builtLanding], ["builtResult", files.builtResult]]) {
+  const refs = [...source.matchAll(/(?:src|href)=["']([^"']+\.(?:js|css)(?:\?[^"']*)?)["']/g)]
+    .map(m => m[1])
+    .concat([...source.matchAll(/nacitaj\(["']([^"']+\.js(?:\?[^"']*)?)["']\)/g)].map(m => m[1]));
+  for (const ref of refs) {
+    if (/^(?:https?:)?\/\//.test(ref)) continue;
+    if (!/[?&]v=/.test(ref)) errors.push(`${channel}: lokálny asset bez cache-busteru „${ref}“`);
+  }
+}
 must("result", "id=\"model-kicker\"");
 must("builtResult", "id=\"model-kicker\"");
 must("result", "NEPLATNE_MENA");

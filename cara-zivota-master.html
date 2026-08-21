@@ -108,6 +108,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font
 /* Spresnenie „v dnešných cenách" patrí na vlastný riadok pod popis a nesmie sa
    lámať — v úzkej karte by sa inak roztrieštilo na štyri riadky. */
 .sl .k-note{display:block;white-space:nowrap;font-size:13px;line-height:1.35;margin-top:1px;color:var(--muted)}
+#have-rent-note{margin:7px 0 0;font-size:13px;line-height:1.35;color:var(--on-gold-soft,var(--muted))}
 .sl .v{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
 input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:22px;margin:6px 0 0;background:transparent;cursor:pointer}
 input[type=range]::-webkit-slider-runnable-track{height:3px;background:rgba(255,255,255,.2)}
@@ -871,9 +872,9 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
     <h1>Strat&eacute;gia priv&aacute;tnej renty</h1>
     <p class="lead-claim">Majetok s&aacute;m osebe nie je pr&iacute;jem.<br>
       Aj majitelia hodnotn&yacute;ch portf&oacute;li&iacute; často nevedia,<br>
-      koľko si z majetku m&ocirc;žu mesačne vypl&aacute;cať,<br>
+      koľko si z majetku m&ocirc;žu mesačne vypl&aacute;cať,<br>
       aby ho nevyčerpali sk&ocirc;r, než pl&aacute;novali.</p>
-    <a class="intro-jump" href="#kalkulacka">Prejsť priamo k aplik&aacute;cii <span aria-hidden="true">&darr;</span></a>
+    <a class="intro-jump" href="#kalkulacka">Prejsť priamo k aplik&aacute;cii <span aria-hidden="true">&darr;</span></a>
   </div>
   <figure class="lead-img" data-e style="--d:.18s">
     <picture>
@@ -897,10 +898,10 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
 
   <h2>Ako aplik&aacute;cia funguje?</h2>
   <div class="intro-cols">
-    <p>Z&aacute;kladom aplik&aacute;cie je <strong>Čiara života</strong> a <strong>tri pohybliv&eacute; m&iacute;ľniky</strong>. Prv&yacute; predstavuje dnešok, druh&yacute; vek, od ktor&eacute;ho chcete začať čerpať priv&aacute;tnu rentu, a tret&iacute; obdobie, dokedy m&aacute; renta pokračovať. Keď ktor&yacute;koľvek m&iacute;ľnik posuniete, aplik&aacute;cia cel&yacute; pl&aacute;n okamžite prepoč&iacute;ta.</p>
-    <p>V karte <strong>Dnes</strong> si zvol&iacute;te, či <strong>majetok ešte len budujete, alebo ho už m&aacute;te</strong>. Pri budovan&iacute; m&ocirc;žete kombinovať jednorazov&uacute; investíciu s pravideln&yacute;m investovan&iacute;m a zistiť, ak&yacute; kapit&aacute;l potrebujete pripraviť. Ak už majetok m&aacute;te, aplik&aacute;cia uk&aacute;že, ak&uacute; mesačn&uacute; rentu m&ocirc;že prin&aacute;šať alebo ako dlho by pri zvolenom čerpan&iacute; mohol vydržať.</p>
-    <p>N&aacute;sledne nastav&iacute;te <strong>začiatok v&yacute;platy</strong>, mesačn&uacute; rentu v dnešnej hodnote a <strong>koniec čerpania</strong>. Zvoliť m&ocirc;žete aj rentu bez časov&eacute;ho obmedzenia. Zhodnotenie si určujete sami, a to zvl&aacute;šť pre obdobie budovania majetku a zvl&aacute;šť pre obdobie vypl&aacute;cania. S infl&aacute;ciou aplik&aacute;cia štandardne poč&iacute;ta, aby ste rentu zad&aacute;vali v dnešnej k&uacute;pnej sile; jej v&yacute;šku si m&ocirc;žete zmeniť alebo ju vypn&uacute;ť.</p>
-    <p><strong>Z&aacute;kladn&yacute; orientačn&yacute; prepočet</strong> nevyžaduje meno ani e-mail. Hneď po prvej zmene sa pod aplik&aacute;ciou objav&iacute; <strong>test odolnosti</strong>: uvid&iacute;te, v koľk&yacute;ch z 800 modelovan&yacute;ch priebehov by v&aacute;š majetok pokryl všetky pl&aacute;novan&eacute; v&yacute;platy. Počas budovania sa v nich skladaj&uacute; s&uacute;visl&eacute; &uacute;seky skutočn&yacute;ch ročn&yacute;ch v&yacute;nosov indexu MSCI World, počas vypl&aacute;cania plat&iacute; pevn&yacute; modelov&yacute; v&yacute;nos štyri percent&aacute; ročne, bez ohľadu na to, čo si nastav&iacute;te. Nejde o pravdepodobnosť ani predpoveď. <strong>Rozš&iacute;ren&aacute; model&aacute;cia</strong> v PDF ten ist&yacute; test rozp&iacute;še do detailu a prid&aacute;, o koľko vyššia investícia by v&yacute;sledok posunula.</p>
+    <p>Z&aacute;kladom aplik&aacute;cie je <strong>Čiara života</strong> a <strong>tri pohybliv&eacute; m&iacute;ľniky</strong>. Prv&yacute; predstavuje dnešok, druh&yacute; vek, od ktor&eacute;ho chcete začať čerpať priv&aacute;tnu rentu, a tret&iacute; obdobie, dokedy m&aacute; renta pokračovať. Keď ktor&yacute;koľvek m&iacute;ľnik posuniete, aplik&aacute;cia cel&yacute; pl&aacute;n okamžite prepoč&iacute;ta.</p>
+    <p>V karte <strong>Dnes</strong> si zvol&iacute;te, či <strong>majetok ešte len budujete, alebo ho už m&aacute;te</strong>. Pri budovan&iacute; m&ocirc;žete kombinovať jednorazov&uacute; investíciu s pravideln&yacute;m investovan&iacute;m a zistiť, ak&yacute; kapit&aacute;l potrebujete pripraviť. Ak už majetok m&aacute;te, aplik&aacute;cia uk&aacute;že, ak&uacute; mesačn&uacute; rentu m&ocirc;že prin&aacute;šať alebo ako dlho by pri zvolenom čerpan&iacute; mohol vydržať.</p>
+    <p>N&aacute;sledne nastav&iacute;te <strong>začiatok v&yacute;platy</strong>, mesačn&uacute; rentu v dnešnej hodnote a <strong>koniec čerpania</strong>. Zvoliť m&ocirc;žete aj rentu bez časov&eacute;ho obmedzenia. Zhodnotenie si určujete sami, a to zvl&aacute;šť pre obdobie budovania majetku a zvl&aacute;šť pre obdobie vypl&aacute;cania. S infl&aacute;ciou aplik&aacute;cia štandardne poč&iacute;ta, aby ste rentu zad&aacute;vali v dnešnej k&uacute;pnej sile; jej v&yacute;šku si m&ocirc;žete zmeniť alebo ju vypn&uacute;ť.</p>
+    <p><strong>Z&aacute;kladn&yacute; orientačn&yacute; prepočet</strong> nevyžaduje meno ani e-mail. Hneď po prvej zmene sa pod aplik&aacute;ciou objav&iacute; <strong>test odolnosti</strong>: uvid&iacute;te, v koľk&yacute;ch z 800 modelovan&yacute;ch priebehov by v&aacute;š majetok pokryl všetky pl&aacute;novan&eacute; v&yacute;platy. Počas budovania sa v nich skladaj&uacute; s&uacute;visl&eacute; &uacute;seky skutočn&yacute;ch ročn&yacute;ch v&yacute;nosov indexu MSCI World, počas vypl&aacute;cania plat&iacute; pevn&yacute; modelov&yacute; v&yacute;nos štyri percent&aacute; ročne, bez ohľadu na to, čo si nastav&iacute;te. Nejde o pravdepodobnosť ani predpoveď. <strong>Rozš&iacute;ren&aacute; model&aacute;cia</strong> v PDF ten ist&yacute; test rozp&iacute;še do detailu a prid&aacute;, o koľko vyššia investícia by v&yacute;sledok posunula.</p>
   </div>
 </article>
 
@@ -1012,6 +1013,7 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
           <button type="button" data-goal="duration">Ako dlho vydrží</button>
         </div>
         <div class="out"><div class="k" id="have-k">Môžem si vyplácať</div><div class="v" id="have-v">—</div></div>
+        <p class="k-note" id="have-rent-note" hidden></p>
       </div>
 
       <div class="set">
@@ -1093,23 +1095,23 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
            aria-labelledby="pas-nazov" hidden>
     <h3 class="pas-nazov" id="pas-nazov">Test odolnosti plánu</h3>
     <p class="pas-vysledok" aria-live="polite">Váš majetok pokryl všetky plánované výplaty renty v <strong class="pas-pocet"><span id="pas-uspesnych">-</span>&nbsp;z&nbsp;<span id="pas-zo">-</span></strong> modelovaných priebehov.</p>
-    <p class="pas-ostatne" id="pas-ostatne" aria-live="polite">V ostatných sa majetok vyčerpal pred plánovaným koncom čerpania.</p>
-    <p class="pas-hranice">Výsledok nie je pravdepodobnosť ani predpoveď. Ukazuje, ako plán obstál v rôznych modelovaných podmienkach.</p>
+    <p class="pas-ostatne" id="pas-ostatne" aria-live="polite">V ostatných sa majetok vyčerpal pred plánovaným koncom čerpania.</p>
+    <p class="pas-hranice">Výsledok nie je pravdepodobnosť ani predpoveď. Ukazuje, ako plán obstál v rôznych modelovaných podmienkach.</p>
     <p class="pas-vyber">Ďalej sa dá pokračovať dvoma spôsobmi. Môžete si vybrať jeden z nich alebo oba.</p>
     <div class="pas-cesty">
       <a class="pas-cesta" href="#delivery-title">
-        <h4>Modelácia v PDF</h4>
-        <p>Okrem pl&aacute;nu priv&aacute;tnej renty, ktor&yacute; ste si nastavili, uvid&iacute;te aj to, koľko by ste museli investovať, aby pl&aacute;n obst&aacute;l vo viacer&yacute;ch priebehoch.</p>
+        <h4>Modelácia v PDF</h4>
+        <p>Okrem pl&aacute;nu priv&aacute;tnej renty, ktor&yacute; ste si nastavili, uvid&iacute;te aj to, koľko by ste museli investovať, aby pl&aacute;n obst&aacute;l vo viacer&yacute;ch priebehoch.</p>
       </a>
       <a class="pas-cesta" href="#consult-title">
         <h4>Osobn&aacute; konzult&aacute;cia</h4>
-        <p>V&yacute;sledok testu zasad&iacute;me do kontextu vašej situ&aacute;cie. Ak už investujete, pozrieme sa, či v&aacute;s dnešn&eacute; portf&oacute;lio k tomuto pl&aacute;nu naozaj vedie. Ak zatiaľ neinvestujete, uk&aacute;žeme, ak&eacute; portf&oacute;lio k nemu vedie.</p>
+        <p>V&yacute;sledok testu zasad&iacute;me do kontextu vašej situ&aacute;cie. Ak už investujete, pozrieme sa, či v&aacute;s dnešn&eacute; portf&oacute;lio k tomuto pl&aacute;nu naozaj vedie. Ak zatiaľ neinvestujete, uk&aacute;žeme, ak&eacute; portf&oacute;lio k nemu vedie.</p>
       </a>
     </div>
     <div class="pas-metodika">
       <h4>Metodika</h4>
-      <p>Počas budovania majetku vych&aacute;dzaj&uacute; modelovan&eacute; priebehy zo s&uacute;visl&yacute;ch &uacute;sekov skutočn&yacute;ch ročn&yacute;ch v&yacute;nosov indexu MSCI World. Počas čerpania počítaj&uacute; s pevn&yacute;m modelov&yacute;m v&yacute;nosom 4&nbsp;% ročne.</p>
-      <p>Použit&aacute; met&oacute;da: Monte Carlo s blokov&yacute;m bootstrapom.</p>
+      <p>Počas budovania majetku vych&aacute;dzaj&uacute; modelovan&eacute; priebehy zo s&uacute;visl&yacute;ch &uacute;sekov skutočn&yacute;ch ročn&yacute;ch v&yacute;nosov indexu MSCI World. Počas čerpania počítaj&uacute; s pevn&yacute;m modelov&yacute;m v&yacute;nosom 4&nbsp;% ročne.</p>
+      <p>Použit&aacute; met&oacute;da: Monte Carlo s blokov&yacute;m bootstrapom.</p>
     </div>
   </section>
 
@@ -1146,7 +1148,7 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
              web. A otvára sa v novom okne - v ráme by pravidlá nahradili
              kalkulačku a klient by prišiel o rozpracovaný plán. Adresa je tá
              istá, akú web používa všade inde (links.privacy). -->
-        <small class="privacy-note">Odoslaním formulára beriete na vedomie spracovanie osobných údajov na účely vytvorenia a doručenia modelácie podľa <a href="https://www.hechtberger.com/pravidla-ochrany-osobnych-udajov" target="_blank" rel="noopener">Pravidiel ochrany osobných údajov</a>.</small>
+        <small class="privacy-note">Odoslaním formulára beriete na vedomie spracovanie osobných údajov na účely vytvorenia a doručenia modelácie podľa <a href="https://www.hechtberger.com/pravidla-ochrany-osobnych-udajov" target="_blank" rel="noopener">Pravidiel ochrany osobných údajov</a>.</small>
         <p class="send-status" id="send-status" aria-live="polite"></p>
         </div>
       </div>
@@ -1319,12 +1321,33 @@ const VYSTUP_BASE=location.protocol==='file:'
   ? location.href.split('?')[0]
   : location.origin+location.pathname.replace(/[^/]*$/,'vysledok.html');
 
+/* SCENARIO_PARAMS_POLICY:START */
+function scenarioEntries(state,vypocitana){
+  const rent=state.sit==='have'&&state.goal==='rent'&&vypocitana
+    &&!vypocitana.warn&&Number.isFinite(vypocitana.Rtoday)
+      ?Math.round(vypocitana.Rtoday):state.rent;
+  const entries=[
+    ['now',state.now],['start',state.start],['end',state.end],['rent',rent],
+    ['infl',state.infl],['vynos',state.vynos],['vynosRent',state.vynosRent],
+    ['sit',state.sit],['pension',state.pension],['infl_on',state.inflOn?'1':'0']
+  ];
+  if(state.sit==='have'){
+    entries.push(['existing',state.existing],['goal',state.goal]);
+  }else{
+    entries.push(['mode',state.mode]);
+    if(state.mode==='combo'){
+      entries.push(['combo',state.combo],['comboDir',state.comboDir]);
+      if(state.comboDir==='known')entries.push(['monthlyKnown',state.monthlyKnown]);
+    }
+  }
+  return entries;
+}
+/* SCENARIO_PARAMS_POLICY:END */
 function scenarioParams(){
-  const p=new URLSearchParams();
-  NUM_KEYS.forEach(k=>p.set(k,String(S[k])));
-  Object.keys(ENUM_KEYS).forEach(k=>p.set(k,S[k]));
-  p.set('infl_on',S.inflOn?'1':'0');
-  return p;
+  /* URL nesie iba hodnoty, ktoré majú v danom režime vplyv na výpočet. Tak
+     zostáva identický scenár pod limitom CRM stĺpca aj bez tichého skracovania. */
+  const vypocitana=S.sit==='have'&&S.goal==='rent'?compute():null;
+  return new URLSearchParams(scenarioEntries(S,vypocitana));
 }
 /* Pri lokálnom otvorení odkaz vedie späť do aplikácie, ktorá režim výstupu pozná
    podľa ?vystup. Výsledková stránka ten prepínač nepotrebuje. */
@@ -1375,7 +1398,7 @@ applyScenarioFromUrl();
 
 
 const fmtN=n=>Math.max(0,Math.round(n)).toLocaleString('sk-SK');
-const fmtEur=n=>fmtN(n)+' €';
+const fmtEur=n=>fmtN(n)+'\u00a0€';
 const pctTxt=v=>String(Math.round(v*10)/10).replace('.',',');
 const yrs=n=>`${n} ${n===1?'rok':(n>=2&&n<=4?'roky':'rokov')}`;
 
@@ -1461,7 +1484,12 @@ function compute(){
     o.R=o.rast?S.rent*Math.pow(1+infl/100,N):S.rent;
     o.C0=S.existing;
     o.avail=o.C0*Math.pow(1+rocnaCista(S.vynos),N);o.cap=o.avail;
-    if(S.goal==='rent'){o.R=nek?o.avail*(i-g):rentFromCap(o.avail,Tm,i,g);o.payM=nek?360:Tm}
+    if(S.goal==='rent'){
+      o.R=nek?o.avail*(i-g):rentFromCap(o.avail,Tm,i,g);
+      o.Rtoday=o.rast?o.R/Math.pow(1+infl/100,N):o.R;
+      o.calculatesRent=true;
+      o.payM=nek?360:Tm;
+    }
     else{o.Rtoday=S.rent;const m=monthsToZero(o.avail,o.R,i,g);
       if(m===Infinity){o.forever=true;o.payM=360}else{o.months=m;o.payM=Math.min(1200,Math.max(360,m+120))}}
   }
@@ -1544,7 +1572,7 @@ addEventListener('message',e=>{
 const tw=new Map(),twSafe=new Map();
 function money(el,val,unit){
   const to=Math.max(0,Math.round(val));
-  const draw=v=>{el.innerHTML=fmtN(v)+' €'+(unit?`<small>${unit}</small>`:'')};
+  const draw=v=>{el.innerHTML=fmtN(v)+'\u00a0€'+(unit?`<small>${unit}</small>`:'')};
   if(!ANIM||REDUCED||typeof el._v!=='number'||document.hidden){draw(to);el._v=to;return}
   const from=el._v;if(from===to){draw(to);return}
   cancelAnimationFrame(tw.get(el));
@@ -1639,6 +1667,7 @@ function varovania(o){
 function render(){
   const o=compute();
   const rentaDnes=o.calculatesRent?o.Rtoday:S.rent;
+  const maHotovyMajetokRentu=S.sit==='have'&&S.goal==='rent';
   const derived=S.sit==='have'&&S.goal==='duration';
   let endEff=S.end;
   if(derived&&!o.warn)endEff=o.forever?Math.max(S.start+1,100)
@@ -1658,7 +1687,7 @@ function render(){
 
   /* milníky */
   txt($('v-now'),String(S.now));txt($('v-start'),String(S.start));txt($('v-end'),String(endEff));
-  $('h-now').setAttribute('aria-valuenow',S.now);$('h-now').setAttribute('aria-valuemax',S.start);
+  $('h-now').setAttribute('aria-valuenow',S.now);$('h-now').setAttribute('aria-valuemax',Math.min(99,S.start));
   $('h-start').setAttribute('aria-valuenow',S.start);$('h-start').setAttribute('aria-valuemin',S.now);$('h-start').setAttribute('aria-valuemax',S.end-1);
   $('h-end').setAttribute('aria-valuenow',endEff);$('h-end').setAttribute('aria-valuemin',S.start+1);
   $('h-end').dataset.locked=(derived||openEnd)?'1':'0';
@@ -1694,7 +1723,8 @@ function render(){
   $('ticks').innerHTML=th;
 
   /* karta DNES */
-  if(o.warn){txt($('fund-v'),'—');txt($('have-v'),'—')}
+  const haveRentNote=$('have-rent-note');
+  if(o.warn){txt($('fund-v'),'—');txt($('have-v'),'—');haveRentNote.hidden=true}
   else if(S.sit==='build'){
     if(o.immediate){txt($('fund-k'),'Musím mať pripravené');money($('fund-v'),o.P0)}
     else if(S.mode==='lump'){txt($('fund-k'),'Investujem dnes');money($('fund-v'),o.P0)}
@@ -1702,8 +1732,15 @@ function render(){
     else if(o.covers){txt($('fund-k'),'Jednorazová investícia');txt($('fund-v'),'Postačuje')}
     else{txt($('fund-k'),'Odkladám mesačne');money($('fund-v'),o.M,'/ mes.')}
   }else{
-    if(S.goal==='rent'){txt($('have-k'),'Môžem si vyplácať');money($('have-v'),o.R,'/ mes.')}
-    else{txt($('have-k'),'Majetok mi vydrží');
+    if(S.goal==='rent'){
+      txt($('have-k'),o.rast?'Môžem si vyplácať v dnešných cenách':'Môžem si vyplácať');
+      money($('have-v'),o.Rtoday,'/ mes.');
+      haveRentNote.hidden=!(o.rast&&o.N>0);
+      if(!haveRentNote.hidden)haveRentNote.textContent=
+        `Prvá výplata vo veku ${S.start} rokov: ${fmtEur(o.R)} / mes. `
+        +`Renta sa ďalej zvyšuje o ${pctTxt(o.infl)} % ročne.`;
+    }
+    else{haveRentNote.hidden=true;txt($('have-k'),'Majetok mi vydrží');
       /* Bodky pri skratke: v tej istej karte stojí hneď nad tým „Mám 35 rokov"
          plným slovom, takže holé „r"/„m" bez bodky pôsobilo ako preklep. */
       txt($('have-v'),o.forever?'Nevyčerpá sa':`${Math.floor(o.months/12)} r. ${o.months%12} mes.`)}
@@ -1732,14 +1769,18 @@ function render(){
   const calculatedRentNote=$('calculated-rent-note');
   if(o.warn){txt($('cap-v'),'—');$('out-fut').hidden=true;calculatedRentNote.hidden=true}
   else if(o.calculatesRent){
-    txt($('cap-k'),o.rast?'Renta v dnešných cenách':'Pevná nominálna renta');
+    txt($('cap-k'),o.rast?'Renta v dnešných cenách':(maHotovyMajetokRentu?'Renta':'Pevná nominálna renta'));
     money($('cap-v'),o.rast?o.Rtoday:o.R,'/ mes.');
-    calculatedRentNote.hidden=false;
-    calculatedRentNote.textContent=o.rast
+    /* Pri hotovom majetku je nominálna prvá výplata už priamo pod hlavným
+       výsledkom v karte Dnes; v druhej karte ju preto neduplikujeme. */
+    calculatedRentNote.hidden=maHotovyMajetokRentu;
+    if(!calculatedRentNote.hidden)calculatedRentNote.textContent=o.rast
       ?`Prvá výplata vo veku ${S.start} rokov: ${fmtEur(o.R)} / mes. Renta sa ďalej zvyšuje o ${pctTxt(o.infl)} % ročne.`
       :'Bez úpravy o infláciu; jej kúpna sila bude časom klesať.';
     $('out-fut').hidden=false;
-    txt($('fut-k'),`Vytvorený kapitál vo veku ${S.start} rokov`);
+    txt($('fut-k'),maHotovyMajetokRentu
+      ?`Môj majetok vo veku ${S.start} rokov`
+      :`Vytvorený kapitál vo veku ${S.start} rokov`);
     money($('fut-v'),o.cap);
   }
   else{
@@ -2113,7 +2154,7 @@ var cmaObnov=null;
     const t=document.createElement('script');t.src=src;t.onload=ok;t.onerror=ok;
     document.head.appendChild(t);
   });
-  Promise.all([nacitaj('dist/renta-core.browser.js'),nacitaj('dist/renta-data.browser.js')])
+  Promise.all([nacitaj('dist/renta-core.browser.js?v=20260821a'),nacitaj('dist/renta-data.browser.js?v=20260821a')])
     .then(()=>{
       if(!window.RentaCore||typeof RentaCore.cmaPlan!=='function')return;
       /* CMA je deterministické a lacné - počíta sa pri každom prekreslení.
@@ -2208,7 +2249,7 @@ function layout(o,endEff,openEnd){
 function setAge(k,v){
   if(!Number.isFinite(v))return;
   v=Math.round(v);
-  if(k==='now')S.now=Math.max(18,Math.min(v,S.start));
+  if(k==='now')S.now=Math.max(18,Math.min(v,S.start,99));
   if(k==='start')S.start=Math.max(S.now,Math.min(v,S.end-1));
   if(k==='end')S.end=Math.min(120,Math.max(S.start+1,v));
   render();
@@ -2347,7 +2388,8 @@ function syncMobileLifeNav(){
   const capSummary=fmtEur(o.cap);
   const mapVals={
     today:[S.now,todayValues],
-    start:[S.start,[(o.rast?fmtEur(rentaDnes)+' / mes. v dnešných cenách':fmtEur(rentaDnes)+' / mes. nominálne'),o.rast?'Inflácia '+pctTxt(o.infl)+' %':'Bez inflácie',(o.calculatesRent?'Vytvorím ':'Potrebujem ')+capSummary]],
+    start:[S.start,[(o.rast?fmtEur(rentaDnes)+' / mes. v dnešných cenách':fmtEur(rentaDnes)+' / mes.'),o.rast?'Inflácia '+pctTxt(o.infl)+' %':'Bez inflácie',
+      (S.sit==='have'?'Budem mať ':(o.calculatesRent?'Vytvorím ':'Potrebujem '))+capSummary]],
     /* Dĺžka renty tu bola natvrdo „ rokov", zatiaľ čo tá istá hodnota v karte
        (pole end-v, cez yrs()) vie skloňovať 1/2-4/5+ - vedľa seba tak stálo
        „Renta 1 rokov" a „1 rok". */
@@ -2374,6 +2416,41 @@ function syncMobileLifeNav(){
    na osi. (Potvrdené aj nezávislým review; pôvodný `::after` na karte bol
    práve tá časť, ktorá by inak klamala.) */
 const MAPA_VRCH=118, MAPA_ROZPATIE=518, MAPA_ODSTUP=8, MAPA_SPODOK=660;
+/* MOBILE_POINT_LAYOUT:START */
+function mobilePointLayout(kotvy){
+  const out=kotvy.map((kotva,index)=>({index,kotva,center:32,size:38,visible:true,rep:index}));
+  const sorted=out.slice().sort((a,b)=>a.kotva-b.kotva||a.index-b.index);
+  const reps=[];
+  sorted.forEach(item=>{
+    const same=reps[reps.length-1];
+    if(same&&Math.abs(same.kotva-item.kotva)<0.5){
+      item.visible=false;item.rep=same.index;
+    }else reps.push(item);
+  });
+  const groups=[];
+  reps.forEach(item=>{
+    const group=groups[groups.length-1];
+    if(group&&item.kotva-group[group.length-1].kotva<38)group.push(item);
+    else groups.push([item]);
+  });
+  /* Blízke rôzne veky dostanú kompaktné bočné pruhy. Ich stred zostáva na
+     pravdivej výške veku, iba sa rozostúpia vodorovne v priestore medzi
+     okrajom a kartou. Tri míľniky sú maximum, ktoré táto mapa môže mať. */
+  groups.filter(group=>group.length===2).forEach(group=>{
+    group[0].center=17;group[0].size=30;
+    group[1].center=47;group[1].size=30;
+  });
+  groups.filter(group=>group.length===3).forEach(group=>{
+    group[0].center=10;group[0].size=20;
+    group[1].center=32;group[1].size=20;
+    group[2].center=54;group[2].size=20;
+  });
+  out.filter(item=>!item.visible).forEach(item=>{
+    const rep=out[item.rep];item.center=rep.center;item.size=rep.size;
+  });
+  return out.sort((a,b)=>a.index-b.index);
+}
+/* MOBILE_POINT_LAYOUT:END */
 function rozmiestniMapu(mapVals){
   if(!mobileLifeMap||!isMob())return;
   const svg=document.getElementById('mobile-map-spojnice');
@@ -2391,6 +2468,9 @@ function rozmiestniMapu(mapVals){
             v:card.offsetHeight||88};
   }).filter(Boolean);
   if(!polozky.length)return;
+
+  const bodyLayout=mobilePointLayout(polozky.map(p=>p.kotva));
+  polozky.forEach((p,index)=>Object.assign(p,bodyLayout[index]));
 
   const zoradene=polozky.slice().sort((a,b)=>a.kotva-b.kotva);
   /* Zhora nadol: každá karta ide na svoju kotvu, a ak by naliezla na
@@ -2415,12 +2495,17 @@ function rozmiestniMapu(mapVals){
   polozky.forEach(p=>{
     p.card.style.top=Math.round(p.y)+'px';
     p.bod.style.top=Math.round(p.kotva)+'px';
+    p.bod.style.left=Math.round(p.center-p.size/2)+'px';
+    p.bod.style.width=p.size+'px';p.bod.style.height=p.size+'px';
+    p.bod.style.fontSize=(p.size<=22?'10px':p.size<38?'11px':'13px');
+    p.bod.style.visibility=p.visible?'':'hidden';
     p.bod.textContent=p.popis===Infinity?'∞':p.popis;
     /* Lomená spojnica: z krúžku vodorovne, potom zvisle na výšku karty
        a nakoniec vodorovne do nej. Priama šikmá by pri 15 px vodorovne
        a 60 px zvisle vyzerala takmer zvisle a nespájala by zjavne nič. */
-    body.push('<polyline points="51,'+Math.round(p.kotva)+' 58,'+Math.round(p.kotva)
-      +' 58,'+Math.round(p.y)+' 66,'+Math.round(p.y)+'"'
+    const edge=Math.round(p.center+p.size/2),elbow=Math.max(58,Math.min(64,edge+4));
+    body.push('<polyline points="'+edge+','+Math.round(p.kotva)+' '+elbow+','+Math.round(p.kotva)
+      +' '+elbow+','+Math.round(p.y)+' 66,'+Math.round(p.y)+'"'
       +(Math.abs(p.y-p.kotva)<0.5?' class="rovno"':'')+'></polyline>');
   });
   if(svg)svg.innerHTML=body.join('');
@@ -2513,7 +2598,7 @@ syncMobileLifeNav();updateMobileLifeFromScroll();
    zostalo aktívne, no ťuknutie by už nič nezmenilo. */
 function syncSteps(endEff,openEnd,derived){
   const medze={
-    now:[S.now>18,S.now<S.start],
+    now:[S.now>18,S.now<Math.min(S.start,99)],
     start:[S.start>S.now,S.start<S.end-1],
     end:[!(derived||openEnd)&&S.end>S.start+1,!(derived||openEnd)&&S.end<120]
   };
@@ -2699,7 +2784,9 @@ function scenarioSummary(){
     if(o.P0>0)bits.push(`jednorazovo ${fmtEur(o.P0)}`);
   }else{
     bits.push(`má ${fmtEur(S.existing)}`);
-    if(S.goal==='rent')bits.push(`renta ${fmtEur(o.R)} / mes.`);
+    if(S.goal==='rent')bits.push(o.rast
+      ?`renta ${fmtEur(o.Rtoday)} / mes. v dnešných cenách`
+      :`renta ${fmtEur(o.Rtoday)} / mes.`);
     else bits.push(o.forever?'majetok sa nevyčerpá'
       :`vydrží ${Math.floor(o.months/12)} r. ${o.months%12} mes.`);
   }
@@ -2763,10 +2850,21 @@ if(sendModel){
     win.location.replace(url);
   };
   const mark=(el,bad)=>{el.classList.toggle('bad',bad);return bad};
-  ['gate-first','gate-last','model-email'].forEach(id=>
-    $(id).addEventListener('input',()=>$(id).classList.remove('bad')));
+  ['gate-first','gate-last','model-email'].forEach(id=>{
+    const pole=$(id);
+    pole.addEventListener('input',()=>pole.classList.remove('bad'));
+    /* Polia nie sú vnorené vo formulári, preto Enter preložíme na jediný
+       klik. Opakovanie klávesu aj prebiehajúce IME skladanie sa ignoruje;
+       disabled tlačidlo je druhá poistka proti súbežnému odoslaniu. */
+    pole.addEventListener('keydown',e=>{
+      if(e.key!=='Enter'||e.isComposing||e.repeat)return;
+      e.preventDefault();
+      if(!sendModel.disabled)sendModel.click();
+    });
+  });
 
   sendModel.addEventListener('click',async()=>{
+    if(sendModel.disabled)return;
     const fi=$('gate-first'),la=$('gate-last'),em=$('model-email'),status=$('send-status');
     const first=fi.value.trim(),last=la.value.trim(),email=em.value.trim();
     let bad=false;
@@ -2912,7 +3010,7 @@ if(ANIM&&!REDUCED){
      Vo vloženom ráme si nevie scrollovať (rám je zamknutý na 0,0, rodič je na
      inej doméne), preto pri každom kroku pošle rodičovi rozsah, ktorý má byť
      vidieť; poslucháč je v code injection stránky. Na mobile sa nespúšťa. -->
-<link rel="stylesheet" href="sprievodca.css?v=20260820m">
-<script src="sprievodca.js?v=20260820m"></script>
+<link rel="stylesheet" href="sprievodca.css?v=20260821a">
+<script src="sprievodca.js?v=20260821a"></script>
 </body>
 </html>

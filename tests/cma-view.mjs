@@ -115,14 +115,18 @@ test("4 % platia rovnako v jadre, historickom pohľade aj konfigurácii", () => 
     "modelácia používa iný plánovací predpoklad než jadro");
 });
 
-/* 6. CMA ovládanie sa nezobrazí v klientskej verzii. */
-test("klient CMA nevidí a nenačíta", () => {
+/* 6. Klient potrebuje spoločné jadro pre verejný výsledkový pás, poradenský
+   graf a CMA ovládanie však nesmie vidieť. */
+test("klient vidí iba verejný výsledok, nie CMA ovládanie", () => {
   assert.ok(/<section class="assumptions-block cma-block" id="cma-block"[^>]*\shidden>/.test(app),
     "CMA sekcia nie je v zostavenej stránke skrytá");
-  assert.ok(app.includes("if(!PORADCA)return;"),
-    "chýba brána, ktorá poradenský kód zastaví v klientskej verzii");
+  assert.ok(app.includes("odolnostBlok.hidden=!PORADCA;")
+    && app.includes("if(PORADCA)blok.hidden=false;"),
+    "chýba brána, ktorá poradenské zobrazenie skryje klientovi");
   assert.equal(/<script[^>]+src="dist\/renta-core\.browser\.js"/.test(app), false,
     "poradenské jadro sa načítava staticky, teda aj klientovi");
+  assert.ok(app.includes("nacitaj('dist/renta-core.browser.js?v="),
+    "spoločné jadro sa nenačíta pre verejný výsledkový pás");
   const brana = app.match(/const PUBLIC_HOST=([^\n]+)/);
   assert.ok(brana && /hechtberger\\?\.com/.test(brana[1]) && /hechtgit/.test(brana[1]),
     "brána nechráni produkčné domény");
@@ -135,12 +139,13 @@ test("akvizičná časť je skrytá iba poradcovi", () => {
   assert.ok(app.includes("document.body.classList.add('poradca');"),
     "poradenský režim si nenastavuje vlastnú triedu");
   /* Sekcie musia v stránke fyzicky zostať — klient ich potrebuje. */
-  assert.ok(app.includes('class="flow-options"'), "akvizičný blok zo stránky zmizol");
   assert.ok(app.includes('class="bottom-flow"'), "blok s modeláciou a konzultáciou zmizol");
+  assert.ok(app.includes('class="client-panel delivery-panel ')
+    && app.includes('class="client-panel consult-panel '),
+    "jedna z dvoch klientskych ciest zo stránky zmizla");
   const pred = app.indexOf("document.body.classList.add('poradca');");
-  const brana = app.indexOf("if(!PORADCA)return;");
-  assert.ok(brana > 0 && pred > brana,
-    "trieda sa nastavuje pred bránou, teda by ju dostal aj klient");
+  assert.ok(pred > 0 && app.includes("if(PORADCA)document.body.classList.add('poradca');"),
+    "poradenskú triedu by mohol dostať klient");
 });
 
 /* 7. + 11. Historická metodika a 800 ciest zostávajú nedotknuté. */

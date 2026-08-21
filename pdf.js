@@ -1,14 +1,14 @@
-/* Vygenerovanie modelácie ako PDF priamo v prehliadači.
+/* Vygenerovanie modelácie ako PDF priamo v prehliadači.
 
-   Prečo takto: stránka je statická, žiadny server nemáme, a tlačový dialóg
-   je na telefóne neprívetivý — klient chce súbor, nie ponuku tlače. jsPDF
-   preto dokument vysádže a stiahne ho ako súbor.
+   Prečo takto: stránka je statická, žiadny server nemáme, a tlačový dialóg
+   je na telefóne neprívetivý — klient chce súbor, nie ponuku tlače. jsPDF
+   preto dokument vysádže a stiahne ho ako súbor.
 
-   Čísla sa neprepočítavajú. Čítajú sa z už vykreslenej modelácie, takže PDF
+   Čísla sa neprepočítavajú. Čítajú sa z už vykreslenej modelácie, takže PDF
    nemá ako ukázať niečo iné, než čo má klient pred očami.
 
-   Načítava sa až po ťuknutí na tlačidlo — spolu s písmom má okolo 440 kB
-   a väčšina návštevníkov PDF nechce.
+   Načítava sa až po ťuknutí na tlačidlo — spolu s písmom má okolo 440 kB
+   a väčšina návštevníkov PDF nechce.
 */
 (function () {
   "use strict";
@@ -26,7 +26,7 @@
     return el ? (el.textContent || "").replace(/\s+/g, " ").trim() : "";
   }
 
-  /* Údaje berieme z DOM — jediný zdroj, ktorý klient naozaj videl. */
+  /* Údaje berieme z DOM — jediný zdroj, ktorý klient naozaj videl. */
   function zoStranky() {
     var karty = [];
     ["m-today", "m-start", "m-end"].forEach(function (id) {
@@ -72,7 +72,7 @@
       preKoho: text(document.getElementById("pre-koho")),
       vyhotovene: text(document.getElementById("vyhotovene")),
       /* Tri míľniky ako čísla, nie ako veta - klient si vie 35 + 20 = 55
-         overiť na prvý pohľad. Berú sa z adresy, teda z toho istého zdroja,
+         overiť na prvý pohľad. Berú sa z adresy, teda z toho istého zdroja,
          akým je zložený celý výpočet. */
       veky: (function () {
         var q = new URLSearchParams(location.search);
@@ -126,8 +126,8 @@
       }
     }
     function medzera(mm) { y += mm; }
-    /* Nadpis bez svojho textu na konci strany vyzerá ako chyba sadzby.
-       Odhadneme výšku nadpisu aj nasledujúceho odseku a zalomíme ich spolu. */
+    /* Nadpis bez svojho textu na konci strany vyzerá ako chyba sadzby.
+       Odhadneme výšku nadpisu aj nasledujúceho odseku a zalomíme ich spolu. */
     function nadpisSTelom(nadpis, telo, velN, velT) {
       doc.setFont("Asap", "normal"); doc.setFontSize(velT);
       var riadkov = doc.splitTextToSize(telo || "", SIRKA).length;
@@ -147,8 +147,8 @@
     /* ——— hlavička ——— */
     var vrchH = y;
     odstavec("MODELÁCIA PRIVÁTNEJ RENTY", 7.5, "bold", ZLATA, SIRKA, 1.2);
-    /* Meno aj dátum berieme zo stránky — nie z generátora, nech sa dokument
-       a stránka nemôžu rozísť. Idú na jeden riadok oproti rubrike, takže
+    /* Meno aj dátum berieme zo stránky — nie z generátora, nech sa dokument
+       a stránka nemôžu rozísť. Idú na jeden riadok oproti rubrike, takže
        dokumentu nepribudne ani milimeter výšky. */
     var meta = [d.preKoho, d.vyhotovene].filter(Boolean).join("  ·  ");
     if (meta) {
@@ -161,9 +161,9 @@
     medzera(1.5);
     odstavec(d.uvod, 8.8, "normal", SEDA, SIRKA, 1.34);
 
-    /* Dokument hovoril „obdobie budovania majetku: 20 rokov" a „renta od 55
+    /* Dokument hovoril „obdobie budovania majetku: 20 rokov" a „renta od 55
        rokov", ale dnešný vek klienta neuvádzal nikde - tie dve čísla si teda
-       nemal ako spojiť ani overiť. Tri míľniky na jednom riadku to zavrú. */
+       nemal ako spojiť ani overiť. Tri míľniky na jednom riadku to zavrú. */
     if (d.veky) {
       medzera(1.5);
       odstavec(d.veky, 8, "bold", TMAVA, SIRKA, 1.3);
@@ -174,7 +174,7 @@
 
     /* ——— plán ——— */
     odstavec(d.plan, 12, "bold", TMAVA, SIRKA, 1.25);
-    /* d.ciel bol vytlačený dvakrát: raz v perexe (d.uvod ho obsahuje) a hneď
+    /* d.ciel bol vytlačený dvakrát: raz v perexe (d.uvod ho obsahuje) a hneď
        pod čiarou znova. */
     if (d.ciel && d.uvod.indexOf(d.ciel) === -1) {
       medzera(0.5);
@@ -184,7 +184,7 @@
 
     /* ——— míľniky ——— */
     d.karty.forEach(function (k) {
-      /* Podtext („Obdobie budovania majetku: 20 rokov.") dosadal 0,05 mm nad
+      /* Podtext („Obdobie budovania majetku: 20 rokov.") dosadal 0,05 mm nad
          rám, takže dolné dotiahnutia písmen j, g, p rám pretínali. Rovnaký
          krok ako pri riadkoch dá pod text toľko vzduchu, koľko je nad
          nadpisom. */
@@ -226,10 +226,10 @@
 
     medzera(0.5);
 
-    /* ——— čo to znamená v číslach ——— */
+    /* ——— čo to znamená v číslach ——— */
     if (d.suhrn && d.suhrn.polozky.length) {
       /* Rámček musí pojať aj dvojriadkový popisok - výška sa preto dopočíta
-         z toho, koľko riadkov popisky naozaj zaberú. */
+         z toho, koľko riadkov popisky naozaj zaberú. */
       var sirkaStlpca = (SIRKA - 12) / d.suhrn.polozky.length;
       doc.setFont("Asap", "normal"); doc.setFontSize(7);
       var riadkovPopisku = d.suhrn.polozky.reduce(function (a, p) {
@@ -251,11 +251,11 @@
       y += 7;
 
       var stlpec = (SIRKA - 12) / d.suhrn.polozky.length;
-      /* Popisky sa kreslili holým doc.text bez zalomenia, takže dlhší z nich
-         („ROZDIEL MEDZI NOMINÁLNOU RENTOU A INVESTÍCIAMI") prerástol svoj
-         stĺpec a dobehol až na rám rámčeka. Zalamujú sa na šírku stĺpca
-         zmenšenú o medzeru, a keďže sa tým jeden z nich stane dvojriadkovým,
-         hodnoty sa sadzajú na spoločnú účtovnú čiaru - inak by zlaté sumy
+      /* Popisky sa kreslili holým doc.text bez zalomenia, takže dlhší z nich
+         („ROZDIEL MEDZI NOMINÁLNOU RENTOU A INVESTÍCIAMI") prerástol svoj
+         stĺpec a dobehol až na rám rámčeka. Zalamujú sa na šírku stĺpca
+         zmenšenú o medzeru, a keďže sa tým jeden z nich stane dvojriadkovým,
+         hodnoty sa sadzajú na spoločnú účtovnú čiaru - inak by zlaté sumy
          stáli každá inde. */
       doc.setFont("Asap", "normal"); doc.setFontSize(7);
       var popisky = d.suhrn.polozky.map(function (p) {
@@ -285,9 +285,9 @@
 
     ciara();
 
-    /* ——— predpoklady a východiská ———
-       Dva stĺpce vedľa seba, rovnako ako na stránke: obsah oboch výstupov tak
-       sedí a dokument sa zmestí na jednu stranu. */
+    /* ——— predpoklady a východiská ———
+       Dva stĺpce vedľa seba, rovnako ako na stránke: obsah oboch výstupov tak
+       sedí a dokument sa zmestí na jednu stranu. */
     var MEDZISTLPEC = 10;
     var stlp = (SIRKA - MEDZISTLPEC) / 2;
     var xL = OKRAJ, xP = OKRAJ + stlp + MEDZISTLPEC;
@@ -312,10 +312,10 @@
     d.predpoklady.forEach(function (t) { yL = odstavecStlpca(t, xL, yL, stlp) + 1; });
 
     var yP = nadpisStlpca(d.vychodiskaNadpis, xP, vrchS2);
-    /* Pravý stĺpec mal odrážky o bod väčšie než text vľavo a odsadené o 4,6 mm
-       od nadpisu - dva rovnocenné stĺpce tak vyzerali ako hlavný a vedľajší.
-       Veľkosť je teraz rovnaká ako vľavo a guľôčka visí v medzistĺpci, takže
-       nadpis aj text lícujú na jednej zvislici. */
+    /* Pravý stĺpec mal odrážky o bod väčšie než text vľavo a odsadené o 4,6 mm
+       od nadpisu - dva rovnocenné stĺpce tak vyzerali ako hlavný a vedľajší.
+       Veľkosť je teraz rovnaká ako vľavo a guľôčka visí v medzistĺpci, takže
+       nadpis aj text lícujú na jednej zvislici. */
     doc.setFont("Asap", "normal"); doc.setFontSize(7.4);
     var vrOdr = 7.4 * 0.3528 * 1.32;
     d.vychodiska.forEach(function (v) {
@@ -325,7 +325,7 @@
       var riadky = doc.splitTextToSize(v, stlp);
       riadky.forEach(function (r, i) { doc.text(r, xP, yP + 2.4 + i * vrOdr); });
       /* dlhá odrážka sa zalomí — posun musí ísť podľa počtu riadkov,
-         inak nasledujúca odrážka pristane na nej */
+         inak nasledujúca odrážka pristane na nej */
       yP += Math.max(5.2, riadky.length * vrOdr + 1.4);
     });
 
@@ -337,42 +337,42 @@
       y += 6;
     }
     /* ——— vývoj majetku ———
-       Jediný obrázok v dokumente a jediná vec, ktorú z prvej strany pochopí
-       aj ten, kto si nič neprečíta: majetok rastie, na začiatku renty
-       vyvrcholí a potom sa spotrebuje.
+       Jediný obrázok v dokumente a jediná vec, ktorú z prvej strany pochopí
+       aj ten, kto si nič neprečíta: majetok rastie, na začiatku renty
+       vyvrcholí a potom sa spotrebuje.
 
-       Kreslí sa len vtedy, keď na neho medzi predpokladmi a pätičkou naozaj
+       Kreslí sa len vtedy, keď na neho medzi predpokladmi a pätičkou naozaj
        ostane miesto. Pri dlhšom scenári radšej nie je — tlačiť kvôli grafu
-       pätičku na tretiu stranu by bola horšia sadzba než prázdny pás. */
+       pätičku na tretiu stranu by bola horšia sadzba než prázdny pás. */
     doc.setFont("Asap", "normal"); doc.setFontSize(7);
     var riadkovD = doc.splitTextToSize(d.disclaimer, SIRKA).length;
     var VYSKA_PATKY = 5 + 18 + 5 + riadkovD * 7 * 0.3528 * 1.5 + 1;
 
-    /* Vlastný nadpis graf nedostal zámerne - medzi predpokladmi a pätičkou je
-       reálne okolo 25 mm a nadpis by z nich ukrojil pätinu. „BUDOVANIE
-       MAJETKU" a „ČERPANIE RENTY" priamo v ploche, suma na vrchole a veky pod
-       osou povedia to isté a nezaberú ani riadok navyše.
+    /* Vlastný nadpis graf nedostal zámerne - medzi predpokladmi a pätičkou je
+       reálne okolo 25 mm a nadpis by z nich ukrojil pätinu. „BUDOVANIE
+       MAJETKU" a „ČERPANIE RENTY" priamo v ploche, suma na vrchole a veky pod
+       osou povedia to isté a nezaberú ani riadok navyše.
 
        Výška sa prispôsobuje tomu, čo zvýšilo: pri stručnom scenári je graf
-       vyšší, pri obsiahlejšom nižší, a keď by klesol pod čitateľnú mieru,
+       vyšší, pri obsiahlejšom nižší, a keď by klesol pod čitateľnú mieru,
        nekreslí sa vôbec. */
     var krivka = typeof window.PH_KRIVKA === "function" ? window.PH_KRIVKA() : null;
     var POPISKY = 3.4, MIN_TELO = 15, MAX_TELO = 26;
     var VOLNE = A4.v - OKRAJ - VYSKA_PATKY - y - 3;
-    var NAD = 4;   /* suma na vrchole sa píše nad plochu - tu je na ňu miesto */
+    var NAD = 5;   /* samostatný pás pre názvy fáz nad plochou grafu */
     if (krivka && krivka.body.length > 2 && VOLNE >= NAD + MIN_TELO + POPISKY) {
       medzera(NAD);
       var gx = OKRAJ, gw = SIRKA, gy = y,
           gh = Math.min(MAX_TELO, VOLNE - NAD - POPISKY);
       var body = krivka.body;
       /* Mierka sa škáluje podľa najvyššieho bodu krivky, popiska sa viaže na
-         majetok na začiatku renty - to nie je vždy tá istá hodnota. */
+         majetok na začiatku renty - to nie je vždy tá istá hodnota. */
       var strop = krivka.maximum || 1;
       var rozpatie = krivka.koniec - krivka.dnes || 1;
       var xOf = function (v) { return gx + gw * (v - krivka.dnes) / rozpatie; };
       var yOf = function (s) { return gy + gh * (1 - s / strop); };
 
-      /* jsPDF kreslí cestu ako rad prírastkov od východiskového bodu. */
+      /* jsPDF kreslí cestu ako rad prírastkov od východiskového bodu. */
       function cesta(zoznam, x0, y0, styl, zavriet) {
         var px = x0, py = y0, kroky = [];
         zoznam.forEach(function (b) {
@@ -389,7 +389,7 @@
       doc.setLineWidth(0.45);
       cesta(vrch.slice(1), vrch[0][0], vrch[0][1], "S", false);
 
-      /* Zvislica na začiatku renty rozdeľuje graf na dve fázy - bez nej je to
+      /* Zvislica na začiatku renty rozdeľuje graf na dve fázy - bez nej je to
          len kopec bez deja. */
       var xS = xOf(krivka.start);
       doc.setLineWidth(0.2);
@@ -400,42 +400,36 @@
 
       doc.setFont("Asap", "normal"); doc.setFontSize(6.6);
       doc.setTextColor(SEDA[0], SEDA[1], SEDA[2]);
-      /* Majetok na začiatku renty je jediné číslo, ktoré si z krivky treba
-         odniesť - a je to tá istá suma, aká stojí v karte „Začiatok čerpania".
-         Píše sa na tú stranu zvislice, kde je viac miesta, aby nevisel cez
+      /* Názvy fáz sú v samostatnom páse nad kresbou. Krivka cez ne preto
+         nemôže prechádzať ani v scenári, keď po začatí renty ešte stúpa. */
+      doc.setFont("Asap", "normal"); doc.setFontSize(6.6);
+      doc.setTextColor(SEDA[0], SEDA[1], SEDA[2]);
+      var xVlavoStred = gx + (xS - gx) / 2;
+      var xVpravoStred = xS + (gx + gw - xS) / 2;
+      if (xS - gx > 30) doc.text("BUDOVANIE MAJETKU", xVlavoStred, gy - 1.5, { align: "center" });
+      if (gx + gw - xS > 27) doc.text("ČERPANIE RENTY", xVpravoStred, gy - 1.5, { align: "center" });
+
+      /* Majetok na začiatku renty je jediné číslo, ktoré si z krivky treba
+         odniesť - a je to tá istá suma, aká stojí v karte „Začiatok čerpania".
+         Píše sa na tú stranu zvislice, kde je viac miesta, aby nevisel cez
          okraj strany.
 
-         Suma aj popisky fáz mieria do toho istého pruhu pod horným okrajom.
-         Kým krivka po začatí renty ešte stúpa - a to robí vždy, keď čistý
-         výnos prevýši prvé výplaty - vrchol klesne presne medzi ne a suma sa
-         čítala cez „ČERPANIE RENTY". Preto sa najprv zistí, kde suma leží,
-         a popiska na jej strane sa až potom umiestni tak, aby jej neliezla
-         do cesty. */
+         Keď je vrchol úplne hore, suma sa presunie pod bod a dostane biele
+         pozadie, aby zostala čitateľná bez zásahu do názvov fáz. */
       doc.setFont("Asap", "bold"); doc.setFontSize(8);
       var sirkaSumy = doc.getTextWidth(krivka.vrcholText);
       var ySumy = yOf(krivka.vrchol) - 1.8;
+      if (ySumy < gy + 2.8) ySumy = gy + 3.2;
       var doprava = gx + gw - xS > xS - gx;
       var xSumy = doprava ? xS + 2.6 : xS - 2.6 - sirkaSumy;
-      /* Popisky sedia na účtovnej čiare gy+3; ich horný okraj je asi 2,3 mm
-         nad ňou. Suma im prekáža, kým jej účiara nie je aspoň o riadok vyššie. */
-      var vKonflikte = ySumy < gy + 5;
-
-      doc.setFont("Asap", "normal"); doc.setFontSize(6.6);
-      doc.setTextColor(SEDA[0], SEDA[1], SEDA[2]);
-      var xVlavo = gx + 2;
-      var xVpravo = (vKonflikte && doprava) ? xSumy + sirkaSumy + 4 : xS + 2;
-      /* Vľavo sa popiska posunúť nedá - je na okraji. Keď by suma sadla na ňu,
-         radšej odpadne: fáza sa dá odčítať aj zo zvislice a z rokov pod osou,
-         suma nikde inde nie je. */
-      var vlavoVolno = !(vKonflikte && !doprava)
-        || xSumy > xVlavo + doc.getTextWidth("BUDOVANIE MAJETKU") + 4;
-      if (xS - xVlavo > 24 && vlavoVolno) doc.text("BUDOVANIE MAJETKU", xVlavo, gy + 3);
-      if (gx + gw - xVpravo > 20) doc.text("ČERPANIE RENTY", xVpravo, gy + 3);
 
       doc.setFont("Asap", "bold"); doc.setFontSize(8);
       doc.setTextColor(ZLATA[0], ZLATA[1], ZLATA[2]);
       doc.setFillColor(ZLATA[0], ZLATA[1], ZLATA[2]);
       doc.circle(xS, yOf(krivka.vrchol), 0.8, "F");
+      doc.setFillColor(255, 255, 255);
+      doc.rect(xSumy - 0.8, ySumy - 2.8, sirkaSumy + 1.6, 3.7, "F");
+      doc.setTextColor(ZLATA[0], ZLATA[1], ZLATA[2]);
       doc.text(krivka.vrcholText, xSumy, ySumy);
 
       y = gy + gh + 3.4;
@@ -448,20 +442,20 @@
     }
 
     /* ——— ďalší krok ———
-       Obsah tejto sekcie sa presúva na druhú stranu, takže tu býva prázdna.
-       Čiara sa predtým kreslila bezpodmienečne a nad pätkou zostali dve linky
-       s ničím medzi sebou - klasický príznak „niečo sa nenačítalo". */
+       Obsah tejto sekcie sa presúva na druhú stranu, takže tu býva prázdna.
+       Čiara sa predtým kreslila bezpodmienečne a nad pätkou zostali dve linky
+       s ničím medzi sebou - klasický príznak „niečo sa nenačítalo". */
     if (d.dalejNadpis || d.dalej) {
       ciara();
       nadpisSTelom(d.dalejNadpis, d.dalej, 11, 8.5);
     }
 
     /* ——— kto to pripravil ———
-       PDF putuje ďalej bez stránky, takže musí samo povedať, od koho je
-       a kam sa klient môže obrátiť.
+       PDF putuje ďalej bez stránky, takže musí samo povedať, od koho je
+       a kam sa klient môže obrátiť.
 
-       Pätička sa neplaví s textom, ale kotví na spodok strany — tam patrí
-       a dokument tým nekončí prázdnou stranou len kvôli pár riadkom. */
+       Pätička sa neplaví s textom, ale kotví na spodok strany — tam patrí
+       a dokument tým nekončí prázdnou stranou len kvôli pár riadkom. */
     doc.setFont("Asap", "normal"); doc.setFontSize(7);
     var riadkovD = doc.splitTextToSize(d.disclaimer, SIRKA).length;
     var VYSKA_PATKY = 5 + 18 + 5 + riadkovD * 7 * 0.3528 * 1.5 + 1;
@@ -502,8 +496,8 @@
     doc.setFont("Asap", "normal"); doc.setFontSize(7);
     doc.setTextColor(130, 125, 118);
     /* Číslovanie mala len druhá strana („2 / 2"), takže prvá pôsobila, akoby
-       do dokumentu nepatrila. Ide pod disclaimer, nie k telefónu - tam ho
-       prvý pokus položil rovno na číslo. Počet strán dodá pdf-alternativa.js
+       do dokumentu nepatrila. Ide pod disclaimer, nie k telefónu - tam ho
+       prvý pokus položil rovno na číslo. Počet strán dodá pdf-alternativa.js
        ešte pred kreslením; bez neho ostane samotné „1". */
     doc.text(window.PH_PDF_STRAN ? "1 / " + window.PH_PDF_STRAN : "1",
       OKRAJ + SIRKA, y + 2.4, { align: "right" });

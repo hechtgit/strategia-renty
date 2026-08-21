@@ -12,21 +12,20 @@ function has(text, fragment, label) {
 has(app, 'id="fund-out"', "samostatný výstup karty Dnes");
 has(app, "$('fund-out').hidden=S.sit==='build'&&S.mode==='combo'&&S.comboDir==='known'&&!o.immediate;",
   "skrytie výsledku v karte Dnes pri známej kombinácii");
-has(app, "txt($('cap-k'),o.rast?'Renta v dnešných cenách':'Pevná nominálna renta');",
+has(app, "txt($('cap-k'),o.rast?'Renta v dnešných cenách':(maHotovyMajetokRentu?'Renta':'Pevná nominálna renta'));",
   "rozlíšenie reálnej a pevnej nominálnej renty v karte Začiatok čerpania");
 has(app, 'Prvá výplata vo veku ${S.start} rokov:',
   "prvú nominálnu výplatu pri zapnutej inflácii");
-has(app, "txt($('fut-k'),`Vytvorený kapitál vo veku ${S.start} rokov`);",
+has(app, "?`Môj majetok vo veku ${S.start} rokov`",
+  "hotový majetok v karte Začiatok čerpania");
+has(app, ":`Vytvorený kapitál vo veku ${S.start} rokov`);",
   "vytvorený kapitál v karte Začiatok čerpania");
 has(app, 'const zrusFokus=()=>{',
   "vypnutie pohyblivého fokusu vo vnorenom ráme");
 has(app, 'overflow:hidden;overflow-anchor:none',
   "úplné uzamknutie vnoreného dokumentu proti automatickému posunu");
-/* Stavová trieda časovej osi sa nesmie volať rovnako ako popisok „a ďalej →".
-   Pri zhode mien dopadne pravidlo `.longevity{opacity:0}` aj na samotné #lp
-   a celá aplikácia po prekročení veku 100 zmizne. */
-has(app, "lp.classList.toggle('longevity-on'",
-  "stavovú triedu časovej osi oddelenú od popisku");
+has(app, "lp.classList.toggle('perp',openEnd)",
+  "samostatnú stavovú triedu renty bez časového obmedzenia");
 has(app, 'requestAnimationFrame(drzPociatok)',
   "návrat vnoreného dokumentu na začiatok počas ťahania");
 has(app, "document.documentElement.classList.contains('viewport-compact')",

@@ -91,15 +91,16 @@ for (const [name, override] of cases) {
 
   if (api.S.sit === "build") {
     let accumulated;
-    /* Akumulácia beží na výnose počas budovania (iA), čerpanie na vlastnom (i).
-       Kým bola sadzba jedna, stačilo o.i; po rozdelení by to ticho meralo
-       budovanie predpokladom výplatnej fázy. */
-    if (o.immediate || api.S.mode === "lump") accumulated = o.P0 * o.e * Math.pow(1 + o.iA, o.Nm);
+    /* Jednorazový vklad sa podľa produkčnej metodiky úročí ročne čistým
+       výnosom, pravidelný vklad mesačne sadzbou iA. Audit musí tieto dve
+       konvencie rozlišovať rovnako ako finančné jadro. */
+    const annualGrowth = Math.pow(1 + o.iA * 12, o.N);
+    if (o.immediate || api.S.mode === "lump") accumulated = o.P0 * o.e * annualGrowth;
     else if (api.S.mode === "monthly") accumulated = o.M * o.e * annuityFactor(o.Nm, o.iA);
-    else accumulated = api.S.combo * o.e * Math.pow(1 + o.iA, o.Nm) + o.M * o.e * annuityFactor(o.Nm, o.iA);
+    else accumulated = api.S.combo * o.e * annualGrowth + o.M * o.e * annuityFactor(o.Nm, o.iA);
     close(accumulated, o.cap, `${name}: akumulácia`, 2e-8);
   } else {
-    close(o.avail, api.S.existing * Math.pow(1 + o.iA, o.Nm), `${name}: zhodnotenie hotového majetku`);
+    close(o.avail, api.S.existing * Math.pow(1 + o.iA * 12, o.N), `${name}: zhodnotenie hotového majetku`);
     if (api.S.goal === "duration" && !o.forever) {
       const independentMonths = simulateMonths(o.avail, o.R, o.i, o.g);
       if (independentMonths !== o.months) throw new Error(`${name}: počet mesiacov ${o.months} != ${independentMonths}`);
@@ -132,18 +133,19 @@ const knownComboApi = production({
   comboDir: "known", combo: 750000, monthlyKnown: 5000,
 });
 const knownCombo = knownComboApi.compute();
-close(knownCombo.cap, 1110315.8919389392, "známa kombinácia: kapitál");
-/* Prepočítané po oddelení výnosu pre výplatnú fázu: z rovnakého kapitálu
-   (ten sa nezmenil, viď kontrolu vyššie) vychádza pri čerpaní na 4 % nižšia
-   renta než pri pôvodných 8,3 %. Zmena predpokladu, nie výpočtu. */
-close(knownCombo.Rtoday, 1660.529901267141, "známa kombinácia: renta v dnešnej hodnote");
+const knownAnnualGrowth = Math.pow(1 + knownCombo.iA * 12, knownCombo.N);
+const knownExpectedCap = 750000 * knownCombo.e * knownAnnualGrowth
+  + 5000 * knownCombo.e * annuityFactor(knownCombo.Nm, knownCombo.iA);
+close(knownCombo.cap, knownExpectedCap, "známa kombinácia: kapitál");
+const knownExpectedRent = knownCombo.cap / paymentPv(1, knownCombo.Tm, knownCombo.i, knownCombo.g);
+const knownExpectedToday = knownExpectedRent / Math.pow(1 + knownCombo.infl / 100, knownCombo.N);
+close(knownCombo.Rtoday, knownExpectedToday, "známa kombinácia: renta v dnešnej hodnote");
 if (!knownCombo.calculatesRent) throw new Error("Známa kombinácia neprepla smer výpočtu na rentu.");
 
-let transitionCapital = 750000 * knownCombo.e;
-for (let month = 0; month < knownCombo.Nm; month++) {
-  /* Budovanie majetku — teda sadzba akumulácie, nie čerpania. */
-  transitionCapital = transitionCapital * (1 + knownCombo.iA) + 5000 * knownCombo.e;
-}
+let monthlyCapital = 0;
+for (let month = 0; month < knownCombo.Nm; month++)
+  monthlyCapital = monthlyCapital * (1 + knownCombo.iA) + 5000 * knownCombo.e;
+const transitionCapital = 750000 * knownCombo.e * knownAnnualGrowth + monthlyCapital;
 close(transitionCapital, knownCombo.cap,
   "známa kombinácia: posledný mesiac budovania bez posunu");
 const firstDrawBalance = knownCombo.cap * (1 + knownCombo.i) - knownCombo.R;
@@ -242,12 +244,13 @@ if (JSON.stringify([...historicalApi.HIST_VYNOSY]) !== JSON.stringify(historyDat
 }
 
 const resilience = historicalApi.testOdolnosti();
-/* 268 → 460: plán je teraz dimenzovaný na tie isté 4 %, akými sa testuje,
-   takže prestal byť meraný prísnejším metrom, než na akom stojí. */
-if (!resilience || resilience.priebehov !== 800 || resilience.zaklad !== 460) {
+/* Referenčný výsledok po zjednotení metodiky: jednorazový vklad sa počas
+   budovania úročí ročne, pravidelné vklady mesačne a čerpanie používa vlastný
+   plánovací výnos. Zmena ktorejkoľvek konvencie musí tento gate vedome zmeniť. */
+if (!resilience || resilience.priebehov !== 800 || resilience.zaklad !== 399) {
   throw new Error(`Neočakávaný výsledok referenčného testu: ${JSON.stringify(resilience)}`);
 }
-const expectedThresholds = [735305, 1115116];
+const expectedThresholds = [738866.2199638468, 1120516.6150638114];
 resilience.urovne.forEach((level, index) => {
   close(level.vklad, expectedThresholds[index], `hranica ${level.meta}/800`, 2e-6);
 });

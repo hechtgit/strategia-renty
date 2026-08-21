@@ -704,6 +704,13 @@ function vykresli(){
   $('s-value1').textContent=fmtEur(o.cap);
   $('s-label2').textContent='Mesačná renta pri začiatku';
   $('s-value2').textContent=fmtEur(o.R);
+  /* Nadstavbová prezentačná vrstva potrebuje výsledok jadra, nie hodnotu
+     parametra `rent`. V starších rozposlaných have+rent odkazoch totiž `rent`
+     niesol pôvodný vstup, hoci výsledná renta sa počítala z majetku. */
+  if(S.sit==='have'&&S.goal==='rent'&&o.calculatesRent){
+    $('s-value2').dataset.haveRentToday=String(o.Rtoday);
+    $('s-value2').dataset.haveRentNominal=String(o.R);
+  }
   $('s-sub').textContent=o.rast?'mesačne, pri zohľadnení inflácie':'mesačne';
 
   /* ===== karta KONIEC ČERPANIA ===== */
@@ -1055,9 +1062,9 @@ $('btn-pdf').addEventListener('click',async()=>{
        inak by mohlo vzniknúť bez hlavného výsledku 268/800. */
     await cakajNaFinalnuCopyVysledku();
     if(!pdfNacitanie)pdfNacitanie=(async()=>{
-      await Promise.all([nacitaj('jspdf.min.js'),nacitaj('pdf-font.js')]);
-      await nacitaj('pdf.js?v=20260820e');
-      await nacitaj('pdf-alternativa.js?v=20260820p');
+      await Promise.all([nacitaj('jspdf.min.js?v=20260821a'),nacitaj('pdf-font.js?v=20260821a')]);
+      await nacitaj('pdf.js?v=20260821a');
+      await nacitaj('pdf-alternativa.js?v=20260821a');
     })();
     await pdfNacitanie;
     await window.PH_PDF();
@@ -1087,6 +1094,6 @@ if(window.parent!==window)
   addEventListener('load',()=>window.parent.postMessage({type:'ph-renta-na-zaciatok'},'*'));
 })();
 </script>
-<script src="vysledok-10of10.js?v=20260820d"></script>
+<script src="vysledok-10of10.js?v=20260821a"></script>
 </body>
 </html>

@@ -1,13 +1,26 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
+import { execFileSync } from "node:child_process";
 
 const out = path.resolve("tmp/pdfs/modelacia-privatnej-renty-audit.pdf");
 fs.mkdirSync(path.dirname(out), { recursive: true });
 
 const jsPdfModule = await import("./jspdf.min.js");
 globalThis.window = globalThis;
+globalThis.location = { search: "?now=50&start=65&end=90&pension=temporary" };
 globalThis.jspdf = jsPdfModule.default;
+globalThis.PH_KRIVKA = () => ({
+  dnes: 50, start: 65, koniec: 90, maximum: 900000, vrchol: 850000,
+  vrcholText: "850 000 €",
+  body: [
+    { vek: 50, suma: 306384 }, { vek: 55, suma: 470000 },
+    { vek: 60, suma: 650000 }, { vek: 65, suma: 850000 },
+    { vek: 70, suma: 900000 }, { vek: 75, suma: 760000 },
+    { vek: 80, suma: 540000 }, { vek: 85, suma: 280000 },
+    { vek: 90, suma: 0 }
+  ]
+});
 await import("./pdf-font.js");
 
 const el = textContent => ({ textContent });
@@ -58,7 +71,9 @@ const byId = {
   ...cards,
   odolnost: {
     hidden: false,
-    querySelector: selector => selector === "h2" ? el("Obstál by váš plán aj pri rozdielnom vývoji trhov?") : selector === ".odolnost-zaver" ? el("Čo si z toho odniesť? Základný prepočet funguje pri rovnakom zhodnotení každý rok. Modelované simulácie ukazujú citlivosť na poradie výnosov počas budovania majetku. Kolísanie výnosov počas čerpania renty tento test nemodeluje.") : null,
+    querySelector: selector => selector === "h2" ? el("Obstál by váš plán aj pri rozdielnom vývoji trhov?")
+      : selector === ".odolnost-zaver" ? el("Čo si z toho odniesť? Základný prepočet funguje pri rovnakom zhodnotení každý rok. Modelované simulácie ukazujú citlivosť na poradie výnosov počas budovania majetku. Kolísanie výnosov počas čerpania renty tento test nemodeluje.")
+      : selector === ".odolnost-testuje p strong" ? el("Čo presne testujeme?") : null,
     querySelectorAll: selector => selector === ".odolnost-testuje li" ? testItems : []
   },
   "odolnost-uvod": el("Základný prepočet počíta každý rok s rovnakým zhodnotením, ktoré ste zadali. V 800 modelovaných simuláciách meníme vývoj iba počas budovania majetku. Po začatí renty všetky simulácie používajú rovnaký plánovací výnos 4 % ročne po investičných nákladoch, pred infláciou."),
@@ -114,10 +129,21 @@ jspdf.jsPDF.API.save = function () {
 
 await import("./pdf.js?audit=1");
 await import("./pdf-alternativa.js?audit=1");
-window.PH_PDF();
+await window.PH_PDF();
 jspdf.jsPDF.API.save = save;
 
 if (!fs.existsSync(out) || fs.statSync(out).size < 10000) {
   throw new Error("Alternatívny PDF nevznikol alebo je neúplný.");
+}
+const pdfText = execFileSync("pdftotext", [out, "-"], { encoding: "utf8" });
+for (const required of ["Čo presne testujeme?", "Cieľ: renta 3 000 € mesačne", "Základný prepočet:"]) {
+  if (!pdfText.includes(required)) throw new Error(`PDF druhá strana: chýba „${required}“`);
+}
+for (const required of ["BUDOVANIE MAJETKU", "ČERPANIE RENTY", "850 000 €"]) {
+  if (!pdfText.includes(required)) throw new Error(`PDF graf: chýba „${required}“`);
+}
+const todayMatches = pdfText.match(/Vaša dnešná investícia: 306 384 €/g) || [];
+if (todayMatches.length !== 1) {
+  throw new Error(`PDF druhá strana: dnešná investícia sa musí uviesť raz, našla sa ${todayMatches.length}×.`);
 }
 console.log(out);

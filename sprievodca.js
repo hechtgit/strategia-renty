@@ -1,27 +1,27 @@
-/* VARIANTA A - interaktívne zaškolenie v aplikácii.
+/* VARIANTA A - interaktívne zaškolenie v aplikácii.
 
-   Aplikácia aj Čiara života sú viditeľné od prvej sekundy. Sprievodca nič
-   neprekrýva natrvalo a nič neblokuje: okolie sa stlmí, jeden skutočný
-   ovládací prvok zostane v plnom jase.
+   Aplikácia aj Čiara života sú viditeľné od prvej sekundy. Sprievodca nič
+   neprekrýva natrvalo a nič neblokuje: okolie sa stlmí, jeden skutočný
+   ovládací prvok zostane v plnom jase.
 
    Prejde sa KAŽDÝ vstup, ktorý je pri danom scenári naozaj dostupný -
-   vrátane zhodnotenia, inflácie a zhodnotenia počas vyplácania. Práve tie sú
-   najmenej objaviteľné a klient by o nich inak nevedel. Zoznam krokov sa
-   preto neurčuje dopredu, ale počíta sa nanovo po každej odpovedi: keď si
+   vrátane zhodnotenia, inflácie a zhodnotenia počas vyplácania. Práve tie sú
+   najmenej objaviteľné a klient by o nich inak nevedel. Zoznam krokov sa
+   preto neurčuje dopredu, ale počíta sa nanovo po každej odpovedi: keď si
    klient zvolí kombináciu, kroky pribudnú; keď zvolí rentu bez časového
    obmedzenia, vek konca sa vynechá, lebo ho aplikácia zamkne.
 
    Otázky vykajú - sprievodca sa prihovára klientovi, rovnako ako vysvetlivky
-   na stránke („Je to váš predpoklad"). Popisy v kartách zostávajú v prvej
-   osobe („Mám 35 rokov"), lebo tam hovorí klient sám o sebe.
+   na stránke („Je to váš predpoklad"). Popisy v kartách zostávajú v prvej
+   osobe („Mám 35 rokov"), lebo tam hovorí klient sám o sebe.
 
    Ďalej sa ide dvoma rovnocennými cestami: skutočnou zmenou zvýraznenej
    hodnoty (vtedy automaticky), alebo tlačidlom „Potvrdiť". Pri desiatich
-   krokoch nemožno trvať len na zmene - klient by musel pohnúť infláciou z
-   troch percent iba preto, aby sa dostal ďalej, a pokazil by si tým plán.
-   Potvrdenie nie je únik: klient hodnotu videl a vedome ju necháva platiť.
+   krokoch nemožno trvať len na zmene - klient by musel pohnúť infláciou z
+   troch percent iba preto, aby sa dostal ďalej, a pokazil by si tým plán.
+   Potvrdenie nie je únik: klient hodnotu videl a vedome ju necháva platiť.
 
-   Vrstva nepočíta nič vlastné a do modelu nezapisuje - hodnoty mení sám
+   Vrstva nepočíta nič vlastné a do modelu nezapisuje - hodnoty mení sám
    klient cez pôvodné prvky aplikácie. Sprievodca ich len číta. */
 
 (() => {
@@ -40,8 +40,8 @@
     if (r.width < 4 || r.height < 4) return false;
     return getComputedStyle(el).visibility !== 'hidden';
   };
-  /* Prvý cieľ, ktorý je na tejto šírke naozaj vidieť. Na mobile sú míľniky
-     na čiare skryté a vek sa mení dvojicou tlačidiel v karte - sprievodca
+  /* Prvý cieľ, ktorý je na tejto šírke naozaj vidieť. Na mobile sú míľniky
+     na čiare skryté a vek sa mení dvojicou tlačidiel v karte - sprievodca
      preto ukáže tú. */
   const prvyViditelny = (...vyber) => {
     for (const najdi of vyber) {
@@ -56,7 +56,7 @@
     return b ? b.dataset[attr] : null;
   };
   const poloha = id => { const s = $(id); return s ? s.value : null; };
-  /* Predpoklady bývajú v samostatnom bloku .set aj s vysvetlením pod „i" -
+  /* Predpoklady bývajú v samostatnom bloku .set aj s vysvetlením pod „i" -
      zvýrazniť treba celý blok, nie holý posuvník. */
   const blok = id => { const e = $(id); return e ? e.closest('.set') : null; };
 
@@ -65,33 +65,33 @@
   const KROKY = [
     {
       /* Úvod nie je modálne okno cez celú obrazovku - tým by sa varianta A
-         zmenila na variantu B a zanikol by práve ten rozdiel, ktorý sa
-         porovnáva. Je to ten istý pokyn v tej istej bubline, len zakotvený na
-         celú čiaru života: klient hneď vidí hlavný objekt, o ktorom to je.
+         zmenila na variantu B a zanikol by práve ten rozdiel, ktorý sa
+         porovnáva. Je to ten istý pokyn v tej istej bubline, len zakotvený na
+         celú čiaru života: klient hneď vidí hlavný objekt, o ktorom to je.
 
-         Nedá sa splniť zmenou hodnoty, preto sa z neho ide výhradne
+         Nedá sa splniť zmenou hodnoty, preto sa z neho ide výhradne
          tlačidlom - `hodnota` je zámerne nemenná. */
       id: 'uvod',
       uvodny: true,
       nadpis: 'Váš plán privátnej renty',
-      /* Nadpis pomenúva, čo to je; popis hovorí, čo sa bude diať a ako dlho.
-         Čas patrí sem, nie do nadpisu - tam by z neho bol sľub rýchlosti,
+      /* Nadpis pomenúva, čo to je; popis hovorí, čo sa bude diať a ako dlho.
+         Čas patrí sem, nie do nadpisu - tam by z neho bol sľub rýchlosti,
          ale vypustiť sa nesmie, lebo kvôli nemu úvod vznikol. */
-      popis: () => 'Za necelé dve minúty uvidíte všetkých ' + pocetKrokov()
-           + ' miest, kde si plán viete nastaviť - od dnešného veku po poslednú '
+      popis: () => 'Za necelé dve minúty uvidíte všetkých ' + pocetKrokov()
+           + ' miest, kde si plán viete nastaviť - od dnešného veku po poslednú '
            + 'vyplatenú rentu. Meniť nemusíte nič, stačí potvrdiť. Späť aj koniec '
-           + 'máte po ruke stále.',
+           + 'máte po ruke stále.',
       ciel: () => document.querySelector('.axis-wrap'),
       hodnota: () => 'uvod',
     },
     {
       id: 'vek',
       nadpis: 'Koľko máte dnes rokov?',
-      /* Dvojica − a + pri veku je na desktope skrytá (existuje len pre dotykový
-         displej), takže sa na ňu v tomto kroku nedá odkázať. Pri hodnotách
-         v kartách však viditeľná je - preto „neskôr". */
-      popis: 'Chyťte značku a potiahnite ju po čiare života, alebo použite šípky '
-           + 'na klávesnici. Tlačidlá − a + nájdete neskôr pri hodnotách v kartách.',
+      /* Dvojica − a + pri veku je na desktope skrytá (existuje len pre dotykový
+         displej), takže sa na ňu v tomto kroku nedá odkázať. Pri hodnotách
+         v kartách však viditeľná je - preto „neskôr". */
+      popis: 'Chyťte značku a potiahnite ju po čiare života, alebo použite šípky '
+           + 'na klávesnici. Tlačidlá − a + nájdete neskôr pri hodnotách v kartách.',
       ciel: () => prvyViditelny(() => $('n-now'),
                                 () => document.querySelector('#c-today .when-row')),
       hodnota: () => vek('h-now'),
@@ -136,15 +136,15 @@
       id: 'combo-mesacne',
       ked: () => vidno($('sl-monthly-known-wrap')),
       nadpis: 'Koľko investujete mesačne?',
-      popis: 'Suma, ktorú investujete každý mesiac až do začiatku vyplácania.',
+      popis: 'Suma, ktorú investujete každý mesiac až do začiatku vyplácania.',
       ciel: () => $('sl-monthly-known-wrap'),
       hodnota: () => poloha('sl-monthly-known'),
     },
     {
       id: 'majetok',
       ked: () => zvolene('tg-sit', 'sit') === 'have',
-      nadpis: 'Aký máte majetok na rentu?',
-      popis: 'Hodnota majetku, z ktorého má renta vzísť.',
+      nadpis: 'Aký máte majetok na rentu?',
+      popis: 'Hodnota majetku, z ktorého má renta vzísť.',
       ciel: () => document.querySelector('#blk-have label.sl'),
       hodnota: () => poloha('sl-c0'),
     },
@@ -152,7 +152,7 @@
       id: 'ciel-vypoctu',
       ked: () => zvolene('tg-sit', 'sit') === 'have',
       nadpis: 'Koľko vám vyplatí, alebo ako dlho vydrží?',
-      popis: 'Buď si necháte spočítať rentu z majetku, ktorý máte, alebo koľko '
+      popis: 'Buď si necháte spočítať rentu z majetku, ktorý máte, alebo koľko '
            + 'rokov vydrží renta, ktorú si poviete sami.',
       ciel: () => $('tg-goal'),
       hodnota: () => zvolene('tg-goal', 'goal'),
@@ -160,29 +160,29 @@
     },
     {
       id: 'zhodnotenie',
-      nadpis: 'S akým zhodnotením chcete počítať?',
-      /* Predpoklad výnosu do historického testu nevstupuje - test beží na
+      nadpis: 'S akým zhodnotením chcete počítať?',
+      /* Predpoklad výnosu do historického testu nevstupuje - test beží na
          skutočných výnosoch MSCI World. Určuje len to, koľko treba investovať
          - zámerne nie „odkladať“, predvolený režim je jednorazový vklad.
-         Krok preto hovorí o sume na obrazovke, nie o teste, ktorý klient
+         Krok preto hovorí o sume na obrazovke, nie o teste, ktorý klient
          uvidí až dole pod kalkulačkou - dovtedy by to bol odkaz naprázdno.
-         Neodkazujeme ani na historické tlačidlá: sú schované v paneli za „i“
-         a je na nich iba „8,3 %“, takže odkaz mieril na niečo neviditeľné.
+         Neodkazujeme ani na historické tlačidlá: sú schované v paneli za „i“
+         a je na nich iba „8,3 %“, takže odkaz mieril na niečo neviditeľné.
          Kto majetok už má, nič neodkladá; jemu sa mení výsledok, nie vklad.
-         Ten výsledok môže byť renta aj dĺžka vyplácania, podľa toho, na čo
+         Ten výsledok môže byť renta aj dĺžka vyplácania, podľa toho, na čo
          sa pýtal - preto zámerne „priaznivejší výsledok", nie „vyššia renta". */
       popis: () => zvolene('tg-sit', 'sit') === 'have'
-        ? 'Podľa tohto čísla vypočítame, ako váš majetok narastie do začiatku '
+        ? 'Podľa tohto čísla vypočítame, ako váš majetok narastie do začiatku '
           + 'vyplácania. Čím vyššie ho nastavíte, tým priaznivejší výsledok vám '
-          + 'plán ukáže, ale tým viac závisí od toho, či trh taký výnos naozaj '
+          + 'plán ukáže, ale tým viac závisí od toho, či trh taký výnos naozaj '
           + 'prinesie. Predvolených 5 % je konzervatívnejší odhad. '
-          + 'Napríklad svetový akciový index priniesol za 56 rokov v priemere '
-          + 'ročne 8,3 % a 11,3 % za posledných desať rokov.'
+          + 'Napríklad svetový akciový index priniesol za 56 rokov v priemere '
+          + 'ročne 8,3 % a 11,3 % za posledných desať rokov.'
         : 'Čím vyššie zhodnotenie nastavíte, tým menej budete musieť '
-          + 'investovať, ale tým viac plán závisí od toho, či trh taký výnos '
+          + 'investovať, ale tým viac plán závisí od toho, či trh taký výnos '
           + 'naozaj prinesie. Predvolených 5 % je konzervatívnejší odhad. '
-          + 'Napríklad svetový akciový index priniesol za 56 rokov v priemere '
-          + 'ročne 8,3 % a 11,3 % za posledných desať rokov.',
+          + 'Napríklad svetový akciový index priniesol za 56 rokov v priemere '
+          + 'ročne 8,3 % a 11,3 % za posledných desať rokov.',
       ciel: () => blok('sl-vynos'),
       hodnota: () => poloha('sl-vynos'),
       /* Historické čísla pod „i" sa dajú kliknúť, ale kým hodnotu nezmenia,
@@ -190,7 +190,7 @@
     },
     {
       id: 'zaciatok',
-      nadpis: 'Kedy chcete začať s vyplácaním?',
+      nadpis: 'Kedy chcete začať s vyplácaním?',
       /* Kto majetok už má, nič neodkladá - „koľko vás to stojí" by mu
          nesedelo. Jemu sa posunom mení výsledok, nie náklad. */
       popis: () => zvolene('tg-sit', 'sit') === 'have'
@@ -204,32 +204,32 @@
       id: 'renta',
       ked: () => vidno($('sl-rent-wrap')),
       nadpis: 'Koľko chcete vyplácať mesačne?',
-      popis: 'V dnešných cenách - infláciu si aplikácia dopočíta sama.',
+      popis: 'V dnešných cenách - infláciu si aplikácia dopočíta sama.',
       ciel: () => $('sl-rent-wrap'),
       hodnota: () => poloha('sl-rent'),
     },
     {
       id: 'inflacia',
-      nadpis: 'Rátate s ročnou infláciou?',
+      nadpis: 'Rátate s ročnou infláciou?',
       popis: 'Prepínač ju vypne alebo zapne, posuvník mení jej výšku. Práve ona '
-           + 'rozhoduje, čo vaša renta reálne kúpi v čase, keď ju začnete čerpať.',
+           + 'rozhoduje, čo vaša renta reálne kúpi v čase, keď ju začnete čerpať.',
       ciel: () => blok('in-inflon'),
       hodnota: () => ($('in-inflon') ? $('in-inflon').checked : '') + '|' + poloha('sl-infl'),
     },
     {
       id: 'zhodnotenie-renta',
       nadpis: 'Aké ročné zhodnotenie očakávate počas vyplácania?',
-      popis: 'Kým majetok budujete, môžete si dovoliť výkyvy. Keď z neho žijete, '
-           + 'čas na čakanie nemáte - preto sa tu počíta opatrnejšie.',
+      popis: 'Kým majetok budujete, môžete si dovoliť výkyvy. Keď z neho žijete, '
+           + 'čas na čakanie nemáte - preto sa tu počíta opatrnejšie.',
       ciel: () => blok('sl-vynos-rent'),
       hodnota: () => poloha('sl-vynos-rent'),
     },
     {
       id: 'dlzka',
-      /* Pri hotovom majetku a otázke „ako dlho vydrží" aplikácia prepínač
+      /* Pri hotovom majetku a otázke „ako dlho vydrží" aplikácia prepínač
          skryje - dĺžku si vtedy dopočítava sama. */
       ked: () => vidno($('tg-pension')),
-      nadpis: 'Chcete rentu na určitý čas, alebo nekonečnú?',
+      nadpis: 'Chcete rentu na určitý čas, alebo nekonečnú?',
       popis: 'Pri rente bez časového obmedzenia sa vypláca len výnos, takže '
            + 'majetok by mal zostať zachovaný. Predpokladá to, že sa zvolené '
            + 'zhodnotenie naozaj dostaví.',
@@ -239,17 +239,17 @@
     },
     {
       id: 'koniec',
-      /* Pri nekonečnej rente a v odvodených scenároch aplikácia míľnik zamkne -
-         nemá zmysel pýtať sa na vek, ktorý sa nedá nastaviť. Kontroluje sa
+      /* Pri nekonečnej rente a v odvodených scenároch aplikácia míľnik zamkne -
+         nemá zmysel pýtať sa na vek, ktorý sa nedá nastaviť. Kontroluje sa
          samotný zámok, nie len prepínač: zamknúť ho vie viac stavov. */
       ked: () => {
         const h = document.querySelector('.handle[data-key="end"]');
         return !!h && h.dataset.locked !== '1'
           && zvolene('tg-pension', 'pension') !== 'perpetuity';
       },
-      nadpis: 'V akom veku má vyplácanie skončiť?',
+      nadpis: 'V akom veku má vyplácanie skončiť?',
       popis: 'Posledný míľnik. Presný vek sa vopred vedieť nedá - preto sa dá '
-           + 'kedykoľvek zmeniť a plán sa okamžite prepočíta.',
+           + 'kedykoľvek zmeniť a plán sa okamžite prepočíta.',
       ciel: () => prvyViditelny(() => $('n-end'),
                                 () => document.querySelector('#c-end .when-row')),
       hodnota: () => vek('h-end'),
@@ -259,7 +259,7 @@
   /* Zoznam sa počíta nanovo pri každom kroku - vetvenie sa mení podľa toho,
      čo klient práve odpovedal. */
   const zoznam = () => KROKY.filter(k => !k.ked || k.ked());
-  /* Úvod sa nečísluje - „Krok 1 z 11" by klientovi sľuboval o jedno
+  /* Úvod sa nečísluje - „Krok 1 z 11" by klientovi sľuboval o jedno
      nastavenie viac, než ich naozaj je. */
   const kroky = () => zoznam().filter(k => !k.uvodny);
   const pocetKrokov = () => kroky().length;
@@ -269,21 +269,21 @@
   let bezi = false, aktualny = null, snimka = null, cielEl = null;
   let smycka = 0, cakanie = 0;
   /* História drží len kroky, ktoré sa naozaj zobrazili - preskočené (mimo
-     vetvenia alebo neviditeľné) do nej nepatria, inak by sa klient tlačidlom
-     Späť vracal na prázdno. */
+     vetvenia alebo neviditeľné) do nej nepatria, inak by sa klient tlačidlom
+     Späť vracal na prázdno. */
   const historia = [];
-  /* Kroky v poradí, v akom ich klient naozaj videl. Slúžia na dve veci: hľadá
-     sa podľa nich ďalší nezobrazený krok a číslujú sa podľa nich aj kroky.
-     Číslovať podľa poradia v zozname sa nedá - po prepnutí vetvy pribudnú
-     otázky vyššie v zozname a počítadlo by skočilo dozadu (5 → 3 → 4). */
+  /* Kroky v poradí, v akom ich klient naozaj videl. Slúžia na dve veci: hľadá
+     sa podľa nich ďalší nezobrazený krok a číslujú sa podľa nich aj kroky.
+     Číslovať podľa poradia v zozname sa nedá - po prepnutí vetvy pribudnú
+     otázky vyššie v zozname a počítadlo by skočilo dozadu (5 → 3 → 4). */
   const videne = [];
-  /* Kroky, z ktorých sa klient vrátil tlačidlom Späť. Tlačidlo Potvrdiť ho na
-     ne vráti naspäť, presne ako tlačidlo dopredu v prehliadači. */
+  /* Kroky, z ktorých sa klient vrátil tlačidlom Späť. Tlačidlo Potvrdiť ho na
+     ne vráti naspäť, presne ako tlačidlo dopredu v prehliadači. */
   const dopredu = [];
   let vrstva, tien, prstenec, bublina, elNadpis, elPopis, elPocitadlo, elPas, tlSpat, tlDalej;
   let pilulka = null;
-  /* Text sa mení do vlastného <span>. textContent na celom tlačidle by zmazal
-     aj <svg> s obiehajúcim lemom - ten by po prvom prepnutí zmizol. Zmena textu
+  /* Text sa mení do vlastného <span>. textContent na celom tlačidle by zmazal
+     aj <svg> s obiehajúcim lemom - ten by po prvom prepnutí zmizol. Zmena textu
      mení šírku, takže sa hneď prepočíta aj obvod. */
   const obnovPilulku = () => {
     if (!pilulka) return;
@@ -293,16 +293,16 @@
     obkresliPilulku();
   };
 
-  /* Obvod pilulky: dve rovné strany plus kruh z oboch polkruhových koncov.
-     Ráta sa z rozmerov, ktoré tlačidlo naozaj má - natvrdo zapísané číslo by
+  /* Obvod pilulky: dve rovné strany plus kruh z oboch polkruhových koncov.
+     Ráta sa z rozmerov, ktoré tlačidlo naozaj má - natvrdo zapísané číslo by
      pri dlhšom texte („Ukončiť sprievodcu") segment useklo. */
-  /* Ten istý výpočet používa aj mobilné tlačidlo vo vodidle nad mapou -
-     obiehajúci lem je na oboch rovnaký, len tlačidlo je iné. */
+  /* Ten istý výpočet používa aj mobilné tlačidlo vo vodidle nad mapou -
+     obiehajúci lem je na oboch rovnaký, len tlačidlo je iné. */
   function obkresli(el) {
     if (!el) return;
     const r = el.getBoundingClientRect();
     if (!r.width) return;
-    const w = r.width - 2, h = r.height - 2;   /* 1 px na stranu pre stroke */
+    const w = r.width - 2, h = r.height - 2;   /* 1 px na stranu pre stroke */
     el.querySelectorAll('rect').forEach(rect => {
       rect.setAttribute('x', 1); rect.setAttribute('y', 1);
       rect.setAttribute('width', w); rect.setAttribute('height', h);
@@ -373,7 +373,7 @@
   }
 
   function postavPilulku() {
-    /* Pod 481 px prepína aplikácia na mobilnú mapu plánu a všetky ciele
+    /* Pod 481 px prepína aplikácia na mobilnú mapu plánu a všetky ciele
        sprievodcu (karty, os, prepínače, jazdce) sú display:none - tlačidlo
        by tam ponúkalo prehliadku, ktorá nemá čo ukázať. Mobil je samostatná
        úloha. */
@@ -393,20 +393,33 @@
     pripniPilulku();
   }
 
-  /* Vo vloženom ráme sa position:fixed neviaže na obrazovku klienta, ale na
-     rám - a ten je vysoký 1700 px a zamknutý na 0,0. Pilulka preto skončila
-     na y≈1684, teda až pod koncom aplikácie: klient ju uvidel jedine vtedy,
+  /* Vo vloženom ráme sa position:fixed neviaže na obrazovku klienta, ale na
+     rám - a ten je vysoký 1700 px a zamknutý na 0,0. Pilulka preto skončila
+     na y≈1684, teda až pod koncom aplikácie: klient ju uvidel jedine vtedy,
      keď doscroloval úplne dole. Rám nemá ako zistiť, kam sa rodič posunul
      (iná doména), takže mu to rodič sám posiela - rovnaký kanál ako
      ph-renta-scroll, len opačným smerom. Kým prvá správa nepríde (priame
      otvorenie aplikácie, staršia stránka bez odosielateľa), zostáva pôvodné
      fixed umiestnenie - tam funguje správne. */
   /* Jediné miesto, kde sa počúva rodičovo okno. Odoberateľov je viac -
-     pilulka sa podľa neho umiestňuje a sprievodca podľa neho vie, kedy je
-     aplikácia naozaj pred návštevníkom - a musia dostávať tú istú hodnotu. */
+     pilulka sa podľa neho umiestňuje a sprievodca podľa neho vie, kedy je
+     aplikácia naozaj pred návštevníkom - a musia dostávať tú istú hodnotu. */
   const odberatelia = [];
   let oknoRodica = null;
   let kanalOtvoreny = false;
+
+  /* GUIDE_VIEWPORT_POLICY:START */
+  function doveryhodnaViewportSprava(origin, jeRodic) {
+    if (!jeRodic) return false;
+    try {
+      const u = new URL(origin);
+      return u.protocol === 'https:'
+        && (u.hostname === 'hechtberger.com' || u.hostname.endsWith('.hechtberger.com'));
+    } catch (e) {
+      return false;
+    }
+  }
+  /* GUIDE_VIEWPORT_POLICY:END */
 
   function publikuj(top, height) {
     if (!(height > 0)) return;
@@ -422,15 +435,15 @@
     kanalOtvoreny = true;
 
     /* Hlavný zdroj: rám sa spýta sám seba. IntersectionObserver dostáva
-       intersectionRect orezaný aj nadradeným rámom, takže aj tu - v rámci na
+       intersectionRect orezaný aj nadradeným rámom, takže aj tu - v rámci na
        cudzej doméne - povie, ktorý pruh aplikácie má návštevník naozaj pred
-       sebou. Je to súradnica v rámci rámu, presne to, čo potrebujeme, a nič
-       na to netreba od stránky. Hustý zoznam prahov je tu preto, že
+       sebou. Je to súradnica v rámci rámu, presne to, čo potrebujeme, a nič
+       na to netreba od stránky. Hustý zoznam prahov je tu preto, že
        IntersectionObserver hlási zmeny, nie scroll: čím viac prahov, tým
        jemnejšie tlačidlo sleduje obrazovku. */
     /* Sleduje sa CELÝ rám, nie len telo kalkulačky. Rám býva vyšší než jeho
-       obsah a pod aplikáciou zostáva prázdny pruh; keby sa sledovalo iba
-       #lp, prienik by tam skončil, prestali by chodiť správy a tlačidlo by
+       obsah a pod aplikáciou zostáva prázdny pruh; keby sa sledovalo iba
+       #lp, prienik by tam skončil, prestali by chodiť správy a tlačidlo by
        ostalo visieť tam, kde ho nechal posledný záznam. */
     const app = document.body;
     if ('IntersectionObserver' in window) {
@@ -445,20 +458,21 @@
     }
 
     /* Druhý zdroj, ak ho stránka ponúka. Presnejší (pozná celé okno, nielen
-       prienik s aplikáciou), preto ho necháme prepisovať prvý. */
+       prienik s aplikáciou), preto ho necháme prepisovať prvý. */
     window.addEventListener('message', (e) => {
       const d = e.data;
       if (!d || d.type !== 'ph-renta-viewport') return;
+      if (!doveryhodnaViewportSprava(e.origin, e.source === window.parent)) return;
       if (typeof d.top !== 'number' || typeof d.height !== 'number') return;
       publikuj(d.top, d.height);
     });
     window.parent.postMessage({ type: 'ph-renta-viewport-prosim' }, '*');
   }
 
-  /* Pilulka stojí napevno v pravom hornom rohu aplikácie. Predtým sledovala
-     obrazovku, aby bola vždy po ruke - lenže rám o scrolle vie len z hlásení,
-     ktoré chodia po skokoch, takže tlačidlo za pohybom viditeľne plávalo.
-     Pevné miesto je pokojnejšie a nájde sa rovnako spoľahlivo: pravý horný
+  /* Pilulka stojí napevno v pravom hornom rohu aplikácie. Predtým sledovala
+     obrazovku, aby bola vždy po ruke - lenže rám o scrolle vie len z hlásení,
+     ktoré chodia po skokoch, takže tlačidlo za pohybom viditeľne plávalo.
+     Pevné miesto je pokojnejšie a nájde sa rovnako spoľahlivo: pravý horný
      roh je prázdny (karta „Koniec čerpania" siaha nižšie), takže tam nič
      neprekrýva. Pozornosť si vypýta pulzovaním, nie pohybom. */
   function pripniPilulku() {
@@ -469,7 +483,7 @@
       const r = app.getBoundingClientRect();
       /* Rovnaká medzera zhora aj sprava, aby roh pôsobil symetricky. Berie sa
          pravé odsadenie aplikácie: tým pilulka nikdy nepresiahne stĺpec
-         obsahu a na užších displejoch sa zúži spolu s ním. */
+         obsahu a na užších displejoch sa zúži spolu s ním. */
       const medzera = parseFloat(getComputedStyle(app).paddingRight) || 16;
       pilulka.style.top = Math.round(r.top + window.scrollY + medzera) + 'px';
       pilulka.style.left =
@@ -478,15 +492,15 @@
     umiestni();
     requestAnimationFrame(umiestni);
     addEventListener('resize', () => { umiestni(); obkresliPilulku(); });
-    /* Kým sa nenačíta Asap, tlačidlo má šírku v náhradnom písme - obvod by
-       sedel na rozmer, ktorý o chvíľu prestane platiť. */
+    /* Kým sa nenačíta Asap, tlačidlo má šírku v náhradnom písme - obvod by
+       sedel na rozmer, ktorý o chvíľu prestane platiť. */
     if (document.fonts && document.fonts.ready)
       document.fonts.ready.then(() => { umiestni(); obkresliPilulku(); });
     document.documentElement.classList.add('za-pripnute');
 
     /* Pulz sa spustí až keď je aplikácia naozaj pred návštevníkom - inak by
-       si minútu odbil, kým je človek ešte hore pri audiu, a tlačidlo by sa
-       prihlásilo o slovo do prázdna. */
+       si minútu odbil, kým je človek ešte hore pri audiu, a tlačidlo by sa
+       prihlásilo o slovo do prázdna. */
     let pulzovalo = false;
     naOknoRodica(() => {
       if (pulzovalo) return;
@@ -504,7 +518,7 @@
   /* ---------------------------------------------------------- umiestnenie */
 
   /* Zapisuje sa len vtedy, keď sa geometria naozaj zmenila - inak by sa pri
-     zápise v každom snímku zbytočne prepisovali štýly celej bubliny. */
+     zápise v každom snímku zbytočne prepisovali štýly celej bubliny. */
   let posledna = '';
 
   function umiestni() {
@@ -519,12 +533,12 @@
     const bh = bublina.offsetHeight, bw = bublina.offsetWidth;
     const vh = innerHeight, vw = innerWidth, medzera = 16;
 
-    /* Keď zvýraznený prvok leží v karte, bublina ide VEDĽA karty, nie nad ňu
+    /* Keď zvýraznený prvok leží v karte, bublina ide VEDĽA karty, nie nad ňu
        alebo pod ňu. Inak prekryje práve tie výsledky, ktoré sa daným ovládačom
-       menia, a klient nevidí, čo spôsobil. */
-    /* Míľnik na osi nie je v karte, takže by bublina padla „hore" - rovno na
-       kartu, ktorej hodnotu klient práve nastavuje (namerané až 82 % prekrytia
-       poslednej karty). Míľnik sa preto mapuje na svoju kartu a bublina ide
+       menia, a klient nevidí, čo spôsobil. */
+    /* Míľnik na osi nie je v karte, takže by bublina padla „hore" - rovno na
+       kartu, ktorej hodnotu klient práve nastavuje (namerané až 82 % prekrytia
+       poslednej karty). Míľnik sa preto mapuje na svoju kartu a bublina ide
        vedľa nej rovnako ako pri ovládačoch vnútri karty. */
     const KARTA_MILNIKA = { 'n-now': 'c-today', 'n-start': 'c-start', 'n-end': 'c-end' };
     const uzol = cielEl.closest ? cielEl.closest('.node') : null;
@@ -540,8 +554,8 @@
         bx = Math.round(vpravo ? kr.right + medzera : kr.left - medzera - bw);
         by = Math.round(r0.top + r0.height / 2 - bh / 2);
 
-        /* Karty stoja tesne vedľa seba, takže bublina po strane sadne na
-           susednú - a práve tam sa často číta dôsledok práve menenej hodnoty.
+        /* Karty stoja tesne vedľa seba, takže bublina po strane sadne na
+           susednú - a práve tam sa často číta dôsledok práve menenej hodnoty.
            Karty sú však zarovnané spodnou hranou, takže nad tou nižšou býva
            voľná plocha. Ak sa tam bublina zmestí, ide radšej ta. */
         const sused = document.elementsFromPoint
@@ -561,7 +575,7 @@
     }
     if (!bok) {
       dole = t + h + medzera + bh <= vh - 8;
-      /* Bublina sa musí zmestiť do okna aj vtedy, keď je cieľ pod jeho okrajom
+      /* Bublina sa musí zmestiť do okna aj vtedy, keď je cieľ pod jeho okrajom
          (vysoká karta odtlačí os nadol). */
       by = dole ? t + h + medzera : t - medzera - bh;
       bx = Math.round(r0.left + r0.width / 2 - bw / 2);
@@ -590,13 +604,13 @@
   function ukaz(id, hlbka, spatny) {
     const z = zoznam();
     const k = z.find(x => x.id === id);
-    /* Krok vypadol z vetvenia alebo jeho prvok nie je vidieť - ideme na ďalší.
+    /* Krok vypadol z vetvenia alebo jeho prvok nie je vidieť - ideme na ďalší.
        Hĺbka chráni pred zacyklením, keby nebolo vidieť vôbec nič. */
     if (!k) { poDalsom(id, hlbka, spatny); return; }
     cielEl = k.ciel();
-    /* Nestačí, že prvok v dokumente existuje - musí byť aj vidieť. Inak by
-       sprievodca položil otázku na ovládač, ktorý aplikácia v danom scenári
-       skryla, a prstenec by zostal svietiť na predchádzajúcom kroku. */
+    /* Nestačí, že prvok v dokumente existuje - musí byť aj vidieť. Inak by
+       sprievodca položil otázku na ovládač, ktorý aplikácia v danom scenári
+       skryla, a prstenec by zostal svietiť na predchádzajúcom kroku. */
     if (!vidno(cielEl)) { poDalsom(id, hlbka, spatny); return; }
 
     if (!spatny && aktualny && aktualny !== id) historia.push(aktualny);
@@ -604,13 +618,13 @@
     if (!videne.includes(id)) videne.push(id);
     snimka = k.hodnota();
     const zive = zoznam();
-    /* Kroky, ktoré z vetvy vypadli, sa už nerátajú - inak sľúbených desať
-       narastie na konci na jedenásť. */
+    /* Kroky, ktoré z vetvy vypadli, sa už nerátajú - inak sľúbených desať
+       narastie na konci na jedenásť. */
     const rad = videne.filter(x => x !== 'uvod' && zive.some(k => k.id === x));
     const cele = Math.max(kroky().length, rad.length);
     const poradie = rad.indexOf(k.id) + 1;
     /* Štítok nad nadpisom pomenúva mechaniku („sprievodca"), takže nadpis
-       môže patriť klientovi a jeho výsledku. Zároveň spája úvod s pilulkou
+       môže patriť klientovi a jeho výsledku. Zároveň spája úvod s pilulkou
        „Sprievodca" vľavo dole, ktorou sa dá spustiť znova. */
     elPocitadlo.textContent = k.uvodny ? 'Sprievodca' : 'Krok ' + poradie + ' z ' + cele;
     elPas.firstChild.style.width = k.uvodny ? '0%'
@@ -621,10 +635,10 @@
     tlDalej.textContent = k.uvodny ? 'Začíname' : 'Potvrdiť';
 
     /* Karty presahujú cez okraj okna - cieľ, ktorý nie je vidieť, treba
-       najprv priviesť do zorného poľa, inak by bublina ukazovala mimo. */
+       najprv priviesť do zorného poľa, inak by bublina ukazovala mimo. */
     /* Skok je okamžitý, nie plynulý: sprievodca preskakuje medzi vzdialenými
-       miestami stránky a dlhé plynulé rolovanie by pokyn ukázalo až po ňom.
-       Plynulé rolovanie sa navyše v nečinnej karte vôbec nespustí a cieľ by
+       miestami stránky a dlhé plynulé rolovanie by pokyn ukázalo až po ňom.
+       Plynulé rolovanie sa navyše v nečinnej karte vôbec nespustí a cieľ by
        zostal mimo obrazovky. Prechod prekryje prelnutie bubliny. */
     const r = cielEl.getBoundingClientRect();
     if (window.parent === window && (r.top < 70 || r.bottom > innerHeight - 70))
@@ -632,19 +646,19 @@
 
     /* Prelínanie je zámerne ozdoba nad pokojovým stavom, nie cesta doň:
        kľudová hodnota je plná viditeľnosť. Keby sa skrývalo triedou alebo
-       prechodom, stačilo by jedno neprehraté prelnutie a sprievodca by
+       prechodom, stačilo by jedno neprehraté prelnutie a sprievodca by
        zostal neviditeľný. */
     posledna = '';
     umiestni();
     requestAnimationFrame(umiestni);
-    /* Vo vloženom ráme sa NESMIE rozhodovať podľa innerHeight: rám má výšku
+    /* Vo vloženom ráme sa NESMIE rozhodovať podľa innerHeight: rám má výšku
        celého obsahu (rodič mu ju nastavuje), takže odtiaľto vyzerá všetko ako
-       viditeľné. Polohu preto hlásime pri každom kroku a scrolluje rodič -
+       viditeľné. Polohu preto hlásime pri každom kroku a scrolluje rodič -
        jediný, kto pozná skutočné okno. Posielame ROZSAH cez cieľ aj bublinu:
-       pri míľnikoch leží bublina pri karte hore a prstenec na osi o stovky
-       pixelov nižšie, takže scrollovanie na jediný bod druhý z nich vytlačí
-       z obrazovky. Sami scrollovať nemôžeme - rám je zamknutý na 0,0 a rodič
-       je na inej doméne. */
+       pri míľnikoch leží bublina pri karte hore a prstenec na osi o stovky
+       pixelov nižšie, takže scrollovanie na jediný bod druhý z nich vytlačí
+       z obrazovky. Sami scrollovať nemôžeme - rám je zamknutý na 0,0 a rodič
+       je na inej doméne. */
     if (window.parent !== window) requestAnimationFrame(() => {
       const c = cielEl.getBoundingClientRect();
       const bb = bublina.getBoundingClientRect();
@@ -660,8 +674,8 @@
       });
     }
 
-    /* Fokus ide na skutočný prvok, takže sa krok dá splniť aj z klávesnice.
-       V úvode je cieľom celá čiara života - fokus preto patrí tlačidlu
+    /* Fokus ide na skutočný prvok, takže sa krok dá splniť aj z klávesnice.
+       V úvode je cieľom celá čiara života - fokus preto patrí tlačidlu
        „Začíname", nie prvému míľniku, ktorý sa ešte nerieši. */
     const fok = k.uvodny ? tlDalej
       : (cielEl.matches('button,input')
@@ -669,14 +683,14 @@
     if (fok) { try { fok.focus({ preventScroll: true }); } catch (e) {} }
   }
 
-  /* Posun na krok nasledujúci za daným id v aktuálnom vetvení. */
+  /* Posun na krok nasledujúci za daným id v aktuálnom vetvení. */
   function poDalsom(id, hlbka, spatny) {
     const d = (hlbka || 0) + 1;
     if (d > KROKY.length + 2) { koniec(true); return; }
-    /* Dopredu sa ide rovnako ako v prehliadači: keď sa klient práve vrátil
+    /* Dopredu sa ide rovnako ako v prehliadači: keď sa klient práve vrátil
        tlačidlom Späť, „Potvrdiť" ho vráti presne tam, odkiaľ prišiel. Inak sa
-       ide na prvý krok, ktorý ešte nevidel - vďaka tomu sa po prepnutí vetvy
-       dotiahnu otázky, ktoré v zozname stoja vyššie, a zároveň sa žiadny krok
+       ide na prvý krok, ktorý ešte nevidel - vďaka tomu sa po prepnutí vetvy
+       dotiahnu otázky, ktoré v zozname stoja vyššie, a zároveň sa žiadny krok
        neukáže druhý raz. */
     const z = zoznam();
     while (dopredu.length) {
@@ -690,9 +704,9 @@
 
   function dalej() { poDalsom(aktualny, 0); }
 
-  /* Späť sa vracia na posledný zobrazený krok, ktorý v aktuálnom vetvení ešte
-     existuje. Keď klient medzitým prepol napr. na „Majetok už mám“, kroky o
-     spôsobe investovania z vetvenia vypadli - vrátiť sa na ne by nemalo kam. */
+  /* Späť sa vracia na posledný zobrazený krok, ktorý v aktuálnom vetvení ešte
+     existuje. Keď klient medzitým prepol napr. na „Majetok už mám“, kroky o
+     spôsobe investovania z vetvenia vypadli - vrátiť sa na ne by nemalo kam. */
   function spat() {
     if (!bezi) return;
     clearTimeout(cakanie); cakanie = 0;
@@ -705,16 +719,16 @@
   }
 
   /* Kontroluje sa hodnota, nie widget: klientovi sa uzná aj to, keď vek zmení
-     tlačidlami v karte namiesto ťahania po čiare. */
+     tlačidlami v karte namiesto ťahania po čiare. */
   function skontroluj() {
     if (!bezi) return;
     const k = KROKY.find(x => x.id === aktualny);
     if (!k) return;
-    /* Počítadlo sa opravuje aj počas odpočtu na posun - odpoveď mohla práve
-       zmeniť vetvenie a klient by inak na poslednom kroku videl „9 z 10". */
+    /* Počítadlo sa opravuje aj počas odpočtu na posun - odpoveď mohla práve
+       zmeniť vetvenie a klient by inak na poslednom kroku videl „9 z 10". */
     prepocitajPocitadlo(k);
-    /* Nadpis aj popis vedia závisieť od vetvy (napr. „počas budovania" u toho,
-       kto nič nebuduje). Po zmene voľby sa musia prepísať hneď. */
+    /* Nadpis aj popis vedia závisieť od vetvy (napr. „počas budovania" u toho,
+       kto nič nebuduje). Po zmene voľby sa musia prepísať hneď. */
     if (typeof k.nadpis === 'function') {
       const t = k.nadpis();
       if (elNadpis.textContent !== t) elNadpis.textContent = t;
@@ -725,9 +739,9 @@
     }
     if (cakanie) return;
 
-    /* Odpoveď v predchádzajúcom kroku mohla aktuálny krok z vetvenia vyradiť
+    /* Odpoveď v predchádzajúcom kroku mohla aktuálny krok z vetvenia vyradiť
        alebo jeho prvok skryť. Vtedy sa nesmie ďalej pýtať naň - inak bublina
-       hlási otázku na niečo, čo už na obrazovke nie je. */
+       hlási otázku na niečo, čo už na obrazovke nie je. */
     if (!zoznam().some(x => x.id === aktualny) || !vidno(k.ciel())) { dalej(); return; }
 
     if (k.hodnota() === snimka) return;
@@ -738,8 +752,8 @@
   function prepocitajPocitadlo(k) {
     if (k.uvodny) return;
     const zive = zoznam();
-    /* Kroky, ktoré z vetvy vypadli, sa už nerátajú - inak sľúbených desať
-       narastie na konci na jedenásť. */
+    /* Kroky, ktoré z vetvy vypadli, sa už nerátajú - inak sľúbených desať
+       narastie na konci na jedenásť. */
     const rad = videne.filter(x => x !== 'uvod' && zive.some(k => k.id === x));
     const cele = Math.max(kroky().length, rad.length);
     const poradie = rad.indexOf(k.id) + 1;
@@ -772,15 +786,15 @@
   function start() {
     if (bezi) return;
     bezi = true;
-    /* Bez vyčistenia by sa po reštarte objavilo „Späť" už v úvode a skočilo
-       na krok, na ktorom klient skončil minule. */
+    /* Bez vyčistenia by sa po reštarte objavilo „Späť" už v úvode a skočilo
+       na krok, na ktorom klient skončil minule. */
     historia.length = 0;
     videne.length = 0;
     dopredu.length = 0;
     aktualny = null;
     vrstva.hidden = false;
-    /* Pulz mal jedinú úlohu - upozorniť, že sprievodca existuje. Po kliku
-       je splnená, ďalšie dýchanie by pri práci s plánom už len rušilo. */
+    /* Pulz mal jedinú úlohu - upozorniť, že sprievodca existuje. Po kliku
+       je splnená, ďalšie dýchanie by pri práci s plánom už len rušilo. */
     if (pilulka) pilulka.classList.remove('pulzuje');
     obnovPilulku();
     document.addEventListener('click', naKlik, true);
@@ -809,10 +823,10 @@
     if (dokoncene) hotovo();
   }
 
-  /* Aplikácia zostáva presne v stave, ktorý si klient sám nastavil - vrstva
-     na konci nič neprepisuje ani neresetuje. */
+  /* Aplikácia zostáva presne v stave, ktorý si klient sám nastavil - vrstva
+     na konci nič neprepisuje ani neresetuje. */
   function hotovo() {
-    /* Kto prešiel sprievodcu a všetko iba potvrdil, nezmenil ani jeden vstup -
+    /* Kto prešiel sprievodcu a všetko iba potvrdil, nezmenil ani jeden vstup -
        pás by mu preto zostal skrytý, hoci si plán prešiel celý. */
     if (window.odomkniPas) window.odomkniPas();
     const t = document.createElement('div');
@@ -833,29 +847,29 @@
   /* ================= mobil: tri kroky, tri karty =================
 
      Pod 481 px aplikácia neukazuje os, prepínače ani jazdce - má mapu troch
-     kariet a každá sa ťuknutím otvorí ako samostatný editor. Desaťkrokový
+     kariet a každá sa ťuknutím otvorí ako samostatný editor. Desaťkrokový
      sprievodca sem preto preniesť nejde: jeho ciele tu neexistujú, sú
-     poskladané práve do tých troch editorov.
+     poskladané práve do tých troch editorov.
 
-     Mobilný sprievodca má preto tri kroky a nič nezvýrazňuje - stlmiť
+     Mobilný sprievodca má preto tri kroky a nič nezvýrazňuje - stlmiť
      okolie panela, ktorý zaberá celú obrazovku, nemá čo ukázať. Pokyn nie je
-     ani plávajúca bublina: tá má 370 px a na 390 px obrazovke by prekryla
-     práve ten ovládač, o ktorom hovorí. A `position:fixed` sa vo vloženom
-     ráme viaže na rám, nie na obrazovku - pruh pri spodnej hrane by teda
-     skončil inde, než kam mieri. Pokyn je preto prvý blok v samotnom
-     editore: klient ho vidí hneď po otvorení a „Hotovo" je pod ním.
+     ani plávajúca bublina: tá má 370 px a na 390 px obrazovke by prekryla
+     práve ten ovládač, o ktorom hovorí. A `position:fixed` sa vo vloženom
+     ráme viaže na rám, nie na obrazovku - pruh pri spodnej hrane by teda
+     skončil inde, než kam mieri. Pokyn je preto prvý blok v samotnom
+     editore: klient ho vidí hneď po otvorení a „Hotovo" je pod ním.
 
-     Ďalej sa ide výhradne tlačidlom „Hotovo", ktoré v editore už je. Druhé
-     tlačidlo na to isté by pýtalo rozhodnutie navyše. */
+     Ďalej sa ide výhradne tlačidlom „Hotovo", ktoré v editore už je. Druhé
+     tlačidlo na to isté by pýtalo rozhodnutie navyše. */
 
   const KROKY_MOBIL = [
     { karta: 'c-today', tlacidlo: 'map-today',
       popis: 'Váš vek, či majetok budujete alebo ho už máte, koľko doň dáte '
-           + 'a s akým zhodnotením rátate. Meniť nemusíte nič - keď vám '
+           + 'a s akým zhodnotením rátate. Meniť nemusíte nič - keď vám '
            + 'hodnoty sedia, ťuknite Hotovo.' },
     { karta: 'c-start', tlacidlo: 'map-start',
-      popis: 'Vek, v ktorom má renta začať, jej mesačná výška v dnešných '
-           + 'cenách, inflácia a zhodnotenie počas čerpania. Hneď vidíte, aký '
+      popis: 'Vek, v ktorom má renta začať, jej mesačná výška v dnešných '
+           + 'cenách, inflácia a zhodnotenie počas čerpania. Hneď vidíte, aký '
            + 'majetok si to vyžiada.' },
     { karta: 'c-end', tlacidlo: 'map-end',
       popis: 'Dokedy má renta trvať, alebo či má bežať navždy. Posledný krok - '
@@ -869,7 +883,7 @@
   const mEditorOtvoreny = () =>
     document.body.classList.contains('mobile-editor-open');
 
-  /* Pôvodné znenie vodidla - po sprievodcovi sa doň text vracia. */
+  /* Pôvodné znenie vodidla - po sprievodcovi sa doň text vracia. */
   let mPovodneVodidlo = '';
 
   function mPovedz(html, docasne) {
@@ -903,8 +917,8 @@
     kon.textContent = 'Ukončiť';
     kon.addEventListener('click', () => mKoniec(false));
     hlava.append(poc, kon);
-    /* Tenký pás postupu, rovnaký ako v desktopovej bubline - pri troch krokoch
-       povie na prvý pohľad, koľko z nich je za nami. */
+    /* Tenký pás postupu, rovnaký ako v desktopovej bubline - pri troch krokoch
+       povie na prvý pohľad, koľko z nich je za nami. */
     const pas = document.createElement('div');
     pas.className = 'za-mobil-pas';
     const vypln = document.createElement('i');
@@ -919,15 +933,15 @@
 
   function mUkaz(index) {
     mKrok = index;
-    /* Editor sa otvára až po vložení pokynu, aby ho klient videl hneď v prvom
-       snímku a nie ako niečo, čo doskočilo dodatočne. */
+    /* Editor sa otvára až po vložení pokynu, aby ho klient videl hneď v prvom
+       snímku a nie ako niečo, čo doskočilo dodatočne. */
     mVlozPokyn(index);
     mCakaNaZatvorenie = false;
     if (typeof window.otvorMobilnyEditor === 'function')
       window.otvorMobilnyEditor(KROKY_MOBIL[index].karta);
-    /* Otvorenie editora samo o sebe nikam neposúva - vo vloženom ráme to za
+    /* Otvorenie editora samo o sebe nikam neposúva - vo vloženom ráme to za
        stránku spraví rodič, ale pri priamom otvorení odkazu by klient zostal
-       tam, kde práve bol, a pokyn navrchu karty by nevidel. */
+       tam, kde práve bol, a pokyn navrchu karty by nevidel. */
     try { window.scrollTo(0, 0); } catch (e) {}
     requestAnimationFrame(() => { mCakaNaZatvorenie = true; });
   }
@@ -935,8 +949,8 @@
   function mDalej() {
     mOdstranPokyn();
     if (mKrok + 1 >= KROKY_MOBIL.length) { mKoniec(true); return; }
-    /* Editor sa práve zatvoril a stránka scrolluje mapu do záberu; ďalší
-       otvárame až v nasledujúcom snímku, nech si to neprekročí cestu. */
+    /* Editor sa práve zatvoril a stránka scrolluje mapu do záberu; ďalší
+       otvárame až v nasledujúcom snímku, nech si to neprekročí cestu. */
     const dalsi = mKrok + 1;
     requestAnimationFrame(() => requestAnimationFrame(() => mUkaz(dalsi)));
   }
@@ -948,14 +962,14 @@
     if (mPozorovatel) { mPozorovatel.disconnect(); mPozorovatel = null; }
     mNastavTlacidlo(false);
     if (!dokoncene) return;
-    /* Kto prešiel sprievodcu a všetko iba potvrdil, nezmenil ani jeden vstup -
-       pás s výsledkom by mu inak zostal skrytý. */
+    /* Kto prešiel sprievodcu a všetko iba potvrdil, nezmenil ani jeden vstup -
+       pás s výsledkom by mu inak zostal skrytý. */
     if (window.odomkniPas) window.odomkniPas();
-    /* Záverečná správa nemôže byť plávajúci pruh (fixed sa viaže na rám).
-       Ide do vodidla nad mapou - stránka tam po zatvorení editora scrolluje,
+    /* Záverečná správa nemôže byť plávajúci pruh (fixed sa viaže na rám).
+       Ide do vodidla nad mapou - stránka tam po zatvorení editora scrolluje,
        takže je to presne miesto, kam sa klient pozerá. */
-    /* Krátko, na dva riadky: pri klientovi vo veku 18 rokov leží prvá karta
-       hneď pod pruhom a dlhší text by na ňu dosadol. */
+    /* Krátko, na dva riadky: pri klientovi vo veku 18 rokov leží prvá karta
+       hneď pod pruhom a dlhší text by na ňu dosadol. */
     mPovedz('<strong>Plán je nastavený.</strong> Súhrn nájdete pod mapou.', true);
   }
 
@@ -963,7 +977,7 @@
     if (mKrok >= 0) { mKoniec(false); return; }
     if (!mPozorovatel) {
       /* Ďalej sa ide zatvorením editora, nie vlastným tlačidlom. Sledujeme
-         triedu na <body>, nie klik na „Hotovo" - tak sa krok posunie aj vtedy,
+         triedu na <body>, nie klik na „Hotovo" - tak sa krok posunie aj vtedy,
          keď editor zavrie čokoľvek iné. */
       mPozorovatel = new MutationObserver(() => {
         if (mKrok < 0 || !mCakaNaZatvorenie) return;
@@ -976,8 +990,8 @@
   }
 
   let mTlacidlo = null;
-  /* Text ide do vlastného <span> - textContent na celom tlačidle by zmazal aj
-     <svg> s obiehajúcim lemom. Zmena textu mení šírku, preto sa lem hneď
+  /* Text ide do vlastného <span> - textContent na celom tlačidle by zmazal aj
+     <svg> s obiehajúcim lemom. Zmena textu mení šírku, preto sa lem hneď
      prekreslí. */
   function mNastavTlacidlo(bezi) {
     if (!mTlacidlo) return;
@@ -1005,7 +1019,7 @@
 
   /* ------------------------------------------------------------- spustenie */
 
-  /* Tá istá podmienka, akou prepína rozloženie aplikácia: telefón na šírku
+  /* Tá istá podmienka, akou prepína rozloženie aplikácia: telefón na šírku
      (844x390) je stále telefón, hoci je širší než 480 px. */
   const MOBILNE = matchMedia('(max-width:860px),(max-height:520px) and (any-pointer:coarse)');
   let vrstvaPostavena = false;
@@ -1017,17 +1031,17 @@
     postavPilulku();
 
     /* Sprievodca sa NESPÚŠŤA sám. Predtým naskakoval prvému návštevníkovi,
-       len čo sa aplikácia dostala do záberu - a keďže si k prvému kroku pýtal
-       scroll, odsunul človeka do kalkulačky skôr, než stihol čokoľvek vidieť.
-       Teraz ho spúšťa výhradne klik na pilulku, ktorá stojí napevno v pravom
-       hornom rohu aplikácie a prvú minútu jemne pulzuje. Hovorí to aj audio
-       úvod stránky, takže návštevník vie, že si ho má pustiť sám a kde ho
-       nájde. `?uvod` v adrese ho spustí rovno - to je na testovanie. */
+       len čo sa aplikácia dostala do záberu - a keďže si k prvému kroku pýtal
+       scroll, odsunul človeka do kalkulačky skôr, než stihol čokoľvek vidieť.
+       Teraz ho spúšťa výhradne klik na pilulku, ktorá stojí napevno v pravom
+       hornom rohu aplikácie a prvú minútu jemne pulzuje. Hovorí to aj audio
+       úvod stránky, takže návštevník vie, že si ho má pustiť sám a kde ho
+       nájde. `?uvod` v adrese ho spustí rovno - to je na testovanie. */
     if (QS.has('uvod')) setTimeout(start, 200);
   }
 
-  /* Otočenie telefónu prehodí aplikáciu medzi mapou a plnou kalkulačkou.
-     Bez tohto by na mobilnej mape zostala desktopová pilulka, ktorá by
+  /* Otočenie telefónu prehodí aplikáciu medzi mapou a plnou kalkulačkou.
+     Bez tohto by na mobilnej mape zostala desktopová pilulka, ktorá by
      spustila prehliadku prvkov, čo tam nie sú. Rozbehnutý sprievodca sa
      najprv korektne ukončí. */
   const preposta = () => {

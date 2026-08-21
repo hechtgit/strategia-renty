@@ -509,12 +509,33 @@ const VYSTUP_BASE=location.protocol==='file:'
   ? location.href.split('?')[0]
   : location.origin+location.pathname.replace(/[^/]*$/,'vysledok.html');
 
+/* SCENARIO_PARAMS_POLICY:START */
+function scenarioEntries(state,vypocitana){
+  const rent=state.sit==='have'&&state.goal==='rent'&&vypocitana
+    &&!vypocitana.warn&&Number.isFinite(vypocitana.Rtoday)
+      ?Math.round(vypocitana.Rtoday):state.rent;
+  const entries=[
+    ['now',state.now],['start',state.start],['end',state.end],['rent',rent],
+    ['infl',state.infl],['vynos',state.vynos],['vynosRent',state.vynosRent],
+    ['sit',state.sit],['pension',state.pension],['infl_on',state.inflOn?'1':'0']
+  ];
+  if(state.sit==='have'){
+    entries.push(['existing',state.existing],['goal',state.goal]);
+  }else{
+    entries.push(['mode',state.mode]);
+    if(state.mode==='combo'){
+      entries.push(['combo',state.combo],['comboDir',state.comboDir]);
+      if(state.comboDir==='known')entries.push(['monthlyKnown',state.monthlyKnown]);
+    }
+  }
+  return entries;
+}
+/* SCENARIO_PARAMS_POLICY:END */
 function scenarioParams(){
-  const p=new URLSearchParams();
-  NUM_KEYS.forEach(k=>p.set(k,String(S[k])));
-  Object.keys(ENUM_KEYS).forEach(k=>p.set(k,S[k]));
-  p.set('infl_on',S.inflOn?'1':'0');
-  return p;
+  /* URL nesie iba hodnoty, ktoré majú v danom režime vplyv na výpočet. Tak
+     zostáva identický scenár pod limitom CRM stĺpca aj bez tichého skracovania. */
+  const vypocitana=S.sit==='have'&&S.goal==='rent'?compute():null;
+  return new URLSearchParams(scenarioEntries(S,vypocitana));
 }
 /* Pri lokálnom otvorení odkaz vedie späť do aplikácie, ktorá režim výstupu pozná
    podľa ?vystup. Výsledková stránka ten prepínač nepotrebuje. */
@@ -565,7 +586,7 @@ applyScenarioFromUrl();
 
 
 const fmtN=n=>Math.max(0,Math.round(n)).toLocaleString('sk-SK');
-const fmtEur=n=>fmtN(n)+' €';
+const fmtEur=n=>fmtN(n)+'\u00a0€';
 const pctTxt=v=>String(Math.round(v*10)/10).replace('.',',');
 const yrs=n=>`${n} ${n===1?'rok':(n>=2&&n<=4?'roky':'rokov')}`;
 
@@ -651,7 +672,12 @@ function compute(){
     o.R=o.rast?S.rent*Math.pow(1+infl/100,N):S.rent;
     o.C0=S.existing;
     o.avail=o.C0*Math.pow(1+rocnaCista(S.vynos),N);o.cap=o.avail;
-    if(S.goal==='rent'){o.R=nek?o.avail*(i-g):rentFromCap(o.avail,Tm,i,g);o.payM=nek?360:Tm}
+    if(S.goal==='rent'){
+      o.R=nek?o.avail*(i-g):rentFromCap(o.avail,Tm,i,g);
+      o.Rtoday=o.rast?o.R/Math.pow(1+infl/100,N):o.R;
+      o.calculatesRent=true;
+      o.payM=nek?360:Tm;
+    }
     else{o.Rtoday=S.rent;const m=monthsToZero(o.avail,o.R,i,g);
       if(m===Infinity){o.forever=true;o.payM=360}else{o.months=m;o.payM=Math.min(1200,Math.max(360,m+120))}}
   }
@@ -950,6 +976,13 @@ function vykresli(){
   $('s-value1').textContent=fmtEur(o.cap);
   $('s-label2').textContent='Mesačná renta pri začiatku';
   $('s-value2').textContent=fmtEur(o.R);
+  /* Nadstavbová prezentačná vrstva potrebuje výsledok jadra, nie hodnotu
+     parametra `rent`. V starších rozposlaných have+rent odkazoch totiž `rent`
+     niesol pôvodný vstup, hoci výsledná renta sa počítala z majetku. */
+  if(S.sit==='have'&&S.goal==='rent'&&o.calculatesRent){
+    $('s-value2').dataset.haveRentToday=String(o.Rtoday);
+    $('s-value2').dataset.haveRentNominal=String(o.R);
+  }
   $('s-sub').textContent=o.rast?'mesačne, pri zohľadnení inflácie':'mesačne';
 
   /* ===== karta KONIEC ČERPANIA ===== */
@@ -1301,9 +1334,9 @@ $('btn-pdf').addEventListener('click',async()=>{
        inak by mohlo vzniknúť bez hlavného výsledku 268/800. */
     await cakajNaFinalnuCopyVysledku();
     if(!pdfNacitanie)pdfNacitanie=(async()=>{
-      await Promise.all([nacitaj('jspdf.min.js'),nacitaj('pdf-font.js')]);
-      await nacitaj('pdf.js?v=20260820e');
-      await nacitaj('pdf-alternativa.js?v=20260820p');
+      await Promise.all([nacitaj('jspdf.min.js?v=20260821a'),nacitaj('pdf-font.js?v=20260821a')]);
+      await nacitaj('pdf.js?v=20260821a');
+      await nacitaj('pdf-alternativa.js?v=20260821a');
     })();
     await pdfNacitanie;
     await window.PH_PDF();
@@ -1333,7 +1366,7 @@ if(window.parent!==window)
   addEventListener('load',()=>window.parent.postMessage({type:'ph-renta-na-zaciatok'},'*'));
 })();
 </script>
-<script src="vysledok-10of10.js?v=20260820d"></script>
+<script src="vysledok-10of10.js?v=20260821a"></script>
 
 <script>
 /* ---- Vloženie do Squarespace: hlásenie výšky rodičovi ----
