@@ -128,6 +128,10 @@ ok(sensitivityContext.intro(720).includes('Obe z nich váš dnešný vstup už 
   'Splnené obe hranice musia použiť množné číslo.');
 ok(footerInjection.includes('e.origin !== POVOLENY_POVOD || e.source !== f.contentWindow'),
   'Globálny scroll poslucháč musí overiť pôvod aj konkrétny rám.');
+ok(footerInjection.includes('window.scrollTo({ top: Math.max(0, Math.round(ciel)), behavior: "auto" })'),
+  'Scroll sprievodcu musí zrušiť rozbehnutý posun rodičovského odkazu.');
+ok(!footerInjection.includes('window.scrollTo({ top: Math.max(0, Math.round(ciel)), behavior: "smooth" })'),
+  'Scroll sprievodcu nesmie pretekať s animáciou rodičovského odkazu.');
 
 const guidePolicy=between(guide,'/* GUIDE_VIEWPORT_POLICY:START */','/* GUIDE_VIEWPORT_POLICY:END */');
 const guideContext=vm.createContext({URL});

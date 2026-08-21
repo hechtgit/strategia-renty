@@ -2160,7 +2160,7 @@ body.is-mobile-overlay-active .Mobile-bar {
     var ciel = vyska > (window.innerHeight - okraj * 2)
       ? top - okraj
       : top - (window.innerHeight - vyska) / 2;
-    window.scrollTo({ top: Math.max(0, Math.round(ciel)), behavior: "smooth" });
+    window.scrollTo({ top: Math.max(0, Math.round(ciel)), behavior: "auto" });
   });
 })();
 </script>
