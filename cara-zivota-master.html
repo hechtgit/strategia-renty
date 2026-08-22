@@ -448,10 +448,10 @@ body.poradca .flow-options,body.poradca .bottom-flow{display:none}
   body.mobile-editor-open .mobile-life-map,body.mobile-editor-open .mob,body.mobile-editor-open #msg,body.mobile-editor-open .bottom-flow,body.mobile-editor-open .assumptions-block{display:none!important}
   body.mobile-editor-open .stage{display:block!important;height:auto!important;margin:0!important}
   body.mobile-editor-open .stage>.card{display:none!important}
-  body.mobile-editor-open .stage>.card.mobile-editing{position:relative!important;inset:auto!important;z-index:200;display:block!important;width:100%!important;height:auto!important;max-height:100dvh!important;margin:0!important;padding:18px 18px 28px!important;border:0!important;border-radius:0!important;overflow-y:auto;background:var(--tone,#b58b52);box-shadow:none}
+  body.mobile-editor-open .stage>.card.mobile-editing{position:relative!important;inset:auto!important;z-index:200;display:block!important;width:100%!important;height:var(--mobile-editor-height,100dvh)!important;max-height:var(--mobile-editor-height,100dvh)!important;margin:0!important;padding:18px 18px calc(92px + env(safe-area-inset-bottom))!important;border:0!important;border-radius:0!important;overflow-x:hidden!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;background:var(--tone,#b58b52);box-shadow:none}
   .mobile-editor-toolbar{display:none}
-  body.mobile-editor-open .mobile-editing>.mobile-editor-toolbar{position:static;display:flex;justify-content:flex-end;margin:18px -18px -28px;padding:12px 14px;background:var(--tone,#b58b52);border-top:1px solid rgba(47,31,15,.22)}
-  .mobile-editor-done{display:block;width:auto;min-height:40px;padding:10px 24px;border:1px solid rgba(47,31,15,.48);border-radius:3px;background:#171717;color:#f2d6aa;box-shadow:0 7px 18px rgba(0,0,0,.28);font:800 15px/1 var(--sans);cursor:pointer}
+  body.mobile-editor-open>.mobile-editor-toolbar{position:fixed;z-index:500;left:0;right:0;bottom:0;display:flex;justify-content:flex-end;margin:0;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(to bottom,rgba(181,139,82,.94),var(--tone,#b58b52) 28%);border-top:1px solid rgba(47,31,15,.22);box-shadow:0 -10px 24px rgba(47,31,15,.16)}
+  .mobile-editor-done{display:block;width:100%;min-height:48px;padding:12px 24px;border:1px solid rgba(47,31,15,.48);border-radius:4px;background:#171717;color:#f2d6aa;box-shadow:0 7px 18px rgba(0,0,0,.28);font:800 16px/1 var(--sans);cursor:pointer}
   .mobile-editor-done:hover,.mobile-editor-done:focus-visible{background:#2a2118;outline:2px solid #fff;outline-offset:2px}
   .mobile-life-track{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
   .mobile-life-track::before{content:"";position:absolute;left:16.66%;right:16.66%;top:10px;height:2px;background:rgba(174,135,83,.42)}
@@ -1564,6 +1564,9 @@ addEventListener('message',e=>{
   const compact=viewportCompactPolicy(e.origin,e.source===parent,location.hostname,
     e.data.width,e.data.height);
   if(compact===null)return;
+  const editorHeight=Number(e.data.editorHeight);
+  if(Number.isFinite(editorHeight)&&editorHeight>=320)
+    document.documentElement.style.setProperty('--mobile-editor-height',Math.round(editorHeight)+'px');
   if(document.documentElement.classList.contains('viewport-compact')===compact)return;
   document.documentElement.classList.toggle('viewport-compact',compact);
   requestAnimationFrame(()=>render());
@@ -2533,6 +2536,7 @@ addEventListener('resize',updateMobileLifeFromScroll,{passive:true});
 
 /* Mobilný koncept B: mapa celého života a samostatný editor každej karty. */
 function closeMobileEditor(card){
+  if(!card)return;
   document.body.classList.remove('mobile-editor-open');
   card.classList.remove('mobile-editing');
   syncMobileLifeNav();
@@ -2542,24 +2546,26 @@ function closeMobileEditor(card){
 function openMobileEditor(cardId){
   if(!isMob())return;
   const card=document.getElementById(cardId);if(!card)return;
-  let toolbar=card.querySelector('.mobile-editor-toolbar');
-  let done=card.querySelector('.mobile-editor-done');
+  let toolbar=document.querySelector('body>.mobile-editor-toolbar');
+  let done=toolbar&&toolbar.querySelector('.mobile-editor-done');
   if(!done){
     toolbar=document.createElement('div');toolbar.className='mobile-editor-toolbar';
     done=document.createElement('button');done.type='button';done.className='mobile-editor-done';
     done.textContent='Hotovo';
-    done.addEventListener('click',()=>closeMobileEditor(card));
-    toolbar.appendChild(done);card.append(toolbar);
+    done.addEventListener('click',()=>closeMobileEditor(document.querySelector('.card.mobile-editing')));
+    toolbar.appendChild(done);document.body.append(toolbar);
   }
+  toolbar.style.setProperty('--tone',getComputedStyle(card).getPropertyValue('--tone'));
   card.classList.add('mobile-editing');document.body.classList.add('mobile-editor-open');
   requestAnimationFrame(()=>parent.postMessage({type:'ph-renta-editor',open:true,height:card.scrollHeight},'*'));
-  card.scrollTop=0;done.focus({preventScroll:true});
+  card.scrollTop=0;
 }
 /* Sprievodca je samostatný súbor a editor si sám otvoriť nevie - ťuknutie na
    kartu beží cez pointer udalosti kvôli ťahaniu, takže syntetický klik by
    neprešiel. Vystavené je len otvorenie; zatvára sa výhradne tlačidlom
    „Hotovo", aby existovala jediná cesta von. */
 window.otvorMobilnyEditor=openMobileEditor;
+window.zavriMobilnyEditor=()=>closeMobileEditor(document.querySelector('.card.mobile-editing'));
 mobileMapCards.forEach(mapCard=>{
   const key=mapCard.dataset.editorCard==='c-today'?'now':mapCard.dataset.editorCard==='c-start'?'start':'end';
   let drag=null;
@@ -3010,7 +3016,7 @@ if(ANIM&&!REDUCED){
      Vo vloženom ráme si nevie scrollovať (rám je zamknutý na 0,0, rodič je na
      inej doméne), preto pri každom kroku pošle rodičovi rozsah, ktorý má byť
      vidieť; poslucháč je v code injection stránky. Na mobile sa nespúšťa. -->
-<link rel="stylesheet" href="sprievodca.css?v=20260821a">
-<script src="sprievodca.js?v=20260821a"></script>
+<link rel="stylesheet" href="sprievodca.css?v=20260822a">
+<script src="sprievodca.js?v=20260822a"></script>
 </body>
 </html>

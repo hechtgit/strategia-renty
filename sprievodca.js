@@ -879,6 +879,7 @@
   let mKrok = -1;
   let mPozorovatel = null;
   let mCakaNaZatvorenie = false;
+  let mNavigaciaHistorie = false;
 
   const mEditorOtvoreny = () =>
     document.body.classList.contains('mobile-editor-open');
@@ -933,6 +934,7 @@
 
   function mUkaz(index) {
     mKrok = index;
+    parent.postMessage({ type: 'ph-renta-guide-history', active: true, step: index }, '*');
     /* Editor sa otvára až po vložení pokynu, aby ho klient videl hneď v prvom
        snímku a nie ako niečo, čo doskočilo dodatočne. */
     mVlozPokyn(index);
@@ -956,11 +958,15 @@
   }
 
   function mKoniec(dokoncene) {
+    const bolAktivny = mKrok >= 0;
     mKrok = -1;
     mCakaNaZatvorenie = false;
     mOdstranPokyn();
     if (mPozorovatel) { mPozorovatel.disconnect(); mPozorovatel = null; }
     mNastavTlacidlo(false);
+    if (bolAktivny && !mNavigaciaHistorie)
+      parent.postMessage({ type: 'ph-renta-guide-history', active: false }, '*');
+    mNavigaciaHistorie = false;
     if (!dokoncene) return;
     /* Kto prešiel sprievodcu a všetko iba potvrdil, nezmenil ani jeden vstup -
        pás s výsledkom by mu inak zostal skrytý. */
@@ -988,6 +994,24 @@
     mNastavTlacidlo(true);
     mUkaz(0);
   }
+
+  /* Safariho systémové „Späť" nesmie počas sprievodcu opustiť stránku.
+     Rodič drží jediný pomocný záznam histórie a po stlačení pošle tento pokyn:
+     vrátime sa na predchádzajúcu kartu, na prvom kroku späť na mapu. */
+  addEventListener('message', e => {
+    if (e.source !== parent || !e.data || e.data.type !== 'ph-renta-guide-back') return;
+    if (mKrok < 0) return;
+    mNavigaciaHistorie = true;
+    mCakaNaZatvorenie = false;
+    const predosly = mKrok - 1;
+    if (typeof window.zavriMobilnyEditor === 'function') window.zavriMobilnyEditor();
+    mOdstranPokyn();
+    if (predosly < 0) { mKoniec(false); return; }
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      mNavigaciaHistorie = false;
+      mUkaz(predosly);
+    }));
+  });
 
   let mTlacidlo = null;
   /* Text ide do vlastného <span> - textContent na celom tlačidle by zmazal aj
@@ -1026,7 +1050,11 @@
   function postavRaz() { if (!vrstvaPostavena) { postav(); vrstvaPostavena = true; } }
 
   function pripoj() {
-    if (MOBILNE.matches) { postavMobil(); return; }
+    if (MOBILNE.matches) {
+      postavMobil();
+      if (QS.has('uvod')) setTimeout(mStart, 200);
+      return;
+    }
     postavRaz();
     postavPilulku();
 

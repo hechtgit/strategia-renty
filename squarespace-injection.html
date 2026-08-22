@@ -121,12 +121,62 @@
   var editorOtvoreny = false;
   var poslednaVyskaAplikacie = 0;
   var viewportFrame = 0;
+  var guideAktivny = false;
+  var guideKrok = -1;
+  var guideCistiHistoriu = false;
+
+  function viditelneOkno() {
+    var vv = window.visualViewport;
+    var vyska = vv ? vv.height : window.innerHeight;
+    var posun = vv ? vv.offsetTop : 0;
+    var spodokHlavicky = 0;
+    var selektory = "header,#header,.Header,.Mobile-bar,.Mobile,[data-test='header'],[data-section-theme] header";
+    document.querySelectorAll(selektory).forEach(function (el) {
+      var styl = window.getComputedStyle(el);
+      var r = el.getBoundingClientRect();
+      if (styl.display === "none" || styl.visibility === "hidden" || r.height < 1) return;
+      if (r.top > 260 || r.bottom <= 0) return;
+      spodokHlavicky = Math.max(spodokHlavicky, r.bottom - posun);
+    });
+    var hornyOkraj = Math.max(0, Math.ceil(spodokHlavicky));
+    return { vyska: Math.max(320, Math.floor(vyska - hornyOkraj - 8)),
+             hornyOkraj: hornyOkraj, posun: posun };
+  }
+
   function posliVelkostOkna() {
     viewportFrame = 0;
     var m = mount(); if (!m) return;
     var f = m.querySelector("iframe"); if (!f || !f.contentWindow) return;
+    var v = viditelneOkno();
     f.contentWindow.postMessage({type:"ph-renta-host-viewport",
-      width:window.innerWidth,height:window.innerHeight}, "https://hechtgit.github.io");
+      width:window.innerWidth,height:window.innerHeight,editorHeight:v.vyska}, "https://hechtgit.github.io");
+  }
+
+  function nastavMobilnyEditor(c) {
+    if (!editorOtvoreny) return;
+    var v = viditelneOkno();
+    c.ram.style.height = v.vyska + "px";
+    var ciel = c.mount.getBoundingClientRect().top + window.pageYOffset - v.hornyOkraj - v.posun - 8;
+    window.scrollTo({ top: Math.max(0, ciel), behavior: "auto" });
+    posliVelkostOkna();
+  }
+
+  function sprievodcaHistoria(active, step) {
+    if (active) {
+      guideKrok = Math.max(0, Number(step) || 0);
+      if (!guideAktivny) {
+        guideAktivny = true;
+        history.pushState({phRentaGuide:true,step:guideKrok}, "", location.href);
+      } else {
+        history.replaceState({phRentaGuide:true,step:guideKrok}, "", location.href);
+      }
+      return;
+    }
+    if (!guideAktivny) return;
+    guideAktivny = false;
+    guideKrok = -1;
+    guideCistiHistoriu = true;
+    history.back();
   }
   /* Legacy skript stránky mieri na koreň repozitára — teda na pôvodnú kalkulačku —
      s vlastnou zamrznutou verziou. Nestačí preto strážiť len adresu aplikácie:
@@ -222,15 +272,17 @@
     if (e.data.type === "ph-renta-editor") {
       editorOtvoreny = !!e.data.open;
       if (editorOtvoreny) {
-        var obsah = Number(e.data.height) || window.innerHeight;
-        c.ram.style.height = Math.min(Math.max(360, obsah), window.innerHeight) + "px";
-        var hlavicka = document.querySelector("header, #header, .Header");
-        var odsadenie = hlavicka ? Math.ceil(hlavicka.getBoundingClientRect().height) + 12 : 92;
-        var top = c.mount.getBoundingClientRect().top + window.pageYOffset - odsadenie;
-        window.scrollTo({ top: Math.max(0, top), behavior: "auto" });
+        nastavMobilnyEditor(c);
+        requestAnimationFrame(function () { nastavMobilnyEditor(c); });
+        setTimeout(function () { nastavMobilnyEditor(c); }, 180);
       } else if (poslednaVyskaAplikacie) {
         c.ram.style.height = poslednaVyskaAplikacie + "px";
       }
+      return;
+    }
+
+    if (e.data.type === "ph-renta-guide-history") {
+      sprievodcaHistoria(!!e.data.active, e.data.step);
       return;
     }
 
@@ -245,6 +297,28 @@
   window.addEventListener("resize", function () {
     if (!viewportFrame) viewportFrame = requestAnimationFrame(posliVelkostOkna);
   }, {passive:true});
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", function () {
+      var m = mount(), f = m && m.querySelector("iframe");
+      if (editorOtvoreny && m && f) nastavMobilnyEditor({mount:m,ram:f});
+      else posliVelkostOkna();
+    }, {passive:true});
+  }
+  window.addEventListener("popstate", function () {
+    if (guideCistiHistoriu) { guideCistiHistoriu = false; return; }
+    if (!guideAktivny) return;
+    var m = mount(), f = m && m.querySelector("iframe");
+    if (!f || !f.contentWindow) return;
+    var predosly = guideKrok - 1;
+    if (predosly >= 0) {
+      guideKrok = predosly;
+      history.pushState({phRentaGuide:true,step:guideKrok}, "", location.href);
+    } else {
+      guideAktivny = false;
+      guideKrok = -1;
+    }
+    f.contentWindow.postMessage({type:"ph-renta-guide-back"}, "https://hechtgit.github.io");
+  });
 
   /* 2. Úvod: schválené texty vľavo, obraz vpravo; audio sa zachytí o značku nižšie */
   function vlozUvod() {

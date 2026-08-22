@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="sk">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mobile guide host fixture</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;background:#333;overflow-anchor:none}
+  header{position:fixed;z-index:10;inset:0 0 auto;height:112px;background:#252525;color:#fff;padding:20px}
+  main{padding-top:112px}iframe{display:block;width:100%;height:1800px;border:0}
+</style>
+<header>Test header</header>
+<main id="ph-renta-calculator"><iframe id="app" src="/cara-zivota.html?preview=1&amp;uvod=1"></iframe></main>
+<script>
+  history.scrollRestoration='manual';
+  scrollTo(0,0);
+  const frame=document.getElementById('app');
+  const mount=document.getElementById('ph-renta-calculator');
+  let editorOpen=false,guideActive=false,guideStep=-1,cleanup=false,lastHeight=1800;
+  const metrics=()=>({top:120,height:Math.max(320,(visualViewport?.height||innerHeight)-120)});
+  const sendViewport=()=>{const m=metrics();frame.contentWindow.postMessage({type:'ph-renta-host-viewport',width:innerWidth,height:innerHeight,editorHeight:m.height},'*')};
+  frame.addEventListener('load',()=>{scrollTo(0,0);sendViewport()});
+  addEventListener('message',e=>{
+    if(e.source!==frame.contentWindow||!e.data)return;
+    if(e.data.type==='ph-renta-height'){lastHeight=Number(e.data.height)||lastHeight;if(!editorOpen)frame.style.height=lastHeight+'px'}
+    if(e.data.type==='ph-renta-editor'){editorOpen=!!e.data.open;if(editorOpen){const m=metrics();frame.style.height=m.height+'px';scrollTo(0,Math.max(0,mount.offsetTop-m.top));sendViewport()}else frame.style.height=lastHeight+'px'}
+    if(e.data.type==='ph-renta-guide-history'){
+      if(e.data.active){guideStep=Number(e.data.step)||0;if(!guideActive){guideActive=true;history.pushState({guide:true},'',location.href)}else history.replaceState({guide:true},'',location.href)}
+      else if(guideActive){guideActive=false;guideStep=-1;cleanup=true;history.back()}
+    }
+  });
+  addEventListener('popstate',()=>{
+    if(cleanup){cleanup=false;return}if(!guideActive)return;
+    const previous=guideStep-1;
+    if(previous>=0){guideStep=previous;history.pushState({guide:true},'',location.href)}else{guideActive=false;guideStep=-1}
+    frame.contentWindow.postMessage({type:'ph-renta-guide-back'},'*');
+  });
+</script>
+</html>
