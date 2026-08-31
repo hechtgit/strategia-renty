@@ -999,7 +999,8 @@
      Rodič drží jediný pomocný záznam histórie a po stlačení pošle tento pokyn:
      vrátime sa na predchádzajúcu kartu, na prvom kroku späť na mapu. */
   addEventListener('message', e => {
-    if (e.source !== parent || !e.data || e.data.type !== 'ph-renta-guide-back') return;
+    if (!e.data || e.data.type !== 'ph-renta-guide-back') return;
+    if (!doveryhodnaViewportSprava(e.origin, e.source === parent)) return;
     if (mKrok < 0) return;
     mNavigaciaHistorie = true;
     mCakaNaZatvorenie = false;

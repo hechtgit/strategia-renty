@@ -2,6 +2,8 @@
 <html lang="sk">
 <head>
 <meta charset="utf-8">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' 'unsafe-inline'; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://images.squarespace-cdn.com; connect-src 'self'; form-action 'self'; upgrade-insecure-requests">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%232b2118'/%3E%3Cpath d='M32 12 52 50H12Z' fill='%23ae8753'/%3E%3C/svg%3E">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
@@ -1062,7 +1064,7 @@ $('btn-pdf').addEventListener('click',async()=>{
        inak by mohlo vzniknúť bez hlavného výsledku 268/800. */
     await cakajNaFinalnuCopyVysledku();
     if(!pdfNacitanie)pdfNacitanie=(async()=>{
-      await Promise.all([nacitaj('jspdf.min.js?v=20260821a'),nacitaj('pdf-font.js?v=20260821a')]);
+      await Promise.all([nacitaj('jspdf.min.js?v=20260831a'),nacitaj('pdf-font.js?v=20260821a')]);
       await nacitaj('pdf.js?v=20260821a');
       await nacitaj('pdf-alternativa.js?v=20260821a');
     })();
