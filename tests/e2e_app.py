@@ -15,6 +15,7 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from threading import Thread
 from typing import Iterator
+from urllib.parse import urljoin
 
 from playwright.sync_api import Browser, Frame, Page, sync_playwright
 
@@ -162,6 +163,21 @@ def run(browser: Browser, url: str, direct: bool) -> dict[str, object]:
         mobile_page.close()
 
 
+def live_app_url(browser: Browser) -> str:
+    """Zistí presnú verziu aplikácie, ktorú práve vkladá živý Squarespace."""
+    page = browser.new_page(viewport={"width": 1440, "height": 900})
+    try:
+        page.goto(LIVE_URL, wait_until="domcontentloaded", timeout=60_000)
+        iframe = page.locator('iframe[src*="cara-zivota"]').first
+        iframe.wait_for(state="attached", timeout=30_000)
+        page.wait_for_timeout(4_000)
+        src = iframe.get_attribute("src")
+        assert src, "Živá stránka nemá zdroj rámu aplikácie."
+        return urljoin(LIVE_URL, src)
+    finally:
+        page.close()
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--target", choices=("local", "live"), default="local")
@@ -173,7 +189,9 @@ def main() -> int:
         browser = browser_type.launch(headless=True)
         try:
             if args.target == "live":
-                result = run(browser, LIVE_URL, direct=False)
+                deployed_url = live_app_url(browser)
+                result = run(browser, deployed_url, direct=True)
+                result["landing_url"] = LIVE_URL
             else:
                 with local_server() as url:
                     result = run(browser, url, direct=True)
