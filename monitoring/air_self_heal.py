@@ -226,6 +226,8 @@ def attempt_repair(failed: Check, failure_output: str) -> tuple[bool, dict[str, 
                 report["rolled_back"] = rollback_push.returncode == 0
                 if rollback_push.returncode:
                     report["critical"] = "Rollback push zlyhal; nasadená oprava nie je potvrdená živým testom."
+            else:
+                report["critical"] = "Git revert zlyhal; nasadená oprava nie je potvrdená živým testom."
         else:
             report["rollback_blocked"] = "Origin/main sa po nasadení zmenil; automatický rollback by nebol bezpečný."
             report["critical"] = report["rollback_blocked"]
