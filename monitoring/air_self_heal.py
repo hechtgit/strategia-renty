@@ -26,6 +26,7 @@ REMOTE = "origin"
 BRANCH = "main"
 MAX_REPAIR_ATTEMPTS = 3
 PATH_VALUE = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+PYTHON = sys.executable
 
 
 @dataclass
@@ -37,7 +38,7 @@ class Check:
 
 
 CHECKS = [
-    Check("build", ["python3", "zostav.py"], auto_fixable=False),
+    Check("build", [PYTHON, "zostav.py"], auto_fixable=False),
     Check("generated-sync", ["git", "diff", "--exit-code", "--", "cara-zivota.html", "vysledok.html"], auto_fixable=False),
     Check("shared-core", ["node", "tests/shared-core-parity.mjs"], auto_fixable=False),
     Check("frontend-contract", ["node", "tests/frontend-review-fixes.mjs"]),
@@ -47,9 +48,9 @@ CHECKS = [
     Check("financial-core", ["node", "audit-financne-jadro.mjs"], auto_fixable=False),
     Check("ui-contract", ["node", "audit-ui-kontrakt.mjs"]),
     Check("pdf", ["node", "audit-pdf-alternativa.mjs"], auto_fixable=False),
-    Check("local-browser", ["python3", "tests/e2e_app.py", "--target", "local", "--browser", "chromium"]),
-    Check("local-webkit", ["python3", "tests/e2e_app.py", "--target", "local", "--browser", "webkit"]),
-    Check("live-browser", ["python3", "tests/e2e_app.py", "--target", "live", "--browser", "chromium"], live=True),
+    Check("local-browser", [PYTHON, "tests/e2e_app.py", "--target", "local", "--browser", "chromium"]),
+    Check("local-webkit", [PYTHON, "tests/e2e_app.py", "--target", "local", "--browser", "webkit"]),
+    Check("live-browser", [PYTHON, "tests/e2e_app.py", "--target", "live", "--browser", "chromium"], live=True),
 ]
 
 
@@ -120,11 +121,12 @@ def changed_paths(root: Path) -> list[str]:
 
 
 def safe_diff(paths: list[str]) -> tuple[bool, str]:
-    blocked_prefixes = ("data/", ".github/", "monitoring/", ".env", "secrets/")
+    blocked_parts = {"data", ".github", "monitoring", "secrets"}
     allowed_suffixes = (".html", ".js", ".mjs", ".css", ".py")
     for path in paths:
         clean = path.split(" -> ")[-1]
-        if clean.startswith(blocked_prefixes) or not clean.endswith(allowed_suffixes):
+        parts = set(Path(clean).parts)
+        if parts & blocked_parts or any(part.startswith(".env") for part in parts) or not clean.endswith(allowed_suffixes):
             return False, f"Automatická oprava zasiahla nepovolenú cestu: {clean}"
     return bool(paths), ""
 
@@ -210,7 +212,7 @@ def attempt_repair(failed: Check, failure_output: str) -> tuple[bool, dict[str, 
             live_results, live_failed = execute_checks(worktree, include_live=True)
             live_only = [item for item in live_results if item["name"] == "live-browser"]
             report["live_validation"] = live_only
-            if not live_failed or live_failed.name != "live-browser":
+            if not live_failed:
                 return True, report
         report["blocked"] = "Oprava prešla lokálne, ale živá stránka ju nepotvrdila."
         remote_now = run(["git", "ls-remote", REMOTE, f"refs/heads/{BRANCH}"], worktree).stdout.split()
@@ -222,8 +224,11 @@ def attempt_repair(failed: Check, failure_output: str) -> tuple[bool, dict[str, 
                 rollback_push = run(["git", "push", REMOTE, f"{rollback_head}:refs/heads/{BRANCH}"], worktree)
                 report["rollback_push_output"] = rollback_push.stdout
                 report["rolled_back"] = rollback_push.returncode == 0
+                if rollback_push.returncode:
+                    report["critical"] = "Rollback push zlyhal; nasadená oprava nie je potvrdená živým testom."
         else:
             report["rollback_blocked"] = "Origin/main sa po nasadení zmenil; automatický rollback by nebol bezpečný."
+            report["critical"] = report["rollback_blocked"]
         return False, report
     finally:
         run(["git", "worktree", "remove", "--force", str(worktree)], ROOT)
@@ -250,6 +255,7 @@ def main() -> int:
             assert safe_diff(["vylepsenia.js", "tests/direct-input-controls.mjs"])[0]
             assert not safe_diff(["data/cma-assumptions.json"])[0]
             assert not safe_diff(["monitoring/air_self_heal.py"])[0]
+            assert not safe_diff(["src/data/metodika.js"])[0]
             print("OK: zámok, hranice samoopravy a fail-closed politika fungujú.")
             return 0
 
@@ -280,6 +286,8 @@ def main() -> int:
             if repaired:
                 payload["consecutive_failures"] = 0
                 payload["last_success_at"] = now()
+            if report.get("critical"):
+                payload["needs_attention"] = True
         if consecutive >= MAX_REPAIR_ATTEMPTS and payload["status"] != "repaired":
             payload["needs_attention"] = True
         atomic_json(STATE_FILE, payload)

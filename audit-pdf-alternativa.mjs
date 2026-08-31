@@ -149,7 +149,12 @@ function extractPdfText(file) {
       "reader = PdfReader(Path(sys.argv[1]))",
       "print('\\n'.join((page.extract_text() or '') for page in reader.pages))",
     ].join(";");
-    return execFileSync("python3", ["-c", script, file], { encoding: "utf8" });
+    try {
+      return execFileSync("python3", ["-c", script, file], { encoding: "utf8" });
+    } catch (fallbackError) {
+      const detail = String(fallbackError?.stderr || fallbackError?.message || fallbackError);
+      throw new Error(`PDF audit potrebuje nástroj pdftotext alebo modul pypdf. ${detail}`);
+    }
   }
 }
 const pdfText = extractPdfText(out);

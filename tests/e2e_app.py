@@ -10,6 +10,7 @@ import argparse
 import json
 import re
 import sys
+import time
 from contextlib import contextmanager
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -54,15 +55,18 @@ def app_frame(page: Page, direct: bool) -> Frame:
     if direct:
         return page.main_frame
     page.wait_for_selector('iframe[src*="cara-zivota"]', timeout=30_000)
-    # Squarespace po načítaní ešte raz skladá blok stránky a môže prvý iframe
-    # nahradiť. Počkáme na túto jednorazovú hydratáciu, aby monitor nehlásil
-    # odpojený rám ako chybu aplikácie.
-    page.wait_for_timeout(4_000)
+    stable_url = ""
+    stable_count = 0
     for _ in range(120):
         for frame in page.frames:
-            if "cara-zivota" in frame.url:
+            if "cara-zivota" in frame.url and not frame.is_detached():
                 frame.wait_for_selector("#c-today", timeout=20_000)
-                return frame
+                if frame.url == stable_url:
+                    stable_count += 1
+                else:
+                    stable_url, stable_count = frame.url, 1
+                if stable_count >= 3:
+                    return frame
         page.wait_for_timeout(250)
     raise AssertionError("Nenašiel sa rám živej aplikácie.")
 
@@ -122,9 +126,14 @@ def desktop_contract(page: Page, url: str, direct: bool) -> dict[str, object]:
     inflation.check()
 
     before = number(frame.locator("#rent-v").inner_text())
-    frame.locator("#rent-v").locator("xpath=..").locator("button").last.click()
+    controls = frame.locator("#rent-v").locator("xpath=..").locator("button")
+    controls.last.click()
     after = number(frame.locator("#rent-v").inner_text())
     assert after > before, f"Tlačidlo + pri rente nezvýšilo hodnotu: {before} -> {after}."
+    set_exact(frame, "rent-v", 4_321)
+    controls.first.click()
+    lowered = number(frame.locator("#rent-v").inner_text())
+    assert lowered < 4_321, f"Tlačidlo − pri rente neznížilo hodnotu: 4321 -> {lowered}."
 
     assert not errors, "Chyby JavaScriptu: " + " | ".join(errors)
     return {"exact_inputs": 7, "toggles": 5, "console_errors": 0}
@@ -168,12 +177,23 @@ def live_app_url(browser: Browser) -> str:
     page = browser.new_page(viewport={"width": 1440, "height": 900})
     try:
         page.goto(LIVE_URL, wait_until="domcontentloaded", timeout=60_000)
-        iframe = page.locator('iframe[src*="cara-zivota"]').first
-        iframe.wait_for(state="attached", timeout=30_000)
-        page.wait_for_timeout(4_000)
-        src = iframe.get_attribute("src")
-        assert src, "Živá stránka nemá zdroj rámu aplikácie."
-        return urljoin(LIVE_URL, src)
+        deadline = time.monotonic() + 30
+        previous = ""
+        stable = 0
+        while time.monotonic() < deadline:
+            iframe = page.locator('iframe[src*="cara-zivota"]').first
+            try:
+                src = iframe.get_attribute("src", timeout=2_000) or ""
+            except Exception:
+                src = ""
+            if src and src == previous:
+                stable += 1
+            else:
+                previous, stable = src, 1 if src else 0
+            if stable >= 3:
+                return urljoin(LIVE_URL, src)
+            page.wait_for_timeout(500)
+        raise AssertionError("Živá stránka nemá stabilný zdroj rámu aplikácie.")
     finally:
         page.close()
 
