@@ -53,6 +53,10 @@ def app_frame(page: Page, direct: bool) -> Frame:
     if direct:
         return page.main_frame
     page.wait_for_selector('iframe[src*="cara-zivota"]', timeout=30_000)
+    # Squarespace po načítaní ešte raz skladá blok stránky a môže prvý iframe
+    # nahradiť. Počkáme na túto jednorazovú hydratáciu, aby monitor nehlásil
+    # odpojený rám ako chybu aplikácie.
+    page.wait_for_timeout(4_000)
     for _ in range(120):
         for frame in page.frames:
             if "cara-zivota" in frame.url:
