@@ -44,9 +44,11 @@ assert.ok(improvements.includes("new CustomEvent('ph-renta-presna-hodnota'")
   'Presný zápis musí mať odosielateľa aj prijímača vlastnej udalosti.');
 assert.ok(improvements.includes('const orez = zapisPresne(cfg, v);'),
   'Ručne napísaná hodnota musí ísť presnou cestou.');
+assert.ok(improvements.includes('(smer > 0 && v > teraz) || (smer < 0 && v < teraz)'),
+  'Po presnom zápise musí + hodnotu zvýšiť a − znížiť aj mimo mriežky posuvníka.');
 assert.ok(master.includes('set(presne);') && master.includes('sl.value=scale.toPos(presne);'),
   'Aplikácia musí uložiť presnú sumu; posuvník je iba jej vizuálnou polohou.');
-assert.ok(master.includes('vylepsenia.js?v=20260831a'),
+assert.ok(master.includes('vylepsenia.js?v=20260831b'),
   'Po oprave musí byť zvýšená verzia skriptu kvôli cache prehliadača.');
 
 console.log('OK: priame zadávanie súm používa ľudské jednotky a zachováva presnú hodnotu.');

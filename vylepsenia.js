@@ -102,7 +102,10 @@
       pos += smer;
       if (pos < +s.min || pos > +s.max) return teraz;
       const v = sc.toVal(pos);
-      if (v !== teraz) return v;
+      /* Presná ručne zadaná suma nemusí ležať na mriežke posuvníka. Samotná
+         odlišnosť preto nestačí: tlačidlo + musí nájsť prvú hodnotu nad
+         presnou sumou a tlačidlo − prvú pod ňou. */
+      if ((smer > 0 && v > teraz) || (smer < 0 && v < teraz)) return v;
     }
     return teraz;
   }

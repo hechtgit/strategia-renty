@@ -119,7 +119,7 @@ def desktop_contract(page: Page, url: str, direct: bool) -> dict[str, object]:
     before = number(frame.locator("#rent-v").inner_text())
     frame.locator("#rent-v").locator("xpath=..").locator("button").last.click()
     after = number(frame.locator("#rent-v").inner_text())
-    assert after > before, "Tlačidlo + pri rente nezvýšilo hodnotu."
+    assert after > before, f"Tlačidlo + pri rente nezvýšilo hodnotu: {before} -> {after}."
 
     assert not errors, "Chyby JavaScriptu: " + " | ".join(errors)
     return {"exact_inputs": 7, "toggles": 5, "console_errors": 0}
