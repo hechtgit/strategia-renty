@@ -101,7 +101,7 @@ def desktop_contract(page: Page, url: str, direct: bool) -> dict[str, object]:
     click(frame, '[data-goal="rent"]')
 
     click(frame, '[data-sit="build"]')
-    click(frame, '[data-mode="combo"]')
+    click(frame, '[data-mode="lump"]')
     set_exact(frame, "rent-v", 4_321)
     set_exact(frame, "vynos-v", 7.4)
     set_exact(frame, "infl-v", 2.5)
