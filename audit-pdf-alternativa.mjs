@@ -135,7 +135,24 @@ jspdf.jsPDF.API.save = save;
 if (!fs.existsSync(out) || fs.statSync(out).size < 10000) {
   throw new Error("Alternatívny PDF nevznikol alebo je neúplný.");
 }
-const pdfText = execFileSync("pdftotext", [out, "-"], { encoding: "utf8" });
+function extractPdfText(file) {
+  try {
+    return execFileSync("pdftotext", [file, "-"], { encoding: "utf8" });
+  } catch (error) {
+    if (error?.code !== "ENOENT") throw error;
+    /* Air už má lokálny pypdf; test preto nemusí inštalovať celý Poppler iba
+       kvôli extrakcii textu z vlastného syntetického PDF. */
+    const script = [
+      "from pathlib import Path",
+      "from pypdf import PdfReader",
+      "import sys",
+      "reader = PdfReader(Path(sys.argv[1]))",
+      "print('\\n'.join((page.extract_text() or '') for page in reader.pages))",
+    ].join(";");
+    return execFileSync("python3", ["-c", script, file], { encoding: "utf8" });
+  }
+}
+const pdfText = extractPdfText(out);
 for (const required of ["Čo presne testujeme?", "Cieľ: renta 3 000 € mesačne", "Základný prepočet:"]) {
   if (!pdfText.includes(required)) throw new Error(`PDF druhá strana: chýba „${required}“`);
 }
