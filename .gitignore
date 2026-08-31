@@ -1,3 +1,5 @@
 __pycache__/
+.self-heal-last-message.txt
+tmp/
 *.pyc
 .DS_Store
