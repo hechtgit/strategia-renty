@@ -1510,6 +1510,16 @@ function prehladCiastok(){
 
 /* JADRO:KONIEC */
 
+/* Vrstva priameho zadávania potrebuje vedieť, že sumové posuvníky neobsahujú
+   eurá, ale pozíciu 0–1000 na nelineárnej škále. Sprístupňujeme iba prevodné
+   funkcie podľa ID posuvníka; finančný stav ani výpočtové jadro tým neotvárame. */
+window.__SC=Object.freeze({
+  'sl-rent':SC.rent,
+  'sl-c0':SC.c0,
+  'sl-combo':SC.combo,
+  'sl-monthly-known':SC.monthly
+});
+
 /* Lokálny wrapper si cez túto úzku funkciu vie zostaviť skutočný výsledkový
    odkaz bez Turnstile a bez odoslania údajov do Boldemu. */
 if(QS.has('preview'))window.__previewScenarioURL=scenarioURL;
@@ -2607,6 +2617,19 @@ function bindSlider(slId,valId,scale,get,set,unit){
   const paint=()=>{v.textContent=fmtEur(get())+(unit||'')};
   paint();
   sl.addEventListener('input',()=>{set(scale.toVal(+sl.value));paint();render()});
+  /* Posuvník má zámerne zaokrúhlenú mriežku, no klik na číslo sľubuje presný
+     zápis. Vlastná udalosť preto nastaví presnú sumu do stavu a posuvník iba
+     presunie na najbližšiu vizuálnu pozíciu. */
+  sl.addEventListener('ph-renta-presna-hodnota',e=>{
+    const raw=Number(e.detail&&e.detail.value);
+    if(!Number.isFinite(raw))return;
+    const lo=scale.toVal(+sl.min),hi=scale.toVal(+sl.max);
+    const presne=Math.round(Math.min(hi,Math.max(lo,raw)));
+    set(presne);
+    sl.value=scale.toPos(presne);
+    paint();
+    render();
+  });
 }
 bindSlider('sl-rent','rent-v',SC.rent,()=>S.rent,v=>S.rent=v,' / mes.');
 bindSlider('sl-c0','c0-v',SC.c0,()=>S.existing,v=>S.existing=v);
@@ -2996,7 +3019,7 @@ if(ANIM&&!REDUCED){
      nájsť. Musí sa načítať PRED sprievodcom: sprievodca ukazuje na prvky,
      ktoré táto vrstva prestavuje. -->
 <link rel="stylesheet" href="vylepsenia.css?v=20260820b">
-<script src="vylepsenia.js?v=20260820b"></script>
+<script src="vylepsenia.js?v=20260831a"></script>
 
 <!-- Sprievodca: prekryv, ktorý nového návštevníka prevedie všetkými vstupmi.
      Vo vloženom ráme si nevie scrollovať (rám je zamknutý na 0,0, rodič je na

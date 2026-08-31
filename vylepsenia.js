@@ -56,6 +56,12 @@
   const skala = cfg => (window.__SC || {})[cfg.slider] || null;
   const citaj = cfg => {
     const s = $(cfg.slider), sc = skala(cfg);
+    /* Po presnom zápise môže byť poloha nelineárneho jazdca iba približná.
+       Autoritatívna suma je preto hodnota vykreslená z aplikačného stavu. */
+    if (sc) {
+      const zobrazene = cislo($(cfg.id).textContent);
+      if (zobrazene !== null) return zobrazene;
+    }
     return sc ? sc.toVal(+s.value) : +s.value;
   };
   const rozsah = cfg => {
@@ -70,6 +76,21 @@
     s.value = sc ? sc.toPos(orez) : Math.round(orez / krok) * krok;
     s.dispatchEvent(new Event('input', { bubbles: true }));
     return orez;
+  }
+  /* Pri priamom zápise sumy nesmie nelineárny posuvník hodnotu zaokrúhliť na
+     svoju vizuálnu mriežku. Aplikácia dostane presnú sumu vlastnou udalosťou;
+     percentá zostávajú na pôvodnom lineárnom zápise. */
+  function zapisPresne(cfg, hodnota) {
+    const s = $(cfg.slider), sc = skala(cfg);
+    const [lo, hi] = rozsah(cfg);
+    const orez = Math.min(hi, Math.max(lo, hodnota));
+    const presne = cfg.des === 0 ? Math.round(orez) : orez;
+    if (!sc) return zapis(cfg, presne);
+    s.dispatchEvent(new CustomEvent('ph-renta-presna-hodnota', {
+      bubbles: true,
+      detail: { value: presne },
+    }));
+    return presne;
   }
   /* Najbližšia odlišná hodnota v danom smere - mriežku drží samotná škála. */
   function dalsia(cfg, smer) {
@@ -210,7 +231,7 @@
         }
         if (ulozit && v !== null) {
           const [lo, hi] = rozsah(cfg);
-          const orez = zapis(cfg, v);
+          const orez = zapisPresne(cfg, v);
           if (v < lo || v > hi) poznamkaPri(el,
             `Zadali ste ${cisloText(v, cfg.des)}${NBSP}${cfg.jed}. Rozsah je `
             + `${cisloText(lo, cfg.des)}${NBSP}–${NBSP}${cisloText(hi, cfg.des)}${NBSP}${cfg.jed}, `
