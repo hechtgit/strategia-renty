@@ -1337,8 +1337,8 @@ $('btn-pdf').addEventListener('click',async()=>{
     await cakajNaFinalnuCopyVysledku();
     if(!pdfNacitanie)pdfNacitanie=(async()=>{
       await Promise.all([nacitaj('jspdf.min.js?v=20260831a'),nacitaj('pdf-font.js?v=20260821a')]);
-      await nacitaj('pdf.js?v=20260821a');
-      await nacitaj('pdf-alternativa.js?v=20260821a');
+      await nacitaj('pdf.js?v=20260901a');
+      await nacitaj('pdf-alternativa.js?v=20260901a');
     })();
     await pdfNacitanie;
     await window.PH_PDF();

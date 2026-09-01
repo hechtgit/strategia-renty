@@ -144,6 +144,21 @@
       y += 5;
     }
 
+    /* Pätička má v kanonickom PDF presne jeden riadok. Číslo strany má
+       vyhradený vlastný priestor vpravo; keby sa text po budúcej úprave do
+       zvyšku nezmestil, generovanie musí zlyhať namiesto tichého zalomenia
+       alebo nečitateľného zmenšenia. */
+    function vyskaPatky(disclaimer) {
+      var PISMO = 6.2;
+      var REZERVA_CISLO = 15;
+      doc.setFont("Asap", "normal");
+      doc.setFontSize(PISMO);
+      if (doc.getTextWidth(disclaimer || "") > SIRKA - REZERVA_CISLO) {
+        throw new Error("PDF pätička: text sa nezmestí do jedného riadka.");
+      }
+      return 5 + 18 + 5 + PISMO * 0.3528 * 1.5 + 1;
+    }
+
     /* ——— hlavička ——— */
     var vrchH = y;
     odstavec("MODELÁCIA PRIVÁTNEJ RENTY", 7.5, "bold", ZLATA, SIRKA, 1.2);
@@ -344,9 +359,7 @@
        Kreslí sa len vtedy, keď na neho medzi predpokladmi a pätičkou naozaj
        ostane miesto. Pri dlhšom scenári radšej nie je — tlačiť kvôli grafu
        pätičku na tretiu stranu by bola horšia sadzba než prázdny pás. */
-    doc.setFont("Asap", "normal"); doc.setFontSize(7);
-    var riadkovD = doc.splitTextToSize(d.disclaimer, SIRKA).length;
-    var VYSKA_PATKY = 5 + 18 + 5 + riadkovD * 7 * 0.3528 * 1.5 + 1;
+    var VYSKA_PATKY = vyskaPatky(d.disclaimer);
 
     /* Vlastný nadpis graf nedostal zámerne - medzi predpokladmi a pätičkou je
        reálne okolo 25 mm a nadpis by z nich ukrojil pätinu. „BUDOVANIE
@@ -456,9 +469,7 @@
 
        Pätička sa neplaví s textom, ale kotví na spodok strany — tam patrí
        a dokument tým nekončí prázdnou stranou len kvôli pár riadkom. */
-    doc.setFont("Asap", "normal"); doc.setFontSize(7);
-    var riadkovD = doc.splitTextToSize(d.disclaimer, SIRKA).length;
-    var VYSKA_PATKY = 5 + 18 + 5 + riadkovD * 7 * 0.3528 * 1.5 + 1;
+    var VYSKA_PATKY = vyskaPatky(d.disclaimer);
     var spodok = A4.v - OKRAJ;
     if (y + VYSKA_PATKY > spodok) strana();
     y = spodok - VYSKA_PATKY;
@@ -493,17 +504,15 @@
 
     /* ——— disclaimer ——— */
     linka();
-    doc.setFont("Asap", "normal"); doc.setFontSize(7);
+    doc.setFont("Asap", "normal"); doc.setFontSize(6.2);
     doc.setTextColor(130, 125, 118);
     /* Číslovanie mala len druhá strana („2 / 2"), takže prvá pôsobila, akoby
        do dokumentu nepatrila. Ide pod disclaimer, nie k telefónu - tam ho
        prvý pokus položil rovno na číslo. Počet strán dodá pdf-alternativa.js
        ešte pred kreslením; bez neho ostane samotné „1". */
     doc.text(window.PH_PDF_STRAN ? "1 / " + window.PH_PDF_STRAN : "1",
-      OKRAJ + SIRKA, y + 2.4, { align: "right" });
-    doc.splitTextToSize(d.disclaimer, SIRKA).forEach(function (r, i) {
-      doc.text(r, OKRAJ, y + i * 7 * 0.3528 * 1.5 + 2);
-    });
+      OKRAJ + SIRKA, y + 2.2, { align: "right" });
+    doc.text(d.disclaimer, OKRAJ, y + 2.2);
 
     return doc;
   }

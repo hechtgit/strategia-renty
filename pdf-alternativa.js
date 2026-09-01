@@ -9,8 +9,8 @@
 
   /* Portrét je kruhový PNG s priehľadným pozadím - jsPDF orezať do kruhu nevie,
      tak kruh nesie priamo obrázok a zlatý lem sa dokreslí. Sťahuje sa hneď pri
-     načítaní tohto súboru; ak by sa nestihol alebo chýbal, sekcia sa vykreslí
-     bez neho. */
+     načítaní tohto súboru; ak sa nenačíta, PDF sa nesmie potichu uložiť bez
+     neho. */
   var portretData = null;
   var portretHotovy = fetch("portrait-petr-kruh.png")
     .then(function (r) { return r.ok ? r.blob() : null; })
@@ -48,13 +48,14 @@
   }
   var SLOVOM = { 3: "trojročné", 5: "päťročné", 10: "desaťročné" };
 
-  var LIST_NADPIS = "Od čísla k stratégii";
+  var LIST_NADPIS = "Od modelácie k premyslenej stratégii";
   var LIST_TELO = "Táto modelácia vám dáva prvý obraz o tom, aký majetok môže byť "
     + "potrebný pre vašu privátnu rentu. Nevidí však celý váš majetok, ďalšie "
     + "investície, rezervu, likviditu ani rozhodnutia, ktoré máte pred sebou. "
     + "Na konzultácii ju viem zasadiť do vašej reality a oddeliť zaujímavé číslo "
     + "od stratégie, podľa ktorej sa dá pokojne rozhodovať. Preto má zmysel "
     + "sadnúť si k tomu spolu.";
+  var PATKA_TEXT = "Ilustračný a vzdelávací výpočet. Nejde o investičné poradenstvo ani odporúčanie.";
   if (typeof povodnePDF !== "function" || !window.jspdf || !window.jspdf.jsPDF) return;
 
   function text(el) {
@@ -209,7 +210,7 @@
         medzera(2);
       }
       napis(testText, OKRAJ + 7, 9.2, "normal", TMAVA, SIRKA - 14, 1.42);
-      y = testTop + testH + 8;
+      y = testTop + testH + 5;
     }
 
     var vzorPomeru = new RegExp("([0-9]+)\\s*z\\s*" + N);
@@ -271,7 +272,7 @@
         napis(hodnotaHl, xP, 12.2, "bold", ZLATA, PLNA, 1.24);
         if (nepokrylo) { medzera(1.5); napis(nepokrylo, xP, 8.3, "bold", TMAVA, PLNA, 1.4); }
         napis(r.doplnenie, xP, 8.3, "normal", SEDA, PLNA, 1.4);
-        y = Math.max(panelTop + panelH, y) + 8;
+        y = Math.max(panelTop + panelH, y) + 5;
         return;
       }
       napis(r.nadpis, OKRAJ, 9.2, "bold", TMAVA, lava, 1.3);
@@ -300,7 +301,7 @@
       var zR = riadky(d.zaver, 8.8, SIRKA - 12);
       var zH = 8 + zR.length * 8.8 * 0.3528 * 1.42;
       doc.roundedRect(OKRAJ, y, SIRKA, zH, 1.5, 1.5, "F");
-      y += 4;
+      y += 2;
       napis(d.zaver, OKRAJ + 6, 8.8, "bold", TMAVA, SIRKA - 12, 1.42);
       y += 4;
     }
@@ -312,20 +313,21 @@
     napis(d.metodika, OKRAJ, 7.8, "normal", SEDA, SIRKA, 1.46);
 
     if (d.konzultaciaNadpis) {
-      medzera(6);
-      /* Posledný blok na strane: portrét vľavo, oslovenie vpravo, tlačidlo pod
+      medzera(1);
+      /* Posledný blok na strane: oslovenie vľavo, portrét vpravo, tlačidlo pod
          tým. Doteraz tu bola natvrdo vysoká škatuľa s jednou vetou, ktorá na
          webe ani nestála. Výška sa ráta z obsahu.
 
          Spodný okraj strany je inde 16 mm; tento blok smie ísť až na 8 mm.
          Práve tých 8 mm rozhoduje o tom, či sa sekcia zmestí na druhú stranu -
          a keďže je posledná na strane, užší okraj pod ňou nie je vidieť. */
-      /* Sekcia potrebovala s portrétom 50 mm a na strane ich zostáva 47.
-         Tie tri milimetre sa berú z vnútorných okrajov a medzery nad
-         tlačidlom - nie z textu ani z veľkosti fotky. */
-      var VNU = 5;
-      var FOTO = d.portret ? 26 : 0;
-      var MEDZI = FOTO ? 6 : 0;
+      /* Portrét je súčasťou kanonického PDF layoutu, nie voliteľná dekorácia.
+         Priestor sa preň rezervuje vždy. Keby sa po budúcej textovej zmene blok
+         nezmestil, generovanie musí zlyhať nahlas namiesto tichého prepnutia
+         na inú vizuálnu verziu dokumentu. */
+      var VNU = 4;
+      var FOTO = 26;
+      var MEDZI = 6;
       var TXT = SIRKA - 2 * VNU - FOTO - MEDZI;
       var CTA_S = 62, CTA_V = 8.5;
 
@@ -333,23 +335,31 @@
          289 mm, čo je 7 mm POD ňu - v tomto scenári to nevyskočilo, ale bola
          to čakajúca chyba. */
       var DOSTUPNE = 282 - 4 - y;
-      function vyskaListu(sFotkou) {
-        var sirka = SIRKA - 2 * VNU - (sFotkou ? FOTO + MEDZI : 0);
-        var h = vyskaTextu(LIST_NADPIS, 12.5, sirka, 1.25) + 2
-              + vyskaTextu(LIST_TELO, 8.3, sirka, 1.4);
-        return { hlava: Math.max(sFotkou ? FOTO : 0, h),
-                 cela: VNU + Math.max(sFotkou ? FOTO : 0, h) + 2 + CTA_V + VNU };
+      function vyskaListu() {
+        var h = vyskaTextu(LIST_NADPIS, 12.5, TXT, 1.25) + 2
+              + vyskaTextu(LIST_TELO, 8.3, TXT, 1.4);
+        return { hlava: Math.max(FOTO, h),
+                 cela: VNU + Math.max(FOTO, h) + 1.5 + CTA_V + VNU };
       }
-      /* Pri dlhšom obsahu nad sekciou nemusí zostať na portrét miesto. Vtedy
-         padá on, nie text - bez portrétu je blok o výšku fotky nižší. Text sa
-         neskracuje nikdy: radšej list bez tváre než useknutá veta. */
-      var sFotkou = !!d.portret && vyskaListu(true).cela <= DOSTUPNE;
-      if (!sFotkou) { FOTO = 0; MEDZI = 0; TXT = SIRKA - 2 * VNU; }
-      var miery = vyskaListu(sFotkou);
+      if (!d.portret) {
+        throw new Error("PDF druhá strana: portrét sa nepodarilo načítať.");
+      }
+      var miery = vyskaListu();
+      /* Dlhšia legitímna kópia nad týmto blokom smie zobrať niekoľko milimetrov
+         navyše. Vtedy sa zmenší iba vnútorné odsadenie CTA, nie text ani portrét;
+         kanonický scenár ostáva pixelovo nezmenený. Pod 2,5 mm nejdeme a ak ani
+         táto čitateľná verzia nestačí, generovanie ďalej zlyhá nahlas. */
+      if (miery.cela > DOSTUPNE) {
+        VNU = 2.5;
+        CTA_V = 8;
+        miery = vyskaListu();
+      }
       var hHlava = miery.hlava;
-      /* Rámček sa NESMIE orezať pod výšku obsahu - predtým som ho zmenšil na
-         dostupné miesto, ale text sa kreslil ďalej a tlačidlo pristálo naň. */
       var konzH = miery.cela;
+      if (konzH > DOSTUPNE) {
+        throw new Error("PDF druhá strana: záverečný blok s portrétom sa nezmestí "
+          + "(" + konzH.toFixed(1) + " mm, dostupné " + DOSTUPNE.toFixed(1) + " mm).");
+      }
 
       var konzTop = y;
       doc.setFillColor(250, 246, 238);
@@ -357,19 +367,14 @@
       doc.setLineWidth(0.3);
       doc.roundedRect(OKRAJ, konzTop, SIRKA, konzH, 1.8, 1.8, "FD");
 
-      /* Podmienka musí byť `sFotkou`, nie `d.portret`. Keď sa portrét nezmestí,
-         FOTO je nula - a addImage s nulovým rozmerom si jsPDF vyloží ako
-         „použi vlastnú veľkosť obrázka", takže 400 px vykreslil cez pol
-         strany. */
-      if (sFotkou) {
-        var fx = OKRAJ + VNU, fy = konzTop + VNU + Math.max(0, (hHlava - FOTO) / 2);
-        try { doc.addImage(d.portret, "PNG", fx, fy, FOTO, FOTO); } catch (e) {}
-        doc.setDrawColor.apply(doc, ZLATA);
-        doc.setLineWidth(0.5);
-        doc.circle(fx + FOTO / 2, fy + FOTO / 2, FOTO / 2, "S");
-      }
+      var fx = OKRAJ + SIRKA - VNU - FOTO;
+      var fy = konzTop + VNU + Math.max(0, (hHlava - FOTO) / 2);
+      doc.addImage(d.portret, "PNG", fx, fy, FOTO, FOTO);
+      doc.setDrawColor.apply(doc, ZLATA);
+      doc.setLineWidth(0.5);
+      doc.circle(fx + FOTO / 2, fy + FOTO / 2, FOTO / 2, "S");
 
-      var textX = OKRAJ + VNU + (FOTO ? FOTO + MEDZI : 0);
+      var textX = OKRAJ + VNU;
       y = konzTop + VNU;
       napis(LIST_NADPIS, textX, 12.5, "bold", TMAVA, TXT, 1.25);
       medzera(2);
@@ -397,8 +402,7 @@
        pritom bola jediná bez akejkoľvek výhrady. Ak ju niekto odfotí alebo
        pošle samostatne, išla by von bez upozornenia. */
     doc.setFontSize(6.2);
-    doc.text("Ilustračný a vzdelávací výpočet. Nejde o investičné poradenstvo ani odporúčanie.",
-      OKRAJ, 291.5);
+    doc.text(PATKA_TEXT, OKRAJ, 291.5);
   }
 
   window.PH_PDF = async function () {
@@ -450,6 +454,7 @@
     if (budeDruhaStrana) docasneSkrat(document.querySelector(".blok .vystraha"), "");
     docasneSkrat(document.querySelector(".next h2"), "");
     docasneSkrat(document.querySelector(".next p"), "");
+    docasneSkrat(document.querySelector(".disclaimer"), PATKA_TEXT);
 
     /* Prvá strana kreslí číslovanie skôr, než sa pridá druhá - musí preto
        vopred vedieť, či nejaká druhá vôbec bude. */
@@ -466,6 +471,9 @@
     }
 
     try { await portretHotovy; } catch (e) {}
+    if (dataDruhejStrany && !portretData) {
+      throw new Error("PDF druhá strana: portrét sa nepodarilo načítať.");
+    }
     if (dataDruhejStrany) dataDruhejStrany.portret = portretData;
     pridajDruhuStranu(dokument, dataDruhejStrany);
     skutocneUlozenie.call(dokument, "modelacia-privatnej-renty.pdf");

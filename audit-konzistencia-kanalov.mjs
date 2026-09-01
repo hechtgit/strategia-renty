@@ -62,8 +62,8 @@ must("builtLanding", "sprievodca.js?v=20260822a");
 must("builtResult", "vysledok-10of10.js?v=20260821b");
 must("builtResult", "jspdf.min.js?v=20260831a");
 must("builtResult", "pdf-font.js?v=20260821a");
-must("builtResult", "pdf.js?v=20260821a");
-must("builtResult", "pdf-alternativa.js?v=20260821a");
+must("builtResult", "pdf.js?v=20260901a");
+must("builtResult", "pdf-alternativa.js?v=20260901a");
 
 /* Každý lokálny meniteľný asset musí mať cache-buster. Inak môže klient po
    nasadení na desať minút skombinovať novú stránku so starým skriptom. */
