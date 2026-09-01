@@ -1311,7 +1311,10 @@ const VYSTUP_BASE=location.protocol==='file:'
 
 /* SCENARIO_PARAMS_POLICY:START */
 function scenarioEntries(state,vypocitana){
-  const rent=state.sit==='have'&&state.goal==='rent'&&vypocitana
+  /* Ak jadro rentu počíta z majetku alebo zo známych investícií, je to
+     kanonický výsledok scenára. Pôvodná hodnota posuvníka `rent` je v týchto
+     režimoch iba nepoužitý vstup a nesmie sa dostať do vysvetlenia ani PDF. */
+  const rent=vypocitana&&vypocitana.calculatesRent
     &&!vypocitana.warn&&Number.isFinite(vypocitana.Rtoday)
       ?Math.round(vypocitana.Rtoday):state.rent;
   const entries=[
@@ -1334,8 +1337,7 @@ function scenarioEntries(state,vypocitana){
 function scenarioParams(){
   /* URL nesie iba hodnoty, ktoré majú v danom režime vplyv na výpočet. Tak
      zostáva identický scenár pod limitom CRM stĺpca aj bez tichého skracovania. */
-  const vypocitana=S.sit==='have'&&S.goal==='rent'?compute():null;
-  return new URLSearchParams(scenarioEntries(S,vypocitana));
+  return new URLSearchParams(scenarioEntries(S,compute()));
 }
 /* Pri lokálnom otvorení odkaz vedie späť do aplikácie, ktorá režim výstupu pozná
    podľa ?vystup. Výsledková stránka ten prepínač nepotrebuje. */
@@ -2818,7 +2820,12 @@ function scenarioSummary(){
 /* Funkcia návratu k rozpracovanému scenáru bola odstránená bez náhrady. Jej
    starý záznam preto cielene mažeme; niet ho kam migrovať a nesmie zostať
    neviditeľne uložený v prehliadači. */
-try{localStorage.removeItem('ph-renta-scenar')}catch(e){}
+try{
+  localStorage.removeItem('ph-renta-scenar');
+  /* Upratanie staršej verzie, ktorá meno a scenár ponechávala 30 dní v
+     úložisku spoločnom pre všetky GitHub Pages tohto účtu. */
+  localStorage.removeItem('ph-renta-klient');
+}catch(e){}
 
 const sendModel=$('send-model');
 if(sendModel){
@@ -2944,9 +2951,12 @@ if(sendModel){
       sendModel.disabled=false;sendModel.textContent=label;
       return;
     }
-    /* Meno pre modeláciu — ostáva v prehliadači klienta, do adresy nejde. */
-    try{localStorage.setItem('ph-renta-klient', JSON.stringify(
-      {kedy:Date.now(), meno:(first+' '+last).trim(), scenar:scenarioParams().toString()}))}catch(e){}
+    /* Jednorazový prenos mena priamo do nového tabu. `about:blank` zdedí
+       pôvod aplikácie, takže jeho sessionStorage prežije navigáciu na výsledok,
+       ale nie je zdieľaný s ostatnými tabmi ani GitHub Pages projektmi. Výsledok
+       záznam po prvom prečítaní okamžite odstráni. */
+    try{modelWindow.sessionStorage.setItem('ph-renta-klient', JSON.stringify(
+      {meno:(first+' '+last).trim(), scenar:scenarioParams().toString()}))}catch(e){}
     await otvorVysledok(modelWindow,url,animacia);
     status.textContent='Modelácia sa otvorila v novom okne. Odkaz vám posielame aj e-mailom.';
     sendModel.disabled=false;sendModel.textContent=label;

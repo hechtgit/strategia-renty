@@ -24,9 +24,8 @@
   /* HAVE_RENT_PRESENTATION:END */
 
   /* HAVE_RENT_RESOLUTION:START */
-  function resolvedHaveRentToday(sit,goal,paramRent,computedRent){
-    return sit==='have'&&goal==='rent'&&Number.isFinite(computedRent)
-      ?computedRent:paramRent;
+  function resolvedRentToday(paramRent,computedRent){
+    return Number.isFinite(computedRent)?computedRent:paramRent;
   }
   /* HAVE_RENT_RESOLUTION:END */
 
@@ -42,17 +41,17 @@
     /* Jadro už vypočítalo obe hodnoty z presných vstupov. Prevezmeme ich
        z karty ešte pred prepísaním prezentácie. `rent` v starších odkazoch
        niesol pôvodný vstup, nie vypočítanú rentu, preto mu tu nemožno veriť. */
-    let firstPayment=value?Number(value.dataset.haveRentNominal):Number.NaN;
-    params.rentToday=value?Number(value.dataset.haveRentToday):Number.NaN;
+    let firstPayment=value?Number(value.dataset.computedRentNominal):Number.NaN;
+    params.rentToday=value?Number(value.dataset.computedRentToday):Number.NaN;
     if(value&&!Number.isFinite(firstPayment)){
       firstPayment=Number((value.textContent||'').replace(/[^0-9,-]/g,'').replace(',','.'));
-      if(Number.isFinite(firstPayment))value.dataset.haveRentNominal=String(firstPayment);
+      if(Number.isFinite(firstPayment))value.dataset.computedRentNominal=String(firstPayment);
     }
     if(!Number.isFinite(params.rentToday)&&Number.isFinite(firstPayment)){
       const years=Math.max(0,params.start-params.now);
       params.rentToday=params.inflOn&&params.infl>0
         ?firstPayment/Math.pow(1+params.infl/100,years):firstPayment;
-      if(value)value.dataset.haveRentToday=String(params.rentToday);
+      if(value)value.dataset.computedRentToday=String(params.rentToday);
     }
     if(!Object.values(params).filter(v=>typeof v==='number').every(Number.isFinite))return;
     const copy=haveRentPresentation({...params,firstPayment});
@@ -103,8 +102,8 @@
     const value=i=>rows[i]?.querySelector(".kolko")?.textContent.trim()||"—";
     const now=Number(q.get("now")),start=Number(q.get("start")),end=Number(q.get("end"));
     const mode=q.get("mode")||"lump",sit=q.get("sit")||"build";
-    const computedRent=Number(document.getElementById('s-value2')?.dataset.haveRentToday);
-    const rent=resolvedHaveRentToday(sit,q.get('goal'),Number(q.get('rent')),computedRent);
+    const computedRent=Number(document.getElementById('s-value2')?.dataset.computedRentToday);
+    const rent=resolvedRentToday(Number(q.get('rent')),computedRent);
     const today=document.getElementById("s1-v")?.textContent.trim()||document.getElementById("t-value")?.textContent.trim()||"—";
     const target=document.getElementById("s-value1")?.textContent.trim()||"—";
     const success=(value(0).match(/[0-9]+/)||["—"])[0],meta600=value(1),meta720=value(2);

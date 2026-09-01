@@ -64,13 +64,13 @@ const roundedToday=presentationContext.fn({...acceptance,rentToday:Math.round(ac
 const roundedTodayText=roundedToday.sub.replace(/\u00a0/g,' ');
 ok(roundedTodayText.includes('4 118')&&!roundedTodayText.includes('4 119'),
   'Výsledok musí prevziať presnú nominálnu výplatu z jadra, nie ju spätne prepočítať zo zaokrúhlenej URL.');
-ok(result.includes('value.dataset.haveRentNominal')&&result.includes('value.dataset.haveRentNominal=String(firstPayment)')
-  &&result.includes('value.dataset.haveRentToday')&&result.includes('value.dataset.haveRentToday=String(params.rentToday)'),
+ok(result.includes('value.dataset.computedRentNominal')&&result.includes('value.dataset.computedRentNominal=String(firstPayment)')
+  &&result.includes('value.dataset.computedRentToday')&&result.includes('value.dataset.computedRentToday=String(params.rentToday)'),
   'Opakované spustenie výsledkovej vrstvy musí zachovať obe vypočítané hodnoty.');
 ok(!result.includes("rentToday:Number(q.get('rent'))"),
   'Legacy have+rent odkaz nesmie zameniť pôvodný parameter rent za vypočítanú rentu.');
-ok(resultMaster.includes("$('s-value2').dataset.haveRentToday=String(o.Rtoday)")
-  &&resultMaster.includes("$('s-value2').dataset.haveRentNominal=String(o.R)"),
+ok(resultMaster.includes("$('s-value2').dataset.computedRentToday=String(o.Rtoday)")
+  &&resultMaster.includes("$('s-value2').dataset.computedRentNominal=String(o.R)"),
   'Výsledková stránka musí prezentačnej vrstve odovzdať obe hodnoty priamo z jadra.');
 const presentFixed=presentationContext.fn({...base,rentToday:withoutInflation.Rtoday,inflOn:false});
 close(presentFixed.firstPayment,withoutInflation.R,'Výsledok bez inflácie');
@@ -79,11 +79,11 @@ ok(presentFixed.sub==='mesačne'&&!presentFixed.goal.includes('Prvá výplata'),
 
 const rentResolutionSource=between(result,'/* HAVE_RENT_RESOLUTION:START */','/* HAVE_RENT_RESOLUTION:END */');
 const rentResolutionContext=vm.createContext({});
-vm.runInContext(`${rentResolutionSource};globalThis.fn=resolvedHaveRentToday;`,rentResolutionContext);
-close(rentResolutionContext.fn('have','rent',3000,acceptanceInflation.Rtoday),acceptanceInflation.Rtoday,
+vm.runInContext(`${rentResolutionSource};globalThis.fn=resolvedRentToday;`,rentResolutionContext);
+close(rentResolutionContext.fn(3000,acceptanceInflation.Rtoday),acceptanceInflation.Rtoday,
   'Legacy rent parameter nesmie preniknúť do PDF historického bloku');
-close(rentResolutionContext.fn('build','rent',3000,acceptanceInflation.Rtoday),3000,
-  'Build scenár musí zachovať zadanú rentu');
+close(rentResolutionContext.fn(3000,Number.NaN),3000,
+  'Scenár bez vypočítanej renty musí zachovať zadanú rentu');
 
 const scenarioPolicy=between(landing,'/* SCENARIO_PARAMS_POLICY:START */','/* SCENARIO_PARAMS_POLICY:END */');
 const scenarioContext=vm.createContext({URLSearchParams});
@@ -112,11 +112,28 @@ const comboFull=compute(comboState);
 const comboCompact=scenarioContext.entries(comboFull.S,comboFull.compute);
 const comboKeys=new Set(comboCompact.map(([key])=>key));
 for(const key of ['combo','comboDir','monthlyKnown','mode'])ok(comboKeys.has(key),`Combo URL: chýba ${key}`);
+ok(Number(new URLSearchParams(comboCompact).get('rent'))===Math.round(comboFull.compute.Rtoday),
+  'Combo-known URL musí niesť vypočítanú rentu, nie nepoužitú hodnotu posuvníka.');
+close(rentResolutionContext.fn(comboState.rent,comboFull.compute.Rtoday),comboFull.compute.Rtoday,
+  'Combo-known vysvetlenie a PDF musia použiť vypočítanú rentu.');
 ok(!comboKeys.has('existing')&&!comboKeys.has('goal'),'Build URL nesmie niesť have hodnoty.');
 const compactUrl='https://hechtgit.github.io/strategia-renty/vysledok.html?'+new URLSearchParams(comboCompact);
 ok(compactUrl.length<=255,`Kompaktná URL má ${compactUrl.length} znakov.`);
 const comboRoundtrip=compute(comboCompact).compute;
 for(const key of ['cap','R','Rtoday','P0','M'])close(comboRoundtrip[key],comboFull.compute[key],`Combo round-trip ${key}`);
+
+ok(!landing.includes("localStorage.setItem('ph-renta-klient'"),
+  'Meno a scenár sa nesmú ukladať do zdieľaného localStorage.');
+ok(landing.includes("modelWindow.sessionStorage.setItem('ph-renta-klient'"),
+  'Meno a scenár sa majú preniesť iba do sessionStorage nového tabu.');
+const klientRead=resultMaster.indexOf('const raw=sessionStorage.getItem(KLIENT)');
+const klientDelete=resultMaster.indexOf('sessionStorage.removeItem(KLIENT)',klientRead);
+ok(klientRead>=0&&klientDelete>klientRead,
+  'Výsledok musí jednorazový záznam odstrániť hneď po prečítaní.');
+ok(!resultMaster.includes('KLIENT_DNI=30')
+  &&landing.includes("localStorage.removeItem('ph-renta-klient')")
+  &&resultMaster.includes('localStorage.removeItem(KLIENT)'),
+  '30-dňová retencia musí byť odstránená a legacy záznam uprataný.');
 
 const sensitivitySource=between(result,'/* SENSITIVITY_INTRO:START */','/* SENSITIVITY_INTRO:END */');
 const sensitivityContext=vm.createContext({});
@@ -274,7 +291,7 @@ for(let i=1;i<triple.length;i++){
 const duplicate=pointContext.layout([anchor(54),anchor(54),anchor(90)]);
 ok(duplicate.filter(point=>point.visible).length===2,'Zhodný vek má používať jeden spoločný krúžok.');
 
-ok(landing.includes("state.sit==='have'&&state.goal==='rent'&&vypocitana")
+ok(landing.includes('vypocitana&&vypocitana.calculatesRent')
   &&landing.includes('?Math.round(vypocitana.Rtoday):state.rent'),
   'Odkaz na výsledok musí niesť dnešnú hodnotu vypočítanej renty.');
 ok(landing.includes("S.sit==='have'?'Budem mať '"),'Mobilná sumarizácia musí hovoriť „Budem mať“.');
