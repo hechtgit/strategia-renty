@@ -23,6 +23,10 @@ Pri prechode do chyby, pri trvajúcej chybe raz za 24 hodín a pri návrate do
 poriadku príde správa do Telegramu (kanál `health`, cez
 `~/NanoClaw/agent-bridge/workers/send_telegram.py`), bez osobných údajov.
 
+Kontrola PDF porovnáva výstup so schváleným referenčným PDF (testovací scenár,
+bez osobných údajov) v `~/.local/state/strategia-renty-self-heal/reference/modelacia-referencna.pdf`;
+monitor ho odovzdá cez `RENTA_PDF_REFERENCE`.
+
 Stav je uložený v `~/.local/state/strategia-renty-self-heal/state.json`.
 
 Manuálne overenie:

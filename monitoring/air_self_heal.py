@@ -68,10 +68,17 @@ def now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+PDF_REFERENCE = STATE_ROOT / "reference" / "modelacia-referencna.pdf"
+
+
 def env() -> dict[str, str]:
     value = dict(os.environ)
     value["PATH"] = PATH_VALUE
     value["PYTHONUNBUFFERED"] = "1"
+    # Schválené referenčné PDF (testovací scenár, bez osobných údajov) žije mimo
+    # repozitára; audit-pdf-alternativa.mjs ho inak hľadá v ~/Downloads na PRO.
+    if PDF_REFERENCE.exists() and "RENTA_PDF_REFERENCE" not in value:
+        value["RENTA_PDF_REFERENCE"] = str(PDF_REFERENCE)
     return value
 
 
