@@ -451,7 +451,7 @@ def main() -> int:
         failure_output = str(failed_item.get("retry_output") or failed_item.get("output") or "")
         allowed, attempts = repair_allowed(state, failed, revision_fp)
         payload["repair_attempts"] = attempts
-        repair_note = "vypnutá (--no-repair)"
+        repair_note = "pri ručnej kontrole sa nespúšťa"
         if args.no_repair:
             pass
         elif allowed:
@@ -468,13 +468,14 @@ def main() -> int:
                 payload["needs_attention"] = True
         else:
             payload["repair"] = {"skipped": "Automatická oprava sa nespúšťa: chyba nie je automaticky opraviteľná alebo už vyčerpala pokusy nad touto revíziou."}
-            repair_note = "nespustená, treba človeka"
+            repair_note = "nespustená, treba to pozrieť ručne"
             payload["needs_attention"] = True
         if consecutive >= MAX_REPAIR_ATTEMPTS and payload["status"] != "repaired":
             payload["needs_attention"] = True
         if payload["status"] != "repaired" and alert_due(state, str(payload["status"])):
-            text = (f"Dohľad Stratégie privátnej renty: zlyháva kontrola {failed.name} "
-                    f"({consecutive}× po sebe) nad revíziou {revision[:7]}. Automatická oprava: {repair_note}.")
+            text = (f"Dohľad Stratégie privátnej renty: zlyháva kontrola „{failed.name}“ "
+                    f"na verzii, ktorá je na webe ({revision[:7]}). Automatická oprava: {repair_note}. "
+                    f"Ďalšia správa príde, keď sa to opraví, alebo o 24 hodín.")
             if notify(text):
                 payload["last_alert_at"] = now()
         atomic_json(STATE_FILE, payload)
