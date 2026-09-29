@@ -500,12 +500,19 @@ async def email_states(h: Harness, browser) -> None:
     frame = await h.app_frame(page, squarespace=False)
     h.relay_mode = "email-zlyhal"
     await h.fill_form(frame)
-    popup = await h.send(ctx, frame)
-    await popup.close()
+    popup_stale = await h.send(ctx, frame)
     first_token = h.last_relay_calls[-1]["overenie"]
     h.relay_mode = "odoslany"
     await h.send(ctx, frame, expect_popup=False)
     second_token = h.last_relay_calls[-1]["overenie"]
+    # Už otvorená modelácia sa po úspešnom opakovaní aktualizuje (aj po obnovení)
+    await popup_stale.wait_for_timeout(500)
+    mail = flat(await popup_stale.locator("#mail-note").inner_text())
+    check("poslali aj e-mailom" in mail, f"otvorená modelácia po úspešnom opakovaní: {mail}", E)
+    await popup_stale.reload(wait_until="load")
+    mail = flat(await popup_stale.locator("#mail-note").inner_text())
+    check("poslali aj e-mailom" in mail, f"otvorená modelácia po opakovaní a obnovení: {mail}", E)
+    await popup_stale.close()
     check(first_token != second_token, "opakovanie nepoužilo nový token overenia", E)
     status = flat(await frame.locator("#send-status").inner_text())
     check("poslali aj e-mailom" in status, f"opakovanie: {status}", E)

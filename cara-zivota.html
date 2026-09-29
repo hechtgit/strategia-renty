@@ -3133,6 +3133,14 @@ if(sendModel){
     if(ponuknuta)ponukniVAplikacii(sEmailom(url,v),v);
     const predtym=posledny;
     posledny={url,v,otvorena:otvorena||(lenEmail&&predtym.otvorena),ponuknuta};
+    /* Už otvorená modelácia toho istého scenára (aj v inej karte) sa dozvie
+       nový stav e-mailu — inak by po úspešnom opakovaní ďalej tvrdila, že
+       e-mail neodišiel. Kanál je iba v rámci pôvodu aplikácie. */
+    try{
+      const kanal=new BroadcastChannel('ph-renta-email');
+      kanal.postMessage({scenar:scenarioParams().toString(),stav:v.stav});
+      kanal.close();
+    }catch(e){}
     status.textContent=(lenEmail?'':otvorena?'Modelácia sa otvorila v novom okne. '
       :'Modelácia je pripravená — otvoríte ju tlačidlom nižšie. ')+oEmaile(v);
     sendModel.disabled=false;

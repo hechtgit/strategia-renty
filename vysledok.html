@@ -1358,6 +1358,15 @@ function zobrazStavEmailu(stav,ulozit=true){
    otvorila odkazom v aplikácii (zablokované alebo zatvorené okno) a pamäť karty
    sa nepreniesla. Po prečítaní ho z adresy odstránime, aby záložka ani
    preposlaný odkaz nenesli dočasnú hlášku. */
+/* Aplikácia po opakovanom odoslaní ohlási nový stav e-mailu všetkým otvoreným
+   modeláciám toho istého scenára (BroadcastChannel je iba v rámci pôvodu). */
+try{
+  const kanal=new BroadcastChannel('ph-renta-email');
+  kanal.onmessage=e=>{
+    const d=e.data;
+    if(d&&typeof d.stav==='string'&&d.scenar===scenarioParams().toString())zobrazStavEmailu(d.stav);
+  };
+}catch(e){}
 (function stavZAdresy(){
   const m=/^#email=([a-z]+)$/.exec(location.hash||'');
   if(m){
