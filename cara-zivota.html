@@ -3090,7 +3090,12 @@ if(sendModel){
       return;
     }
     if(typeof window.PH_UDALOST==='function')window.PH_UDALOST('odoslal');
+    /* Scenár sa zachytí pred prvým čakaním. Klient môže počas odosielania
+       pohnúť jazdcom — výsledok odoslania však patrí scenáru, ktorý odišiel,
+       nie tomu, ktorý je práve na obrazovke. */
     const url=scenarioURL();
+    const scenar=scenarioParams().toString();
+    const zhrnutie=scenarioSummary();
     /* Opakované odoslanie toho istého scenára po nepotvrdenom e-maile už
        modeláciu neotvára znova — klient ju má pred sebou (v okne alebo ako
        ponuku v aplikácii), chce len e-mail. Ponuka v aplikácii pritom ostáva. */
@@ -3111,7 +3116,7 @@ if(sendModel){
     try{
       const overenie=await overenieCloveka();
       v=await submitToBoldem({first,last,email,scenarioUrl:url,
-                              summary:scenarioSummary(),overenie});
+                              summary:zhrnutie,overenie});
     }catch(e){
       console.warn('Turnstile',e&&e.message);
       v={stav:'neodoslany',dovod:'overenie'};
@@ -3124,7 +3129,7 @@ if(sendModel){
          ale nie je zdieľaný s ostatnými tabmi ani GitHub Pages projektmi. Výsledok
          záznam po prvom prečítaní okamžite odstráni. */
       try{modelWindow.sessionStorage.setItem('ph-renta-klient', JSON.stringify(
-        {meno:(first+' '+last).trim(), scenar:scenarioParams().toString(), email:v.stav}))}catch(e){}
+        {meno:(first+' '+last).trim(), scenar, email:v.stav}))}catch(e){}
       otvorena=await otvorVysledok(modelWindow,sEmailom(url,v),animacia);
     }
     /* Ponuka v aplikácii: keď okno nevzniklo alebo ho klient zavrel — a pri
@@ -3132,13 +3137,18 @@ if(sendModel){
     const ponuknuta=!otvorena&&(!lenEmail||posledny.ponuknuta);
     if(ponuknuta)ponukniVAplikacii(sEmailom(url,v),v);
     const predtym=posledny;
-    posledny={url,v,otvorena:otvorena||(lenEmail&&predtym.otvorena),ponuknuta};
-    /* Už otvorená modelácia toho istého scenára (aj v inej karte) sa dozvie
-       nový stav e-mailu — inak by po úspešnom opakovaní ďalej tvrdila, že
-       e-mail neodišiel. Kanál je iba v rámci pôvodu aplikácie. */
+    const okno=otvorena?modelWindow:(lenEmail&&predtym.okno)||null;
+    posledny={url,v,otvorena:otvorena||(lenEmail&&predtym.otvorena),ponuknuta,okno};
+    /* Už otvorená modelácia toho istého scenára sa dozvie nový stav e-mailu —
+       inak by po úspešnom opakovaní ďalej tvrdila, že e-mail neodišiel.
+       Priama správa oknu, ktoré aplikácia otvorila, funguje aj z rámu na
+       hechtberger.com; BroadcastChannel je v ráme oddelený od samostatnej
+       karty (rozdelené úložisko), pokrýva preto iba ostatné karty. */
+    const sprava={type:'ph-renta-email-stav',scenar,stav:v.stav};
+    if(lenEmail&&okno&&!okno.closed){try{okno.postMessage(sprava,location.origin)}catch(e){}}
     try{
       const kanal=new BroadcastChannel('ph-renta-email');
-      kanal.postMessage({scenar:scenarioParams().toString(),stav:v.stav});
+      kanal.postMessage(sprava);
       kanal.close();
     }catch(e){}
     status.textContent=(lenEmail?'':otvorena?'Modelácia sa otvorila v novom okne. '

@@ -190,6 +190,11 @@ class Harness:
         if self.relay_mode == "siet":
             await route.abort("timedout")
             return
+        if self.relay_mode == "pomaly":
+            await asyncio.sleep(4)
+            await route.fulfill(status=200, headers={**CORS, "Content-Type": "application/json"},
+                                body=json.dumps({"ok": True, "emailQueued": True}))
+            return
         if self.relay_mode == "timeout":
             await asyncio.sleep(27)   # aplikácia čaká 25 s
             try:
@@ -495,9 +500,16 @@ async def email_states(h: Harness, browser) -> None:
         await page.close()
     h.turnstile_down = False
 
-    # Opakovanie po nepotvrdenom e-maile: nový token, bez nového okna
+    # Opakovanie po nepotvrdenom e-maile: nový token, bez nového okna — v
+    # produkčnom ráme Squarespace. Prehliadače s rozdeleným úložiskom (Safari,
+    # Firefox, Chrome) neprepoja BroadcastChannel rámu a samostatnej karty;
+    # headless Chrome to nie vždy robí, preto ho tu vypneme úplne — otvorená
+    # modelácia sa musí dozvedieť stav priamou správou od aplikácie.
+    ctx_bez_bc = await h.new_context(browser, 1440, 900)
+    await ctx_bez_bc.add_init_script("try{delete window.BroadcastChannel}catch(e){};window.BroadcastChannel=undefined")
+    ctx_hlavny, ctx = ctx, ctx_bez_bc
     page = await ctx.new_page()
-    frame = await h.app_frame(page, squarespace=False)
+    frame = await h.app_frame(page)
     h.relay_mode = "email-zlyhal"
     await h.fill_form(frame)
     popup_stale = await h.send(ctx, frame)
@@ -517,6 +529,35 @@ async def email_states(h: Harness, browser) -> None:
     status = flat(await frame.locator("#send-status").inner_text())
     check("poslali aj e-mailom" in status, f"opakovanie: {status}", E)
     check(len(ctx.pages) == 1, "opakovanie e-mailu otvorilo nové okno", E)
+    await page.close()
+    await ctx.close()
+    ctx = ctx_hlavny
+
+    # Zmena vstupov počas odosielania: výsledok patrí odoslanému scenáru
+    page = await ctx.new_page()
+    await page.add_init_script("""
+      window.__bc=[];
+      const P=BroadcastChannel.prototype.postMessage;
+      BroadcastChannel.prototype.postMessage=function(m){window.__bc.push(m);return P.call(this,m)};
+    """)
+    frame = await h.app_frame(page, squarespace=False)
+    h.relay_mode = "pomaly"
+    await h.fill_form(frame)
+    async with ctx.expect_page(timeout=15_000) as info:
+        await klik(frame, "#send-model")
+    popup = await info.value
+    await frame.wait_for_timeout(800)
+    await h.set_exact(frame, "rent-v", "4 500")        # počas odosielania
+    await poll(frame, "document.getElementById('send-model').disabled===false"
+               " && document.getElementById('send-status').textContent.length>0", timeout=30_000)
+    odoslany = h.relay_calls[-1]["scenar"]
+    bc = await frame.evaluate("window.__bc")
+    check("rent=3000" in odoslany, f"odoslaný scenár: {odoslany}", E)
+    check(bc and all("rent=3000" in m["scenar"] and "rent=4500" not in m["scenar"] for m in bc),
+          f"stav e-mailu priradený inému scenáru: {bc}", E)
+    await popup.wait_for_url(re.compile(r"vysledok\.html"), timeout=30_000)
+    check("rent=3000" in popup.url, f"modelácia otvorila iný scenár: {popup.url}", E)
+    await popup.close()
     await page.close()
 
     # Zatvorené okno: modelácia sa ponúkne v aplikácii bez straty plánu

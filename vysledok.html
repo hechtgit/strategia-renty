@@ -1360,13 +1360,20 @@ function zobrazStavEmailu(stav,ulozit=true){
    preposlaný odkaz nenesli dočasnú hlášku. */
 /* Aplikácia po opakovanom odoslaní ohlási nový stav e-mailu všetkým otvoreným
    modeláciám toho istého scenára (BroadcastChannel je iba v rámci pôvodu). */
+const prijmiStavEmailu=d=>{
+  if(d&&d.type==='ph-renta-email-stav'&&typeof d.stav==='string'
+     &&d.scenar===scenarioParams().toString())zobrazStavEmailu(d.stav);
+};
 try{
   const kanal=new BroadcastChannel('ph-renta-email');
-  kanal.onmessage=e=>{
-    const d=e.data;
-    if(d&&typeof d.stav==='string'&&d.scenar===scenarioParams().toString())zobrazStavEmailu(d.stav);
-  };
+  kanal.onmessage=e=>prijmiStavEmailu(e.data);
 }catch(e){}
+/* Priama správa od aplikácie, ktorá toto okno otvorila (funguje aj z rámu
+   na hechtberger.com). Prijíma sa iba z vlastného pôvodu a od otvárača. */
+addEventListener('message',e=>{
+  if(e.origin!==location.origin||!window.opener||e.source!==window.opener)return;
+  prijmiStavEmailu(e.data);
+});
 (function stavZAdresy(){
   const m=/^#email=([a-z]+)$/.exec(location.hash||'');
   if(m){
