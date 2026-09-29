@@ -138,6 +138,12 @@ export function normalizeScenario(input = {}) {
     initialCapital: Number(input.initialCapital ?? 100000),
     situation: input.situation === "have" ? "have" : "build",
     funding: ["lump", "monthly", "combo"].includes(input.funding) ? input.funding : "lump",
+    /* Kombinácia má dva smery: „koľko mesačne potrebujem" (needed) a „poznám
+       mesačnú sumu" (known). Pri známej sume je renta výsledkom, nie vstupom.
+       Bez tohto smeru jadro hodnotilo iný plán, než aký klient zadal —
+       pás „X z 800" pri 500 € mesačne rátal s dopočítanými 2 913 €. */
+    comboDirection: input.comboDirection === "known" ? "known" : "needed",
+    monthlyKnown: Math.max(0, Number(input.monthlyKnown ?? 0)),
     goal: input.goal === "duration" ? "duration" : "rent",
     pension: input.pension === "perpetuity" ? "perpetuity" : "temporary",
     inflationOn: input.inflationOn !== false,
@@ -207,7 +213,27 @@ export function computePlan(rawScenario) {
     ? s.rentToday * Math.pow(1 + inflation / 100, yearsBuild)
     : s.rentToday;
 
-  if (s.situation === "build") {
+  const knownCombo = s.situation === "build" && s.funding === "combo" &&
+    s.comboDirection === "known" && yearsBuild > 0;
+  if (knownCombo) {
+    /* Známy jednorazový vklad aj mesačná suma: kapitál je výsledok budovania
+       a renta sa z neho dopočíta. Rovnaký postup ako klientske jadro
+       (cara-zivota-master.html, vetva knownCombo). */
+    const accumulatedFactor = Math.pow(1 + annualNetRate(s.buildReturn, s.managementFee), yearsBuild);
+    const annuity = rateBuild === 0
+      ? monthsBuild
+      : (Math.pow(1 + rateBuild, monthsBuild) - 1) / rateBuild;
+    out.P0 = s.initialCapital;
+    out.M = s.monthlyKnown;
+    out.cap = s.initialCapital * initialEntryFactor * accumulatedFactor
+      + s.monthlyKnown * entryFactor * annuity;
+    out.R = perpetuity
+      ? out.cap * (rateDraw - growth)
+      : rentFromCapital(out.cap, monthsDraw, rateDraw, growth, s.residualCapital);
+    out.Rtoday = out.rast ? out.R / Math.pow(1 + inflation / 100, yearsBuild) : out.R;
+    out.calculatesRent = true;
+    out.payM = perpetuity ? 360 : monthsDraw;
+  } else if (s.situation === "build") {
     out.cap = perpetuity
       ? out.R / (rateDraw - growth)
       : capitalForRent(out.R, monthsDraw, rateDraw, growth, s.residualCapital);

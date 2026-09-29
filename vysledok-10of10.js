@@ -162,7 +162,11 @@
   }
 
   function summary(){
-    if(q.get("pension")==="perpetuity")return;
+    /* Riadi sa vypočítaným stavom, nie parametrom. Pri „majetok mám + ako dlho
+       vydrží" môže renta vyjsť nevyčerpateľná aj s pension=temporary — súhrn
+       vtedy nesie kapitál, nie súčet výplat, a nesmie sa za neho vydávať. */
+    const sek=document.getElementById("suhrn");
+    if(!sek||sek.hidden||sek.dataset.bezKonca!=="0")return;
     const s1=document.getElementById("s1-v"),s2=document.getElementById("s2-v"),s3=document.getElementById("s3-v"),k2=document.getElementById("s2-k"),k3=document.getElementById("s3-k"),pod=document.getElementById("suhrn-pod");
     const num=el=>Number((el?.textContent||"").replace(/[^0-9-]/g,""));
     if(k2)k2.textContent="Nominálny súčet vyplatenej renty";if(k3)k3.textContent="Rozdiel medzi nominálnou rentou a investíciami";

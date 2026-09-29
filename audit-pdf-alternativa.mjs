@@ -99,6 +99,20 @@ globalThis.PH_KRIVKA = () => {
 };
 await import("./pdf-font.js");
 
+/* Štruktúrované údaje, ktoré stránka vystavuje pre PDF (PH_VYSLEDOK). PDF
+   nesmie vzniknúť bez nich — overuje to samostatný scenár „bez-udajov". */
+const bezUdajov = process.env.RENTA_PDF_BEZ_UDAJOV === "1";
+globalThis.PH_VYSLEDOK = bezUdajov ? undefined : Object.freeze({
+  platny: true,
+  sadzby: Object.freeze({ budovanie: 5, cerpanie: 5, budovanieCiste: 4.1, cerpanieCiste: 4.1,
+    sprava: 0.9, vstupny: existing ? 0 : 1.5 }),
+  veky: Object.freeze({ dnes: 35, zaciatok: 55, koniec: 90 }),
+  bezKonca: false,
+  vypocitanyKoniec: false,
+  mesiacovCerpania: null,
+  majetokBudovany: !existing
+});
+
 const el = textContent => ({ textContent });
 const testItems = [
   el(`${todayLabel}: ${todayValue}.`),
@@ -173,6 +187,7 @@ const byId = {
   ,"ciel": el("Vaším cieľom je privátna renta 1 633 € mesačne v dnešnej hodnote od 55 rokov počas 35 rokov.")
   ,"pre-koho": el("")
   ,"vyhotovene": el("Vyhotovené 1. septembra 2026")
+  ,"projekcia-vyhrada": el("Modelový výpočet, nie predpoveď ani záruka.")
 };
 
 const queryOne = {
@@ -187,6 +202,12 @@ const queryOne = {
   ".disclaimer": el("Tento modelový výpočet slúži výhradne na ilustračné a vzdelávacie účely. Nejde o investičné poradenstvo, investičné odporúčanie ani o ponuku či návrh na uzavretie zmluvy. Zhodnotenie nie je garantované, hodnota investície môže v čase kolísať a nie je zaručená návratnosť investovanej sumy.")
 };
 
+const predpokladyEls = [
+  el("Základný prepočet používa zhodnotenie, ktoré ste si nastavili, a ukazuje, čo z neho matematicky vyplýva. Nejde o odhad ani o odporúčanie."),
+  el("Výpočet počíta so zhodnotením 5 % ročne počas budovania majetku a 5 % ročne počas vyplácania; obe hodnoty si nastavujete v aplikácii."),
+  el("Dva pohľady, dve metodiky.")
+].map(item => Object.assign(item, { innerHTML: item.textContent }));
+
 globalThis.document = {
   getElementById: id => byId[id] || null,
   querySelector: selector => {
@@ -199,11 +220,13 @@ globalThis.document = {
       el("Modelované priebehy ukazujú, ako by plán reagoval na výnosy z minulosti. Osobná konzultácia doplní, čo môže prísť a čo to znamená pre váš konkrétny majetok."),
       el("Vychádzame z dlhodobých očakávaní popredných svetových investičných inštitúcií. Nejde o predpoveď ani garanciu.")
     ];
-    if (selector === ".blok p:not(.vystraha)") return [
-      el("Výpočet používa zhodnotenie, ktoré ste zadali vy."),
-      el("Zohľadňuje vstupný poplatok 1,5 %, správu 0,9 % ročne, zadanú infláciu a mesačný priebeh výpočtu; dane z výnosov nezohľadňuje."),
-      el("Metodiku modelovaných simulácií nájdete na druhej strane.")
-    ];
+    /* Tie isté objekty pre obe podoby selektora: pdf-alternativa.js ich
+       dočasne prepíše a pdf.js ich potom číta. Predtým harness vracal pri
+       každom volaní nové objekty, takže prepis sadzieb sa do PDF nikdy
+       nedostal a test ho neoveril. */
+    if (selector === ".blok p:not(.vystraha)" || selector === ".assumptions .blok p:not(.vystraha)") {
+      return predpokladyEls;
+    }
     if (selector === ".recap li") return [
       el("Spôsob tvorby majetku: jednorazová investícia a pravidelné investovanie"),
       el("Zhodnotenie: 5 % ročne (váš predpoklad)"),
@@ -253,8 +276,10 @@ function extractPdfText(file) {
 const pdfText = extractPdfText(out);
 const normalizedPdfText = pdfText.replace(/\s+/g, " ");
 if (scenario === "building") {
+  /* Schválená referencia je v repozitári (bez osobných údajov). Dohľad na Airi
+     ju môže prebiť vlastnou kópiou cez RENTA_PDF_REFERENCE. */
   const reference = path.resolve(process.env.RENTA_PDF_REFERENCE
-    || "/Users/hecht/Downloads/modelacia-privatnej-renty (18).pdf");
+    || "tests/fixtures/modelacia-referencna.pdf");
   if (!fs.existsSync(reference)) {
     throw new Error(`Chýba referenčné PDF pre kontrolu scenára: ${reference}`);
   }
@@ -370,22 +395,50 @@ if (!ctaHeading || ctaHeading.left >= portrait.left) {
   throw new Error("PDF druhá strana: text záverečného bloku nie je vľavo od portrétu.");
 }
 
-const expectedFooter = plainXmlText("Ilustračný a vzdelávací výpočet. Nejde o investičné poradenstvo ani odporúčanie.");
-const footerPrefix = plainXmlText("Ilustračný a vzdelávací výpočet.");
+/* Pätička oboch strán nesie CELÉ upozornenie o riziku (nie skratku) — je
+   viacriadková a jej riadky sa nesmú prekrývať s číslom strany ani s ničím
+   iným na strane. Kontroluje sa poloha z XML layoutu, nie iba výskyt slov. */
+const fullDisclaimer = plainXmlText("Tento modelový výpočet slúži výhradne na ilustračné a vzdelávacie účely. Nejde o investičné poradenstvo, investičné odporúčanie ani o ponuku či návrh na uzavretie zmluvy. Zhodnotenie nie je garantované, hodnota investície môže v čase kolísať a nie je zaručená návratnosť investovanej sumy.");
+const boxesOverlap = (a, b) => a.top < b.top + b.height && b.top < a.top + a.height
+  && a.left < b.left + b.width && b.left < a.left + a.width;
 layoutPages.forEach(page => {
-  const footerLines = page.texts.filter(item => item.text.includes(footerPrefix));
-  if (footerLines.length !== 1 || footerLines[0].text !== expectedFooter) {
-    throw new Error(`PDF strana ${page.number}: disclaimer pätičky nie je v jednom úplnom riadku.`);
+  const bottom = page.texts.filter(item => item.top > page.height * 0.86)
+    .sort((a, b) => a.top - b.top || a.left - b.left);
+  const footerLines = bottom.filter(item => item.text.length > 12 && fullDisclaimer.includes(item.text));
+  const joined = footerLines.map(item => item.text).join(" ").replace(/\s+/g, " ").trim();
+  if (joined !== fullDisclaimer) {
+    throw new Error(`PDF strana ${page.number}: pätička nenesie celé upozornenie o riziku (${JSON.stringify(joined)}).`);
+  }
+  if (footerLines.length < 2) {
+    throw new Error(`PDF strana ${page.number}: celé upozornenie sa nemôže zmestiť do jedného riadka.`);
   }
   const pageNumber = page.texts.find(item => item.text === `${page.number} / 2`);
   if (!pageNumber) throw new Error(`PDF strana ${page.number}: chýba číslo strany.`);
-  const footer = footerLines[0];
-  const verticalOverlap = footer.top < pageNumber.top + pageNumber.height
-    && pageNumber.top < footer.top + footer.height;
-  const horizontalOverlap = footer.left < pageNumber.left + pageNumber.width
-    && pageNumber.left < footer.left + footer.width;
-  if (verticalOverlap && horizontalOverlap) {
-    throw new Error(`PDF strana ${page.number}: disclaimer koliduje s číslom strany.`);
+  for (const line of footerLines) {
+    for (const other of page.texts) {
+      if (other === line) continue;
+      if (boxesOverlap(line, other)) {
+        throw new Error(`PDF strana ${page.number}: riadok pätičky „${line.text.slice(0, 40)}…“ `
+          + `sa prekrýva s „${other.text.slice(0, 40)}“.`);
+      }
+    }
+    if (line.top + line.height > page.height - 4) {
+      throw new Error(`PDF strana ${page.number}: pätička presahuje spodok strany.`);
+    }
   }
 });
+/* Veta pri základnej projekcii musí byť na prvej strane. */
+if (!layoutPages[0].texts.some(item => item.text === plainXmlText("Modelový výpočet, nie predpoveď ani záruka."))) {
+  throw new Error("PDF prvá strana: chýba upozornenie pri projekcii.");
+}
+/* Obe sadzby a ich význam (pred poplatkom / po ňom) zo štruktúrovaných údajov. */
+for (const required of [
+  "zadali vy: 5 % ročne počas budovania majetku a 5 % počas vyplácania, pred poplatkom za správu 0,9 % ročne (po jeho odpočítaní 4,1 % a 4,1 %)",
+  existing ? "Vstupný poplatok sa na majetok, ktorý už máte, nevzťahuje" : "vstupný poplatok 1,5 %"
+]) {
+  if (!normalizedPdfText.includes(required)) throw new Error(`PDF: chýba „${required}“`);
+}
+if (existing && /vstupný poplatok 1,5/.test(normalizedPdfText)) {
+  throw new Error("PDF pri „majetok už mám“ nesmie tvrdiť, že sa odpočíta vstupný poplatok.");
+}
 console.log(`${scenario}: ${out}`);

@@ -17,7 +17,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' 'unsafe-inline'; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://images.squarespace-cdn.com; connect-src 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' 'unsafe-inline'; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://images.squarespace-cdn.com; connect-src 'self' https://renta-boldem.renta-relay.workers.dev; form-action 'self'; upgrade-insecure-requests">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%232b2118'/%3E%3Cpath d='M32 12 52 50H12Z' fill='%23ae8753'/%3E%3C/svg%3E">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
@@ -100,6 +100,9 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
 .section-head p{margin:12px auto 0;max-width:780px;color:var(--muted);line-height:1.55}
 .section-head strong{color:var(--ink);font-weight:600}
 .line-wrap{position:relative;padding:210px 58px 160px}
+/* Upozornenie priamo pri základnej projekcii. Dokument (aj PDF) nesmie ukázať
+   čísla do budúcnosti bez vety, že nejde o predpoveď ani záruku. */
+.projekcia-vyhrada{margin:0 auto;text-align:center;color:var(--muted);font-size:15px;font-weight:600}
 .track{height:52px;border-radius:4px;background:var(--axis);position:relative}
 .track::before{display:none}
 .age{position:absolute;top:50%;transform:translate(-50%,-50%);font-family:var(--serif);
@@ -201,6 +204,9 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
    klikol, takže nič nečaká. Pribudne návrat k scenáru. */
 .embedded .hero{min-height:0}
 .embedded .mail-note{display:none}
+/* Keď sa e-mail nepodarilo potvrdiť, klient to musí vidieť všade — aj keď sa
+   modelácia otvorila v tom istom ráme, lebo prehliadač zablokoval nové okno. */
+.mail-note.pozor,.embedded .mail-note.pozor{display:block;color:#f0d8d2;font-weight:600}
 .embedded .shell{padding:0 0 8px}
 
 
@@ -296,6 +302,7 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
   .blok,.recap{border-color:#d8d2c8}
   .next,.disclaimer{border-color:#d8d2c8}
   .disclaimer{color:#6b665f}
+  .projekcia-vyhrada{color:#1a1a1a;margin:0 0 8px}
   .section{padding:22px 0 0;background:none;border:0}
 }
 </style>
@@ -348,7 +355,7 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
       <div class="actions">
         <button class="btn-primary" type="button" id="btn-pdf">Stiahnuť modeláciu v PDF</button>
       </div>
-      <div class="mail-note">Odkaz na túto modeláciu sme vám poslali aj e-mailom, aby ste sa k nej mohli kedykoľvek vrátiť.</div>
+      <div class="mail-note" id="mail-note">Odkaz na túto modeláciu sme vám poslali aj e-mailom, aby ste sa k nej mohli kedykoľvek vrátiť.</div>
     </div>
   </section>
 
@@ -399,6 +406,7 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
         </div>
       </div>
     </div>
+    <p class="projekcia-vyhrada" id="projekcia-vyhrada">Modelový výpočet, nie predpoveď ani záruka.</p>
   </section>
 
   <section class="suhrn" id="suhrn" hidden>
@@ -448,7 +456,7 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
       <section class="next-benefit"><h3>Stratégia na mieru</h3><p>Ak nájdeme priestor na zlepšenie, navrhneme konkrétny ďalší postup podľa vašich cieľov, časového horizontu a potrebnej likvidity.</p></section>
     </div>
     <p class="next-closing">Cieľom je, aby každá investícia plnila jasnú úlohu v jednej majetkovej stratégii, namiesto toho, aby zostala izolovaným produktom.</p>
-    <a class="btn-primary" href="https://hechtberger.com/rezervacia" target="_blank" rel="noopener">Rezervovať konzultáciu</a>
+    <a class="btn-primary" href="https://hechtberger.com/rezervacia?src=renta" target="_blank" rel="noopener">Rezervovať konzultáciu</a>
   </section>
 
   <div class="disclaimer">Tento modelový výpočet slúži výhradne na ilustračné a vzdelávacie účely. Nejde o investičné poradenstvo, investičné odporúčanie ani o ponuku či návrh na uzavretie zmluvy. Zhodnotenie nie je garantované, hodnota investície môže v čase kolísať a nie je zaručená návratnosť investovanej sumy.</div>
@@ -593,6 +601,27 @@ const fmtN=n=>Math.max(0,Math.round(n)).toLocaleString('sk-SK');
 const fmtEur=n=>fmtN(n)+'\u00a0€';
 const pctTxt=v=>String(Math.round(v*10)/10).replace('.',',');
 const yrs=n=>`${n} ${n===1?'rok':(n>=2&&n<=4?'roky':'rokov')}`;
+/* Sadzba so znamienkom: pod 0,9 % vychádza čistý výnos záporný a spojovník
+   by sa čítal ako pomlčka. */
+const pctZnak=v=>{const r=Math.round(v*10)/10;return (r<0?'−':'')+pctTxt(Math.abs(r))};
+
+/* Sadzby plánu ako údaje, nie ako veta. Klient zadáva zhodnotenie PRED poplatkom
+   za správu; výpočet ho odpočíta v oboch fázach. PDF a modelácia ich preto
+   uvádzajú obe — 8 % a 4 % zadané, 7,1 % a 3,1 % po poplatku — aby sa „4 %"
+   klienta nedalo zameniť so 4 % historického testu, ktoré sú už po nákladoch. */
+function sadzbyPlanu(){
+  return {budovanie:S.vynos,cerpanie:S.vynosRent,
+    budovanieCiste:Math.round((S.vynos-FEE_M)*10)/10,
+    cerpanieCiste:Math.round((S.vynosRent-FEE_M)*10)/10,
+    sprava:FEE_M,vstupny:S.sit==='have'?0:FEE_IN};
+}
+/* Vstupný poplatok sa na majetok, ktorý klient už má, nevzťahuje — výpočet ho
+   pri „Majetok už mám" neodpočíta, tak to nesmie tvrdiť ani text. */
+function vetaPoplatkov(){
+  return S.sit==='have'
+    ?`Uvedené sumy sú po odpočítaní poplatku za správu ${pctTxt(FEE_M)} % ročne; vstupný poplatok sa na majetok, ktorý už máte, nevzťahuje.`
+    :`Uvedené sumy sú po odpočítaní vstupného poplatku ${pctTxt(FEE_IN)} % a poplatku za správu ${pctTxt(FEE_M)} % ročne.`;
+}
 
 /* nelineárne posuvníky — jemné pri malých sumách, dosah pri veľkých */
 function mkScale(min,max,pow,round){
@@ -665,10 +694,15 @@ function compute(){
       o.R=o.rast?S.rent*Math.pow(1+infl/100,N):S.rent;
       o.cap=nek?o.R/(i-g):capForRent(o.R,Tm,i,g);
       if(o.cap===null){o.warn='Takto vysokú rentu by ste na tento čas nedokázali pokryť — skúste nižšiu sumu alebo kratšie obdobie.';return o}
+      /* Pri zhodnotení rovnom poplatku za správu (0,9 %) je mesačná sadzba
+         nula a vzorec anuity delí nulou — klient videl „NaN €". Limitou
+         pre nulovú sadzbu je prostý súčet mesiacov (rovnako ako vo vetve
+         knownCombo a v zdieľanom jadre). */
+      const an=iA===0?Nm:(Math.pow(1+iA,Nm)-1)/iA;
       if(o.immediate){o.P0=o.cap/e;o.M=0}
       else if(S.mode==='lump'){o.P0=o.cap/grow/e;o.M=0}
-      else if(S.mode==='monthly'){o.M=o.cap/(((Math.pow(1+iA,Nm)-1)/iA)*e);o.P0=0}
-      else{const from=S.combo*e*grow,an=(Math.pow(1+iA,Nm)-1)/iA;
+      else if(S.mode==='monthly'){o.M=o.cap/(an*e);o.P0=0}
+      else{const from=S.combo*e*grow;
         o.M=Math.max(0,(o.cap-from)/(an*e));o.P0=S.combo;o.covers=from>=o.cap}
     }
     o.payM=nek?360:Tm;
@@ -686,6 +720,30 @@ function compute(){
       if(m===Infinity){o.forever=true;o.payM=360}else{o.months=m;o.payM=Math.min(1200,Math.max(360,m+120))}}
   }
   return o;
+}
+
+/* Koniec renty tak, ako ho treba ukázať. Pri otázke „ako dlho vydrží" je koniec
+   VÝSLEDKOM výpočtu, nie posledným nastavením jazdca — mobilná os, súhrn,
+   modelácia aj PDF ho preto berú odtiaľto. Predtým si ho každé miesto skladalo
+   samo a mobilná os ukazovala 90 rokov, kým súhrn pod ňou 81. */
+function koniecRenty(o){
+  const derived=S.sit==='have'&&S.goal==='duration';
+  let endEff=S.end;
+  if(derived&&!o.warn)endEff=o.forever?Math.max(S.start+1,100)
+    :Math.min(120,Math.max(S.start+1,Math.round(S.now+o.N+(o.months||0)/12)));
+  return {derived,endEff,openEnd:!!(o.nek||o.forever)};
+}
+
+/* Výsledok, ktorý sa smie odoslať, zobraziť ako modelácia alebo vytlačiť do PDF.
+   Neplatný (varovanie jadra alebo čokoľvek nekonečné či NaN) nesmie odísť
+   von — dokument s „NaN €" vyzerá ako náš výstup a klient mu uverí. */
+function platnyVysledok(o){
+  if(!o||o.warn)return false;
+  const cisla=['cap','R','Rtoday'];
+  if(S.sit==='build')cisla.push('P0','M');
+  if(S.sit==='have'&&S.goal==='duration'&&!o.forever)cisla.push('months');
+  if(!cisla.every(k=>Number.isFinite(o[k])&&o[k]>=0))return false;
+  return [S.vynos,S.vynosRent,S.infl].every(Number.isFinite);
 }
 
 /* Súhrn, ktorý v samotnej simulácii nie je: koľko sa za celé obdobie vyplatí,
@@ -886,11 +944,23 @@ function testOdolnosti(){
    Os musí zvládnuť aj scenár, ktorý presiahne sto rokov, a nesmie nechať míľniky
    preliezť cez seba. Preto sa mapuje na rozsah odvodený od samotného scenára. */
 const o=compute();
-const derived=S.sit==='have'&&S.goal==='duration';
-let endEff=S.end;
-if(derived&&!o.warn)endEff=o.forever?Math.max(S.start+1,100)
-  :Math.min(120,Math.max(S.start+1,Math.round(S.now+o.N+(o.months||0)/12)));
-const openEnd=!!(o.nek||o.forever);
+/* Koniec renty z jadra — pri „ako dlho vydrží" je to vypočítaný vek, nie jazdec. */
+const {derived,endEff,openEnd}=koniecRenty(o);
+const PLATNY=platnyVysledok(o);
+
+/* Štruktúrované údaje výsledku pre PDF. Generátor si ich predtým lovil
+   regulárnym výrazom z vety na stránke a pri zmene formulácie potichu vypustil
+   sadzbu čerpania; koniec renty bral z adresy (90) namiesto výsledku (81).
+   Chýbajúce alebo neplatné údaje musia export zastaviť, nie ho obísť tlačou. */
+globalThis.PH_VYSLEDOK=Object.freeze({
+  platny:PLATNY,
+  sadzby:Object.freeze(sadzbyPlanu()),
+  veky:Object.freeze({dnes:S.now,zaciatok:S.start,koniec:openEnd?null:endEff}),
+  bezKonca:openEnd,
+  vypocitanyKoniec:derived,
+  mesiacovCerpania:Number.isFinite(o.months)?o.months:null,
+  majetokBudovany:S.sit==='build'
+});
 const AXMAX=endEff<=100?110:Math.min(150,Math.max(110,Math.ceil((endEff+2)/10)*10));
 
 
@@ -1007,12 +1077,17 @@ function vykresli(){
   const c=prehladCiastok();
   if(c){
     $('suhrn').hidden=false;
+    /* Prezentačná vrstva (vysledok-10of10.js) sa podľa tohto príznaku rozhodne,
+       či smie súhrn prepísať na „nominálny súčet vyplatenej renty". Predtým sa
+       pozerala iba na parameter pension, takže pri vypočítanej nevyčerpateľnej
+       rente (majetok mám + ako dlho vydrží) vydávala kapitál za súčet výplat. */
+    $('suhrn').dataset.bezKonca=c.nekonecne?'1':'0';
     if(c.nekonecne){
       $('s1-k').textContent='Investovaná suma';    $('s1-v').textContent=fmtEur(c.vklady);
       $('s2-k').textContent='Majetok pri štarte';  $('s2-v').textContent=fmtEur(c.kapital);
       $('s3-k').textContent='Čerpanie';            $('s3-v').textContent='bez konca';
-      $('suhrn-pod').textContent='Renta beží z výnosov, takže samotný majetok sa nemíňa — '
-        +'zostáva vám aj tým, ktorým ho raz odovzdáte.';
+      $('suhrn-pod').textContent='Pri zadanom predpoklade renta beží z výnosov, takže samotný majetok sa nemíňa — '
+        +'zostáva vám aj tým, ktorým ho raz odovzdáte. Skutočné výnosy kolíšu a nie sú zaručené.';
     }else{
       $('s1-k').textContent='Investovaná suma';           $('s1-v').textContent=fmtEur(c.vklady);
       $('s2-k').textContent='Objem vyplatenej renty';    $('s2-v').textContent=fmtEur(c.vyplatene);
@@ -1118,7 +1193,8 @@ function vykresli(){
        uvádzať len tú z budovania znamenalo, že si klient číslo neprepočíta. */
     `Výpočet počíta so zhodnotením ${pctTxt(o.rPct)} % ročne počas budovania majetku `
     +`a ${pctTxt(o.rPctRent)} % ročne počas vyplácania; obe hodnoty si nastavujete v aplikácii. `
-    +`Uvedené sumy sú po odpočítaní vstupného poplatku ${pctTxt(FEE_IN)} % a poplatku za správu ${pctTxt(FEE_M)} % ročne. `
+    +`Po poplatku za správu je to ${pctZnak(S.vynos-FEE_M)} % a ${pctZnak(S.vynosRent-FEE_M)} % ročne. `
+    +vetaPoplatkov()+' '
     +(o.rast?`Výpočet zohľadňuje infláciu ${pctTxt(o.infl)} % ročne. `:'Výpočet nezohľadňuje infláciu. ')
     +'Dane z výnosov výpočet nezohľadňuje. Výpočet prebieha na mesačnej báze: '
     +'zadané ročné zhodnotenie aj inflácia sa rozpočítavajú na dvanástiny, '
@@ -1256,6 +1332,34 @@ function bezpecneKrstneMeno(hodnota){
   if(NEPLATNE_MENA.has(token.toLocaleLowerCase('sk-SK')))return '';
   return token.toLocaleLowerCase('sk-SK').replace(/(^|[-'’])\p{L}/gu,znak=>znak.toLocaleUpperCase('sk-SK'));
 }
+/* Pravdivý stav e-mailu. Aplikácia odovzdá výsledok odoslania spolu s menom;
+   bez odovzdávky (klient prišiel z e-mailu) platí pôvodná veta. Nikdy netvrdíme,
+   že e-mail odišiel, ak to medzičlánok nepotvrdil. */
+const STAV_EMAILU={
+  odoslany:null,
+  opakovanie:'Odkaz na túto modeláciu sme vám už poslali e-mailom.',
+  nepotvrdeny:'Odoslanie e-mailu s odkazom sa nepodarilo potvrdiť. Modeláciu máte otvorenú — PDF si stiahnite teraz, aby ste ju mali uloženú.',
+  neodoslany:'E-mail s odkazom sme neodoslali. Modeláciu máte otvorenú — PDF si stiahnite teraz, aby ste ju mali uloženú.'
+};
+function zobrazStavEmailu(stav){
+  const el=$('mail-note');
+  if(!el||!Object.prototype.hasOwnProperty.call(STAV_EMAILU,stav))return;
+  const veta=STAV_EMAILU[stav];
+  if(!veta)return;
+  el.textContent=veta;
+  el.classList.toggle('pozor',stav==='nepotvrdeny'||stav==='neodoslany');
+  el.setAttribute('role','status');
+}
+/* Stav e-mailu môže prísť aj vo fragmente adresy (#email=…) — keď sa modelácia
+   otvorila odkazom v aplikácii (zablokované alebo zatvorené okno) a pamäť karty
+   sa nepreniesla. Po prečítaní ho z adresy odstránime, aby záložka ani
+   preposlaný odkaz nenesli dočasnú hlášku. */
+(function stavZAdresy(){
+  const m=/^#email=([a-z]+)$/.exec(location.hash||'');
+  if(!m)return;
+  zobrazStavEmailu(m[1]);
+  try{history.replaceState(history.state,'',location.pathname+location.search)}catch(e){}
+})();
 (function menoADatum(){
   let meno='';
   try{
@@ -1269,6 +1373,7 @@ function bezpecneKrstneMeno(hodnota){
        prečítaní už neexistuje ani v tomto tabu. */
     const patriSem = d && d.scenar === scenarioParams().toString();
     if(patriSem && d.meno)meno=String(d.meno);
+    if(patriSem)zobrazStavEmailu(d.email);
   }catch(e){
     try{sessionStorage.removeItem(KLIENT)}catch(ignored){}
   }
@@ -1283,9 +1388,9 @@ function bezpecneKrstneMeno(hodnota){
 
 /* Scenár sa vykresľuje až tu — vyššie deklarované konštanty musia existovať skôr,
    než sa ich vykresľovanie dotkne. */
-if(o.warn){
+if(o.warn||!PLATNY){
   $('warn').hidden=false;
-  $('warn').textContent=o.warn;
+  $('warn').textContent=o.warn||'Tento scenár sa nepodarilo úplne spočítať. Upravte, prosím, zadanie v aplikácii.';
   $('plan').hidden=true;
   document.querySelector('.assumptions').hidden=true;
   /* Nie je čo dať do PDF — tlačidlo by vygenerovalo prázdny dokument. */
@@ -1330,8 +1435,35 @@ async function cakajNaFinalnuCopyVysledku(){
   }
 }
 
+/* Údaje, bez ktorých dokument nesmie vzniknúť — ani ako PDF, ani tlačou.
+   Chyba načítania knižnice smie spadnúť na tlač; neplatné údaje nie: tlač by
+   vyrobila presne ten dokument, ktorý sme zakázali. */
+function platneUdajePreExport(){
+  const v=globalThis.PH_VYSLEDOK;
+  if(!v||v.platny!==true||!v.sadzby)return false;
+  const sz=v.sadzby;
+  return ['budovanie','cerpanie','budovanieCiste','cerpanieCiste','sprava','vstupny']
+    .every(k=>Number.isFinite(sz[k]));
+}
+function hlaskaExportu(text){
+  let el=$('pdf-stav');
+  if(!el){
+    el=document.createElement('p');
+    el.id='pdf-stav';el.className='mail-note pozor';el.setAttribute('role','alert');
+    $('btn-pdf').closest('.actions').after(el);
+  }
+  el.textContent=text;
+}
+const HLASKA_NEPLATNE='Modeláciu teraz nie je možné uložiť, pretože výpočet nie je úplný. '
+  +'Vráťte sa, prosím, do aplikácie a upravte zadanie.';
+if(!platneUdajePreExport()){
+  const bp=$('btn-pdf');
+  if(bp){bp.disabled=true;bp.title='Modeláciu sa nepodarilo spočítať'}
+}
+
 $('btn-pdf').addEventListener('click',async()=>{
   const b=$('btn-pdf'), popis=b.textContent;
+  if(!platneUdajePreExport()){hlaskaExportu(HLASKA_NEPLATNE);return}
   b.disabled=true; b.textContent='Pripravujem PDF…';
   try{
     /* Test odolnosti dobieha na pozadí — bez neho by v PDF chýbala celá druhá strana. */
@@ -1342,27 +1474,36 @@ $('btn-pdf').addEventListener('click',async()=>{
     await cakajNaFinalnuCopyVysledku();
     if(!pdfNacitanie)pdfNacitanie=(async()=>{
       await Promise.all([nacitaj('jspdf.min.js?v=20260831a'),nacitaj('pdf-font.js?v=20260821a')]);
-      await nacitaj('pdf.js?v=20260901a');
-      await nacitaj('pdf-alternativa.js?v=20260901a');
+      await nacitaj('pdf.js?v=20260929a');
+      await nacitaj('pdf-alternativa.js?v=20260929a');
     })();
     await pdfNacitanie;
     await window.PH_PDF();
+    if(typeof window.PH_UDALOST==='function')window.PH_UDALOST('pdf','modelacia');
   }catch(e){
-    console.warn('PDF sa nepodarilo zložiť, tlačím',e);
+    console.warn('PDF sa nepodarilo zložiť',e);
     pdfNacitanie=null;
-    zalozneTlacenie();
+    /* Záložná tlač iba pri platných údajoch — tlačová verzia stránky nesie
+       celé upozornenie aj obe sadzby. Neplatné údaje (chýbajúca sadzba, NaN)
+       sa tlačou obísť nesmú: vyrobila by presne dokument, ktorý zakazujeme. */
+    if(e&&e.neplatneUdaje||!platneUdajePreExport())hlaskaExportu(HLASKA_NEPLATNE);
+    else zalozneTlacenie();
   }finally{
-    b.disabled=false; b.textContent=popis;
+    b.disabled=!platneUdajePreExport(); b.textContent=popis;
   }
 });
 
 /* Otvorené s ?tlac=1 znamená „vytlač sa" — po dopočítaní rozloženia, fontov
    aj testu odolnosti. Bez toho čakania by záložná tlač vyrobila dokument bez
-   celej sekcie, presne ako by ju vyrobilo priskoré kliknutie na PDF. */
+   celej sekcie, presne ako by ju vyrobilo priskoré kliknutie na PDF.
+   Neplatný výsledok sa nevytlačí ani takto — adresu si vie ktokoľvek upraviť. */
 if(QS.get('tlac')==='1'){
   const tlac=()=>Promise.resolve(window.PH_ODOLNOST)
     .catch(()=>{})
-    .then(()=>setTimeout(()=>window.print(),350));
+    .then(()=>{
+      if(!platneUdajePreExport()){hlaskaExportu(HLASKA_NEPLATNE);return}
+      setTimeout(()=>window.print(),350);
+    });
   if(document.fonts&&document.fonts.ready)document.fonts.ready.then(tlac);
   else addEventListener('load',tlac);
 }
@@ -1373,7 +1514,8 @@ if(window.parent!==window)
   addEventListener('load',()=>window.parent.postMessage({type:'ph-renta-na-zaciatok'},'*'));
 })();
 </script>
-<script src="vysledok-10of10.js?v=20260901c"></script>
+<script src="udalosti.js?v=20260929a"></script>
+<script src="vysledok-10of10.js?v=20260929a"></script>
 
 <script>
 /* ---- Vloženie do Squarespace: hlásenie výšky rodičovi ----

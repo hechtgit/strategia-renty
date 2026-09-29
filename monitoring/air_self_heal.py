@@ -55,6 +55,7 @@ CHECKS = [
     Check("cma", ["node", "tests/cma-view.mjs"], auto_fixable=False),
     Check("channel-consistency", ["node", "audit-konzistencia-kanalov.mjs"], auto_fixable=False),
     Check("financial-core", ["node", "audit-financne-jadro.mjs"], auto_fixable=False),
+    Check("package-2026-09", ["node", "tests/balik-pred-kampanou.mjs"], auto_fixable=False),
     Check("ui-contract", ["node", "audit-ui-kontrakt.mjs"]),
     Check("pdf", ["node", "audit-pdf-alternativa.mjs"], auto_fixable=False),
     Check("local-browser", [PYTHON, "tests/e2e_app.py", "--target", "local", "--browser", "chromium"]),
@@ -77,7 +78,11 @@ def env() -> dict[str, str]:
     value["PYTHONUNBUFFERED"] = "1"
     # Schválené referenčné PDF (testovací scenár, bez osobných údajov) žije mimo
     # repozitára; audit-pdf-alternativa.mjs ho inak hľadá v ~/Downloads na PRO.
-    if PDF_REFERENCE.exists() and "RENTA_PDF_REFERENCE" not in value:
+    # Od 29. 9. 2026 je schválená referencia priamo v repozitári
+    # (tests/fixtures/modelacia-referencna.pdf) a mení sa spolu s kódom. Kópia
+    # mimo repozitára sa použije iba pre staršie revízie, ktoré ju nemajú.
+    if (PDF_REFERENCE.exists() and "RENTA_PDF_REFERENCE" not in value
+            and not (CHECK_WORKTREE / "tests" / "fixtures" / "modelacia-referencna.pdf").exists()):
         value["RENTA_PDF_REFERENCE"] = str(PDF_REFERENCE)
     return value
 

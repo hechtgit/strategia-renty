@@ -39,6 +39,7 @@
     FEE_IN: 1.5, FEE_M: 0.9, HIST_OD: 1970, HIST_DO: 2025 };
   var N = K.PRIEBEHOV;
   function cislo(x) { return String(x).replace(".", ","); }
+  function cisloZnak(x) { return (x < 0 ? "\u2212" : "") + cislo(Math.abs(x)); }
   /* „so 4 %" sa číta „so štyrmi percentami" - predložka sa riadi tým, čím
      číslovka ZAČÍNA, nie tým, ako sa píše. Štyri, šesť a sedem začínajú na
      š/s, preto pri nich „so"; pri ostatných „s". Bez toho by veta po zmene
@@ -55,11 +56,18 @@
     + "Na konzultácii ju viem zasadiť do vašej reality a oddeliť zaujímavé číslo "
     + "od stratégie, podľa ktorej sa dá pokojne rozhodovať. Preto má zmysel "
     + "sadnúť si k tomu spolu.";
-  var PATKA_TEXT = "Ilustračný a vzdelávací výpočet. Nejde o investičné poradenstvo ani odporúčanie.";
+  /* Pätička oboch strán nesie celé upozornenie zo stránky, nie skratku.
+     Skrátená veta vynechávala práve to podstatné: že zhodnotenie nie je
+     garantované a návratnosť nie je zaručená. */
   if (typeof povodnePDF !== "function" || !window.jspdf || !window.jspdf.jsPDF) return;
 
   function text(el) {
     return el ? (el.textContent || "").replace(/\s+/g, " ").trim() : "";
+  }
+  /* Vstupný poplatok podľa výsledku výpočtu (pri „majetok už mám" sa neúčtuje). */
+  function vstupnyPoplatok() {
+    var v = window.PH_VYSLEDOK;
+    return v && v.sadzby && Number.isFinite(v.sadzby.vstupny) ? v.sadzby.vstupny : K.FEE_IN;
   }
 
   function dataZoStranky() {
@@ -125,12 +133,15 @@
       metodika: "Simulácie vznikajú metódou Monte Carlo: z výnosov indexu MSCI World (v EUR, "
         + K.HIST_OD + "–" + K.HIST_DO + "; roky pred zavedením eura sú doň prepočítané spätne) "
         + "sa losujú súvislé " + (SLOVOM[K.BLOK_ROKOV] || K.BLOK_ROKOV + "-ročné")
-        + " bloky a skladajú do nových priebehov. História platí len počas budovania majetku — "
-        + "aj tam sa odpočítava vstupný poplatok " + cislo(K.FEE_IN) + " % a správa "
+        + " bloky a skladajú do nových priebehov. História platí len počas budovania majetku — "
+        + (vstupnyPoplatok() > 0
+          ? "aj tam sa odpočítava vstupný poplatok " + cislo(K.FEE_IN) + " % a správa "
+          : "aj tam sa odpočítava správa ")
         + cislo(K.FEE_M) + " % ročne. Čerpanie počíta " + sCislom(K.REF_CERPANIE)
         + " % ročne, v ktorých sú investičné náklady už zohľadnené, pred infláciou. "
         + "Slabé výnosy hneď na začiatku čerpania môžu obdobie renty výrazne skrátiť; "
         + "minulá výkonnosť nie je spoľahlivým ukazovateľom budúcich výsledkov.",
+      disclaimer: text(document.querySelector(".disclaimer")),
       konzultaciaNadpis: text(document.querySelector(".next h2")),
       konzultacia: Array.prototype.map.call(document.querySelectorAll(".next p"), text)
     };
@@ -149,6 +160,20 @@
 
     doc.addPage();
     doc.setFont("Asap", "normal");
+
+    /* Pätička druhej strany: rovnaké celé upozornenie ako na prvej, zalomené
+       a ukotvené na spodok. Posledný riadok stojí tam, kde doteraz stála
+       skratka (291,5 mm); čiara a riadok s číslom strany sa posunú nahor o toľko
+       riadkov, koľko upozornenie zaberie, a obsah strany sa zmestí nad ne. */
+    var PATKA2 = (function () {
+      var PISMO = 6.2, RIADOK = PISMO * 0.3528 * 1.35, REZERVA = 24;
+      if (!d.disclaimer) throw window.PH_PDF_NEPLATNE("chýba upozornenie v pätičke.");
+      doc.setFontSize(PISMO);
+      var r = doc.splitTextToSize(d.disclaimer, SIRKA - REZERVA);
+      if (r.length > 3) throw new Error("PDF druhá strana: upozornenie má viac ako tri riadky.");
+      var prvy = 291.5 - (Math.max(2, r.length) - 1) * RIADOK;
+      return { riadky: r, pismo: PISMO, riadok: RIADOK, prvy: prvy, linka: prvy - 5 };
+    })();
 
     function riadky(t, vel, sirka) {
       doc.setFontSize(vel);
@@ -331,10 +356,11 @@
       var TXT = SIRKA - 2 * VNU - FOTO - MEDZI;
       var CTA_S = 62, CTA_V = 8.5;
 
-      /* Pätka je ukotvená natvrdo na 282 mm. Predtým som blok pustil až na
-         289 mm, čo je 7 mm POD ňu - v tomto scenári to nevyskočilo, ale bola
-         to čakajúca chyba. */
-      var DOSTUPNE = 282 - 4 - y;
+      /* Pätička je ukotvená na spodok a jej výška závisí od počtu riadkov
+         upozornenia (PATKA2.linka). Predtým som blok pustil až na 289 mm, čo
+         bolo 7 mm POD pätičku - v tomto scenári to nevyskočilo, ale bola to
+         čakajúca chyba. */
+      var DOSTUPNE = PATKA2.linka - 4 - y;
       function vyskaListu() {
         var h = vyskaTextu(LIST_NADPIS, 12.5, TXT, 1.25) + 2
               + vyskaTextu(LIST_TELO, 8.3, TXT, 1.4);
@@ -387,25 +413,35 @@
       doc.setFontSize(8.5);
       doc.setTextColor(255, 255, 255);
       doc.text("Rezervovať konzultáciu", textX + CTA_S / 2, ctaY + 5.9, { align: "center" });
-      doc.link(textX, ctaY, CTA_S, CTA_V, { url: "https://hechtberger.com/rezervacia" });
+      doc.link(textX, ctaY, CTA_S, CTA_V, { url: "https://hechtberger.com/rezervacia?src=renta" });
       y = konzTop + konzH;
     }
 
+    if (y > PATKA2.linka - 1) {
+      throw new Error("PDF druhá strana: obsah zasahuje do pätičky ("
+        + y.toFixed(1) + " mm, pätička od " + PATKA2.linka.toFixed(1) + " mm).");
+    }
     doc.setDrawColor.apply(doc, LINKA);
     doc.setLineWidth(0.2);
-    doc.line(OKRAJ, 282, OKRAJ + SIRKA, 282);
-    doc.setFont("Asap", "normal"); doc.setFontSize(7);
+    doc.line(OKRAJ, PATKA2.linka, OKRAJ + SIRKA, PATKA2.linka);
+    doc.setFont("Asap", "normal");
     doc.setTextColor.apply(doc, SEDA);
-    doc.text("Modelácia privátnej renty · hechtberger.com", OKRAJ, 287);
-    doc.text("2 / 2", OKRAJ + SIRKA, 287, { align: "right" });
-    /* Práve táto strana nesie čísla úspešnosti aj výzvu na konzultáciu, a
-       pritom bola jediná bez akejkoľvek výhrady. Ak ju niekto odfotí alebo
-       pošle samostatne, išla by von bez upozornenia. */
-    doc.setFontSize(6.2);
-    doc.text(PATKA_TEXT, OKRAJ, 291.5);
+    /* Práve táto strana nesie čísla úspešnosti aj výzvu na konzultáciu. Ak ju
+       niekto odfotí alebo pošle samostatne, nesmie ísť von bez celej výhrady.
+       Rovnaká stavba ako na prvej strane: upozornenie vľavo, číslo strany
+       vpravo v rezervovanom stĺpci; pod ním adresa webu, od koho dokument je. */
+    doc.setFontSize(PATKA2.pismo);
+    PATKA2.riadky.forEach(function (r, i) {
+      doc.text(r, OKRAJ, PATKA2.prvy + i * PATKA2.riadok);
+    });
+    doc.text("2 / 2", OKRAJ + SIRKA, PATKA2.prvy, { align: "right" });
+    doc.text("hechtberger.com", OKRAJ + SIRKA, PATKA2.prvy + PATKA2.riadok, { align: "right" });
   }
 
   window.PH_PDF = async function () {
+    /* Neplatný výsledok alebo chýbajúce sadzby zastavia export hneď na začiatku,
+       skôr než sa čokoľvek dočasne prepíše na stránke. */
+    window.PH_PDF_VYSLEDOK();
     var dataDruhejStrany = dataZoStranky();
     var SkutocnyKonstruktor = window.jspdf.jsPDF;
     var dokument = null;
@@ -427,25 +463,37 @@
       el.textContent = novyText;
     }
     var predpoklady = document.querySelectorAll(".assumptions .blok p:not(.vystraha)");
-    docasneSkrat(predpoklady[0], "Výpočet používa zhodnotenie, ktoré ste zadali vy.");
-    /* Model počíta s DVOMA sadzbami - jednou počas budovania, druhou počas
-       vyplácania - a potrebný majetok určuje prevažne tá druhá. V PDF stála
-       len prvá, takže kľúčové číslo nemalo v dokumente oporu. Sadzby sa
-       neprepisujú natvrdo: čítajú sa z vety, ktorú stránka zloží do
-       #metodika, aby sa pri zmene predpokladu nerozišli. */
-    var sadzby = (function () {
-      var m = text(document.getElementById("metodika"))
-        .match(/so zhodnotením\s*([0-9.,]+)\s*%[^0-9]+([0-9.,]+)\s*%/);
-      return m ? "Výpočet počíta so zhodnotením " + m[1] + " % ročne počas budovania majetku a "
-                 + m[2] + " % ročne počas vyplácania; obe ste zadali vy. "
-               : "";
-    })();
-    docasneSkrat(predpoklady[1], sadzby + "Zohľadňuje vstupný poplatok " + cislo(K.FEE_IN)
-      + " %, správu " + cislo(K.FEE_M) + " % ročne, zadanú infláciu a mesačný priebeh výpočtu; "
-      + "dane z výnosov nezohľadňuje.");
-    docasneSkrat(predpoklady[2], dataDruhejStrany
-      ? "Metodiku modelovaných simulácií nájdete na druhej strane."
-      : "Tento scenár nemá obdobie budovania s vopred zvoleným koncom čerpania, preto sa historický test nezobrazuje.");
+    /* Model počíta s DVOMA sadzbami - jednou počas budovania, druhou počas
+       vyplácania - a potrebný majetok určuje prevažne tá druhá. Sadzby sa
+       berú zo štruktúrovaných údajov výpočtu (PH_VYSLEDOK), nie regulárnym
+       výrazom z vety: ten sa pri drobnej zmene textu minul a sadzba čerpania
+       z PDF potichu vypadla. Chýbajúce údaje zastavia export (vysledok()).
+       Uvádzajú sa obe podoby: zadané zhodnotenie je PRED poplatkom za správu,
+       výpočet počíta s hodnotou po ňom. Bez toho by sa „4 %" klienta dali
+       zameniť so 4 % historického testu na druhej strane, ktoré sú už po
+       nákladoch. */
+    var v = window.PH_PDF_VYSLEDOK();
+    var sz = v.sadzby;
+    var bezBudovania = v.veky.dnes === v.veky.zaciatok;
+    docasneSkrat(predpoklady[0], bezBudovania
+      ? "Výpočet používa zhodnotenie, ktoré ste zadali vy: " + cislo(sz.cerpanie)
+        + " % ročne počas vyplácania, pred poplatkom za správu " + cislo(sz.sprava)
+        + " % ročne (po jeho odpočítaní " + cisloZnak(sz.cerpanieCiste) + " %)."
+      : "Výpočet používa zhodnotenie, ktoré ste zadali vy: " + cislo(sz.budovanie)
+        + " % ročne počas budovania majetku a " + cislo(sz.cerpanie) + " % počas vyplácania, "
+        + "pred poplatkom za správu " + cislo(sz.sprava) + " % ročne (po jeho odpočítaní "
+        + cisloZnak(sz.budovanieCiste) + " % a " + cisloZnak(sz.cerpanieCiste) + " %).");
+    docasneSkrat(predpoklady[1], (sz.vstupny > 0
+      ? "Zohľadňuje aj vstupný poplatok " + cislo(sz.vstupny) + " %, "
+      : "Vstupný poplatok sa na majetok, ktorý už máte, nevzťahuje. Zohľadňuje ")
+      + "zadanú infláciu a mesačný priebeh výpočtu; dane z výnosov nezohľadňuje. "
+      /* Odkaz na metodiku ide do toho istého odseku: každý odsek v stĺpci stojí
+         3 mm a o tie prišiel graf na prvej strane po pridaní obidvoch sadzieb
+         a celého upozornenia. */
+      + (dataDruhejStrany
+        ? "Metodiku modelovaných simulácií nájdete na druhej strane."
+        : "Tento scenár nemá obdobie budovania s vopred zvoleným koncom čerpania, preto sa historický test nezobrazuje."));
+    docasneSkrat(predpoklady[2], "");
     /* „Minulá výkonnosť nie je spoľahlivým ukazovateľom" stálo na prvej
        strane, na ktorej niet ani jedného historického čísla — patrí k metodike
        na druhej, a tam je teraz. Keď druhá strana nevznikne, výhrada zostáva
@@ -454,7 +502,6 @@
     if (budeDruhaStrana) docasneSkrat(document.querySelector(".blok .vystraha"), "");
     docasneSkrat(document.querySelector(".next h2"), "");
     docasneSkrat(document.querySelector(".next p"), "");
-    docasneSkrat(document.querySelector(".disclaimer"), PATKA_TEXT);
 
     /* Prvá strana kreslí číslovanie skôr, než sa pridá druhá - musí preto
        vopred vedieť, či nejaká druhá vôbec bude. */

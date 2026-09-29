@@ -46,5 +46,29 @@ if (!portraitFailureWasRejected) {
   throw new Error("PDF bez portrétu nesmie byť vygenerované.");
 }
 
+/* Bez štruktúrovaných údajov výsledku (sadzby, veky, platnosť) PDF nesmie
+   vzniknúť — a chyba musí niesť príznak, podľa ktorého stránka nespadne ani
+   na záložnú tlač. */
+let missingDataWasRejected = false;
+try {
+  execFileSync(process.execPath, [path.join(root, "audit-pdf-alternativa.mjs")], {
+    cwd: root,
+    env: {
+      ...process.env,
+      RENTA_PDF_SCENARIO: "existing",
+      RENTA_PDF_OUT: path.join(outputDir, "modelacia-bez-udajov.pdf"),
+      RENTA_PDF_BEZ_UDAJOV: "1"
+    },
+    encoding: "utf8",
+    stdio: "pipe"
+  });
+} catch (error) {
+  const output = `${error.stdout || ""}\n${error.stderr || ""}`;
+  if (!output.includes("výsledok nie je platný") || !output.includes("neplatneUdaje: true")) throw error;
+  missingDataWasRejected = true;
+}
+if (!missingDataWasRejected) throw new Error("PDF bez štruktúrovaných údajov nesmie vzniknúť.");
+
 console.log(`PDF layout matrix: ${scenarios.length}/${scenarios.length} scenárov prešlo.`);
+console.log("PDF fail-closed kontrola chýbajúcich údajov prešla.");
 console.log("PDF fail-closed kontrola portrétu prešla.");

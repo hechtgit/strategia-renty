@@ -261,7 +261,7 @@ test("akčný krok a formálne upozornenie sú na mieste", () => {
     "akčný krok sa nepočíta klientskou metodikou");
   assert.ok(app.includes("Historické simulácie ani dlhodobé výhľadové predpoklady nie sú"),
     "chýba formálne upozornenie v pätičke");
-  assert.ok(app.includes("predpokladaného vstupného poplatku"),
+  assert.ok(app.includes("Skutočné poplatky u vás môžu byť nižšie aj vyššie"),
     "poplatky sa neoznačujú ako predpoklad");
   assert.ok(app.includes("u vás môžu byť nižšie aj vyššie"),
     "chýba upozornenie, že poplatky môžu byť iné");

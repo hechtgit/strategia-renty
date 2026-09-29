@@ -26,6 +26,31 @@
     return el ? (el.textContent || "").replace(/\s+/g, " ").trim() : "";
   }
 
+  /* Štruktúrované údaje výsledku, ktoré stránka vystavila pri výpočte. Bez nich
+     (alebo s NaN) dokument nevznikne — a chyba nesie príznak, podľa ktorého
+     stránka nespadne ani na záložnú tlač. */
+  function neplatne(sprava) {
+    var e = new Error("PDF: " + sprava);
+    e.neplatneUdaje = true;
+    return e;
+  }
+  function vysledok() {
+    var v = window.PH_VYSLEDOK;
+    if (!v || v.platny !== true) throw neplatne("výsledok nie je platný.");
+    var sz = v.sadzby || {};
+    ["budovanie", "cerpanie", "budovanieCiste", "cerpanieCiste", "sprava", "vstupny"]
+      .forEach(function (k) {
+        if (!Number.isFinite(sz[k])) throw neplatne("chýba sadzba " + k + ".");
+      });
+    if (!v.veky || !Number.isFinite(v.veky.dnes) || !Number.isFinite(v.veky.zaciatok)
+        || (!v.bezKonca && !Number.isFinite(v.veky.koniec))) {
+      throw neplatne("chýbajú veky plánu.");
+    }
+    return v;
+  }
+  window.PH_PDF_VYSLEDOK = vysledok;
+  window.PH_PDF_NEPLATNE = neplatne;
+
   /* Údaje berieme z DOM — jediný zdroj, ktorý klient naozaj videl. */
   function zoStranky() {
     var karty = [];
@@ -72,16 +97,16 @@
       preKoho: text(document.getElementById("pre-koho")),
       vyhotovene: text(document.getElementById("vyhotovene")),
       /* Tri míľniky ako čísla, nie ako veta - klient si vie 35 + 20 = 55
-         overiť na prvý pohľad. Berú sa z adresy, teda z toho istého zdroja,
-         akým je zložený celý výpočet. */
+         overiť na prvý pohľad. Berú sa z výsledku výpočtu, nie z adresy: pri
+         otázke „ako dlho vydrží" je koniec výsledkom (napr. 81), kým adresa
+         nesie naposledy nastavený jazdec (90). */
       veky: (function () {
-        var q = new URLSearchParams(location.search);
-        var dnes = q.get("now"), start = q.get("start"), koniec = q.get("end");
-        if (!dnes || !start) return "";
-        var kusy = ["Vek dnes: " + dnes, "Začiatok čerpania: " + start];
-        if (koniec && q.get("pension") !== "perpetuity") kusy.push("Koniec: " + koniec);
+        var v = vysledok();
+        var kusy = ["Vek dnes: " + v.veky.dnes, "Začiatok čerpania: " + v.veky.zaciatok];
+        if (!v.bezKonca) kusy.push((v.vypocitanyKoniec ? "Majetok vydrží do: " : "Koniec: ") + v.veky.koniec);
         return kusy.join("   ·   ");
       })(),
+      projekciaVyhrada: text(document.getElementById("projekcia-vyhrada")),
       vystraha: text(document.querySelector(".blok .vystraha")),
       predpokladyNadpis: text(document.querySelector(".blok h2")),
       predpoklady: predpoklady,
@@ -144,19 +169,23 @@
       y += 5;
     }
 
-    /* Pätička má v kanonickom PDF presne jeden riadok. Číslo strany má
-       vyhradený vlastný priestor vpravo; keby sa text po budúcej úprave do
-       zvyšku nezmestil, generovanie musí zlyhať namiesto tichého zalomenia
-       alebo nečitateľného zmenšenia. */
-    function vyskaPatky(disclaimer) {
-      var PISMO = 6.2;
-      var REZERVA_CISLO = 15;
+    /* Pätička nesie CELÉ upozornenie zo stránky (nie je ponuka ani návrh
+       zmluvy, zhodnotenie nie je garantované, hodnota kolíše, návratnosť nie je
+       zaručená). Pri tomto písme má okolo 283 mm, riadok 163 mm — preto je
+       viacriadková a jej výška sa rezervuje vopred z počtu riadkov. Číslo
+       strany má vlastný priestor vpravo. Viac ako tri riadky znamenajú, že
+       niekto text podstatne predĺžil; vtedy radšej zlyhať nahlas. */
+    var PATKA_PISMO = 6.2, PATKA_RIADOK = 6.2 * 0.3528 * 1.35, PATKA_REZERVA = 15;
+    function riadkyPatky(disclaimer) {
+      if (!disclaimer) throw neplatne("chýba upozornenie v pätičke.");
       doc.setFont("Asap", "normal");
-      doc.setFontSize(PISMO);
-      if (doc.getTextWidth(disclaimer || "") > SIRKA - REZERVA_CISLO) {
-        throw new Error("PDF pätička: text sa nezmestí do jedného riadka.");
-      }
-      return 5 + 18 + 5 + PISMO * 0.3528 * 1.5 + 1;
+      doc.setFontSize(PATKA_PISMO);
+      var r = doc.splitTextToSize(disclaimer, SIRKA - PATKA_REZERVA);
+      if (r.length > 3) throw new Error("PDF pätička: upozornenie má viac ako tri riadky.");
+      return r;
+    }
+    function vyskaPatky(disclaimer) {
+      return 5 + 18 + 5 + riadkyPatky(disclaimer).length * PATKA_RIADOK + 1.2;
     }
 
     /* ——— hlavička ——— */
@@ -238,6 +267,12 @@
       }
       y = vrch + vyskaBloku + 2;
     });
+
+    /* Základná projekcia nesmie stáť bez vety, že nejde o predpoveď ani záruku —
+       PDF putuje ďalej bez stránky a metodické výhrady sú až na druhej strane. */
+    if (!d.projekciaVyhrada) throw neplatne("chýba upozornenie pri projekcii.");
+    odstavec(d.projekciaVyhrada, 8.4, "bold", TMAVA, SIRKA, 1.3);
+    medzera(1.5);
 
     medzera(0.5);
 
@@ -512,12 +547,17 @@
        ešte pred kreslením; bez neho ostane samotné „1". */
     doc.text(window.PH_PDF_STRAN ? "1 / " + window.PH_PDF_STRAN : "1",
       OKRAJ + SIRKA, y + 2.2, { align: "right" });
-    doc.text(d.disclaimer, OKRAJ, y + 2.2);
+    riadkyPatky(d.disclaimer).forEach(function (r, i) {
+      doc.setFont("Asap", "normal"); doc.setFontSize(PATKA_PISMO);
+      doc.setTextColor(130, 125, 118);
+      doc.text(r, OKRAJ, y + 2.2 + i * PATKA_RIADOK);
+    });
 
     return doc;
   }
 
   window.PH_PDF = function () {
+    vysledok();
     var doc = vytvor(zoStranky());
     doc.save("modelacia-privatnej-renty.pdf");
   };

@@ -36,7 +36,7 @@ for (const [id, [minimum, maximum]] of Object.entries(expected)) {
 
 assert.ok(improvements.includes("const skala = cfg => (window.__SC || {})[cfg.slider] || null;"),
   'Ovládacia vrstva musí používať škály aplikácie, nie HTML rozsah 0–1000.');
-assert.ok(improvements.includes('const zobrazene = cislo($(cfg.id).textContent);')
+assert.ok(improvements.includes('const zobrazene = cislo($(cfg.id).textContent, cfg.jed);')
   && improvements.includes('if (zobrazene !== null) return zobrazene;'),
   'Opakované otvorenie musí čítať presnú vykreslenú sumu, nie približnú polohu jazdca.');
 assert.ok(improvements.includes("new CustomEvent('ph-renta-presna-hodnota'")
@@ -48,7 +48,7 @@ assert.ok(improvements.includes('(smer > 0 && v > teraz) || (smer < 0 && v < ter
   'Po presnom zápise musí + hodnotu zvýšiť a − znížiť aj mimo mriežky posuvníka.');
 assert.ok(master.includes('set(presne);') && master.includes('sl.value=scale.toPos(presne);'),
   'Aplikácia musí uložiť presnú sumu; posuvník je iba jej vizuálnou polohou.');
-assert.ok(master.includes('vylepsenia.js?v=20260831b'),
+assert.ok(master.includes('vylepsenia.js?v=20260929a'),
   'Po oprave musí byť zvýšená verzia skriptu kvôli cache prehliadača.');
 
 console.log('OK: priame zadávanie súm používa ľudské jednotky a zachováva presnú hodnotu.');

@@ -27,10 +27,17 @@ Aplikácia a modelácia pre stránku
 
 ```bash
 python3 zostav.py
+node scripts/build-renta-core-browser.mjs   # pás „X z 800" používa dist/, nie master
 node audit-financne-jadro.mjs
 node audit-konzistencia-kanalov.mjs
 node audit-pdf-alternativa.mjs
+node tests/pdf-layout.mjs
+node tests/balik-pred-kampanou.mjs
+python3 tests/e2e_balik.py --target local   # skutočný rám v Squarespace + PDF
 ```
+
+Pri zmene `shared/renta-core.js` treba zostaviť aj `dist/` a zvýšiť `?v=` pri
+jeho načítaní v masteri — inak prehliadač počíta pás so starým jadrom.
 
 1. Uprav **master** (`cara-zivota-master.html` alebo `vysledok-master.html`).
 2. Spusti `zostav.py`.
@@ -76,8 +83,36 @@ a stiahne ho. Na telefóne bola tlačová ponuka funkčná, ale klient z nej PDF
 ešte vylúpiť; súbor je to, čo naozaj chce.
 
 Generátor, písmo a knižnica (spolu ~440 kB) sa načítajú **až po ťuknutí** —
-väčšina návštevníkov PDF nechce. Keby sa čokoľvek nenačítalo, tlačidlo spadne
-na tlač, teda na to, čo fungovalo predtým.
+väčšina návštevníkov PDF nechce. Keby sa generátor nenačítal, tlačidlo spadne
+na tlač — ale iba pri platnom výsledku.
+
+Čísla, ktoré PDF nesmie mať inak než výpočet (obe sadzby pred poplatkom aj po
+ňom, veky, vypočítaný koniec renty, platnosť), berie zo štruktúrovaných údajov
+`PH_VYSLEDOK`, ktoré modelácia vystaví pri výpočte — nie regulárnym výrazom
+z textu. Keď chýbajú alebo sú neplatné (NaN, varovanie jadra), export sa
+zastaví so správou a nespadne ani na tlač; `?tlac=1` neplatný výsledok
+nevytlačí. Pätička oboch strán nesie celé upozornenie o riziku (viacriadkovo,
+s rezervovanou výškou) a pri projekcii na prvej strane stojí „Modelový
+výpočet, nie predpoveď ani záruka.". Schválená referencia rozloženia je
+`tests/fixtures/modelacia-referencna.pdf`.
+
+## Odoslanie modelácie a stav e-mailu
+
+Modelácia sa otvorí vždy — aj keď zlyhá overenie prehliadača, medzičlánok
+alebo e-mail, aj keď prehliadač zablokuje či klient zavrie nové okno (vtedy sa
+ponúkne priamo v aplikácii, bez straty plánu). Stav e-mailu je pravdivý:
+„poslali sme" iba vtedy, keď medzičlánok potvrdil prijatie do fronty; inak
+„nepodarilo sa potvrdiť / neodoslali sme — PDF si stiahnite teraz". Opakovanie
+si vždy vypýta nový token overenia. Medzičlánok (NanoClaw
+`tools/renta-boldem-relay`) drží atómový stav pokusu, takže opakovanie ani
+súbeh nepošlú e-mail dvakrát.
+
+## Meranie
+
+`udalosti.js` posiela na medzičlánok päť anonymných udalostí (začal, videl
+výsledok, odoslal, PDF, rezervácia) — iba názov a stránku, bez súm, e-mailu,
+URL či identifikátorov; každú najviac raz za načítanie. Pri zapnutom „Do Not
+Track" / GPC nemeria. Odkazy na rezerváciu nesú `?src=renta`.
 
 Čísla sa do PDF **neprepočítavajú**, čítajú sa z už vykreslenej modelácie. PDF
 teda nemá ako ukázať niečo iné, než čo má klient pred očami.

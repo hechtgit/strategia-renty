@@ -339,6 +339,8 @@ body:has(#delivery-title:target):not(:has(.pas-cesta[href="#consult-title"]:hove
 .gate-view{display:inline-block;margin-top:18px;padding:14px 24px;border-radius:3px;
   background:#2b2118;color:#fff;font:600 14px var(--sans);text-decoration:none}
 .gate-view:hover{background:#3a2c1c}
+.gate-here{margin:12px 0 0!important;font-size:15px}
+.gate-here a{color:inherit;text-decoration:underline}
 .email-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;margin-top:18px}
 .email-row button{border:0;border-radius:3px;background:#2b2118;color:#fff;padding:13px 20px;font:600 14px var(--sans);cursor:pointer}
 .email-row button:hover{background:#3a2c1c}
@@ -750,6 +752,11 @@ html,body{background:var(--bg)}
    svetlejšia by na nej spadla pod čitateľnú mieru. */
 .assumption-warn{color:#450b10!important}
 .when.vysoky{color:#450b10;font-weight:700}
+/* Čistá sadzba pod oboma posuvníkmi zhodnotenia. Výpočet vždy odpočíta
+   správu 0,9 % ročne; keď to klient nevidí, prepočet mu nesedí a kalkulačka
+   pôsobí, že „dáva menej". Tón aj veľkosť ako popis hodnoty nad ním. */
+.po-poplatkoch{margin:2px 0 0!important;font-size:14px;line-height:1.35;color:var(--on-gold-soft)}
+html.viewport-compact .po-poplatkoch{font-size:12px}
 .sw{color:var(--on-gold-soft)}
 .sw b{color:var(--on-gold)}
 .card .sw input,.delivery-panel .sw input{accent-color:#2b2118}
@@ -1023,6 +1030,7 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
         <input type="range" id="sl-vynos" min="0" max="50" step="0.1" value="5"
                aria-label="Ročné zhodnotenie majetku">
         <p class="when" id="vynos-v" style="margin:8px 0 0">5 % ročne</p>
+        <p class="po-poplatkoch" id="vynos-net">po poplatkoch 4,1 % ročne</p>
         <p class="assumption-note">Je to váš predpoklad, nie očakávaný ani odporúčaný výnos.</p>
         <p class="assumption-note assumption-warn" id="vynos-warn" hidden></p>
         <p class="when" style="margin:10px 0 6px">Historické údaje na porovnanie, nie návrh predpokladu:</p>
@@ -1063,6 +1071,7 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
         <input type="range" id="sl-vynos-rent" min="4" max="10" step="0.1" value="5"
                aria-label="Ročné zhodnotenie počas čerpania renty">
         <p class="when" id="vynos-rent-v" style="margin:8px 0 0">5 % ročne</p>
+        <p class="po-poplatkoch" id="vynos-rent-net">po poplatkoch 4,1 % ročne</p>
         <p class="assumption-note assumption-warn" id="vynos-rent-warn" hidden></p>
         <p class="assumption-note">Kým majetok budujete, môžete si dovoliť výkyvy — máte čas počkať. Keď z neho žijete, čas nemáte, a preto sa počíta opatrne: portfólio má hlavne udržať kúpnu silu.</p>
       </div>
@@ -1112,7 +1121,7 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
     </div>
     <div class="pas-metodika">
       <h4>Metodika</h4>
-      <p>Počas budovania majetku vych&aacute;dzaj&uacute; modelovan&eacute; priebehy zo s&uacute;visl&yacute;ch &uacute;sekov skutočn&yacute;ch ročn&yacute;ch v&yacute;nosov indexu MSCI World. Počas čerpania počítaj&uacute; s pevn&yacute;m modelov&yacute;m v&yacute;nosom 4&nbsp;% ročne.</p>
+      <p>Počas budovania majetku vych&aacute;dzaj&uacute; modelovan&eacute; priebehy zo s&uacute;visl&yacute;ch &uacute;sekov skutočn&yacute;ch ročn&yacute;ch v&yacute;nosov indexu MSCI World. Počas čerpania počítaj&uacute; s pevn&yacute;m modelov&yacute;m v&yacute;nosom 4&nbsp;% ročne po investičn&yacute;ch n&aacute;kladoch, pred infl&aacute;ciou.</p>
       <p>Použit&aacute; met&oacute;da: Monte Carlo s blokov&yacute;m bootstrapom.</p>
     </div>
   </section>
@@ -1156,8 +1165,9 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
       </div>
       <div id="gate-done" hidden>
         <h3>Modelácia privátnej renty je pripravená</h3>
-        <p id="gate-done-text">Nižšie nájdete modeláciu k scenáru privátnej renty, ktorý ste si práve prepočítali. Odkaz sme poslali aj emailom; ak by doručenie meškalo, otvoríte ho aj tlačidlom nižšie.</p>
+        <p id="gate-done-text">Modeláciu k scenáru, ktorý ste si práve prepočítali, otvoríte tlačidlom nižšie.</p>
         <a class="gate-view" id="gate-view" href="#" target="_blank" rel="noopener">Otvoriť modeláciu renty</a>
+        <p class="gate-here"><a id="gate-view-here" href="#">alebo ju otvorte v tomto okne</a></p>
       </div>
       </div>
     </section>
@@ -1183,7 +1193,7 @@ html[data-anim] .card:hover,html[data-anim] .card:focus-within{box-shadow:0 26px
         <section class="consult-benefit"><h4>Stratégia na mieru</h4><p>Ak nájdeme priestor na zlepšenie, navrhneme konkrétny ďalší postup podľa vašich cieľov, časového horizontu a potrebnej likvidity.</p></section>
       </div>
       <p class="consult-closing">Cieľom je, aby každá investícia plnila jasnú úlohu v jednej majetkovej stratégii, namiesto toho, aby zostala izolovaným produktom.</p>
-      <a class="btn" href="https://hechtberger.com/rezervacia" target="_blank" rel="noopener">Rezervovať konzultáciu</a>
+      <a class="btn" href="https://hechtberger.com/rezervacia?src=renta" target="_blank" rel="noopener">Rezervovať konzultáciu</a>
       </div>
     </section>
   </div>
@@ -1405,6 +1415,27 @@ const fmtN=n=>Math.max(0,Math.round(n)).toLocaleString('sk-SK');
 const fmtEur=n=>fmtN(n)+'\u00a0€';
 const pctTxt=v=>String(Math.round(v*10)/10).replace('.',',');
 const yrs=n=>`${n} ${n===1?'rok':(n>=2&&n<=4?'roky':'rokov')}`;
+/* Sadzba so znamienkom: pod 0,9 % vychádza čistý výnos záporný a spojovník
+   by sa čítal ako pomlčka. */
+const pctZnak=v=>{const r=Math.round(v*10)/10;return (r<0?'−':'')+pctTxt(Math.abs(r))};
+
+/* Sadzby plánu ako údaje, nie ako veta. Klient zadáva zhodnotenie PRED poplatkom
+   za správu; výpočet ho odpočíta v oboch fázach. PDF a modelácia ich preto
+   uvádzajú obe — 8 % a 4 % zadané, 7,1 % a 3,1 % po poplatku — aby sa „4 %"
+   klienta nedalo zameniť so 4 % historického testu, ktoré sú už po nákladoch. */
+function sadzbyPlanu(){
+  return {budovanie:S.vynos,cerpanie:S.vynosRent,
+    budovanieCiste:Math.round((S.vynos-FEE_M)*10)/10,
+    cerpanieCiste:Math.round((S.vynosRent-FEE_M)*10)/10,
+    sprava:FEE_M,vstupny:S.sit==='have'?0:FEE_IN};
+}
+/* Vstupný poplatok sa na majetok, ktorý klient už má, nevzťahuje — výpočet ho
+   pri „Majetok už mám" neodpočíta, tak to nesmie tvrdiť ani text. */
+function vetaPoplatkov(){
+  return S.sit==='have'
+    ?`Uvedené sumy sú po odpočítaní poplatku za správu ${pctTxt(FEE_M)} % ročne; vstupný poplatok sa na majetok, ktorý už máte, nevzťahuje.`
+    :`Uvedené sumy sú po odpočítaní vstupného poplatku ${pctTxt(FEE_IN)} % a poplatku za správu ${pctTxt(FEE_M)} % ročne.`;
+}
 
 /* nelineárne posuvníky — jemné pri malých sumách, dosah pri veľkých */
 function mkScale(min,max,pow,round){
@@ -1477,10 +1508,15 @@ function compute(){
       o.R=o.rast?S.rent*Math.pow(1+infl/100,N):S.rent;
       o.cap=nek?o.R/(i-g):capForRent(o.R,Tm,i,g);
       if(o.cap===null){o.warn='Takto vysokú rentu by ste na tento čas nedokázali pokryť — skúste nižšiu sumu alebo kratšie obdobie.';return o}
+      /* Pri zhodnotení rovnom poplatku za správu (0,9 %) je mesačná sadzba
+         nula a vzorec anuity delí nulou — klient videl „NaN €". Limitou
+         pre nulovú sadzbu je prostý súčet mesiacov (rovnako ako vo vetve
+         knownCombo a v zdieľanom jadre). */
+      const an=iA===0?Nm:(Math.pow(1+iA,Nm)-1)/iA;
       if(o.immediate){o.P0=o.cap/e;o.M=0}
       else if(S.mode==='lump'){o.P0=o.cap/grow/e;o.M=0}
-      else if(S.mode==='monthly'){o.M=o.cap/(((Math.pow(1+iA,Nm)-1)/iA)*e);o.P0=0}
-      else{const from=S.combo*e*grow,an=(Math.pow(1+iA,Nm)-1)/iA;
+      else if(S.mode==='monthly'){o.M=o.cap/(an*e);o.P0=0}
+      else{const from=S.combo*e*grow;
         o.M=Math.max(0,(o.cap-from)/(an*e));o.P0=S.combo;o.covers=from>=o.cap}
     }
     o.payM=nek?360:Tm;
@@ -1498,6 +1534,30 @@ function compute(){
       if(m===Infinity){o.forever=true;o.payM=360}else{o.months=m;o.payM=Math.min(1200,Math.max(360,m+120))}}
   }
   return o;
+}
+
+/* Koniec renty tak, ako ho treba ukázať. Pri otázke „ako dlho vydrží" je koniec
+   VÝSLEDKOM výpočtu, nie posledným nastavením jazdca — mobilná os, súhrn,
+   modelácia aj PDF ho preto berú odtiaľto. Predtým si ho každé miesto skladalo
+   samo a mobilná os ukazovala 90 rokov, kým súhrn pod ňou 81. */
+function koniecRenty(o){
+  const derived=S.sit==='have'&&S.goal==='duration';
+  let endEff=S.end;
+  if(derived&&!o.warn)endEff=o.forever?Math.max(S.start+1,100)
+    :Math.min(120,Math.max(S.start+1,Math.round(S.now+o.N+(o.months||0)/12)));
+  return {derived,endEff,openEnd:!!(o.nek||o.forever)};
+}
+
+/* Výsledok, ktorý sa smie odoslať, zobraziť ako modelácia alebo vytlačiť do PDF.
+   Neplatný (varovanie jadra alebo čokoľvek nekonečné či NaN) nesmie odísť
+   von — dokument s „NaN €" vyzerá ako náš výstup a klient mu uverí. */
+function platnyVysledok(o){
+  if(!o||o.warn)return false;
+  const cisla=['cap','R','Rtoday'];
+  if(S.sit==='build')cisla.push('P0','M');
+  if(S.sit==='have'&&S.goal==='duration'&&!o.forever)cisla.push('months');
+  if(!cisla.every(k=>Number.isFinite(o[k])&&o[k]>=0))return false;
+  return [S.vynos,S.vynosRent,S.infl].every(Number.isFinite);
 }
 
 /* Súhrn, ktorý v samotnej simulácii nie je: koľko sa za celé obdobie vyplatí,
@@ -1685,11 +1745,7 @@ function render(){
   const o=compute();
   const rentaDnes=o.calculatesRent?o.Rtoday:S.rent;
   const maHotovyMajetokRentu=S.sit==='have'&&S.goal==='rent';
-  const derived=S.sit==='have'&&S.goal==='duration';
-  let endEff=S.end;
-  if(derived&&!o.warn)endEff=o.forever?Math.max(S.start+1,100)
-    :Math.min(120,Math.max(S.start+1,Math.round(S.now+o.N+(o.months||0)/12)));
-  const openEnd=!!(o.nek||o.forever);
+  const {derived,endEff,openEnd}=koniecRenty(o);
   lp.classList.toggle('perp',openEnd);
 
   $('blk-build').hidden=S.sit!=='build';
@@ -1773,6 +1829,9 @@ function render(){
   $('sl-vynos').value=S.vynos;
   txt($('vynos-rent-v'),pctTxt(S.vynosRent)+'\u00a0% ročne');
   $('sl-vynos-rent').value=S.vynosRent;
+  const sadzby=sadzbyPlanu();
+  txt($('vynos-net'),'po poplatkoch '+pctZnak(sadzby.budovanieCiste)+'\u00a0% ročne');
+  txt($('vynos-rent-net'),'po poplatkoch '+pctZnak(sadzby.cerpanieCiste)+'\u00a0% ročne');
   varovania(o);
   /* Nad históriou indexu nič nezakazujeme — len vedľa čísla postavíme fakt. */
   txt($('vynos-note'), S.vynos>VYNOS_HISTORIA_10R
@@ -1849,16 +1908,42 @@ function render(){
        nevedel prepočítať. A „ktoré ste zadali vy" neplatí pre predvoľbu. */
     :`Výpočet počíta so zhodnotením ${pctTxt(o.rPct)} % ročne počas budovania majetku `
      +`a ${pctTxt(o.rPctRent)} % ročne počas vyplácania; obe hodnoty si nastavujete v aplikácii. `
-     +`Uvedené sumy sú po odpočítaní predpokladaného vstupného poplatku ${pctTxt(FEE_IN)}\u00a0% a poplatku za správu ${pctTxt(FEE_M)}\u00a0% ročne; u vás môžu byť nižšie aj vyššie. `
+     +`Po poplatku za správu je to ${pctZnak(S.vynos-FEE_M)}\u00a0% a ${pctZnak(S.vynosRent-FEE_M)}\u00a0% ročne. `
+     +vetaPoplatkov()+' Skutočné poplatky u vás môžu byť nižšie aj vyššie. '
      +(o.rast?`Výpočet zohľadňuje infláciu ${pctTxt(o.infl)} % ročne. `:'Výpočet nezohľadňuje infláciu. ')
      +'Dane z výnosov výpočet nezohľadňuje. Výpočet prebieha na mesačnej báze: '
      +'zadané ročné zhodnotenie aj inflácia sa rozpočítavajú na dvanástiny; '
      +'jednorazový vklad sa úročí raz ročne.';
 
   layout(o,endEff,openEnd);
+  if(typeof obnovTlacidloOdoslania==='function')obnovTlacidloOdoslania();
+  sledujLievik();
   /* Poradenský CMA pohľad sa prepočíta z toho istého scenára. V klientskej
      verzii sa tento háčik nikdy nenaplní, takže render prebehne nezmenene. */
   if(typeof cmaObnov==='function')cmaObnov();
+}
+
+/* ===== meranie lievika (anonymne, cez udalosti.js) =====
+   „Začal" = prvá zmena scenára oproti tomu, s čím sa stránka načítala (aj zo
+   zdieľaného odkazu). „Videl výsledok" = po začatí sa mu na obrazovku dostal
+   výsledkový pás alebo pokračovanie pod kalkulačkou. Neposiela sa nič iné —
+   žiadne sumy, veky ani nastavenia. */
+var lievikZaciatok=null,lievikZacal=false,lievikSledovanie=false;
+function sledujLievik(){
+  const teraz=JSON.stringify(S);
+  if(lievikZaciatok===null){lievikZaciatok=teraz;return}
+  if(lievikZacal||teraz===lievikZaciatok)return;
+  lievikZacal=true;
+  if(typeof window.PH_UDALOST==='function')window.PH_UDALOST('zacal');
+  if(lievikSledovanie||!('IntersectionObserver' in window))return;
+  lievikSledovanie=true;
+  const ciele=[$('vysledok-pas'),document.querySelector('.bottom-flow')].filter(Boolean);
+  const io=new IntersectionObserver(zaznamy=>{
+    if(!zaznamy.some(z=>z.isIntersecting))return;
+    io.disconnect();
+    if(typeof window.PH_UDALOST==='function')window.PH_UDALOST('videl-vysledok');
+  },{threshold:.15});
+  ciele.forEach(el=>io.observe(el));
 }
 
 /* ===== Poradenský CMA pohľad =====
@@ -1874,7 +1959,11 @@ var cmaObnov=null;
 (()=>{
   const PUBLIC_HOST=/(^|\.)hechtberger\.com$|^hechtgit\.github\.io$/i.test(location.hostname);
   const qs=location.search+location.hash;
-  const PORADCA=/poradca/i.test(qs)?true:!(PUBLIC_HOST||/verejna/i.test(qs));
+  /* Na verejnej adrese sa poradenský režim neodomyká ničím z adresy. Predtým
+     stačilo pripísať ?poradca a ktokoľvek videl CMA pohľad a interné vety;
+     snímka s menom poradcu by kolovala bez kontextu. Poradca pracuje
+     s lokálnou kópiou, kde je režim predvolený (?verejna ho vypne). */
+  const PORADCA=!PUBLIC_HOST&&!/verejna/i.test(qs);
   /* Klientovi sa poradenské bloky neodomykajú, ale výpočet potrebuje aj on:
      výsledkový pás pod kalkulačkou stojí na počte úspešných scenárov. Predtým
      sa klientovi jadro vôbec nenačítalo. Načíta sa teda tu, so samostatným
@@ -1925,6 +2014,10 @@ var cmaObnov=null;
     nowAge:S.now,startAge:S.start,endAge:S.end,rentToday:S.rent,
     existingCapital:S.existing,initialCapital:S.combo,
     situation:S.sit,funding:S.mode,goal:S.goal,pension:S.pension,
+    /* Smer kombinácie a známa mesačná suma: bez nich pás „X z 800" hodnotil
+       dopočítaný mesačný vklad (napr. 2 913 €) namiesto zadaných 500 € a
+       ukazoval iné číslo než modelácia a PDF (588 oproti 575). */
+    comboDirection:S.comboDir,monthlyKnown:S.monthlyKnown,
     inflationOn:S.inflOn,inflationRate:S.infl,
     /* Bez týchto dvoch sadzieb si jadro doplní vlastné predvolené 8,3 % pre obe
        fázy - teda aj pre vyplácanie, kde aplikácia počíta 5 %. Blok Odolnosti
@@ -2171,7 +2264,7 @@ var cmaObnov=null;
     const t=document.createElement('script');t.src=src;t.onload=ok;t.onerror=ok;
     document.head.appendChild(t);
   });
-  Promise.all([nacitaj('dist/renta-core.browser.js?v=20260821a'),nacitaj('dist/renta-data.browser.js?v=20260821a')])
+  Promise.all([nacitaj('dist/renta-core.browser.js?v=20260929a'),nacitaj('dist/renta-data.browser.js?v=20260929a')])
     .then(()=>{
       if(!window.RentaCore||typeof RentaCore.cmaPlan!=='function')return;
       /* CMA je deterministické a lacné - počíta sa pri každom prekreslení.
@@ -2395,8 +2488,11 @@ const mobileLifeMap=document.getElementById('mobile-life-map');
 const mobileMapCards=[...document.querySelectorAll('.mobile-map-card')];
 function syncMobileLifeNav(){
   const o=compute(),rentaDnes=o.calculatesRent?o.Rtoday:S.rent;
+  /* Koniec renty z výsledku, nie z jazdca: pri „Ako dlho vydrží" je to
+     vypočítaný vek (napr. 81), nie naposledy nastavených 90. */
+  const {endEff,openEnd}=koniecRenty(o);
   const vals={'mobile-life-now':S.now,'mobile-life-start':S.start,
-    'mobile-life-end':S.pension==='perpetuity'?'∞':S.end};
+    'mobile-life-end':openEnd?'∞':endEff};
   Object.entries(vals).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.textContent=v==='∞'?'Bez konca':v+' r.'});
   const modeLabel={lump:'Jednorazovo',monthly:'Pravidelne',combo:'Kombinácia'};
   const todayValues=S.sit==='build'
@@ -2410,7 +2506,7 @@ function syncMobileLifeNav(){
     /* Dĺžka renty tu bola natvrdo „ rokov", zatiaľ čo tá istá hodnota v karte
        (pole end-v, cez yrs()) vie skloňovať 1/2-4/5+ - vedľa seba tak stálo
        „Renta 1 rokov" a „1 rok". */
-    end:[S.pension==='perpetuity'?100:S.end,S.pension==='perpetuity'?['Bez konca']:['Do '+S.end+' rokov','Renta '+yrs(Math.max(0,S.end-S.start))]]
+    end:[openEnd?100:endEff,openEnd?['Bez konca']:['Do '+endEff+' rokov','Renta '+yrs(Math.max(0,endEff-S.start))]]
   };
   Object.entries(mapVals).forEach(([key,val])=>{
     const card=document.getElementById('map-'+key),summary=document.getElementById('map-'+key+'-summary');
@@ -2781,36 +2877,51 @@ async function overenieCloveka(){
 const RELAY_URL='https://renta-boldem.renta-relay.workers.dev/';
 const RELAY_TIMEOUT_MS=15000;
 
+/* Odpoveď medzičlánku preložená na jediný pravdivý stav e-mailu:
+     odoslany / opakovanie — medzičlánok potvrdil prijatie e-mailu do fronty,
+     neodoslany            — e-mail určite neodišiel (vstup, overenie, limit, výpadok pred odoslaním),
+     nepotvrdeny           — nevieme (timeout, stratená odpoveď, pokus ešte beží alebo spadol).
+   Modelácia sa klientovi zobrazí v každom z nich; sľúbiť e-mail smieme iba pri prvých dvoch.
+   „Duplicitný pokus" (409) už nie je úspech — medzičlánok pri opakovaní vráti
+   výsledok prvého pokusu a 409 znamená iba „prebieha" alebo „výsledok neznámy". */
 async function submitToBoldem({first,last,email,scenarioUrl,summary,overenie}){
   const controller=new AbortController();
   const timer=setTimeout(()=>controller.abort(),RELAY_TIMEOUT_MS);
+  let res,body='';
   try{
-    const res=await fetch(RELAY_URL,{
+    res=await fetch(RELAY_URL,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({meno:first,priezvisko:last,email,scenar:scenarioUrl,
                            zhrnutie:summary,overenie}),
       signal:controller.signal
     });
-    const body=await res.text().catch(()=>'');
-    if(!res.ok)throw new Error('relay-failed:'+res.status+':'+body.slice(0,160));
-    let d=null;
-    try{d=JSON.parse(body)}catch(e){}
-    if(!d||d.ok!==true)throw new Error('relay-rejected:'+body.slice(0,160));
+    body=await res.text().catch(()=>'');
   }catch(e){
-    if(e&&e.name==='AbortError')throw new Error('relay-timeout');
-    throw e;
+    return {stav:'nepotvrdeny',dovod:e&&e.name==='AbortError'?'timeout':'siet'};
   }finally{clearTimeout(timer)}
+  let d=null;
+  try{d=JSON.parse(body)}catch(e){}
+  const chyba=d&&typeof d.chyba==='string'?d.chyba:'';
+  if(res.ok&&d&&d.ok===true&&d.emailQueued===true)
+    return {stav:d.opakovanie?'opakovanie':'odoslany'};
+  if(res.status===400)return {stav:'neodoslany',dovod:chyba==='meno'||chyba==='email'?chyba:'vstup'};
+  if(res.status===403)return {stav:'neodoslany',dovod:'overenie'};
+  if(res.status===429)return {stav:'neodoslany',dovod:'limit'};
+  if(res.status===409)return {stav:'nepotvrdeny',dovod:chyba==='prebieha'?'prebieha':'neznamy'};
+  if(res.status===503)return {stav:'neodoslany',dovod:'vypadok'};
+  if(res.status===502&&!(d&&d.vysledokNeznamy))return {stav:'neodoslany',dovod:'vypadok'};
+  return {stav:'nepotvrdeny',dovod:'vypadok'};
 }
 
 /* Krátke zhrnutie scenára pre CRM — rovnaké čísla, aké klient videl na obrazovke. */
 function scenarioSummary(){
   const o=compute();
   if(o.warn)return 'Scenár privátnej renty z orientačného výpočtu.';
-  const bits=[];
+  const bits=[],{endEff,openEnd}=koniecRenty(o);
   bits.push(`${S.now} r`);
   bits.push(o.immediate?'renta hneď':`začiatok v ${S.start}`);
-  bits.push(o.nek||o.forever?'renta bez konca':`renta ${yrs(Math.max(0,S.end-S.start))}`);
+  bits.push(openEnd?'renta bez konca':`renta ${yrs(Math.max(0,endEff-S.start))}`);
   if(S.sit==='build'){
     bits.push(`${o.calculatesRent?'dosiahne':'chce'} ${fmtEur(o.calculatesRent?o.Rtoday:S.rent)} / mes.`);
     bits.push(`potrebný kapitál ${fmtEur(o.cap)}`);
@@ -2842,33 +2953,25 @@ try{
 }catch(e){}
 
 const sendModel=$('send-model');
+/* Nastaví sa nižšie; render() ho volá pri každej zmene scenára. */
+var obnovTlacidloOdoslania=null;
 if(sendModel){
-  const stavModelovehoOkna=(win,nadpis,text,chyba=false)=>{
+  /* Karta, ktorá sa otvorí ešte počas kliknutia a počas overenia ukazuje
+     priebeh. Chybový stav v nej už nie je: modelácia sa otvorí vždy a stav
+     e-mailu sa povie priamo na nej. */
+  const stavModelovehoOkna=(win,nadpis)=>{
     try{
       const d=win.document;
-      const bezpecnyHtml=v=>String(v).replace(/[&<>"']/g,c=>({
+      const bezpecnyNadpis=String(nadpis).replace(/[&<>"']/g,c=>({
         '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
       })[c]);
-      const bezpecnyNadpis=bezpecnyHtml(nadpis);
-      const bezpecnyText=bezpecnyHtml(text);
       d.open();
       const page='<!doctype html><html lang="sk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+bezpecnyNadpis+'</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Asap:wght@400;500;600;700&family=PT+Serif:wght@400;700&display=swap" rel="stylesheet">'+
-        '<style>:root{--bg:#292929;--gold:#ae8753;--gold-hi:#d0ab73;--ink:#f6f1e9;--muted:#c4bdb4}*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink)}body{min-height:100vh;display:grid;place-items:center;padding:32px;font:16px/1.55 Asap,Arial,sans-serif}.stav{width:min(780px,100%);text-align:center;opacity:1;transition:opacity .3s ease}.brand{margin:0;color:var(--gold-hi);font:400 clamp(31px,4vw,45px)/1.15 "PT Serif",Georgia,serif;letter-spacing:.01em}.journey{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:70px auto 0;max-width:680px}.track,.progress{position:absolute;left:16.66%;right:16.66%;top:10px;height:2px}.track{background:rgba(174,135,83,.36);box-shadow:0 0 8px rgba(174,135,83,.09)}.progress{right:auto;width:0;background:linear-gradient(90deg,#9c7139,var(--gold-hi),#ebc889);box-shadow:0 0 8px rgba(208,171,115,.4),0 0 20px rgba(174,135,83,.16);transition:width 1.02s cubic-bezier(.22,.61,.36,1)}.spark{position:absolute;z-index:3;top:4px;left:16.66%;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:#f3d59f;box-shadow:0 0 8px 3px rgba(238,197,135,.72),0 0 25px 10px rgba(174,135,83,.28),0 0 46px 16px rgba(174,135,83,.10);opacity:0;transition:left 1.02s cubic-bezier(.22,.61,.36,1),opacity .27s ease}.step{position:relative;padding-top:38px;color:#817b73;font-size:15px;font-weight:500;transition:color .4s ease,text-shadow .4s ease,font-size .3s ease}.dot{position:absolute;z-index:2;top:3px;left:50%;width:16px;height:16px;margin-left:-8px;border:1.5px solid var(--gold);border-radius:50%;background:var(--bg);transition:background .35s ease,box-shadow .35s ease,transform .35s ease}.step.lit .dot{background:var(--gold-hi);box-shadow:0 0 12px rgba(208,171,115,.55)}.step.revealed{color:var(--gold-hi);font-size:18px;text-shadow:0 0 14px rgba(208,171,115,.24)}.step.active .dot{transform:scale(1.12);animation:breathe 2.175s ease-in-out infinite}.journey.finish .progress{box-shadow:0 0 13px rgba(208,171,115,.75),0 0 32px rgba(174,135,83,.22)}.journey.finish .dot{box-shadow:0 0 12px rgba(208,171,115,.55)}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.lead{max-width:620px;margin:18px auto 0;color:#d8d2c9;font-size:17px}.actions{margin-top:28px}button{min-height:48px;padding:12px 24px;border:0;background:#9a6929;color:#fff;font:700 16px/1.2 Asap,Arial,sans-serif;cursor:pointer}button:focus-visible{outline:3px solid #fff;outline-offset:4px}@keyframes breathe{0%,100%{box-shadow:0 0 0 0 rgba(208,171,115,0),0 0 8px rgba(208,171,115,.2)}50%{box-shadow:0 0 0 10px rgba(208,171,115,.18),0 0 18px rgba(208,171,115,.5)}}.stav.complete{opacity:0}@media(max-width:560px){body{padding:24px}.journey{margin-top:54px;gap:5px}.step{font-size:12px}.step.revealed{font-size:14px}}@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}.progress{width:66.68%!important}.spark{display:none}.step{color:#ddd6cd}.dot{background:var(--gold-hi)}}</style></head><body>'+
-        '<style>.stav[role=alert] h1{margin:24px 0 0;font:400 clamp(28px,3.8vw,42px)/1.18 "PT Serif",Georgia,serif;color:#f0d8d2}</style>'+
-        (chyba
-          ?'<main class="stav" role="alert"><p class="brand">Stratégia privátnej renty</p><h1>'+bezpecnyNadpis+'</h1><p class="lead">'+bezpecnyText+'</p><div class="actions"><button id="navrat-k-formularu" type="button">Vrátiť sa k formuláru</button></div></main>'
-          :'<main class="stav" id="model-state"><h1 class="brand">Stratégia privátnej renty</h1><div class="journey" id="journey" role="status" aria-live="polite" aria-label="Priebeh prípravy modelácie"><span class="track" aria-hidden="true"></span><span class="progress" aria-hidden="true"></span><span class="spark" aria-hidden="true"></span><div class="step"><span class="dot"></span>Scenár prijatý</div><div class="step"><span class="dot"></span>Prebieha overenie</div><div class="step"><span class="dot"></span>Otvárame výsledok</div></div></main>')+
+        '<style>:root{--bg:#292929;--gold:#ae8753;--gold-hi:#d0ab73;--ink:#f6f1e9;--muted:#c4bdb4}*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink)}body{min-height:100vh;display:grid;place-items:center;padding:32px;font:16px/1.55 Asap,Arial,sans-serif}.stav{width:min(780px,100%);text-align:center;opacity:1;transition:opacity .3s ease}.brand{margin:0;color:var(--gold-hi);font:400 clamp(31px,4vw,45px)/1.15 "PT Serif",Georgia,serif;letter-spacing:.01em}.journey{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:70px auto 0;max-width:680px}.track,.progress{position:absolute;left:16.66%;right:16.66%;top:10px;height:2px}.track{background:rgba(174,135,83,.36);box-shadow:0 0 8px rgba(174,135,83,.09)}.progress{right:auto;width:0;background:linear-gradient(90deg,#9c7139,var(--gold-hi),#ebc889);box-shadow:0 0 8px rgba(208,171,115,.4),0 0 20px rgba(174,135,83,.16);transition:width 1.02s cubic-bezier(.22,.61,.36,1)}.spark{position:absolute;z-index:3;top:4px;left:16.66%;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:#f3d59f;box-shadow:0 0 8px 3px rgba(238,197,135,.72),0 0 25px 10px rgba(174,135,83,.28),0 0 46px 16px rgba(174,135,83,.10);opacity:0;transition:left 1.02s cubic-bezier(.22,.61,.36,1),opacity .27s ease}.step{position:relative;padding-top:38px;color:#817b73;font-size:15px;font-weight:500;transition:color .4s ease,text-shadow .4s ease,font-size .3s ease}.dot{position:absolute;z-index:2;top:3px;left:50%;width:16px;height:16px;margin-left:-8px;border:1.5px solid var(--gold);border-radius:50%;background:var(--bg);transition:background .35s ease,box-shadow .35s ease,transform .35s ease}.step.lit .dot{background:var(--gold-hi);box-shadow:0 0 12px rgba(208,171,115,.55)}.step.revealed{color:var(--gold-hi);font-size:18px;text-shadow:0 0 14px rgba(208,171,115,.24)}.step.active .dot{transform:scale(1.12);animation:breathe 2.175s ease-in-out infinite}.journey.finish .progress{box-shadow:0 0 13px rgba(208,171,115,.75),0 0 32px rgba(174,135,83,.22)}.journey.finish .dot{box-shadow:0 0 12px rgba(208,171,115,.55)}@keyframes breathe{0%,100%{box-shadow:0 0 0 0 rgba(208,171,115,0),0 0 8px rgba(208,171,115,.2)}50%{box-shadow:0 0 0 10px rgba(208,171,115,.18),0 0 18px rgba(208,171,115,.5)}}.stav.complete{opacity:0}@media(max-width:560px){body{padding:24px}.journey{margin-top:54px;gap:5px}.step{font-size:12px}.step.revealed{font-size:14px}}@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}.progress{width:66.68%!important}.spark{display:none}.step{color:#ddd6cd}.dot{background:var(--gold-hi)}}</style></head><body>'+
+        '<main class="stav" id="model-state"><h1 class="brand">Stratégia privátnej renty</h1><div class="journey" id="journey" role="status" aria-live="polite" aria-label="Priebeh prípravy modelácie"><span class="track" aria-hidden="true"></span><span class="progress" aria-hidden="true"></span><span class="spark" aria-hidden="true"></span><div class="step"><span class="dot"></span>Scenár prijatý</div><div class="step"><span class="dot"></span>Prebieha overenie</div><div class="step"><span class="dot"></span>Otvárame výsledok</div></div></main>'+
         '</bo'+'dy></html>';
       d.write(page);
       d.close();
-      if(chyba){
-        const navrat=d.getElementById('navrat-k-formularu');
-        if(navrat)navrat.addEventListener('click',()=>{
-          try{win.opener&&win.opener.focus()}catch(e){}
-          win.close();
-        });
-        return Promise.resolve();
-      }
       const reduce=win.matchMedia&&win.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if(reduce)return Promise.resolve();
       const journey=d.getElementById('journey');
@@ -2892,13 +2995,19 @@ if(sendModel){
     }catch(e){return Promise.resolve()}
   };
   const otvorVysledok=async(win,url,animacia)=>{
-    await animacia;
+    /* Zatvorené okno nečakáme: animácia v ňom by sa už nikdy nedokončila. */
+    await Promise.race([animacia,new Promise(ok=>{
+      const t=setInterval(()=>{if(win.closed){clearInterval(t);ok()}},250);
+      Promise.resolve(animacia).finally(()=>clearInterval(t));
+    })]);
+    if(win.closed)return false;
     try{
       const stav=win.document.getElementById('model-state');
       if(stav)stav.classList.add('complete');
     }catch(e){}
     await new Promise(ok=>setTimeout(ok,300));
-    win.location.replace(url);
+    if(win.closed)return false;
+    try{win.location.replace(url);return true}catch(e){return false}
   };
   const mark=(el,bad)=>{el.classList.toggle('bad',bad);return bad};
   ['gate-first','gate-last','model-email'].forEach(id=>{
@@ -2914,67 +3023,132 @@ if(sendModel){
     });
   });
 
+  /* Rovnaké pravidlá ako v medzičlánku — klient sa o chybe dozvie hneď pri
+     poli, nie až ako „služba neodpovedá". Čiarka je povolená („Novák, PhD."). */
+  const MENO_VZOR=/^\p{L}[\p{L}\p{M} ,'’.‐-―-]{0,79}$/u;
+  const EMAIL_VZOR=/^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,20}$/;
+  /* Hláška sa skladá z dvoch pravdivých častí: čo je s modeláciou a čo
+     s e-mailom. E-mail sľubujeme iba vtedy, keď ho medzičlánok potvrdil. */
+  const O_EMAILE={
+    odoslany:'Odkaz na ňu sme vám poslali aj e-mailom.',
+    opakovanie:'Odkaz na ňu sme vám už poslali e-mailom.',
+    nepotvrdeny:'Odoslanie e-mailu sa nepodarilo potvrdiť — PDF si stiahnite hneď.',
+    meno:'E-mail sme neodoslali: meno a priezvisko môžu obsahovať iba písmená, medzeru, '
+      +'spojovník, apostrof, bodku a čiarku.',
+    email:'E-mail sme neodoslali: skontrolujte, prosím, adresu.',
+    vstup:'E-mail sme neodoslali: skontrolujte, prosím, meno a adresu.',
+    overenie:'E-mail sme neodoslali, lebo sa nepodarilo overiť prehliadač. Skúste to znova, '
+      +'prípadne vypnite blokovanie skriptov.',
+    limit:'E-mail sme neodoslali pre príliš veľa pokusov za krátky čas. Skúste to o minútu.',
+    vypadok:'E-mail sa teraz nepodarilo odoslať — PDF si stiahnite hneď. Odoslanie môžete skúsiť znova.'
+  };
+  const oEmaile=v=>v.stav==='neodoslany'?(O_EMAILE[v.dovod]||O_EMAILE.vypadok):O_EMAILE[v.stav];
+  const potvrdeny=v=>v.stav==='odoslany'||v.stav==='opakovanie';
+  /* Stav e-mailu ide na modeláciu vo fragmente adresy (#email=…): nejde na
+     server, nie je osobným údajom a funguje aj pri otvorení odkazom, keď
+     sa pamäť karty neprenesie. Pri potvrdenom e-maile nič nepridávame —
+     predvolená veta modelácie („poslali sme vám e-mailom") je vtedy pravdivá. */
+  const sEmailom=(url,v)=>v.stav==='odoslany'?url:url+'#email='+v.stav;
+  let posledny=null;
+
+  /* Keď nové okno nevzniklo (blokovanie okien, prehliadač vo Facebooku či
+     LinkedIne) alebo ho klient zavrel, modelácia sa ponúkne priamo tu v
+     aplikácii — bez nového výpočtu a bez straty nastaveného plánu. */
+  const gateDone=$('gate-done'),gateView=$('gate-view'),gateHere=$('gate-view-here'),
+        gateText=$('gate-done-text');
+  function ponukniVAplikacii(url,v){
+    gateView.href=url;
+    gateHere.href=url;
+    gateText.textContent='Modeláciu k scenáru, ktorý ste si práve prepočítali, otvoríte tlačidlom nižšie. '
+      +oEmaile(v);
+    gateDone.hidden=false;
+    requestAnimationFrame(()=>gateDone.scrollIntoView({block:'nearest'}));
+  }
+  if(gateHere)gateHere.addEventListener('click',e=>{
+    /* Otvorenie v tom istom ráme: plán sa najprv zapíše do adresy aplikácie,
+       takže tlačidlo Späť vráti klienta presne k jeho scenáru. */
+    e.preventDefault();
+    try{
+      const tu=new URL(location.href);
+      scenarioParams().forEach((v,k)=>tu.searchParams.set(k,v));
+      history.replaceState(null,'',tu.toString());
+    }catch(err){}
+    location.assign(gateHere.href);
+  });
+
   sendModel.addEventListener('click',async()=>{
     if(sendModel.disabled)return;
     const fi=$('gate-first'),la=$('gate-last'),em=$('model-email'),status=$('send-status');
-    const first=fi.value.trim(),last=la.value.trim(),email=em.value.trim();
+    const first=fi.value.trim(),last=la.value.trim(),email=em.value.trim().toLowerCase();
     let bad=false;
-    bad=mark(fi,!first)||bad;
-    bad=mark(la,!last)||bad;
-    bad=mark(em,!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))||bad;
+    bad=mark(fi,!first||!MENO_VZOR.test(first))||bad;
+    bad=mark(la,!last||!MENO_VZOR.test(last))||bad;
+    bad=mark(em,!EMAIL_VZOR.test(email))||bad;
     if(bad){
-      status.textContent='Vyplňte, prosím, meno, priezvisko a platný e-mail.';
-      (!first?fi:!last?la:em).focus();
+      status.textContent=(!first||!last||!email)
+        ?'Vyplňte, prosím, meno, priezvisko a platný e-mail.'
+        :(!MENO_VZOR.test(first)||!MENO_VZOR.test(last))
+          ?'Meno a priezvisko môžu obsahovať iba písmená, medzeru, spojovník, apostrof, bodku a čiarku.'
+          :'Skontrolujte, prosím, e-mailovú adresu.';
+      (fi.classList.contains('bad')?fi:la.classList.contains('bad')?la:em).focus();
       return;
     }
+    /* Neplatný výpočet (varovanie jadra, NaN) nesmie odísť ako modelácia. */
+    if(!platnyVysledok(compute())){
+      status.textContent='Tento scenár sa nedá spočítať. Upravte, prosím, zadanie a skúste to znova.';
+      return;
+    }
+    if(typeof window.PH_UDALOST==='function')window.PH_UDALOST('odoslal');
     const url=scenarioURL();
+    /* Opakované odoslanie toho istého scenára po nepotvrdenom e-maile už
+       modeláciu neotvára znova — klient ju má pred sebou, chce len e-mail. */
+    const lenEmail=!!(posledny&&posledny.url===url&&posledny.zobrazena&&!potvrdeny(posledny.v));
     /* Okno treba vytvoriť ešte počas kliknutia. Po asynchrónnom overení by ho
        prehliadač mohol vyhodnotiť ako nevyžiadané a zablokovať. */
-    const modelWindow=window.open('about:blank','_blank');
-    if(!modelWindow){
-      status.textContent='Povoľte, prosím, otváranie nových okien a skúste to znova.';
-      return;
-    }
-    const animacia=stavModelovehoOkna(modelWindow,'Pripravujeme vašu modeláciu','Overujeme odoslanie a pripravujeme výsledok v tejto karte.');
-    const label=sendModel.textContent;
+    const modelWindow=lenEmail?null:window.open('about:blank','_blank');
+    const animacia=modelWindow?stavModelovehoOkna(modelWindow,'Pripravujeme vašu modeláciu'):null;
     sendModel.disabled=true;sendModel.textContent='Odosielam…';
     status.textContent='';
-    let overenie;
+    gateDone.hidden=true;
+
+    /* Overenie aj medzičlánok majú vlastný strop času. Ich zlyhanie už nikdy
+       nezablokuje výsledok — iba e-mail. Každý pokus si pýta nový token
+       (Turnstile je jednorazový), takže opakovanie funguje. */
+    let v;
     try{
-      overenie=await overenieCloveka();
+      const overenie=await overenieCloveka();
+      v=await submitToBoldem({first,last,email,scenarioUrl:url,
+                              summary:scenarioSummary(),overenie});
     }catch(e){
-      console.warn('Turnstile',e);
-      stavModelovehoOkna(modelWindow,'Modeláciu sa nepodarilo pripraviť','Prehliadač sa nepodarilo overiť. Vráťte sa, prosím, do formulára a skúste to ešte raz.',true);
-      status.textContent='Nepodarilo sa overiť prehliadač. Skúste to prosím ešte raz, '
-        +'prípadne vypnite blokovanie skriptov.';
-      sendModel.disabled=false;sendModel.textContent=label;
-      return;
+      console.warn('Turnstile',e&&e.message);
+      v={stav:'neodoslany',dovod:'overenie'};
     }
-    try{
-      await submitToBoldem({first,last,email,scenarioUrl:url,
-                            summary:scenarioSummary(),overenie});
-    }catch(e){
-      console.warn('Boldem submit failed',e);
-      const timeout=e&&e.message==='relay-timeout';
-      stavModelovehoOkna(modelWindow,'Modeláciu sa nepodarilo odoslať',timeout
-        ?'Odoslanie trvalo príliš dlho. Vráťte sa, prosím, do formulára a skúste to ešte raz.'
-        :'Služba na odoslanie momentálne neodpovedá. Vráťte sa, prosím, do formulára a skúste to ešte raz.',true);
-      status.textContent=timeout
-        ?'Odoslanie trvalo príliš dlho. Skúste to prosím ešte raz.'
-        :'Nepodarilo sa odoslať modeláciu e-mailom. Skúste to prosím ešte raz.';
-      sendModel.disabled=false;sendModel.textContent=label;
-      return;
+
+    let zobrazena=lenEmail;
+    if(modelWindow&&!modelWindow.closed){
+      /* Jednorazový prenos mena priamo do nového tabu. `about:blank` zdedí
+         pôvod aplikácie, takže jeho sessionStorage prežije navigáciu na výsledok,
+         ale nie je zdieľaný s ostatnými tabmi ani GitHub Pages projektmi. Výsledok
+         záznam po prvom prečítaní okamžite odstráni. */
+      try{modelWindow.sessionStorage.setItem('ph-renta-klient', JSON.stringify(
+        {meno:(first+' '+last).trim(), scenar:scenarioParams().toString(), email:v.stav}))}catch(e){}
+      zobrazena=await otvorVysledok(modelWindow,sEmailom(url,v),animacia);
     }
-    /* Jednorazový prenos mena priamo do nového tabu. `about:blank` zdedí
-       pôvod aplikácie, takže jeho sessionStorage prežije navigáciu na výsledok,
-       ale nie je zdieľaný s ostatnými tabmi ani GitHub Pages projektmi. Výsledok
-       záznam po prvom prečítaní okamžite odstráni. */
-    try{modelWindow.sessionStorage.setItem('ph-renta-klient', JSON.stringify(
-      {meno:(first+' '+last).trim(), scenar:scenarioParams().toString()}))}catch(e){}
-    await otvorVysledok(modelWindow,url,animacia);
-    status.textContent='Modelácia sa otvorila v novom okne. Odkaz vám posielame aj e-mailom.';
-    sendModel.disabled=false;sendModel.textContent=label;
+    if(!zobrazena)ponukniVAplikacii(sEmailom(url,v),v);
+    posledny={url,v,zobrazena:true};
+    status.textContent=(lenEmail?'':zobrazena?'Modelácia sa otvorila v novom okne. '
+      :'Modelácia je pripravená — otvoríte ju tlačidlom nižšie. ')+oEmaile(v);
+    sendModel.disabled=false;
+    obnovTlacidloOdoslania();
   });
+  /* Po nepotvrdenom e-maile tlačidlo ponúkne zopakovať iba odoslanie. Zmena
+     scenára mu vráti pôvodný význam — nový plán je nová modelácia. */
+  obnovTlacidloOdoslania=()=>{
+    if(sendModel.disabled)return;
+    const znova=!!(posledny&&!potvrdeny(posledny.v)&&posledny.url===scenarioURL());
+    const text=znova?'Skúsiť znova odoslať e-mail':'Získať moju modeláciu';
+    if(sendModel.textContent!==text)sendModel.textContent=text;
+  };
 }
 
 /* Režim výstupu: klient si otvoril odkaz na svoju modeláciu. Kontakt už máme,
@@ -3050,6 +3224,7 @@ if(ANIM&&!REDUCED){
   glow();
 })();
 </script>
+<script src="udalosti.js?v=20260929a"></script>
 <script src="renta-flow-10of10.js?v=20260816-2"></script>
 
 <!-- Vylepšenia: krokovacie +/− pri sumách, tlačidlá „i" s vysvetlením a panely,
@@ -3058,7 +3233,7 @@ if(ANIM&&!REDUCED){
      nájsť. Musí sa načítať PRED sprievodcom: sprievodca ukazuje na prvky,
      ktoré táto vrstva prestavuje. -->
 <link rel="stylesheet" href="vylepsenia.css?v=20260820b">
-<script src="vylepsenia.js?v=20260831b"></script>
+<script src="vylepsenia.js?v=20260929a"></script>
 
 <!-- Sprievodca: prekryv, ktorý nového návštevníka prevedie všetkými vstupmi.
      Vo vloženom ráme si nevie scrollovať (rám je zamknutý na 0,0, rodič je na

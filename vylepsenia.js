@@ -23,9 +23,18 @@
 
   /* Slovenské číslo: nezlomiteľné medzery ako oddeľovač tisícov, desatinná
      čiarka. `parseFloat` by z „296 159" prečítal 296. */
-  const cislo = t => {
-    const c = String(t).replace(/[\s  ]/g, '').replace(',', '.')
-      .replace(/[^\d.-]/g, '');
+  const cislo = (t, jed) => {
+    let c = String(t).replace(/[\s\u00a0\u202f]/g, '').replace(/[^\d.,-]/g, '');
+    /* Pri sumách v eurách sa na Slovensku bežne píše „250.000" alebo
+       „1.250.000,50": bodka s presne troma číslicami za ňou je oddeľovač
+       tisícov, nie desatinná čiarka. Predtým sa „250.000" prečítalo ako 250 €.
+       Pri sadzbách to neplatí — „0.900" % musí ostať 0,9 %. Rovnako sa
+       prečíta aj anglický zápis „250,000". */
+    if (jed === '€') {
+      if (/^-?\d{1,3}(\.\d{3})+(,\d*)?$/.test(c)) c = c.replace(/\./g, '');
+      else if (/^-?\d{1,3}(,\d{3})+(\.\d*)?$/.test(c)) c = c.replace(/,/g, '');
+    }
+    c = c.replace(',', '.');
     const v = parseFloat(c);
     return Number.isFinite(v) ? v : null;
   };
@@ -59,7 +68,7 @@
     /* Po presnom zápise môže byť poloha nelineárneho jazdca iba približná.
        Autoritatívna suma je preto hodnota vykreslená z aplikačného stavu. */
     if (sc) {
-      const zobrazene = cislo($(cfg.id).textContent);
+      const zobrazene = cislo($(cfg.id).textContent, cfg.jed);
       if (zobrazene !== null) return zobrazene;
     }
     return sc ? sc.toVal(+s.value) : +s.value;
@@ -225,7 +234,7 @@
       const zavri = ulozit => {
         if (hotovo) return;
         hotovo = true;
-        const v = cislo(pole.value);
+        const v = cislo(pole.value, cfg.jed);
         const napisane = pole.value.trim();
         el.innerHTML = povodne;
         if (ulozit && v === null && napisane !== '') {
