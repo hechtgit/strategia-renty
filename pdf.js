@@ -22,8 +22,10 @@
   var SEDA = [90, 85, 78];
   var LINKA = [214, 208, 198];
 
+  /* Znak U+2212 (mínus) vo vloženom písme nie je a jsPDF by ho vypustil —
+     záporné číslo by v PDF stratilo znamienko. */
   function text(el) {
-    return el ? (el.textContent || "").replace(/\s+/g, " ").trim() : "";
+    return el ? (el.textContent || "").replace(/\s+/g, " ").replace(/\u2212/g, "-").trim() : "";
   }
 
   /* Štruktúrované údaje výsledku, ktoré stránka vystavila pri výpočte. Bez nich

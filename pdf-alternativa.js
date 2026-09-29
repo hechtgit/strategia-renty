@@ -39,7 +39,10 @@
     FEE_IN: 1.5, FEE_M: 0.9, HIST_OD: 1970, HIST_DO: 2025 };
   var N = K.PRIEBEHOV;
   function cislo(x) { return String(x).replace(".", ","); }
-  function cisloZnak(x) { return (x < 0 ? "\u2212" : "") + cislo(Math.abs(x)); }
+  /* Záporný čistý výnos (napr. 0,8 % − 0,9 % správy = −0,1 %) musí mať v PDF
+     znamienko. Vložené písmo nemá znak U+2212 a jsPDF by ho ticho vypustil —
+     z −0,1 % by bolo 0,1 %. Preto obyčajný spojovník-mínus, ktorý písmo má. */
+  function cisloZnak(x) { return (x < 0 ? "-" : "") + cislo(Math.abs(x)); }
   /* „so 4 %" sa číta „so štyrmi percentami" - predložka sa riadi tým, čím
      číslovka ZAČÍNA, nie tým, ako sa píše. Štyri, šesť a sedem začínajú na
      š/s, preto pri nich „so"; pri ostatných „s". Bez toho by veta po zmene
@@ -62,7 +65,7 @@
   if (typeof povodnePDF !== "function" || !window.jspdf || !window.jspdf.jsPDF) return;
 
   function text(el) {
-    return el ? (el.textContent || "").replace(/\s+/g, " ").trim() : "";
+    return el ? (el.textContent || "").replace(/\s+/g, " ").replace(/\u2212/g, "-").trim() : "";
   }
   /* Vstupný poplatok podľa výsledku výpočtu (pri „majetok už mám" sa neúčtuje). */
   function vstupnyPoplatok() {

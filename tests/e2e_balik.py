@@ -191,7 +191,7 @@ class Harness:
             await route.abort("timedout")
             return
         if self.relay_mode == "timeout":
-            await asyncio.sleep(16)
+            await asyncio.sleep(27)   # aplikácia čaká 25 s
             try:
                 await route.fulfill(status=200, headers=CORS, body=json.dumps({"ok": True, "emailQueued": True}))
             except Exception:
@@ -486,6 +486,10 @@ async def email_states(h: Harness, browser) -> None:
         else:
             check("pozor" not in klasa, f"{mode}: zbytočné varovanie na modelácii", E)
         check(await popup.locator("#btn-pdf").is_enabled(), f"{mode}: PDF nie je dostupné", E)
+        if pozor:
+            await popup.reload(wait_until="load")
+            po = flat(await popup.locator("#mail-note").inner_text())
+            check(po == mail_text, f"{mode}: po obnovení stránky sa stav e-mailu zmenil na „{po}“", E)
         vysledky[mode] = {"aplikacia": status, "modelacia": mail_text}
         await popup.close()
         await page.close()
@@ -532,14 +536,20 @@ async def email_states(h: Harness, browser) -> None:
     text = flat(await frame.locator("#gate-done-text").inner_text())
     check("nepodarilo potvrdiť" in text, f"zablokované okno: {text}", E)
     href = await frame.locator("#gate-view").get_attribute("href")
-    check("vysledok.html" in href and "#email=nepotvrdeny" in href, f"odkaz na modeláciu: {href}", E)
+    check("vysledok.html" in href and "#email=" in href, f"odkaz na modeláciu: {href}", E)
     await page.screenshot(path=str(OUT / "desktop-1440-zablokovane-okno.png"))
+    h.relay_mode = "odoslany"
+    await h.send(ctx, frame, expect_popup=False)
+    check(await frame.locator("#gate-done").is_visible(), "opakovanie pri zablokovanom okne skrylo modeláciu", E)
+    text2 = flat(await frame.locator("#gate-done-text").inner_text())
+    check("poslali aj e-mailom" in text2, f"ponuka po opakovaní: {text2}", E)
+    href = await frame.locator("#gate-view").get_attribute("href")
     async with ctx.expect_page() as info:
         await klik(frame, "#gate-view")
     opened = await info.value
     await opened.wait_for_load_state("load")
     mail = flat(await opened.locator("#mail-note").inner_text())
-    check("nepodarilo potvrdiť" in mail, f"modelácia z odkazu: {mail}", E)
+    check("poslali aj e-mailom" in mail, f"modelácia z odkazu: {mail}", E)
     check("#email" not in opened.url, "stav e-mailu ostal v adrese modelácie", E)
     await opened.close()
     # Otvorenie v tom istom ráme a návrat späť s rovnakým plánom
@@ -549,8 +559,7 @@ async def email_states(h: Harness, browser) -> None:
     check(result_frame is not None, "otvorenie v tomto okne neotvorilo modeláciu", E)
     if result_frame:
         mail = flat(await result_frame.locator("#mail-note").inner_text())
-        check("nepodarilo potvrdiť" in mail and await result_frame.locator("#mail-note").is_visible(),
-              f"modelácia v ráme: {mail}", E)
+        check("poslali aj e-mailom" in mail, f"modelácia v ráme: {mail}", E)
         await result_frame.evaluate("history.back()")
         await page.wait_for_timeout(3000)
         app = next((f for f in page.frames if "cara-zivota" in f.url), None)
@@ -686,6 +695,18 @@ async def invalid_export(h: Harness, browser) -> None:
     check(await page.evaluate("window.__tlac") == 0, "chýbajúce sadzby obišli export záložnou tlačou", E)
     msg = await page.locator("#pdf-stav").inner_text() if await page.locator("#pdf-stav").count() else ""
     check("nie je možné uložiť" in msg, f"chýba hláška pri neplatných údajoch: {msg!r}", E)
+    # Bez známeho stavu e-mailu modelácia nič nepotvrdzuje
+    await page.goto(ok_url, wait_until="load")
+    neutral = flat(await page.locator("#mail-note").inner_text())
+    check("poslali" not in neutral, f"modelácia bez stavu tvrdí odoslanie: {neutral}", E)
+    # Záporný čistý výnos (0,8 % − 0,9 %) si v PDF zachová znamienko
+    minus_url = base + "now=40&start=60&end=90&rent=2000&infl=3&vynos=0.8&vynosRent=5&sit=build&pension=temporary&infl_on=1&mode=lump"
+    await page.goto(minus_url, wait_until="load")
+    await poll(page, "document.getElementById('odolnost-riadky')?.dataset.vysvetlene==='1'")
+    await page.evaluate("window.__tlac=0")
+    pdf = await h.pdf_from(page, "zaporna-sadzba")
+    text = flat(pdf_text(pdf))
+    check("(po jeho odpočítaní -0,1 % a 4,1 %)" in text, "PDF stratilo znamienko zápornej sadzby", E)
     # ?poradca na verejnej adrese
     await page.goto(PAGES + "cara-zivota.html?poradca", wait_until="load")
     check(not await page.evaluate("document.body.classList.contains('poradca')"), "?poradca odomkol poradcu", E)

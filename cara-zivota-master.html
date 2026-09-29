@@ -2862,7 +2862,9 @@ async function overenieCloveka(){
       callback:uspech, 'error-callback':zlyhanie, 'timeout-callback':zlyhanie
     });
     window.turnstile.execute(turnstileId);
-    setTimeout(zlyhanie,20000);
+    /* Neviditeľné overenie trvá zvyčajne do dvoch sekúnd. Dlhšie čakanie by
+       iba odďaľovalo modeláciu, ktorá sa otvorí aj bez neho. */
+    setTimeout(zlyhanie,12000);
   });
 }
 
@@ -2875,7 +2877,10 @@ async function overenieCloveka(){
    Navyše sa konečne dozvieme pravdu: verejný formulár vracal „prijaté" aj vtedy,
    keď polovicu údajov zahodil. */
 const RELAY_URL='https://renta-boldem.renta-relay.workers.dev/';
-const RELAY_TIMEOUT_MS=15000;
+/* Medzičlánok má na celé spracovanie rozpočet 20 s a dokončí ho aj vtedy,
+   keď sa prehliadač medzitým odpojí. Klient preto čaká o niečo dlhšie, aby
+   bežne nedostal „nepotvrdené" pri pomalšom, no úspešnom odoslaní. */
+const RELAY_TIMEOUT_MS=25000;
 
 /* Odpoveď medzičlánku preložená na jediný pravdivý stav e-mailu:
      odoslany / opakovanie — medzičlánok potvrdil prijatie e-mailu do fronty,
@@ -3046,9 +3051,9 @@ if(sendModel){
   const potvrdeny=v=>v.stav==='odoslany'||v.stav==='opakovanie';
   /* Stav e-mailu ide na modeláciu vo fragmente adresy (#email=…): nejde na
      server, nie je osobným údajom a funguje aj pri otvorení odkazom, keď
-     sa pamäť karty neprenesie. Pri potvrdenom e-maile nič nepridávame —
-     predvolená veta modelácie („poslali sme vám e-mailom") je vtedy pravdivá. */
-  const sEmailom=(url,v)=>v.stav==='odoslany'?url:url+'#email='+v.stav;
+     sa pamäť karty neprenesie. Modelácia bez známeho stavu ukáže neutrálnu
+     vetu, preto sa posiela vždy — aj pri potvrdenom e-maile. */
+  const sEmailom=(url,v)=>url+'#email='+v.stav;
   let posledny=null;
 
   /* Keď nové okno nevzniklo (blokovanie okien, prehliadač vo Facebooku či
@@ -3101,15 +3106,17 @@ if(sendModel){
     if(typeof window.PH_UDALOST==='function')window.PH_UDALOST('odoslal');
     const url=scenarioURL();
     /* Opakované odoslanie toho istého scenára po nepotvrdenom e-maile už
-       modeláciu neotvára znova — klient ju má pred sebou, chce len e-mail. */
-    const lenEmail=!!(posledny&&posledny.url===url&&posledny.zobrazena&&!potvrdeny(posledny.v));
+       modeláciu neotvára znova — klient ju má pred sebou (v okne alebo ako
+       ponuku v aplikácii), chce len e-mail. Ponuka v aplikácii pritom ostáva. */
+    const lenEmail=!!(posledny&&posledny.url===url&&(posledny.otvorena||posledny.ponuknuta)
+      &&!potvrdeny(posledny.v));
     /* Okno treba vytvoriť ešte počas kliknutia. Po asynchrónnom overení by ho
        prehliadač mohol vyhodnotiť ako nevyžiadané a zablokovať. */
     const modelWindow=lenEmail?null:window.open('about:blank','_blank');
     const animacia=modelWindow?stavModelovehoOkna(modelWindow,'Pripravujeme vašu modeláciu'):null;
     sendModel.disabled=true;sendModel.textContent='Odosielam…';
     status.textContent='';
-    gateDone.hidden=true;
+    if(!lenEmail)gateDone.hidden=true;
 
     /* Overenie aj medzičlánok majú vlastný strop času. Ich zlyhanie už nikdy
        nezablokuje výsledok — iba e-mail. Každý pokus si pýta nový token
@@ -3124,7 +3131,7 @@ if(sendModel){
       v={stav:'neodoslany',dovod:'overenie'};
     }
 
-    let zobrazena=lenEmail;
+    let otvorena=false;
     if(modelWindow&&!modelWindow.closed){
       /* Jednorazový prenos mena priamo do nového tabu. `about:blank` zdedí
          pôvod aplikácie, takže jeho sessionStorage prežije navigáciu na výsledok,
@@ -3132,11 +3139,15 @@ if(sendModel){
          záznam po prvom prečítaní okamžite odstráni. */
       try{modelWindow.sessionStorage.setItem('ph-renta-klient', JSON.stringify(
         {meno:(first+' '+last).trim(), scenar:scenarioParams().toString(), email:v.stav}))}catch(e){}
-      zobrazena=await otvorVysledok(modelWindow,sEmailom(url,v),animacia);
+      otvorena=await otvorVysledok(modelWindow,sEmailom(url,v),animacia);
     }
-    if(!zobrazena)ponukniVAplikacii(sEmailom(url,v),v);
-    posledny={url,v,zobrazena:true};
-    status.textContent=(lenEmail?'':zobrazena?'Modelácia sa otvorila v novom okne. '
+    /* Ponuka v aplikácii: keď okno nevzniklo alebo ho klient zavrel — a pri
+       opakovaní e-mailu sa ponechá s aktualizovaným stavom. */
+    const ponuknuta=!otvorena&&(!lenEmail||posledny.ponuknuta);
+    if(ponuknuta)ponukniVAplikacii(sEmailom(url,v),v);
+    const predtym=posledny;
+    posledny={url,v,otvorena:otvorena||(lenEmail&&predtym.otvorena),ponuknuta};
+    status.textContent=(lenEmail?'':otvorena?'Modelácia sa otvorila v novom okne. '
       :'Modelácia je pripravená — otvoríte ju tlačidlom nižšie. ')+oEmaile(v);
     sendModel.disabled=false;
     obnovTlacidloOdoslania();

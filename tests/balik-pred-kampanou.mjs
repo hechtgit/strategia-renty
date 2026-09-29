@@ -7,6 +7,7 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import vm from "node:vm";
+import { execFileSync } from "node:child_process";
 import { advisoryOutlook, computePlan } from "../shared/renta-core.js";
 
 const read = rel => fs.readFileSync(new URL(`../${rel}`, import.meta.url), "utf8");
@@ -172,6 +173,26 @@ for (const extra of [
   ok(rezim("www.hechtberger.com", "?poradca=1") === false, "?poradca na webe nesmie odomknúť poradcu");
   ok(rezim("127.0.0.1", "") === true, "lokálna kópia ostáva poradenská");
   ok(rezim("127.0.0.1", "?verejna") === false, "?verejna lokálne vypne poradcu");
+}
+
+/* ——— nasadzované súbory zodpovedajú mastrom (a prehliadačové jadro zdieľanému) ———
+   Oprava v masteri bez nového zostavenia by na web nikdy nedošla. */
+{
+  const py = [
+    "import sys; sys.path.insert(0, '.'); import zostav, json",
+    "a = zostav.zostav(zostav.MASTER)",
+    "v = zostav.zostav_vysledok(zostav.vystrihni_jadro(zostav.MASTER.read_text(encoding='utf-8')))",
+    "print(json.dumps({'app': a == zostav.VYSTUP.read_text(encoding='utf-8'),"
+      + " 'vysledok': v == zostav.VYSLEDOK.read_text(encoding='utf-8')}))",
+  ].join("\n");
+  const zhoda = JSON.parse(execFileSync("python3", ["-c", py],
+    { cwd: new URL("..", import.meta.url), encoding: "utf8" }));
+  ok(zhoda.app, "cara-zivota.html nezodpovedá masteru — spusti python3 zostav.py");
+  ok(zhoda.vysledok, "vysledok.html nezodpovedá masteru — spusti python3 zostav.py");
+  const zdroj = read("shared/renta-core.js");
+  const hash = (await import("node:crypto")).createHash("sha256").update(zdroj).digest("hex");
+  ok(read("dist/renta-core.browser.js").includes(`sha256:${hash}`),
+    "dist/renta-core.browser.js nie je zostavené z aktuálneho shared/renta-core.js");
 }
 
 console.log(`OK balík pred kampaňou: ${passed} kontrol`);

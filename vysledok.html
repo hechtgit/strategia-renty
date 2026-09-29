@@ -355,7 +355,7 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:400;color:var(--ink)}
       <div class="actions">
         <button class="btn-primary" type="button" id="btn-pdf">Stiahnuť modeláciu v PDF</button>
       </div>
-      <div class="mail-note" id="mail-note">Odkaz na túto modeláciu sme vám poslali aj e-mailom, aby ste sa k nej mohli kedykoľvek vrátiť.</div>
+      <div class="mail-note" id="mail-note">K modelácii sa môžete vrátiť cez odkaz v e-maile alebo si ju uložte v PDF.</div>
     </div>
   </section>
 
@@ -1336,19 +1336,23 @@ function bezpecneKrstneMeno(hodnota){
    bez odovzdávky (klient prišiel z e-mailu) platí pôvodná veta. Nikdy netvrdíme,
    že e-mail odišiel, ak to medzičlánok nepotvrdil. */
 const STAV_EMAILU={
-  odoslany:null,
+  odoslany:'Odkaz na túto modeláciu sme vám poslali aj e-mailom, aby ste sa k nej mohli kedykoľvek vrátiť.',
   opakovanie:'Odkaz na túto modeláciu sme vám už poslali e-mailom.',
   nepotvrdeny:'Odoslanie e-mailu s odkazom sa nepodarilo potvrdiť. Modeláciu máte otvorenú — PDF si stiahnite teraz, aby ste ju mali uloženú.',
   neodoslany:'E-mail s odkazom sme neodoslali. Modeláciu máte otvorenú — PDF si stiahnite teraz, aby ste ju mali uloženú.'
 };
-function zobrazStavEmailu(stav){
+/* Stav si karta pamätá pre daný scenár (sessionStorage), aby obnovenie stránky
+   nevrátilo vetu, ktorá by e-mail potvrdila bez dôkazu. Bez známeho stavu
+   (napr. otvorenie z histórie) ostáva neutrálna veta z HTML. */
+const EMAIL_KLUC='ph-renta-email';
+function zobrazStavEmailu(stav,ulozit=true){
   const el=$('mail-note');
   if(!el||!Object.prototype.hasOwnProperty.call(STAV_EMAILU,stav))return;
-  const veta=STAV_EMAILU[stav];
-  if(!veta)return;
-  el.textContent=veta;
+  el.textContent=STAV_EMAILU[stav];
   el.classList.toggle('pozor',stav==='nepotvrdeny'||stav==='neodoslany');
   el.setAttribute('role','status');
+  if(ulozit){try{sessionStorage.setItem(EMAIL_KLUC,JSON.stringify(
+    {scenar:scenarioParams().toString(),stav}))}catch(e){}}
 }
 /* Stav e-mailu môže prísť aj vo fragmente adresy (#email=…) — keď sa modelácia
    otvorila odkazom v aplikácii (zablokované alebo zatvorené okno) a pamäť karty
@@ -1356,9 +1360,15 @@ function zobrazStavEmailu(stav){
    preposlaný odkaz nenesli dočasnú hlášku. */
 (function stavZAdresy(){
   const m=/^#email=([a-z]+)$/.exec(location.hash||'');
-  if(!m)return;
-  zobrazStavEmailu(m[1]);
-  try{history.replaceState(history.state,'',location.pathname+location.search)}catch(e){}
+  if(m){
+    zobrazStavEmailu(m[1]);
+    try{history.replaceState(history.state,'',location.pathname+location.search)}catch(e){}
+    return;
+  }
+  try{
+    const d=JSON.parse(sessionStorage.getItem(EMAIL_KLUC)||'null');
+    if(d&&d.scenar===scenarioParams().toString())zobrazStavEmailu(d.stav,false);
+  }catch(e){}
 })();
 (function menoADatum(){
   let meno='';
