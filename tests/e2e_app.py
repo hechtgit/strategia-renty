@@ -7,9 +7,13 @@ zostavenej stránke aj proti živej stránke vloženej v Squarespace.
 from __future__ import annotations
 
 import argparse
+import datetime
+import ipaddress
 import json
 import re
+import ssl
 import sys
+import tempfile
 import time
 from contextlib import contextmanager
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -18,7 +22,11 @@ from threading import Thread
 from typing import Iterator
 from urllib.parse import urljoin
 
-from playwright.sync_api import Browser, Frame, Page, sync_playwright
+from cryptography import x509
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.x509.oid import NameOID
+from playwright.sync_api import Browser, BrowserContext, Frame, Page, sync_playwright
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -30,6 +38,43 @@ class QuietHandler(SimpleHTTPRequestHandler):
         return
 
 
+def _generate_local_tls_cert(directory: Path) -> tuple[Path, Path]:
+    """Krátkodobý samopodpísaný certifikát pre 127.0.0.1.
+
+    Appka si cez CSP (upgrade-insecure-requests) vynucuje zabezpečené
+    pripojenie a WebKit toto pravidlo dodrží doslovne aj na 127.0.0.1 —
+    bez skutočného TLS by sa jej skripty v lokálnej skúške vôbec nenačítali.
+    """
+    key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "127.0.0.1")])
+    now = datetime.datetime.now(datetime.timezone.utc)
+    cert = (
+        x509.CertificateBuilder()
+        .subject_name(name)
+        .issuer_name(name)
+        .public_key(key.public_key())
+        .serial_number(x509.random_serial_number())
+        .not_valid_before(now - datetime.timedelta(minutes=5))
+        .not_valid_after(now + datetime.timedelta(hours=1))
+        .add_extension(
+            x509.SubjectAlternativeName([x509.IPAddress(ipaddress.ip_address("127.0.0.1"))]),
+            critical=False,
+        )
+        .sign(key, hashes.SHA256())
+    )
+    cert_path = directory / "local-e2e-cert.pem"
+    key_path = directory / "local-e2e-key.pem"
+    cert_path.write_bytes(cert.public_bytes(serialization.Encoding.PEM))
+    key_path.write_bytes(
+        key.private_bytes(
+            serialization.Encoding.PEM,
+            serialization.PrivateFormat.TraditionalOpenSSL,
+            serialization.NoEncryption(),
+        )
+    )
+    return cert_path, key_path
+
+
 @contextmanager
 def local_server() -> Iterator[str]:
     class Handler(QuietHandler):
@@ -37,13 +82,26 @@ def local_server() -> Iterator[str]:
             super().__init__(*args, directory=str(ROOT), **kwargs)
 
     server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
-    thread = Thread(target=server.serve_forever, daemon=True)
-    thread.start()
-    try:
-        yield f"http://127.0.0.1:{server.server_port}/cara-zivota.html?frame=1"
-    finally:
-        server.shutdown()
-        thread.join(timeout=3)
+    with tempfile.TemporaryDirectory() as cert_dir:
+        try:
+            cert_path, key_path = _generate_local_tls_cert(Path(cert_dir))
+        except Exception as exc:
+            server.server_close()
+            raise RuntimeError(
+                "Lokálny testovací server potrebuje certifikát pre HTTPS "
+                "(appka si to cez CSP vynucuje aj na 127.0.0.1) a jeho "
+                f"vygenerovanie zlyhalo: {exc}"
+            ) from exc
+        ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        ssl_context.load_cert_chain(certfile=str(cert_path), keyfile=str(key_path))
+        server.socket = ssl_context.wrap_socket(server.socket, server_side=True)
+        thread = Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            yield f"https://127.0.0.1:{server.server_port}/cara-zivota.html?frame=1"
+        finally:
+            server.shutdown()
+            thread.join(timeout=3)
 
 
 def number(text: str) -> float:
@@ -158,7 +216,7 @@ def mobile_contract(page: Page, url: str, direct: bool) -> dict[str, object]:
     return {"editor_opened": True, "done_in_viewport": True, "editor_closed": True}
 
 
-def run(browser: Browser, url: str, direct: bool) -> dict[str, object]:
+def run(browser: Browser | BrowserContext, url: str, direct: bool) -> dict[str, object]:
     desktop_page = browser.new_page()
     mobile_page = browser.new_page()
     try:
@@ -214,7 +272,15 @@ def main() -> int:
                 result["landing_url"] = LIVE_URL
             else:
                 with local_server() as url:
-                    result = run(browser, url, direct=True)
+                    # Lokálny server beží na samopodpísanom certifikáte —
+                    # túto výnimku dostane iba tento kontext, nie prehliadač
+                    # vyššie použitý pre živú kontrolu (tá musí TLS chyby
+                    # na webe naďalej vidieť).
+                    context = browser.new_context(ignore_https_errors=True)
+                    try:
+                        result = run(context, url, direct=True)
+                    finally:
+                        context.close()
         finally:
             browser.close()
     print(json.dumps(result, ensure_ascii=False, sort_keys=True))
