@@ -3138,7 +3138,7 @@ if(sendModel){
     if(ponuknuta)ponukniVAplikacii(sEmailom(url,v),v);
     const predtym=posledny;
     const okno=otvorena?modelWindow:(lenEmail&&predtym.okno)||null;
-    posledny={url,v,otvorena:otvorena||(lenEmail&&predtym.otvorena),ponuknuta,okno};
+    posledny={url,scenar,v,otvorena:otvorena||(lenEmail&&predtym.otvorena),ponuknuta,okno};
     /* Už otvorená modelácia toho istého scenára sa dozvie nový stav e-mailu —
        inak by po úspešnom opakovaní ďalej tvrdila, že e-mail neodišiel.
        Priama správa oknu, ktoré aplikácia otvorila, funguje aj z rámu na
@@ -3155,6 +3155,15 @@ if(sendModel){
       :'Modelácia je pripravená — otvoríte ju tlačidlom nižšie. ')+oEmaile(v);
     sendModel.disabled=false;
     obnovTlacidloOdoslania();
+  });
+  /* Modelácia sa po načítaní spýta okna, ktoré ju otvorilo, na aktuálny stav
+     e-mailu. Priama správa po opakovaní totiž môže prísť skôr, než si
+     načítavaná modelácia zaregistruje poslucháča — a stratila by sa. */
+  addEventListener('message',e=>{
+    if(e.origin!==location.origin||!e.source||!e.data||e.data.type!=='ph-renta-email-stav-prosim')return;
+    if(!posledny||posledny.scenar!==e.data.scenar)return;
+    try{e.source.postMessage({type:'ph-renta-email-stav',scenar:posledny.scenar,stav:posledny.v.stav},
+      location.origin)}catch(err){}
   });
   /* Po nepotvrdenom e-maile tlačidlo ponúkne zopakovať iba odoslanie. Zmena
      scenára mu vráti pôvodný význam — nový plán je nová modelácia. */

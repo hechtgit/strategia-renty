@@ -1374,6 +1374,12 @@ addEventListener('message',e=>{
   if(e.origin!==location.origin||!window.opener||e.source!==window.opener)return;
   prijmiStavEmailu(e.data);
 });
+/* Až teraz, keď poslucháč existuje, sa spýtame otvárača na aktuálny stav —
+   aby sa nestratila správa, ktorá prišla počas načítavania. */
+try{
+  if(window.opener)window.opener.postMessage(
+    {type:'ph-renta-email-stav-prosim',scenar:scenarioParams().toString()},location.origin);
+}catch(e){}
 (function stavZAdresy(){
   const m=/^#email=([a-z]+)$/.exec(location.hash||'');
   if(m){

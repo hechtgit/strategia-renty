@@ -149,12 +149,15 @@ class Harness:
         self.relay_calls: list[dict] = []
         self.events: list[dict] = []
         self.turnstile_down = False
+        self.pomala_modelacia = False
         self.results: dict[str, object] = {}
         self.errors: list[str] = []
 
     # ——— sieť ———
     async def route_pages(self, route: Route) -> None:
         path = urlparse(route.request.url).path
+        if self.pomala_modelacia and path.endswith("/vysledok.html"):
+            await asyncio.sleep(3)
         rel = path[len("/strategia-renty/"):] or "index.html"
         file = (ROOT / rel).resolve()
         if ROOT not in file.parents or not file.is_file():
@@ -525,6 +528,30 @@ async def email_states(h: Harness, browser) -> None:
     mail = flat(await popup_stale.locator("#mail-note").inner_text())
     check("poslali aj e-mailom" in mail, f"otvorená modelácia po opakovaní a obnovení: {mail}", E)
     await popup_stale.close()
+
+    # Súbeh: opakovanie skončí, kým sa modelácia ešte načítava (prvé
+    # načítanie po location.replace) — priama správa by sa stratila a
+    # modelácia sa po načítaní musí spýtať otvárača sama.
+    await h.set_exact(frame, "rent-v", "3 700")
+    h.relay_mode = "email-zlyhal"
+    h.pomala_modelacia = True
+    async with ctx.expect_page(timeout=15_000) as info:
+        await klik(frame, "#send-model")
+    popup_race = await info.value
+    await poll(frame, "document.getElementById('send-model').disabled===false"
+               " && document.getElementById('send-status').textContent.length>0", timeout=30_000)
+    h.relay_mode = "odoslany"
+    await klik(frame, "#send-model")                  # opakovanie, modelácia sa ešte načítava
+    await poll(frame, "document.getElementById('send-model').disabled===false"
+               " && /poslali aj e-mailom/.test(document.getElementById('send-status').textContent)",
+               timeout=30_000)
+    await popup_race.wait_for_url(re.compile(r"vysledok\.html"), timeout=30_000)
+    await popup_race.wait_for_load_state("load")
+    h.pomala_modelacia = False
+    await popup_race.wait_for_timeout(800)
+    mail = flat(await popup_race.locator("#mail-note").inner_text())
+    check("poslali aj e-mailom" in mail, f"modelácia načítavaná počas opakovania: {mail}", E)
+    await popup_race.close()
     check(first_token != second_token, "opakovanie nepoužilo nový token overenia", E)
     status = flat(await frame.locator("#send-status").inner_text())
     check("poslali aj e-mailom" in status, f"opakovanie: {status}", E)
