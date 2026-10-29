@@ -12,6 +12,7 @@ import ipaddress
 import json
 import re
 import ssl
+import subprocess
 import sys
 import tempfile
 import time
@@ -26,7 +27,7 @@ from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509.oid import NameOID
-from playwright.sync_api import Browser, BrowserContext, Frame, Page, sync_playwright
+from playwright.sync_api import Browser, BrowserContext, BrowserType, Frame, Page, sync_playwright
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -256,6 +257,13 @@ def live_app_url(browser: Browser) -> str:
         page.close()
 
 
+def launch_browser(browser_type: BrowserType, name: str) -> Browser:
+    """Doinštaluje binárny prehliadač, ak chýba po aktualizácii Playwrightu."""
+    if not Path(browser_type.executable_path).is_file():
+        subprocess.run([sys.executable, "-m", "playwright", "install", name], check=True)
+    return browser_type.launch(headless=True)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--target", choices=("local", "live"), default="local")
@@ -264,7 +272,7 @@ def main() -> int:
 
     with sync_playwright() as pw:
         browser_type = getattr(pw, args.browser)
-        browser = browser_type.launch(headless=True)
+        browser = launch_browser(browser_type, args.browser)
         try:
             if args.target == "live":
                 deployed_url = live_app_url(browser)
