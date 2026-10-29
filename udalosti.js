@@ -29,6 +29,14 @@
     if (!POVOLENE.has(nazov) || odoslane.has(nazov)) return;
     odoslane.add(nazov);
     if (!verejnaAdresa() || nesledovat()) return;
+    /* Vložená aplikácia pošle rodičovskej stránke iba názov udalosti, aby ju
+       hechtberger.com zapísal do GA4 so zdrojom návštevy (UTM) a podľa súhlasu
+       s cookies. Žiadne sumy ani údaje klienta. */
+    try {
+      if (window.parent !== window) {
+        window.parent.postMessage({ type: 'ph-renta-udalost', u: nazov, z: ZDROJ }, 'https://www.hechtberger.com');
+      }
+    } catch (e) { /* meranie nesmie nikdy rozbiť stránku */ }
     const telo = JSON.stringify({ u: nazov, z: ZDROJ });
     /* Beacon prežije aj odchod zo stránky (klik na rezerváciu). Reťazec ide ako
        text/plain — jednoduchá požiadavka bez predbežnej CORS otázky. */

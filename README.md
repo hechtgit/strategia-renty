@@ -114,6 +114,11 @@ výsledok, odoslal, PDF, rezervácia) — iba názov a stránku, bez súm, e-mai
 URL či identifikátorov; každú najviac raz za načítanie. Pri zapnutom „Do Not
 Track" / GPC nemeria. Odkazy na rezerváciu nesú `?src=renta`.
 
+Vo vloženej aplikácii (rám na hechtberger.com) ide ten istý názov udalosti aj
+rodičovskej stránke cez `postMessage` (cieľ iba `https://www.hechtberger.com`).
+Blok `PH_MERANIE_V1` v pätičke Squarespace ho zapíše do GA4 ako
+`kalkulacka_*` so zdrojom návštevy a podľa súhlasu s cookies (29. 10. 2026).
+
 Čísla sa do PDF **neprepočítavajú**, čítajú sa z už vykreslenej modelácie. PDF
 teda nemá ako ukázať niečo iné, než čo má klient pred očami.
 
